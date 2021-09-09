@@ -1,0 +1,6 @@
+ANSI
+Strict
+NoStackCheck
+Ignore=306,315,1597
+NoIcons
+Define=AMIGA

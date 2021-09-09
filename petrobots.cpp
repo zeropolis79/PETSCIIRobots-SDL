@@ -6,9 +6,12 @@
  * vesuri@jormas.com
  */
 
-#include <cstdio>
-#include <SDL.h>
-#include <SDL_image.h>
+#ifdef AMIGA
+#include "PlatformAmiga.h"
+#else
+#include "PlatformSDL.h"
+#endif
+#include <string.h>
 #include "petrobots.h"
 
 uint8_t DESTRUCT_PATH[256]; // Destruct path array (256 bytes)
@@ -90,88 +93,31 @@ uint8_t LSTX;           // $97 Current Key Pressed: 255 = No Key
 uint8_t NDX;            // $9E No. of Chars. in Keyboard Buffer (Queue)
 uint8_t* MAP_SOURCE;    // $FD
 uint8_t SCREEN_MEMORY[40 * 25]; // $8000
-uint16_t FRAMES_PER_SECOND = 50;
-bool quit = false;
-SDL_AudioSpec audioSpec;
-SDL_AudioDeviceID audioDeviceID;
-SDL_Window* window;
-SDL_Renderer* renderer;
-SDL_Surface* fontSurface;
-SDL_Texture* fontTexture;
-
-float audioAngle = 0;
-float audioFrequency = 440;
-int16_t audioVolume = INT16_MAX;
-uint16_t interruptIntervalInSamples = 0;
-uint16_t samplesSinceInterrupt = 0;
-
-void audioCallback(void *data, uint8_t* stream, int bytes) {
-    int words = bytes >> 1;
-    int16_t* output = (int16_t*)stream;
-    for (int i = 0; i < words; i++) {
-        output[i] = audioVolume * sin(audioAngle);
-        audioAngle += 2 * M_PI * audioFrequency / audioSpec.freq;
-    }
-    samplesSinceInterrupt += words;
-    while (samplesSinceInterrupt >= interruptIntervalInSamples) {
-        if (CINV) {
-            (*CINV)();
-        }
-        samplesSinceInterrupt -= interruptIntervalInSamples;
-    }
-}
 
 int main(int argc, char *argv[])
 {
-    strncpy(MAPNAME, "level-a", sizeof(MAPNAME));
-    strncpy(LOAD_MSG2, "loading map:", sizeof(LOAD_MSG2));
+#ifdef AMIGA
+    PlatformAmiga platformAmiga;
+#else
+    PlatformSDL platformSDL;
+#endif
 
-    if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-        printf("Error initializing SDL: %s\n", SDL_GetError());
-    }
-    if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) == 0) {
-        printf("Error initializing SDL_image: %s\n", IMG_GetError());
-    }
-
-    SDL_AudioSpec requestedAudioSpec;
-    SDL_zero(requestedAudioSpec);
-    requestedAudioSpec.freq = 44100;
-    requestedAudioSpec.format = AUDIO_S16LSB;
-    requestedAudioSpec.channels = 1;
-    requestedAudioSpec.samples = 512;
-    requestedAudioSpec.callback = audioCallback;
-    audioDeviceID = SDL_OpenAudioDevice(NULL, 0, &requestedAudioSpec, &audioSpec, SDL_AUDIO_ALLOW_ANY_CHANGE);
-    interruptIntervalInSamples = audioSpec.freq / FRAMES_PER_SECOND;
-    samplesSinceInterrupt = interruptIntervalInSamples;
-    SDL_PauseAudioDevice(audioDeviceID, 0);
-
-    if (!audioDeviceID) {
-        printf("[SDL] Failed to open audio device: %s\n", SDL_GetError());
-        SDL_Quit();
+    if (!platform) {
         return 1;
     }
 
-    window = SDL_CreateWindow("Attack of the PETSCII robots", 0, 0, 320, 200, 0);
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
-    fontSurface = IMG_Load("petfont.png");
-    fontTexture = SDL_CreateTextureFromSurface(renderer, fontSurface);
-    SDL_FreeSurface(fontSurface);
-    SDL_RenderClear(renderer);
+    strncpy(MAPNAME, "level-a", sizeof(MAPNAME));
+    strncpy(LOAD_MSG2, "loading map:", sizeof(LOAD_MSG2));
 
-    stopNote(); // RESET SOUND TO ZERO
+    platform->stopNote(); // RESET SOUND TO ZERO
     DISPLAY_LOAD_MESSAGE1();
     TILE_LOAD_ROUTINE();
     SETUP_INTERRUPT();
     SET_CONTROLS(); // copy initial key controls
-    while (!quit) {
+    while (!platform->quit) {
         INTRO_SCREEN();
     }
-
-    SDL_DestroyTexture(fontTexture);
-    SDL_DestroyRenderer(renderer);     
-    SDL_DestroyWindow(window);     
-    SDL_CloseAudioDevice(audioDeviceID);
-    SDL_Quit();
+    return 0;
 }
 
 void INIT_GAME()
@@ -218,8 +164,14 @@ uint8_t RANDOM = 0; // used for random number generation
 uint8_t BORDER = 0; // Used for border flash timing
 uint8_t SCREEN_SHAKE = 0; // 1=shake 0=no shake
 uint8_t CONTROL = 0; // 0=keyboard 1=custom keys 2=snes
+#ifdef AMIGA
+const char* INTRO_MESSAGE   = "welcome to amiga-robots!\xff"
+                              "by david murray 2021\xff"
+                              "amiga port by vesa halttunen";
+#else
 const char* INTRO_MESSAGE	= "welcome to pet-robots!\xff"
                               "by david murray 2021";
+#endif
 const char* MSG_CANTMOVE = "can't move that!";
 const char* MSG_BLOCKED = "blocked!";
 const char* MSG_SEARCHING = "searching";
@@ -267,18 +219,19 @@ uint8_t SOUND_EFFECT = 0xff; // FF=OFF or number of effect in progress
 void DISPLAY_LOAD_MESSAGE1()
 {
     for (int Y = 0; Y != 17; Y++) {
-        chrout(convertToPETSCII(LOADMSG1[Y]));
+        platform->chrout(convertToPETSCII(LOADMSG1[Y]));
     }
 }
 
 // Displays loading message for map.
 void DISPLAY_LOAD_MESSAGE2()
 {
-    for (int Y = 0; Y != 12; Y++) {
+    int Y;
+    for (Y = 0; Y != 12; Y++) {
         writeToScreenMemory(0x190 + Y, convertToPETSCII(LOAD_MSG2[Y]));
     }
     const char* name = CALC_MAP_NAME();
-    for (int Y = 0; Y != 12; Y++) {
+    for (Y = 0; Y != 12; Y++) {
         writeToScreenMemory(0x19c + Y, convertToPETSCII(name[Y]));
     }
 }
@@ -287,7 +240,7 @@ char LOAD_MSG2[13];
 
 void SETUP_INTERRUPT()
 {
-    CINV = &RUNIRQ;
+    platform->setInterrupt(&RUNIRQ);
 }
 
 // This is the routine that runs every 60 seconds from the IRQ.
@@ -310,6 +263,7 @@ void RUNIRQ()
     if (BORDER != 0) {
         BORDER--;
     }
+    platform->renderFrame();
     // Back to usual IRQ routine
 }
 uint8_t BGTIMER1 = 0;
@@ -324,7 +278,7 @@ void UPDATE_GAME_CLOCK()
         return;
     }
     CYCLES++;
-    if (CYCLES != FRAMES_PER_SECOND) { // 60 for ntsc or 50 for pal
+    if (CYCLES != platform->framesPerSecond()) { // 60 for ntsc or 50 for pal
         return;
     }
     CYCLES = 0;
@@ -362,16 +316,17 @@ void SET_INITIAL_TIMERS()
 void MAIN_GAME_LOOP()
 {
     bool done = false;
-    while (!done && !quit) {
+    while (!done && !platform->quit) {
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
         if (UNIT_TYPE[0] != 1) { // Is player unit alive
-            return GAME_OVER();
+            GAME_OVER();
+            return;
         }
         if (CONTROL != 2) {
             // Keyboard controls here.
             KEY_REPEAT();
-            uint8_t A = getin();
+            uint8_t A = platform->getin();
             if (A != 0) {
                 KEYTIMER = 5;
                 if (A == 0x1D || A == *KEY_MOVE_RIGHT) { // CURSOR RIGHT
@@ -442,7 +397,7 @@ void TOGGLE_MUSIC()
     if (MUSIC_ON == 1) {
         PRINT_INFO(MSG_MUSICOFF);
         MUSIC_ON = 0;
-        stopNote(); // turn off sound
+        platform->stopNote(); // turn off sound
     } else {
         PRINT_INFO(MSG_MUSICON);
         MUSIC_ON = 1;
@@ -493,7 +448,7 @@ bool PAUSE_GAME()
     for (BGTIMER1 = 0; BGTIMER1 != 1;); // to prevent double-tap of run/stop
     CLEAR_KEY_BUFFER();
     while (true) {
-        switch (getin()) {
+        switch (platform->getin()) {
         case 03: // RUN/STOP
         case 78: // N-KEY
             SCROLL_INFO();
@@ -697,7 +652,8 @@ void FIRE_UP_PISTOL()
             UNIT_TILE[X] = 244; // tile for vertical weapons fire
             UNIT_A[X] = 3; // travel distance.
             UNIT_B[X] = 0; // weapon-type = pistol
-            return AFTER_FIRE(X);
+            AFTER_FIRE(X);
+            return;
         }
     }
 }
@@ -720,7 +676,8 @@ void FIRE_UP_PLASMA()
             UNIT_A[X] = 3; // travel distance.
             UNIT_B[X] = 1; // weapon-type = plasma
             PLASMA_ACT = 1;
-            return AFTER_FIRE(X);
+            AFTER_FIRE(X);
+            return;
         }
     }
 }
@@ -747,7 +704,8 @@ void FIRE_DOWN_PISTOL()
             UNIT_TILE[X] = 244; // tile for vertical weapons fire
             UNIT_A[X] = 3; // travel distance.
             UNIT_B[X] = 0; // weapon-type = pistol
-            return AFTER_FIRE(X);
+            AFTER_FIRE(X);
+            return;
         }
     }
 }
@@ -770,7 +728,8 @@ void FIRE_DOWN_PLASMA()
             UNIT_A[X] = 3; // travel distance.
             UNIT_B[X] = 1; // weapon-type = plasma
             PLASMA_ACT = 1;
-            return AFTER_FIRE(X);
+            AFTER_FIRE(X);
+            return;
         }
     }
 }
@@ -797,7 +756,8 @@ void FIRE_LEFT_PISTOL()
             UNIT_TILE[X] = 245; // tile for horizontal weapons fire
             UNIT_A[X] = 5; // travel distance.
             UNIT_B[X] = 0; // weapon-type = pistol
-            return AFTER_FIRE(X);
+            AFTER_FIRE(X);
+            return;
         }
     }
 }
@@ -820,7 +780,8 @@ void FIRE_LEFT_PLASMA()
             UNIT_A[X] = 5; // travel distance.
             UNIT_B[X] = 1; // weapon-type = plasma
             PLASMA_ACT = 1;
-            return AFTER_FIRE(X);
+            AFTER_FIRE(X);
+            return;
         }
     }
 }
@@ -847,7 +808,8 @@ void FIRE_RIGHT_PISTOL()
             UNIT_TILE[X] = 245; // tile for horizontal weapons fire
             UNIT_A[X] = 5; // travel distance.
             UNIT_B[X] = 0; // weapon-type = pistol
-            return AFTER_FIRE(X);
+            AFTER_FIRE(X);
+            return;
         }
     }
 }
@@ -870,7 +832,8 @@ void FIRE_RIGHT_PLASMA()
             UNIT_A[X] = 5; // travel distance.
             UNIT_B[X] = 1; // weapon-type = plasma
             PLASMA_ACT = 1;
-            return AFTER_FIRE(X);
+            AFTER_FIRE(X);
+            return;
         }
     }
 }
@@ -1042,7 +1005,7 @@ void USER_SELECT_OBJECT()
             return;
         }
         if (CONTROL != 2) {
-            uint8_t A = getin();
+            uint8_t A = platform->getin();
             if (A == 0x1D || A == *KEY_MOVE_RIGHT) { // CURSOR RIGHT
                 CURSOR_X++;
                 return;
@@ -1094,7 +1057,7 @@ void MOVE_OBJECT()
         }
         if (CONTROL != 2) { // which controller are we using?
             // keyboard control
-            uint8_t A = getin();
+            uint8_t A = platform->getin();
             if (A == 0) {
                 continue;
             } else if (A == 0x1D || A == *KEY_MOVE_RIGHT) { // CURSOR RIGHT
@@ -1295,15 +1258,15 @@ void PLOT_TRANSPARENT_TILE(uint16_t destination)
 void REVERSE_TILE()
 {
     uint16_t destination = MAP_CHART[CURSOR_Y] + CURSOR_X + CURSOR_X + CURSOR_X;
-    writeToScreenMemory(destination + 0, SCREEN_MEMORY[destination + 0] |= 0x80);
-    writeToScreenMemory(destination + 1, SCREEN_MEMORY[destination + 1] |= 0x80);
-    writeToScreenMemory(destination + 2, SCREEN_MEMORY[destination + 2] |= 0x80);
-    writeToScreenMemory(destination + 40, SCREEN_MEMORY[destination + 40] |= 0x80);
-    writeToScreenMemory(destination + 41, SCREEN_MEMORY[destination + 41] |= 0x80);
-    writeToScreenMemory(destination + 42, SCREEN_MEMORY[destination + 42] |= 0x80);
-    writeToScreenMemory(destination + 80, SCREEN_MEMORY[destination + 80] |= 0x80);
-    writeToScreenMemory(destination + 81, SCREEN_MEMORY[destination + 81] |= 0x80);
-    writeToScreenMemory(destination + 82, SCREEN_MEMORY[destination + 82] |= 0x80);
+    writeToScreenMemory(destination + 0, SCREEN_MEMORY[destination + 0] ^= 0x80);
+    writeToScreenMemory(destination + 1, SCREEN_MEMORY[destination + 1] ^= 0x80);
+    writeToScreenMemory(destination + 2, SCREEN_MEMORY[destination + 2] ^= 0x80);
+    writeToScreenMemory(destination + 40, SCREEN_MEMORY[destination + 40] ^= 0x80);
+    writeToScreenMemory(destination + 41, SCREEN_MEMORY[destination + 41] ^= 0x80);
+    writeToScreenMemory(destination + 42, SCREEN_MEMORY[destination + 42] ^= 0x80);
+    writeToScreenMemory(destination + 80, SCREEN_MEMORY[destination + 80] ^= 0x80);
+    writeToScreenMemory(destination + 81, SCREEN_MEMORY[destination + 81] ^= 0x80);
+    writeToScreenMemory(destination + 82, SCREEN_MEMORY[destination + 82] ^= 0x80);
 }
 
 // This routine checks to see if UNIT is occupying any space
@@ -1319,31 +1282,11 @@ void CHECK_FOR_WINDOW_REDRAW()
     }
 }
 
-void DECWRITE(uint8_t* destination)
+void DECWRITE(uint16_t destination)
 {
-    SCREENPOS = 0;
-    int A = DECNUM;
-    int Y = 0x4C;
     for (int X = 2; X >= 0; X--) {
-        DECB = Y;
-        A = A >> 1;
-        while (true) {
-            int i = A & 0x80;
-            A = A << 1;
-            if (i || A >= DECA[X]) {
-                A -= DECA[X];
-            }
-            i = DECB & 0x80;
-            DECB = DECB << 1;
-            if (i) {
-                DECTEMP = A;
-                destination[SCREENPOS] = DECB;
-                SCREENPOS++;
-                A = DECTEMP;
-                Y = 0x13;
-                break;
-            }
-        }
+        writeToScreenMemory(destination + X, 0x30 + (DECNUM % 10));
+        DECNUM /= 10;
     }
 }
 
@@ -1355,13 +1298,13 @@ uint8_t DECTEMP = 0;
 // The following routine loads the tileset from disk
 void TILE_LOAD_ROUTINE()
 {
-    load(TILENAME, DESTRUCT_PATH, 2816);
+    platform->load(TILENAME, DESTRUCT_PATH, 2816);
 }
 
 // The following routine loads the map from disk
 void MAP_LOAD_ROUTINE()
 {
-    load(MAPNAME, UNIT_TYPE, 8960);
+    platform->load(MAPNAME, UNIT_TYPE, 8960);
 }
 
 void DISPLAY_GAME_SCREEN()
@@ -1376,6 +1319,7 @@ void DISPLAY_INTRO_SCREEN()
 
 void DISPLAY_ENDGAME_SCREEN()
 {
+    int X;
     DECOMPRESS_SCREEN(SCR_ENDGAME);
     // display map name
     const char* name = CALC_MAP_NAME();
@@ -1384,33 +1328,33 @@ void DISPLAY_ENDGAME_SCREEN()
     }
     // display elapsed time
     DECNUM = HOURS;
-    DECWRITE(SCREEN_MEMORY + 0x17D);
+    DECWRITE(0x17D);
     DECNUM = MINUTES;
-    DECWRITE(SCREEN_MEMORY + 0x180);
+    DECWRITE(0x180);
     DECNUM = SECONDS;
-    DECWRITE(SCREEN_MEMORY + 0x183);
+    DECWRITE(0x183);
     writeToScreenMemory(0x17D, 32); // SPACE
     writeToScreenMemory(0x180, 58); // COLON
     writeToScreenMemory(0x183, 58);
     // count robots remaining
     DECNUM = 0;
-    for (int X = 1; X != 28; X++) {
+    for (X = 1; X != 28; X++) {
         if (UNIT_TYPE[X] != 0) {
             DECNUM++;
         }
     }
-    DECWRITE(SCREEN_MEMORY + 0x1CE);
+    DECWRITE(0x1CE);
     // Count secrets remaining
     DECNUM = 0;
-    for (int X = 48; X != 64; X++) {
+    for (X = 48; X != 64; X++) {
         if (UNIT_TYPE[X] != 0) {
             DECNUM++;
         }
     }
-    DECWRITE(SCREEN_MEMORY + 0x21E);
+    DECWRITE(0x21E);
     // display difficulty level
     const char* WORD = DIFF_LEVEL_WORDS[DIFF_LEVEL];
-    for (int X = 0; WORD[X] != 0; X++) {
+    for (X = 0; WORD[X] != 0; X++) {
         writeToScreenMemory(0x26E + X, convertToPETSCII(WORD[X]));
     }
 }
@@ -1560,7 +1504,7 @@ void DISPLAY_TIMEBOMB()
         writeToScreenMemory(0x1DA + Y, TBOMB1D[Y]);
     }
     DECNUM = INV_BOMBS;
-    DECWRITE(SCREEN_MEMORY + 0x205);
+    DECWRITE(0x205);
 }
 
 void DISPLAY_EMP()
@@ -1572,7 +1516,7 @@ void DISPLAY_EMP()
         writeToScreenMemory(0x1DA + Y, EMP1D[Y]);
     }
     DECNUM = INV_EMP;
-    DECWRITE(SCREEN_MEMORY + 0x205);
+    DECWRITE(0x205);
 }
 
 void DISPLAY_MEDKIT()
@@ -1584,7 +1528,7 @@ void DISPLAY_MEDKIT()
         writeToScreenMemory(0x1DA + Y, MED1D[Y]);
     }
     DECNUM = INV_MEDKIT;
-    DECWRITE(SCREEN_MEMORY + 0x205);
+    DECWRITE(0x205);
 }
 
 void DISPLAY_MAGNET()
@@ -1596,7 +1540,7 @@ void DISPLAY_MAGNET()
         writeToScreenMemory(0x1DA + Y, MAG1D[Y]);
     }
     DECNUM = INV_MAGNET;
-    DECWRITE(SCREEN_MEMORY + 0x205);
+    DECWRITE(0x205);
 }
 
 void DISPLAY_BLANK_ITEM()
@@ -1627,9 +1571,12 @@ void CYCLE_WEAPON()
 
 void DISPLAY_WEAPON()
 {
-    while (SELECTED_WEAPON != 0) {
+    while (true) {
         PRESELECT_WEAPON();
-        if (SELECTED_WEAPON == 1) { // PISTOL
+        if (SELECTED_WEAPON == 0) { // no weapon to show
+            // add routine to draw blank space
+            return;
+        } else if (SELECTED_WEAPON == 1) { // PISTOL
             if (AMMO_PISTOL != 0) { // did we run out?
                 DISPLAY_PISTOL();
                 return;
@@ -1645,8 +1592,6 @@ void DISPLAY_WEAPON()
             SELECTED_WEAPON = 0; // should never happen
         }
     }
-    // no weapon to show
-    // add routine to draw blank space
 }
 
 // This routine checks to see if currently selected
@@ -1681,7 +1626,7 @@ void DISPLAY_PLASMA_GUN()
         writeToScreenMemory(0x0C2 + Y, WEAPON1D[Y]);
     }
     DECNUM = AMMO_PLASMA;
-    DECWRITE(SCREEN_MEMORY + 0x0ED);
+    DECWRITE(0x0ED);
 }
 
 void DISPLAY_PISTOL()
@@ -1693,7 +1638,7 @@ void DISPLAY_PISTOL()
         writeToScreenMemory(0x0C2 + Y, PISTOL1D[Y]);
     }
     DECNUM = AMMO_PISTOL;
-    DECWRITE(SCREEN_MEMORY + 0x0ED);
+    DECWRITE(0x0ED);
 
 }
 
@@ -1748,7 +1693,7 @@ void GAME_OVER()
     CLOCK_ACTIVE = 0;
     // disable music
     MUSIC_ON = 0;
-    stopNote(); // turn off sound
+    platform->stopNote(); // turn off sound
     // Did player die or win?
     if (UNIT_TYPE[0] == 0) {
         UNIT_TILE[0] = 111; // // dead player tile
@@ -1766,7 +1711,7 @@ void GAME_OVER()
     KEYTIMER = 100;
     while (KEYTIMER != 0);
     NDX = 0; // CLEAR KEYBOARD BUFFER
-    while (getin() == 0);
+    while (platform->getin() == 0);
     GOM4();
 }
 
@@ -1776,7 +1721,7 @@ void GOM4()
     MUSIC_ON = 0;
     DISPLAY_ENDGAME_SCREEN();
     DISPLAY_WIN_LOSE();
-    while (getin() == 0);
+    while (platform->getin() == 0);
     NDX = 0; // CLEAR KEYBOARD BUFFER
 }
 
@@ -1835,12 +1780,13 @@ uint8_t PRINTX = 0; // used to store X-cursor location
 // a new row at the bottom.
 void SCROLL_INFO()
 {
-    for (int X = 0; X != 33; X++) {
+    int X;
+    for (X = 0; X != 33; X++) {
         writeToScreenMemory(0x370 + X, SCREEN_MEMORY[0x398 + X]);
         writeToScreenMemory(0x398 + X, SCREEN_MEMORY[0x3C0 + X]); // BOTTOM ROW
     }
     // NOW CLEAR BOTTOM ROW
-    for (int X = 0; X != 33; X++) {
+    for (X = 0; X != 33; X++) {
         writeToScreenMemory(0x3C0 + X, 32); // BOTTOM ROW
     }
 }
@@ -1873,8 +1819,9 @@ void INTRO_SCREEN()
     START_INTRO_MUSIC();
     MENUY = 0;
     REVERSE_MENU_OPTION();
-    while (!quit) {
-        uint8_t A = getin();
+    bool done = false;
+    while (!done && !platform->quit) {
+        uint8_t A = platform->getin();
         if (A != 0) {
             if (A == 0x11 || A == *KEY_MOVE_DOWN) { // CURSOR DOWN
                 if (MENUY != 3) {
@@ -1891,10 +1838,10 @@ void INTRO_SCREEN()
                     PLAY_SOUND(15); // menu beep
                 }
             } else if (A == 32) { // SPACE
-                EXEC_COMMAND();
+                done = EXEC_COMMAND();
             } else if (A == 13) { // RETURN
                 PLAY_SOUND(15); // menu beep, SOUND PLAY
-                EXEC_COMMAND();
+                done = EXEC_COMMAND();
             }
         }
     }
@@ -1908,13 +1855,14 @@ void START_INTRO_MUSIC()
     MUSIC_ON = 1;
 }
 
-void EXEC_COMMAND()
+bool EXEC_COMMAND()
 {
     if (MENUY == 0) { // START GAME
         SET_CONTROLS();
         MUSIC_ON = 0;
-        stopNote(); // turn off sound
+        platform->stopNote(); // turn off sound
         INIT_GAME();
+        return true;
     } else if (MENUY == 2) { // DIFF LEVEL
         DIFF_LEVEL++;
         if (DIFF_LEVEL == 3) {
@@ -1929,6 +1877,7 @@ void EXEC_COMMAND()
         CYCLE_CONTROLS();
         PLAY_SOUND(15); // menu beep
     }
+    return false;
 }
 
 void CYCLE_CONTROLS()
@@ -2189,8 +2138,8 @@ void ELEVATOR_SELECT()
     // Now get user input
     if (CONTROL != 2) {
         // KEYBOARD INPUT
-        while (!quit) {
-            uint8_t A = getin();
+        while (!platform->quit) {
+            uint8_t A = platform->getin();
             if (A != 0) {
                 if (A == 0x9D || A == *KEY_MOVE_LEFT) { // CURSOR LEFT
                     ELEVATOR_DEC();
@@ -2269,16 +2218,16 @@ void SET_CONTROLS()
 }
 
 uint8_t STANDARD_CONTROLS[] = {
-    56, // MOVE UP
-    50, // MOVE DOWN
-    52, // MOVE LEFT
-    54, // MOVE RIGHT
+    73, // MOVE UP orig: 56 (8)
+    75, // MOVE DOWN orig: 50 (2)
+    74, // MOVE LEFT orig: 52 (4)
+    76, // MOVE RIGHT orig: 54 (6)
     87, // FIRE UP
     83, // FIRE DOWN
     65, // FIRE LEFT
     68, // FIRE RIGHT
-    60, // CYCLE WEAPONS
-    62, // CYCLE ITEMS
+    44, // CYCLE WEAPONS orig: 60 (<)
+    46, // CYCLE ITEMS orig: 62 (>)
     32, // USE ITEM
     90, // SEARCH OBEJCT
     77  // MOVE OBJECT
@@ -2290,9 +2239,9 @@ void SET_CUSTOM_KEYS()
         return;
     }
     DECOMPRESS_SCREEN(SCR_CUSTOM_KEYS);
-    uint8_t* destination = SCREEN_MEMORY + 0x151;
+    uint16_t destination = 0x151;
     for (TEMP_A = 0; TEMP_A != 13;) {
-        uint8_t A = getin();
+        uint8_t A = platform->getin();
         if (A != 0) {
             KEY_MOVE_UP[TEMP_A] = A;
             DECNUM = A;
@@ -2480,11 +2429,12 @@ void MUSIC_ROUTINE()
         return;
     }
     if (A == 37) { // END pattern
-        return STOP_SONG();
+        STOP_SONG();
+        return;
     }
     if (A == 38) {
         ARP_MODE = 0;
-        stopNote(); // RESET SOUND TO ZERO
+        platform->stopNote(); // RESET SOUND TO ZERO
     }
     if (A > 38 && A <= 49) { // IS IT A TEMPO COMMAND? COMMAND IS BETWEEN 39 AND 49 (TEMPO ADJUST)
         TEMPO = A - 38;
@@ -2494,7 +2444,7 @@ void MUSIC_ROUTINE()
     // PLAY A NOTE
     ARP_MODE = A >> 6;
     CHORD_ROOT = A & 0x3f; // %00111111
-    playNote(CHORD_ROOT);
+    platform->playNote(CHORD_ROOT);
     TEMPO_TIMER = TEMPO; // reset timer to wait for next line
     DATA_LINE++;
 }
@@ -2502,7 +2452,7 @@ void MUSIC_ROUTINE()
 void STOP_SONG()
 {
     // actually, stop sound effect.
-    stopNote(); // turn off sound;
+    platform->stopNote(); // turn off sound;
     SOUND_EFFECT = 0xFF;
     TEMPO_TIMER = TEMPO;
     /// now restore music info for continued play.
@@ -2516,11 +2466,335 @@ void STOP_SONG()
 
 void BACKGROUND_TASKS()
 {
-    // TODO
-    if (REDRAW_WINDOW == 1) {
+    if (REDRAW_WINDOW == 1 && BGTIMER1 == 1) {
         REDRAW_WINDOW = 0;
         DRAW_MAP_WINDOW();
     }
+    // Now check to see if it is time to run background tasks
+    if (BGTIMER1 != 1) {
+        return;
+    }
+    BGTIMER1 = 0; // RESET BACKGROUND TIMER
+    for (UNIT = 1; UNIT != 64; UNIT++) {
+        // ALL AI routines must JMP back to here at the end.
+        if (UNIT_TYPE[UNIT] != 0) { // Does unit exist?
+            // Unit found to exist, now check it's timer.
+            // unit code won't run until timer hits zero.
+            if (UNIT_TIMER_A[UNIT] != 0) {
+                UNIT_TIMER_A[UNIT]--; // Decrease timer by one.
+            } else {
+                // Unit exists and timer has triggered
+                // The unit type determines which AI routine is run.
+                if (UNIT_TYPE[UNIT] < 24) { // MAX DIFFERENT UNIT TYPES IN CHART, ABORT IF GREATER
+                    AI_ROUTINE_CHART[UNIT_TYPE[UNIT]]();
+                }
+            }
+        }
+    }
+}
+
+void (*AI_ROUTINE_CHART[])(void) =
+{
+    DUMMY_ROUTINE,      // UNIT TYPE 00   ;non-existent unit
+    DUMMY_ROUTINE,      // UNIT TYPE 01   ;player unit - can't use
+    LEFT_RIGHT_DROID,   // UNIT TYPE 02
+    UP_DOWN_DROID,      // UNIT TYPE 03
+    HOVER_ATTACK,       // UNIT TYPE 04
+    WATER_DROID,        // UNIT TYPE 05
+    TIME_BOMB,      // UNIT TYPE 06
+    TRANSPORTER_PAD,    // UNIT TYPE 07
+    DEAD_ROBOT,     // UNIT TYPE 08
+    EVILBOT,        // UNIT TYPE 09 
+    AI_DOOR,        // UNIT TYPE 10
+    SMALL_EXPLOSION,    // UNIT TYPE 11
+    PISTOL_FIRE_UP,     // UNIT TYPE 12
+    PISTOL_FIRE_DOWN,   // UNIT TYPE 13
+    PISTOL_FIRE_LEFT,   // UNIT TYPE 14
+    PISTOL_FIRE_RIGHT,  // UNIT TYPE 15
+    TRASH_COMPACTOR,    // UNIT TYPE 16
+    UP_DOWN_ROLLERBOT,  // UNIT TYPE 17
+    LEFT_RIGHT_ROLLERBOT,   // UNIT TYPE 18
+    ELEVATOR,       // UNIT TYPE 19
+    MAGNET,         // UNIT TYPE 20
+    MAGNETIZED_ROBOT,   // UNIT TYPE 21
+    WATER_RAFT_LR,      // UNIT TYPE 22
+    DEMATERIALIZE      // UNIT TYPE 23
+};
+
+// Dummy routine does nothing, but I need it for development.
+void DUMMY_ROUTINE()
+{
+    return;
+}
+
+void WATER_RAFT_LR()
+{
+    // TODO
+}
+
+void RAFT_DELETE()
+{
+    // TODO
+}
+
+void RAFT_PLOT()
+{
+    // TODO
+}
+
+void MAGNETIZED_ROBOT()
+{
+    // TODO
+}
+
+void GENERATE_RANDOM_NUMBER()
+{
+    // TODO
+}
+
+void MAGNET()
+{
+    // TODO
+}
+
+void DEAD_ROBOT()
+{
+    // TODO
+}
+
+void UP_DOWN_ROLLERBOT()
+{
+    // TODO
+}
+
+void LEFT_RIGHT_ROLLERBOT()
+{
+    // TODO
+}
+
+void ROLLERBOT_FIRE_DETECT()
+{
+    // TODO
+}
+
+void ROLLERBOT_FIRE_LR()
+{
+    // TODO
+}
+
+void ROLLERBOT_FIRE_UD()
+{
+    // TODO
+}
+
+void ROLLERBOT_AFTER_FIRE()
+{
+    // TODO
+}
+
+void ROLLERBOT_ANIMATE()
+{
+    // TODO
+}
+
+void TRANSPORTER_PAD()
+{
+    // TODO
+}
+
+void TRANS_PLAYER_PRESENT()
+{
+    // TODO
+}
+
+void TRANS_ACTIVE()
+{
+    // TODO
+}
+
+void TIME_BOMB()
+{
+    // TODO
+}
+
+void BIG_EXP_PHASE1()
+{
+    // TODO
+}
+
+void BEX1_NORTH()
+{
+    // TODO
+}
+
+void BEX1_SOUTH()
+{
+    // TODO
+}
+
+void BEX1_EAST()
+{
+    // TODO
+}
+
+void BEX1_WEST()
+{
+    // TODO
+}
+
+void BEX1_NE()
+{
+    // TODO
+}
+
+void BEX1_NW()
+{
+    // TODO
+}
+
+void BEX1_SE()
+{
+    // TODO
+}
+
+void BEX1_SW()
+{
+    // TODO
+}
+
+void BEX_PART1()
+{
+    // TODO
+}
+
+void BEX_PART2()
+{
+    // TODO
+}
+
+void BEX_PART3()
+{
+    // TODO
+}
+
+void BIG_EXP_PHASE2()
+{
+    // TODO
+}
+
+void RESTORE_TILE()
+{
+    // TODO
+}
+
+void TRASH_COMPACTOR()
+{
+    // TODO
+}
+
+void DRAW_TRASH_COMPACTOR()
+{
+    // TODO
+}
+
+void WATER_DROID()
+{
+    // TODO
+}
+
+void PISTOL_FIRE_UP()
+{
+    // TODO
+}
+
+void PISTOL_FIRE_DOWN()
+{
+    // TODO
+}
+
+void PISTOL_FIRE_LEFT()
+{
+    // TODO
+}
+
+void PISTOL_FIRE_RIGHT()
+{
+    // TODO
+}
+
+void DEACTIVATE_WEAPON()
+{
+    // TODO
+}
+
+void PISTOL_AI_COMMON()
+{
+    // TODO
+}
+
+void PLASMA_AI_COMMON()
+{
+    // TODO
+}
+
+void ALTER_AI()
+{
+    // TODO
+}
+
+void INFLICT_DAMAGE()
+{
+    // TODO
+}
+
+void SMALL_EXPLOSION()
+{
+    // TODO
+}
+
+void HOVER_ATTACK()
+{
+    // TODO
+}
+
+void CREATE_PLAYER_EXPLOSION()
+{
+    // TODO
+}
+
+void EVILBOT()
+{
+    // TODO
+}
+
+void AI_DOOR()
+{
+    // TODO
+}
+
+void DRAW_VERTICAL_DOOR()
+{
+    // TODO
+}
+
+void DRAW_HORIZONTAL_DOOR()
+{
+    // TODO
+}
+
+void ROBOT_ATTACK_RANGE()
+{
+    // TODO
+}
+
+void DOOR_CHECK_PROXIMITY()
+{
+    // TODO
+}
+
+void ELEVATOR()
+{
+    // TODO
 }
 
 void ELEV_CLOSE_FULL()
@@ -3131,59 +3405,6 @@ uint8_t IN_GAME_MUSIC3[] = {
     0x00
 };
 
-void chrout(uint8_t)
-{
-    // TODO
-}
-
-uint8_t getin()
-{
-    SDL_Event event;
-    while (SDL_PollEvent(&event)) {
-        switch (event.type) {
-        case SDL_QUIT:
-            quit = true;
-            break;
-        case SDL_KEYDOWN:
-            // test keycode
-            switch (event.key.keysym.sym) {
-            case SDLK_LEFT:
-                return 0x9D;
-            case SDLK_RIGHT:
-                return 0x1D;
-            case SDLK_UP: 
-                return 0x91;
-            case SDLK_DOWN:
-                return 0x11;
-            case SDLK_RETURN:
-                return 13;
-            case SDLK_SPACE:
-                return 32;
-            case SDLK_ESCAPE:
-                return 0x03;
-            default:
-                break;
-            }
-            break;
-        default:
-            break;
-        }
-    }
-    SDL_RenderPresent(renderer);
-
-    return 0;
-}
-
-void load(const char* filename, uint8_t* destination, uint32_t size)
-{
-    FILE* file = fopen(filename, "r");
-    if (file) {
-        fseek(file, 2, SEEK_SET);
-        fread(destination, 1, size, file);
-        fclose(file);
-    }
-}
-
 char convertToPETSCII(char value)
 {
     return value >= 96 ? (value - 96) : value;
@@ -3192,181 +3413,10 @@ char convertToPETSCII(char value)
 void writeToScreenMemory(uint16_t address, uint8_t value)
 {
     SCREEN_MEMORY[address] = value;
-
-    SDL_Rect sourceRect, destinationRect;
-    sourceRect.x = value << 3;
-    sourceRect.y = 0;
-    sourceRect.w = 8;
-    sourceRect.h = 8;
-    destinationRect.x = (address % 40) << 3;
-    destinationRect.y = (address / 40) << 3;
-    destinationRect.w = 8;
-    destinationRect.h = 8;
-    SDL_RenderCopy(renderer, fontTexture, &sourceRect, &destinationRect);
+    platform->writeToScreenMemory(address, value);
 }
 
-float noteToFrequency[] = {
-    0,
-    246.94,
-    261.63,
-    277.18,
-    293.66,
-    311.13,
-    329.63,
-    349.23,
-    369.99,
-    392.00,
-    415.30,
-    440.00,
-    466.16,
-    493.88,
-    523.25,
-    554.37,
-    587.33,
-    622.25,
-    659.25,
-    698.46,
-    739.99,
-    783.99,
-    830.61,
-    880.00,
-    932.33,
-    987.77,
-    1046.50,
-    1108.73,
-    1174.66,
-    1244.51,
-    1318.51,
-    1396.91,
-    1479.98,
-    1567.98,
-    1661.22,
-    1760.00,
-    1864.66,
-    1975.53,
-    0
-};
-
-void playNote(uint8_t note)
-{
-    audioFrequency = noteToFrequency[note];
-    audioVolume = audioFrequency > 0 ? INT16_MAX : 0;
-}
-
-void stopNote()
-{
-    audioVolume = 0;
-}
-
-#ifdef TODO
-
-
-
-BACKGROUND_TASKS:
-    LDA REDRAW_WINDOW
-    CMP #1
-    BNE UNIT_AI
-    LDA BGTIMER1
-    CMP #1
-    BNE UNIT_AI
-    LDA #0
-    STA REDRAW_WINDOW
-    JSR DRAW_MAP_WINDOW
-UNIT_AI:
-    ;Now check to see if it is time to run background tasks
-    LDA BGTIMER1
-    CMP #1
-    BEQ AI000
-    RTS
-AI000:  LDA #0
-    STA BGTIMER1    ;RESET BACKGROUND TIMER
-    ;INC    $83C0   ;-TROUBLESHOOTING
-    LDX #$FF
-    STA UNIT
-AILP:   INC UNIT        ;ALL AI routines must JMP back to here at the end.
-    LDX UNIT
-    CPX #64         ;END OF UNITS
-    BNE AI001
-    RTS         ;RETURN CONTROL TO MAIN PROGRAM
-AI001:  LDA UNIT_TYPE,X
-    CMP #0          ;Does unit exist?
-    BNE AI002
-    JMP AILP
-AI002:  ;Unit found to exist, now check it's timer.
-    ;unit code won't run until timer hits zero.
-    LDA UNIT_TIMER_A,X
-    CMP #0
-    BEQ AI003
-    DEC UNIT_TIMER_A,X      ;Decrease timer by one.
-    JMP AILP
-AI003:  ;Unit exists and timer has triggered
-    ;The unit type determines which AI routine is run.
-    LDA UNIT_TYPE,X
-    CMP #24         ;MAX DIFFERENT UNIT TYPES IN CHART
-    BCS AILP            ;ABORT IF GREATER
-    TAY
-    LDA AI_ROUTINE_CHART_L,Y
-    STA AI004+1
-    LDA AI_ROUTINE_CHART_H,Y
-    STA AI004+2
-AI004:  JMP $0000   ;***self modifying code used here***
-
-AI_ROUTINE_CHART_L:
-    <DUMMY_ROUTINE      ;UNIT TYPE 00   ;non-existent unit
-    <DUMMY_ROUTINE      ;UNIT TYPE 01   ;player unit - can't use
-    <LEFT_RIGHT_DROID   ;UNIT TYPE 02
-    <UP_DOWN_DROID      ;UNIT TYPE 03
-    <HOVER_ATTACK       ;UNIT TYPE 04
-    <WATER_DROID        ;UNIT TYPE 05
-    <TIME_BOMB      ;UNIT TYPE 06
-    <TRANSPORTER_PAD    ;UNIT TYPE 07
-    <DEAD_ROBOT     ;UNIT TYPE 08
-    <EVILBOT        ;UNIT TYPE 09 
-    <AI_DOOR        ;UNIT TYPE 10
-    <SMALL_EXPLOSION    ;UNIT TYPE 11
-    <PISTOL_FIRE_UP     ;UNIT TYPE 12
-    <PISTOL_FIRE_DOWN   ;UNIT TYPE 13
-    <PISTOL_FIRE_LEFT   ;UNIT TYPE 14
-    <PISTOL_FIRE_RIGHT  ;UNIT TYPE 15
-    <TRASH_COMPACTOR    ;UNIT TYPE 16
-    <UP_DOWN_ROLLERBOT  ;UNIT TYPE 17
-    <LEFT_RIGHT_ROLLERBOT   ;UNIT TYPE 18
-    <ELEVATOR       ;UNIT TYPE 19
-    <MAGNET         ;UNIT TYPE 20
-    <MAGNETIZED_ROBOT   ;UNIT TYPE 21
-    <WATER_RAFT_LR      ;UNIT TYPE 22
-    <DEMATERIALIZE      ;UNIT TYPE 23
-
-AI_ROUTINE_CHART_H:
-    >DUMMY_ROUTINE      ;UNIT TYPE 00   ;non-existent unit
-    >DUMMY_ROUTINE      ;UNIT TYPE 01   ;player unit - can't use
-    >LEFT_RIGHT_DROID   ;UNIT TYPE 02
-    >UP_DOWN_DROID      ;UNIT TYPE 03
-    >HOVER_ATTACK       ;UNIT TYPE 04
-    >WATER_DROID        ;UNIT TYPE 05
-    >TIME_BOMB      ;UNIT TYPE 06
-    >TRANSPORTER_PAD    ;UNIT TYPE 07
-    >DEAD_ROBOT     ;UNIT TYPE 08
-    >EVILBOT        ;UNIT TYPE 09
-    >AI_DOOR        ;UNIT TYPE 10
-    >SMALL_EXPLOSION    ;UNIT TYPE 11
-    >PISTOL_FIRE_UP     ;UNIT TYPE 12
-    >PISTOL_FIRE_DOWN   ;UNIT TYPE 13
-    >PISTOL_FIRE_LEFT   ;UNIT TYPE 14
-    >PISTOL_FIRE_RIGHT  ;UNIT TYPE 15
-    >TRASH_COMPACTOR    ;UNIT TYPE 16
-    >UP_DOWN_ROLLERBOT  ;UNIT TYPE 17
-    >LEFT_RIGHT_ROLLERBOT   ;UNIT TYPE 18
-    >ELEVATOR       ;UNIT TYPE 19
-    >MAGNET         ;UNIT TYPE 20
-    >MAGNETIZED_ROBOT   ;UNIT TYPE 21
-    >WATER_RAFT_LR      ;UNIT TYPE 22
-    >DEMATERIALIZE      ;UNIT TYPE 23
-
-;Dummy routine does nothing, but I need it for development.
-DUMMY_ROUTINE:
-    JMP AILP
-
+/*
 WATER_RAFT_LR:
     LDA #0
     ;First check which direction raft is moving.
@@ -5512,8 +5562,7 @@ UDD01:  LDA #%00000010
     STA UNIT_A,X    ;CHANGE DIRECTION
 UDD02:  JSR CHECK_FOR_WINDOW_REDRAW
     JMP AILP
-
-#endif
+*/
 
 // NOTES ABOUT UNIT TYPES
 // ----------------------

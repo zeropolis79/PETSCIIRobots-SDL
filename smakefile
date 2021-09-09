@@ -1,0 +1,18 @@
+OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o PETFont.o
+
+all: petrobots 
+
+petrobots: $(OBJECTS)
+   sc link to petrobots with <<
+$(OBJECtS)
+<
+
+petrobots.o: petrobots.cpp
+Platform.o: Platform.cpp
+PlatformAmiga.o: PlatformAmiga.cpp
+PlatformAmigaAssembler.o: PlatformAmigaAssembler.s
+PETFont.o: PETFont.raw
+    Bin2Hunk PETFont.raw PETFont.o NAME _petFont HUNK data
+
+clean:
+    delete $(OBJECTS) petrobots petrobots.info petrobots.lnk

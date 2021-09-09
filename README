@@ -1,6 +1,6 @@
 Attack of the PETSCII robots SDL port (to be turned into an Amiga port)
 
-Work in progress, version 20210908
+Work in progress
 
 brew install sdl2 sdl2_image
 make

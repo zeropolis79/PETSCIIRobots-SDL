@@ -1,7 +1,7 @@
 #ifndef _PETROBOTS_H
 #define _PETROBOTS_H
 
-#include <cstdint>
+#include "Platform.h"
 
 extern uint8_t DESTRUCT_PATH[256]; // Destruct path array (256 bytes)
 extern uint8_t TILE_ATTRIB[256];   // Tile attrib array (256 bytes)
@@ -220,7 +220,7 @@ void PLOT_TILE(uint16_t destination);
 void PLOT_TRANSPARENT_TILE(uint16_t destination);
 void REVERSE_TILE();
 void CHECK_FOR_WINDOW_REDRAW();
-void DECWRITE(uint8_t* destination);
+void DECWRITE(uint16_t destination);
 
 extern uint8_t DECA[];
 extern uint8_t DECB;
@@ -276,7 +276,7 @@ void SCROLL_INFO();
 void RESET_KEYS_AMMO();
 void INTRO_SCREEN();
 void START_INTRO_MUSIC();
-void EXEC_COMMAND();
+bool EXEC_COMMAND();
 void CYCLE_CONTROLS();
 
 extern const char* CONTROLTEXT;
@@ -348,6 +348,64 @@ extern uint8_t* SOUND_LIBRARY[];
 void MUSIC_ROUTINE();
 void STOP_SONG();
 void BACKGROUND_TASKS();
+
+extern void (*AI_ROUTINE_CHART[])(void);
+
+void DUMMY_ROUTINE();
+void WATER_RAFT_LR();
+void RAFT_DELETE();
+void RAFT_PLOT();
+void MAGNETIZED_ROBOT();
+void GENERATE_RANDOM_NUMBER();
+void MAGNET();
+void DEAD_ROBOT();
+void UP_DOWN_ROLLERBOT();
+void LEFT_RIGHT_ROLLERBOT();
+void ROLLERBOT_FIRE_DETECT();
+void ROLLERBOT_FIRE_LR();
+void ROLLERBOT_FIRE_UD();
+void ROLLERBOT_AFTER_FIRE();
+void ROLLERBOT_ANIMATE();
+void TRANSPORTER_PAD();
+void TRANS_PLAYER_PRESENT();
+void TRANS_ACTIVE();
+void TIME_BOMB();
+void BIG_EXP_PHASE1();
+void BEX1_NORTH();
+void BEX1_SOUTH();
+void BEX1_EAST();
+void BEX1_WEST();
+void BEX1_NE();
+void BEX1_NW();
+void BEX1_SE();
+void BEX1_SW();
+void BEX_PART1();
+void BEX_PART2();
+void BEX_PART3();
+void BIG_EXP_PHASE2();
+void RESTORE_TILE();
+void TRASH_COMPACTOR();
+void DRAW_TRASH_COMPACTOR();
+void WATER_DROID();
+void PISTOL_FIRE_UP();
+void PISTOL_FIRE_DOWN();
+void PISTOL_FIRE_LEFT();
+void PISTOL_FIRE_RIGHT();
+void DEACTIVATE_WEAPON();
+void PISTOL_AI_COMMON();
+void PLASMA_AI_COMMON();
+void ALTER_AI();
+void INFLICT_DAMAGE();
+void SMALL_EXPLOSION();
+void HOVER_ATTACK();
+void CREATE_PLAYER_EXPLOSION();
+void EVILBOT();
+void AI_DOOR();
+void DRAW_VERTICAL_DOOR();
+void DRAW_HORIZONTAL_DOOR();
+void ROBOT_ATTACK_RANGE();
+void DOOR_CHECK_PROXIMITY();
+void ELEVATOR();
 void ELEV_CLOSE_FULL();
 void ELEVATOR_PANEL();
 void PLOT_TILE_TO_MAP();
@@ -415,12 +473,7 @@ extern uint8_t IN_GAME_MUSIC1[];
 extern uint8_t IN_GAME_MUSIC2[];
 extern uint8_t IN_GAME_MUSIC3[];
 
-void chrout(uint8_t);
-uint8_t getin();
-void load(const char* filename, uint8_t* destination, uint32_t size);
 char convertToPETSCII(char value);
 void writeToScreenMemory(uint16_t address, uint8_t value);
-void playNote(uint8_t note);
-void stopNote();
 
 #endif
