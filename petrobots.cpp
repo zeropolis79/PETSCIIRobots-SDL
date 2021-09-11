@@ -90,7 +90,6 @@ uint8_t* CUR_PATTERN;   // stores the memory location of the current musical pat
 
 void (*CINV)(void);     // $90-$91 Vector: Hardware Interrupt
 uint8_t LSTX;           // $97 Current Key Pressed: 255 = No Key
-uint8_t NDX;            // $9E No. of Chars. in Keyboard Buffer (Queue)
 uint8_t* MAP_SOURCE;    // $FD
 uint8_t SCREEN_MEMORY[40 * 25]; // $8000
 
@@ -169,8 +168,9 @@ const char* INTRO_MESSAGE   = "welcome to amiga-robots!\xff"
                               "by david murray 2021\xff"
                               "amiga port by vesa halttunen";
 #else
-const char* INTRO_MESSAGE	= "welcome to pet-robots!\xff"
-                              "by david murray 2021";
+const char* INTRO_MESSAGE	= "welcome to sdl-robots!\xff"
+                              "by david murray 2021\xff"
+                              "sdl port by vesa halttunen";
 #endif
 const char* MSG_CANTMOVE = "can't move that!";
 const char* MSG_BLOCKED = "blocked!";
@@ -219,7 +219,7 @@ uint8_t SOUND_EFFECT = 0xff; // FF=OFF or number of effect in progress
 void DISPLAY_LOAD_MESSAGE1()
 {
     for (int Y = 0; Y != 17; Y++) {
-        platform->chrout(convertToPETSCII(LOADMSG1[Y]));
+        platform->chrout(LOADMSG1[Y]);
     }
 }
 
@@ -471,7 +471,7 @@ bool PAUSE_GAME()
 
 void CLEAR_KEY_BUFFER()
 {
-    NDX = 0; // CLEAR KEYBOARD BUFFER
+    platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     KEYTIMER = 20;
 }
 
@@ -997,7 +997,7 @@ void USER_SELECT_OBJECT()
     CURSOR_ON = 1;
     REVERSE_TILE();
     // First ask user which object to move
-    while (true) {
+    while (!platform->quit) {
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
         if (UNIT_TYPE[0] == 0) { // Did player die wile moving something?
@@ -1009,13 +1009,13 @@ void USER_SELECT_OBJECT()
             if (A == 0x1D || A == *KEY_MOVE_RIGHT) { // CURSOR RIGHT
                 CURSOR_X++;
                 return;
-            } else if (A == 0x9D || *KEY_MOVE_LEFT) { // CURSOR LEFT
+            } else if (A == 0x9D || A == *KEY_MOVE_LEFT) { // CURSOR LEFT
                 CURSOR_X--;
                 return;
-            } else if (A == 0x11 || *KEY_MOVE_DOWN) { // CURSOR DOWN
+            } else if (A == 0x11 || A == *KEY_MOVE_DOWN) { // CURSOR DOWN
                 CURSOR_Y++;
                 return;
-            } else if (A == 0x91 || *KEY_MOVE_UP) { // CURSOR UP
+            } else if (A == 0x91 || A == *KEY_MOVE_UP) { // CURSOR UP
                 CURSOR_Y--;
                 return;
             }
@@ -1062,11 +1062,11 @@ void MOVE_OBJECT()
                 continue;
             } else if (A == 0x1D || A == *KEY_MOVE_RIGHT) { // CURSOR RIGHT
                 CURSOR_X++;
-            } else if (A == 0x9D || *KEY_MOVE_LEFT) { // CURSOR LEFT
+            } else if (A == 0x9D || A == *KEY_MOVE_LEFT) { // CURSOR LEFT
                 CURSOR_X--;
-            } else if (A == 0x11 || *KEY_MOVE_DOWN) { // CURSOR DOWN
+            } else if (A == 0x11 || A == *KEY_MOVE_DOWN) { // CURSOR DOWN
                 CURSOR_Y++;
-            } else if (A == 0x91 || *KEY_MOVE_UP) { // CURSOR UP
+            } else if (A == 0x91 || A == *KEY_MOVE_UP) { // CURSOR UP
                 CURSOR_Y--;
             }
         } else {
@@ -1140,9 +1140,9 @@ void MAP_PRE_CALCULATE()
         if (X == 0 || // skip the check for unit zero, always draw it.
             (UNIT_TYPE[X] != 0 &&                    // CHECK THAT UNIT EXISTS
              UNIT_LOC_X[X] >= MAP_WINDOW_X &&        // CHECK HORIZONTAL POSITION
-             UNIT_LOC_X[X] < (MAP_WINDOW_X + 10) &&  // NOW CHECK VERTICAL
+             UNIT_LOC_X[X] <= (MAP_WINDOW_X + 10) && // NOW CHECK VERTICAL
              UNIT_LOC_Y[X] >= MAP_WINDOW_Y &&
-             UNIT_LOC_Y[X] < (MAP_WINDOW_Y + 6))) {
+             UNIT_LOC_Y[X] <= (MAP_WINDOW_Y + 6))) {
             // Unit found in map window, now add that unit's
             // tile to the precalc map.
             int Y = UNIT_LOC_X[X] - MAP_WINDOW_X + PRECALC_ROWS[UNIT_LOC_Y[X] - MAP_WINDOW_Y];
@@ -1710,19 +1710,19 @@ void GAME_OVER()
     }
     KEYTIMER = 100;
     while (KEYTIMER != 0);
-    NDX = 0; // CLEAR KEYBOARD BUFFER
+    platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     while (platform->getin() == 0);
     GOM4();
 }
 
 void GOM4()
 {
-    NDX = 0; // CLEAR KEYBOARD BUFFER
+    platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     MUSIC_ON = 0;
     DISPLAY_ENDGAME_SCREEN();
     DISPLAY_WIN_LOSE();
     while (platform->getin() == 0);
-    NDX = 0; // CLEAR KEYBOARD BUFFER
+    platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
 }
 
 uint8_t GAMEOVER1[] = { 0x70, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x6e };
@@ -2529,73 +2529,295 @@ void DUMMY_ROUTINE()
 
 void WATER_RAFT_LR()
 {
-    // TODO
+    // First check which direction raft is moving.
+    if (UNIT_A[UNIT] == 1) {
+        RAFT_DELETE();
+        // Check to see if player is on raft
+        if (UNIT_LOC_X[UNIT] == UNIT_LOC_X[0] &&
+            UNIT_LOC_Y[UNIT] == UNIT_LOC_Y[0]) {
+            UNIT_LOC_X[0]++; // player
+            UNIT_LOC_X[UNIT]++; // raft
+            RAFT_PLOT();
+            CACULATE_AND_REDRAW();
+        } else {
+            UNIT_LOC_X[UNIT]++; // raft
+            RAFT_PLOT();
+            // Now check if it has reached its destination
+            CHECK_FOR_WINDOW_REDRAW();
+        }
+        if (UNIT_LOC_X[UNIT] != UNIT_C[UNIT]) {
+            UNIT_TIMER_A[UNIT] = 6;
+        } else {
+            UNIT_TIMER_A[UNIT] = 100;
+            UNIT_A[UNIT] = 0;
+        }
+    } else {
+        RAFT_DELETE();
+        // Check to see if player is on raft
+        if (UNIT_LOC_X[UNIT] == UNIT_LOC_X[0] &&
+            UNIT_LOC_Y[UNIT] == UNIT_LOC_Y[0]) {
+            UNIT_LOC_X[0]--; // player
+            UNIT_LOC_X[UNIT]--; // raft
+            RAFT_PLOT();
+            CACULATE_AND_REDRAW();
+        } else {
+            UNIT_LOC_X[UNIT]--; // raft
+            RAFT_PLOT();
+            // Now check if it has reached its destination
+            CHECK_FOR_WINDOW_REDRAW();
+        }
+        // Now check if it has reached its destination
+        if (UNIT_LOC_X[UNIT] != UNIT_B[UNIT]) {
+            UNIT_TIMER_A[UNIT] = 6;
+        } else {
+            UNIT_TIMER_A[UNIT] = 100;
+            UNIT_A[UNIT] = 1;
+        }
+    }
 }
 
 void RAFT_DELETE()
 {
-    // TODO
+    MAP_X = UNIT_LOC_X[UNIT];
+    MAP_Y = UNIT_LOC_Y[UNIT];
+    TILE = 204; // WATER TILE
+    PLOT_TILE_TO_MAP();
 }
 
 void RAFT_PLOT()
 {
-    // TODO
+    MAP_X = UNIT_LOC_X[UNIT];
+    MAP_Y = UNIT_LOC_Y[UNIT];
+    TILE = 242; // RAFT TILE
+    PLOT_TILE_TO_MAP();
 }
 
 void MAGNETIZED_ROBOT()
 {
-    // TODO
+    MOVE_TYPE = 0x01; // %00000001
+    GENERATE_RANDOM_NUMBER();
+    switch (RANDOM & 0x03) { // %00000011
+    case 0:
+        REQUEST_WALK_UP();
+        break;
+    case 1:
+        REQUEST_WALK_DOWN();
+        break;
+    case 2:
+        REQUEST_WALK_LEFT();
+        break;
+    case 3:
+        REQUEST_WALK_RIGHT();
+        break;
+    default:
+        break;
+    }
+    CHECK_FOR_WINDOW_REDRAW();
+    UNIT_TIMER_A[UNIT] = 10;
+    UNIT_TIMER_B[UNIT]--;
+    if (UNIT_TIMER_B[UNIT] == 0) {
+        UNIT_TYPE[UNIT] = UNIT_D[UNIT];
+    }
 }
 
 void GENERATE_RANDOM_NUMBER()
 {
-    // TODO
+    if (RANDOM != 0) { // added this
+        if (RANDOM & 0x80) {
+            RANDOM = (RANDOM << 1) ^ 0x1D;
+        } else {
+            RANDOM = (RANDOM << 1);
+        }
+    } else {
+        RANDOM = 0x1D;
+    }
 }
 
 void MAGNET()
 {
-    // TODO
+MAGNET: 
+    // First let's take care of the timers.  This unit runs
+    // every cycle so that it can detect contact with another
+    // unit.  But it still needs to count down to terminate
+    // So, it uses two timers for a 16-bit value.
+    UNIT_TIMER_B[UNIT]--;
+    if (UNIT_TIMER_B[UNIT] == 0) {
+        UNIT_A[UNIT]--;
+        if (UNIT_A[UNIT] == 0) {
+            // Both timers have reached zero, time to deactivate.
+            UNIT_TYPE[UNIT] = 0;
+            MAGNET_ACT = 0;
+            return;
+        }
+    }
+    // Now let's see if another units walks on the magnet.
+    MAP_X = UNIT_LOC_X[UNIT];
+    MAP_Y = UNIT_LOC_Y[UNIT];
+    CHECK_FOR_UNIT();
+    if (UNIT_FIND == 255) { // no unit found
+        return;
+    } else if (UNIT_FIND == 0) { // player unit
+        INV_MAGNET++;
+        DISPLAY_ITEM();
+    } else {
+        // Collision with robot detected.
+        PLAY_SOUND(4); // HAYWIRE SOUND, SOUND PLAY
+        UNIT_D[UNIT_FIND] = UNIT_TYPE[UNIT_FIND]; // make backup of unit type
+        UNIT_TYPE[UNIT_FIND] = 21; // Crazy robot AI
+        UNIT_TIMER_B[UNIT_FIND] = 60;
+    }
+    UNIT_TYPE[UNIT] = 0;
+    MAGNET_ACT = 0;
 }
 
 void DEAD_ROBOT()
 {
-    // TODO
+    UNIT_TYPE[UNIT] = 0;
 }
 
 void UP_DOWN_ROLLERBOT()
 {
-    // TODO
+    UNIT_TIMER_A[UNIT] = 7;
+    ROLLERBOT_ANIMATE();
+    if (UNIT_A[UNIT] != 1) { // GET DIRECTION 0=UP 1=DOWN
+        MOVE_TYPE = 0x01; // %00000001
+        REQUEST_WALK_UP();
+        if (MOVE_RESULT != 1) {
+            UNIT_A[UNIT] = 1; // CHANGE DIRECTION
+        }
+        ROLLERBOT_FIRE_DETECT();
+        CHECK_FOR_WINDOW_REDRAW();
+    } else {
+        MOVE_TYPE = 0x01; // %00000001
+        REQUEST_WALK_DOWN();
+        if (MOVE_RESULT != 1) {
+            UNIT_A[UNIT] = 0; // CHANGE DIRECTION
+        }
+        ROLLERBOT_FIRE_DETECT();
+        CHECK_FOR_WINDOW_REDRAW();
+    }
 }
 
 void LEFT_RIGHT_ROLLERBOT()
 {
-    // TODO
+    UNIT_TIMER_A[UNIT] = 7;
+    ROLLERBOT_ANIMATE();
+    if (UNIT_A[UNIT] != 1) { // GET DIRECTION 0=LEFT 1=RIGHT
+        MOVE_TYPE = 0x01; // %00000001
+        REQUEST_WALK_LEFT();
+        if (MOVE_RESULT != 1) {
+            UNIT_A[UNIT] = 1; // CHANGE DIRECTION
+        }
+        ROLLERBOT_FIRE_DETECT();
+        CHECK_FOR_WINDOW_REDRAW();
+    } else {
+        MOVE_TYPE = 0x01; // %00000001
+        REQUEST_WALK_RIGHT();
+        if (MOVE_RESULT != 1) {
+            UNIT_A[UNIT] = 0; // CHANGE DIRECTION
+        }
+        ROLLERBOT_FIRE_DETECT();
+        CHECK_FOR_WINDOW_REDRAW();
+    }
 }
 
 void ROLLERBOT_FIRE_DETECT()
 {
-    // TODO
+    int X;
+    TEMP_A = UNIT_LOC_X[UNIT];
+    TEMP_B = UNIT_LOC_Y[UNIT];
+    // See if we're lined up vertically
+    if (UNIT_LOC_Y[UNIT] == UNIT_LOC_Y[0]) { // robot, player
+        if (UNIT_LOC_X[UNIT] > UNIT_LOC_X[0]) {
+            // Check to see if distance is less than 5
+            if (UNIT_LOC_X[UNIT] - UNIT_LOC_X[0] >= 6) { // robot, player
+                return;
+            }
+            for (X = 28; X != 32; X++) {
+                if (UNIT_TYPE[X] == 0) {
+                    UNIT_TYPE[X] = 14; // pistol fire left AI
+                    ROLLERBOT_AFTER_FIRE(X, 245); // tile for horizontal weapons fire
+                    return;
+                }
+            }
+        } else {
+            // Check to see if distance is less than 5
+            if (UNIT_LOC_X[0] - UNIT_LOC_X[UNIT] >= 6) { // player, robot
+                return;
+            }
+            for (X = 28; X != 32; X++) {
+                if (UNIT_TYPE[X] == 0) {
+                    UNIT_TYPE[X] = 15; // pistol fire right AI
+                    ROLLERBOT_AFTER_FIRE(X, 245); // tile for horizontal weapons fire
+                    return;
+                }
+            }
+        }
+    } else if (UNIT_LOC_X[UNIT] == UNIT_LOC_X[0]) { // robot, player
+        // See if we're lined up horizontally
+        if (UNIT_LOC_Y[UNIT] > UNIT_LOC_Y[0]) {
+            // Check to see if distance is less than 5
+            if (UNIT_LOC_Y[UNIT] - UNIT_LOC_Y[0] >= 4) { // robot, player
+                return;
+            }
+            for (X = 28; X != 32; X++) {
+                if (UNIT_TYPE[X] == 0) {
+                    UNIT_TYPE[X] = 12; // pistol fire UP AI
+                    ROLLERBOT_AFTER_FIRE(X, 244); // tile for horizontal weapons fire
+                    return;
+                }
+            }
+        } else {
+            // Check to see if distance is less than 5
+            if (UNIT_LOC_Y[0] - UNIT_LOC_Y[UNIT] >= 4) { // player, robot
+                return;
+            }
+            for (X = 28; X != 32; X++) {
+                if (UNIT_TYPE[X] == 0) {
+                    UNIT_TYPE[X] = 13; // pistol fire DOWN AI
+                    ROLLERBOT_AFTER_FIRE(X, 244); // tile for horizontal weapons fire
+                    return;
+                }
+            }
+        }
+    }
 }
 
-void ROLLERBOT_FIRE_LR()
+void ROLLERBOT_AFTER_FIRE(uint8_t unit, uint8_t tile)
 {
-    // TODO
-}
-
-void ROLLERBOT_FIRE_UD()
-{
-    // TODO
-}
-
-void ROLLERBOT_AFTER_FIRE()
-{
-    // TODO
+    UNIT_TILE[unit] = tile;
+    UNIT_A[unit] = 5; // travel distance.
+    UNIT_B[unit] = 0; // weapon-type = pistol
+    UNIT_TIMER_A[unit] = 0;
+    UNIT_LOC_X[unit] = TEMP_A;
+    UNIT_LOC_Y[unit] = TEMP_B;
+    PLAY_SOUND(9); // PISTOL SOUND SOUND PLAY
 }
 
 void ROLLERBOT_ANIMATE()
 {
-    // TODO
+    if (UNIT_TIMER_B[UNIT] != 0) {
+        UNIT_TIMER_B[UNIT]--;
+        return;
+    }
+    UNIT_TIMER_B[UNIT] = 3; // RESET ANIMATE TIMER
+    if (UNIT_TILE[UNIT] == 164) {
+        UNIT_TILE[UNIT] = 165; // ROLLERBOT TILE
+        CHECK_FOR_WINDOW_REDRAW();
+    } else {
+        UNIT_TILE[UNIT] = 164; // ROLLERBOT TILE
+        CHECK_FOR_WINDOW_REDRAW();
+    }
 }
+
+// UNIT_A: 0=always active    1=only active when all robots are dead
+// UNIT_B: 0=completes level 1=send to coordinates
+// UNIT_C: X-coordinate
+// UNIT_D: Y-coordinate
+
+// The "DEMATERIALIZE" part of this AI routine has to be in the main 
+// source for each individual computer, because the screen effects
+// are created uniquely for each one.
 
 void TRANSPORTER_PAD()
 {
@@ -2699,57 +2921,194 @@ void DRAW_TRASH_COMPACTOR()
 
 void WATER_DROID()
 {
-    // TODO
+    // first rotate the tiles
+    UNIT_TILE[UNIT]++;
+    if (UNIT_TILE[UNIT] == 143) {
+        UNIT_TILE[UNIT] = 140;
+    }
+    UNIT_A[UNIT]--;
+    if (UNIT_A[UNIT] != 0) {
+        CHECK_FOR_WINDOW_REDRAW();
+        return;
+    }
+    // kill unit after countdown reaches zero. 
+    UNIT_TYPE[UNIT] = 8; // Dead robot type
+    UNIT_TIMER_A[UNIT] = 255;
+    UNIT_TILE[UNIT] = 115; // dead robot tile
+    CHECK_FOR_WINDOW_REDRAW();
 }
 
 void PISTOL_FIRE_UP()
 {
-    // TODO
+    // Check if it has reached limits.
+    if (UNIT_A[UNIT] == 0) {
+        // if it has reached max range, then it vanishes.
+        DEACTIVATE_WEAPON();
+        CHECK_FOR_WINDOW_REDRAW();
+    } else {
+        UNIT_LOC_Y[UNIT]--; // move it up one.
+        PISTOL_AI_COMMON();
+    }
 }
 
 void PISTOL_FIRE_DOWN()
 {
-    // TODO
+    // Check if it has reached limits.
+    if (UNIT_A[UNIT] == 0) {
+        // if it has reached max range, then it vanishes.
+        DEACTIVATE_WEAPON();
+        CHECK_FOR_WINDOW_REDRAW();
+    } else {
+        UNIT_LOC_Y[UNIT]++; // move it down one.
+        PISTOL_AI_COMMON();
+    }
 }
 
 void PISTOL_FIRE_LEFT()
 {
-    // TODO
+    // Check if it has reached limits.
+    if (UNIT_A[UNIT] == 0) {
+        // if it has reached max range, then it vanishes.
+        DEACTIVATE_WEAPON();
+        CHECK_FOR_WINDOW_REDRAW();
+    } else {
+        UNIT_LOC_X[UNIT]--; // move it left one.
+        PISTOL_AI_COMMON();
+    }
 }
 
 void PISTOL_FIRE_RIGHT()
 {
-    // TODO
+    // Check if it has reached limits.
+    if (UNIT_A[UNIT] == 0) {
+        // if it has reached max range, then it vanishes.
+        DEACTIVATE_WEAPON();
+        CHECK_FOR_WINDOW_REDRAW();
+    } else {
+        UNIT_LOC_X[UNIT]++; // move it right one.
+        PISTOL_AI_COMMON();
+    }
 }
 
 void DEACTIVATE_WEAPON()
 {
-    // TODO
+    UNIT_TYPE[UNIT] = 0;
+    if (UNIT_B[UNIT] == 1) {
+        UNIT_B[UNIT] = 0;
+        PLASMA_ACT = 0;
+    }
 }
 
 void PISTOL_AI_COMMON()
 {
-    // TODO
+    if (UNIT_B[UNIT] == 0) { // is it pistol or plasma?
+        UNIT_A[UNIT]--; // reduce range by one
+        // Now check what map object it is on.
+        MAP_X = UNIT_LOC_X[UNIT];
+        MAP_Y = UNIT_LOC_Y[UNIT];
+        GET_TILE_FROM_MAP();
+        if (TILE == 131) { // explosive cannister
+            // hit an explosive cannister
+            MAP_SOURCE[0] = 135; // Blown cannister
+            UNIT_TYPE[UNIT] = 6; // bomb AI
+            UNIT_TILE[UNIT] = 131; // Cannister tile
+            UNIT_LOC_X[UNIT] = MAP_X;
+            UNIT_LOC_Y[UNIT] = MAP_Y;
+            UNIT_TIMER_A[UNIT] = 5; // How long until exposion?
+            UNIT_A[UNIT] = 0;
+        } else if ((TILE_ATTRIB[TILE] & 0x10) != 0x10) { // can see through tile?
+            // Hit object that can't pass through, convert to explosion
+            UNIT_TYPE[UNIT] = 11; // SMALL EXPLOSION
+            UNIT_TILE[UNIT] = 248; // first tile for explosion
+            CHECK_FOR_WINDOW_REDRAW();
+        } else {
+            // check if it encountered a robot/human
+            CHECK_FOR_UNIT();
+            if (UNIT_FIND == 255) { // NO UNIT ENCOUNTERED.
+                CHECK_FOR_WINDOW_REDRAW();
+            } else {
+                // struck a robot/human
+                UNIT_TYPE[UNIT] = 11; // SMALL EXPLOSION
+                UNIT_TILE[UNIT] = 248; // first tile for explosion
+                TEMP_A = 1; // set damage for pistol
+                INFLICT_DAMAGE();
+                ALTER_AI();
+                CHECK_FOR_WINDOW_REDRAW();
+            }
+        }
+    } else {
+        UNIT_A[UNIT]--; // reduce range by one
+        // find what tile we are over
+        MAP_X = UNIT_LOC_X[UNIT];
+        MAP_Y = UNIT_LOC_Y[UNIT];
+        GET_TILE_FROM_MAP();
+        if (TILE != 131) { // cannister tile
+            if ((TILE_ATTRIB[TILE] & 0x10) == 0x10) {
+                // check if it encountered a human/robot
+                CHECK_FOR_UNIT();
+                if (UNIT_FIND == 255) { // NO UNIT ENCOUNTERED.
+                    // no impacts detected:
+                    CHECK_FOR_WINDOW_REDRAW();
+                    return;
+                }
+            }
+            // impact detected. convert to explosion
+            UNIT_TYPE[UNIT] = 6; // bomb AI
+            UNIT_TIMER_A[UNIT] = 1; // How long until exposion?
+            UNIT_A[UNIT] = 0;
+            PLASMA_ACT = 0;
+            CHECK_FOR_WINDOW_REDRAW();
+        }
+    }
 }
 
-void PLASMA_AI_COMMON()
-{
-    // TODO
-}
-
+// This routine checks to see if the robot being shot
+// is a hoverbot, if so it will alter it's AI to attack 
+// mode.
 void ALTER_AI()
 {
-    // TODO
+    if (UNIT_TYPE[UNIT_FIND] == 2 || UNIT_TYPE[UNIT_FIND] == 3) { // hoverbot left/right UP/DOWN
+        UNIT_TYPE[UNIT_FIND] = 4; // Attack AI
+    }
 }
 
+// This routine will inflict damage on whatever is defined in
+// UNIT_FIND in the amount set in TEMP_A.  If the damage is more
+// than the health of that unit, it will delete the unit.
 void INFLICT_DAMAGE()
 {
-    // TODO
+    UNIT_HEALTH[UNIT_FIND] -= TEMP_A;
+    if (UNIT_HEALTH[UNIT_FIND] > 0) {
+        if (UNIT_FIND == 0) { // IS IT THE PLAYER?
+            DISPLAY_PLAYER_HEALTH();
+            BORDER = 10;
+        }
+        return;
+    }
+    UNIT_HEALTH[UNIT_FIND] = 0;
+    if (UNIT_FIND != 0) { // Is it the player that is dead?
+        if (UNIT_TYPE[UNIT_FIND] != 8) { // Dead robot type - is it a dead robot already?
+            UNIT_TYPE[UNIT_FIND] = 8;
+            UNIT_TIMER_A[UNIT_FIND] = 255;
+            UNIT_TILE[UNIT_FIND] = 115; // dead robot tile
+        }
+    } else {
+        UNIT_TYPE[UNIT_FIND] = 0;
+        DISPLAY_PLAYER_HEALTH();
+        BORDER = 10;
+    }
 }
 
 void SMALL_EXPLOSION()
 {
-    // TODO
+    UNIT_TIMER_A[UNIT] = 0;
+    UNIT_TILE[UNIT]++;
+    if (UNIT_TILE[UNIT] != 252) {
+        CHECK_FOR_WINDOW_REDRAW();
+    } else {
+        UNIT_TYPE[UNIT] = 0;
+        CHECK_FOR_WINDOW_REDRAW();
+    }
 }
 
 void HOVER_ATTACK()
@@ -2809,7 +3168,7 @@ void ELEVATOR_PANEL()
 
 void PLOT_TILE_TO_MAP()
 {
-    // TODO
+    MAP[(MAP_Y << 7) + MAP_X] = TILE;
 }
 
 // This routine will return the tile for a specific X/Y
@@ -3416,425 +3775,7 @@ void writeToScreenMemory(uint16_t address, uint8_t value)
     platform->writeToScreenMemory(address, value);
 }
 
-/*
-WATER_RAFT_LR:
-    LDA #0
-    ;First check which direction raft is moving.
-    LDX UNIT
-    LDA UNIT_A,X
-    CMP #1
-    BEQ RAFT_RIGHT
-    JMP RAFT_LEFT
-RAFT_RIGHT:
-    JSR RAFT_DELETE
-    ;Check to see if player is on raft
-    LDA UNIT_LOC_X,X    ;raft
-    CMP UNIT_LOC_X  ;player
-    BNE WARF05
-    LDA UNIT_LOC_Y,X    ;raft
-    CMP UNIT_LOC_Y  ;player
-    BNE WARF05
-    INC UNIT_LOC_X  ;player
-    INC UNIT_LOC_X,X    ;raft
-    JSR RAFT_PLOT
-    JSR CACULATE_AND_REDRAW
-    JMP WARF5B
-WARF05: INC UNIT_LOC_X,X    ;raft
-    JSR RAFT_PLOT
-    ;Now check if it has reached its destination
-    JSR CHECK_FOR_WINDOW_REDRAW
-WARF5B: LDX UNIT
-    LDA UNIT_LOC_X,X
-    CMP UNIT_C,X    
-    BEQ WARF06
-    LDA #6
-    STA UNIT_TIMER_A,X
-    JMP AILP
-WARF06: LDA #100
-    STA UNIT_TIMER_A,X
-    LDA #0
-    STA UNIT_A,X
-    JMP AILP
-
-RAFT_LEFT:
-    JSR RAFT_DELETE
-    ;Check to see if player is on raft
-    LDA UNIT_LOC_X,X    ;raft
-    CMP UNIT_LOC_X  ;player
-    BNE WARF07
-    LDA UNIT_LOC_Y,X    ;raft
-    CMP UNIT_LOC_Y  ;player
-    BNE WARF07
-    DEC UNIT_LOC_X  ;player
-    DEC UNIT_LOC_X,X    ;raft
-    JSR RAFT_PLOT
-    JSR CACULATE_AND_REDRAW
-    JMP WARF7B
-WARF07: DEC UNIT_LOC_X,X    ;raft
-    JSR RAFT_PLOT
-    ;Now check if it has reached its destination
-    JSR CHECK_FOR_WINDOW_REDRAW
-WARF7B: LDX UNIT
-    ;Now check if it has reached its destination
-    LDA UNIT_LOC_X,X
-    CMP UNIT_B,X    
-    BEQ WARF08
-    LDA #6
-    STA UNIT_TIMER_A,X
-    JMP AILP
-WARF08: LDA #100
-    STA UNIT_TIMER_A,X
-    LDA #1
-    STA UNIT_A,X
-    JMP AILP
-
-RAFT_DELETE:
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    LDA #204    ;WATER TILE
-    STA TILE
-    JSR     PLOT_TILE_TO_MAP
-    RTS
-
-RAFT_PLOT:
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    LDA #242    ;RAFT TILE
-    STA TILE
-    JSR     PLOT_TILE_TO_MAP
-    RTS
-
-
-MAGNETIZED_ROBOT:
-    LDA #%00000001
-    STA MOVE_TYPE
-    JSR GENERATE_RANDOM_NUMBER
-    LDA RANDOM
-    AND #%00000011
-    CMP #00
-    BEQ MAGRO1
-    CMP #01
-    BEQ MAGRO2
-    CMP #02
-    BEQ MAGRO3
-    CMP #03
-    BEQ MAGRO4
-MAGRO1: JSR REQUEST_WALK_UP
-    JMP MAGR10
-MAGRO2: JSR REQUEST_WALK_DOWN
-    JMP MAGR10
-MAGRO3: JSR REQUEST_WALK_LEFT
-    JMP MAGR10
-MAGRO4: JSR REQUEST_WALK_RIGHT
-MAGR10: JSR CHECK_FOR_WINDOW_REDRAW
-    LDX UNIT
-    LDA #10
-    STA UNIT_TIMER_A,X
-    DEC UNIT_TIMER_B,X
-    LDA UNIT_TIMER_B,X
-    CMP #0
-    BNE MAGR11
-    LDA UNIT_D,X
-    STA UNIT_TYPE,X
-MAGR11: JMP AILP
-
-GENERATE_RANDOM_NUMBER:
-    LDA RANDOM
-    BEQ     DOEOR ;added this
-    ASL
-    BCC NOEOR
-DOEOR:  EOR #$1D
-NOEOR:  STA RANDOM
-    RTS
-
-MAGNET: 
-    ;First let's take care of the timers.  This unit runs
-    ;every cycle so that it can detect contact with another
-    ;unit.  But it still needs to count down to terminate
-    ;So, it uses two timers for a 16-bit value.
-    LDX UNIT
-    DEC UNIT_TIMER_B,X
-    LDA UNIT_TIMER_B,X
-    CMP #0
-    BNE MAGN1
-    DEC UNIT_A,X
-    LDA UNIT_A,X
-    CMP #0
-    BNE MAGN1
-    ;Both timers have reached zero, time to deactivate.
-MAGN0:  LDX UNIT
-    LDA #0
-    STA UNIT_TYPE,X
-    STA MAGNET_ACT
-    JMP AILP
-MAGN1:  ;Now let's see if another units walks on the magnet.
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    JSR CHECK_FOR_UNIT
-    LDA UNIT_FIND
-    CMP #255    ;no unit found
-    BEQ MAGN2
-    CMP #0  ;player unit
-    BEQ MAGN3
-    JMP MAGN4
-MAGN2:  JMP AILP
-MAGN3:  INC INV_MAGNET
-    JSR DISPLAY_ITEM
-    JMP MAGN0
-MAGN4:  ;Collision with robot detected.
-    LDA #4      ;HAYWIRE SOUND
-    JSR PLAY_SOUND  ;SOUND PLAY
-    LDX UNIT_FIND
-    LDA UNIT_TYPE,X
-    STA UNIT_D,X    ;make backup of unit type
-    LDA #21 ;Crazy robot AI
-    STA UNIT_TYPE,X
-    LDA #60
-    STA UNIT_TIMER_B,X
-    LDX UNIT
-    JMP MAGN0
-
-DEAD_ROBOT:
-    LDX UNIT
-    LDA #0
-    STA UNIT_TYPE,X
-    JMP AILP
-
-UP_DOWN_ROLLERBOT:
-    LDX UNIT
-    LDA #7
-    STA UNIT_TIMER_A,X
-    JSR ROLLERBOT_ANIMATE
-    LDX UNIT
-    LDA UNIT_A,X        ;GET DIRECTION
-    CMP #1  ;0=UP 1=DOWN
-    BEQ UDR01
-    LDA #%00000001
-    STA MOVE_TYPE
-    JSR REQUEST_WALK_UP
-    LDA MOVE_RESULT
-    CMP #1
-    BEQ UDR02
-    LDA #1
-    LDX UNIT
-    STA UNIT_A,X    ;CHANGE DIRECTION
-    JSR ROLLERBOT_FIRE_DETECT
-    JSR CHECK_FOR_WINDOW_REDRAW
-    JMP AILP
-UDR01:  LDA #%00000001
-    STA MOVE_TYPE
-    JSR REQUEST_WALK_DOWN
-    LDA MOVE_RESULT
-    CMP #1
-    BEQ UDR02
-    LDA #0
-    LDX UNIT
-    STA UNIT_A,X    ;CHANGE DIRECTION
-UDR02:  JSR ROLLERBOT_FIRE_DETECT
-    JSR CHECK_FOR_WINDOW_REDRAW
-    JMP AILP
-
-LEFT_RIGHT_ROLLERBOT:
-    LDX UNIT
-    LDA #7
-    STA UNIT_TIMER_A,X
-    JSR ROLLERBOT_ANIMATE
-    LDX UNIT
-    LDA UNIT_A,X        ;GET DIRECTION
-    CMP #1  ;0=LEFT 1=RIGHT
-    BEQ LRR01
-    LDA #%00000001
-    STA MOVE_TYPE
-    JSR REQUEST_WALK_LEFT
-    LDA MOVE_RESULT
-    CMP #1
-    BEQ LRR02
-    LDA #1
-    LDX UNIT
-    STA UNIT_A,X    ;CHANGE DIRECTION
-    JSR ROLLERBOT_FIRE_DETECT
-    JSR CHECK_FOR_WINDOW_REDRAW
-    JMP AILP
-LRR01:  LDA #%00000001
-    STA MOVE_TYPE
-    JSR REQUEST_WALK_RIGHT
-    LDA MOVE_RESULT
-    CMP #1
-    BEQ LRR02
-    LDA #0
-    LDX UNIT
-    STA UNIT_A,X    ;CHANGE DIRECTION
-LRR02:  JSR ROLLERBOT_FIRE_DETECT
-    JSR CHECK_FOR_WINDOW_REDRAW
-    JMP AILP
-
-ROLLERBOT_FIRE_DETECT:
-    LDA UNIT_LOC_X,X
-    STA TEMP_A
-    LDA UNIT_LOC_Y,X
-    STA TEMP_B
-    ;See if we're lined up vertically
-    LDA UNIT_LOC_Y,X    ;robot
-    CMP UNIT_LOC_Y  ;player
-    BNE RFDE2
-    JMP ROLLERBOT_FIRE_LR
-RFDE2:  ;See if we're lined up horizontally
-    LDA UNIT_LOC_X,X    ;robot
-    CMP UNIT_LOC_X  ;player
-    BNE RFDE3
-    JMP ROLLERBOT_FIRE_UD
-RFDE3:  RTS
-
-ROLLERBOT_FIRE_LR:
-    LDA UNIT_LOC_X,X
-    CMP UNIT_LOC_X
-    BCC RBFLR2
-    JMP ROLLERBOT_FIRE_LEFT
-RBFLR2: JMP ROLLERBOT_FIRE_RIGHT
-
-ROLLERBOT_FIRE_LEFT:
-    ;Check to see if distance is less than 5
-    LDA UNIT_LOC_X,X    ;robot
-    SEC
-    SBC UNIT_LOC_X  ;player
-    CMP #6
-    BCC RFL0
-    RTS 
-RFL0:   LDX #28
-RFL1:   LDA UNIT_TYPE,X
-    CMP #0
-    BEQ RFL2
-    INX
-    CPX #32
-    BNE RFL1
-    RTS
-RFL2:   LDA #14 ;pistol fire left AI
-    STA UNIT_TYPE,X
-    LDA #245    ;tile for horizontal weapons fire
-    JMP ROLLERBOT_AFTER_FIRE
-    
-ROLLERBOT_FIRE_RIGHT:
-    ;Check to see if distance is less than 5
-    LDA UNIT_LOC_X  ;player
-    SEC
-    SBC UNIT_LOC_X,X    ;robot
-    CMP #6
-    BCC RFR0
-    RTS 
-RFR0:   LDX #28
-RFR1:   LDA UNIT_TYPE,X
-    CMP #0
-    BEQ RFR2
-    INX
-    CPX #32
-    BNE RFR1
-    RTS
-RFR2:   LDA #15 ;pistol fire RIGHT AI
-    STA UNIT_TYPE,X
-    LDA #245    ;tile for horizontal weapons fire
-    JMP ROLLERBOT_AFTER_FIRE
-    RTS
-
-ROLLERBOT_FIRE_UD:
-    LDA UNIT_LOC_Y,X
-    CMP UNIT_LOC_Y
-    BCC RBFUD2
-    JMP ROLLERBOT_FIRE_UP
-RBFUD2: JMP ROLLERBOT_FIRE_DOWN
-
-ROLLERBOT_FIRE_UP:
-    ;Check to see if distance is less than 5
-    LDA UNIT_LOC_Y,X    ;robot
-    SEC
-    SBC UNIT_LOC_Y  ;player
-    CMP #4
-    BCC RFU0
-    RTS 
-RFU0:   LDX #28
-RFU1:   LDA UNIT_TYPE,X
-    CMP #0
-    BEQ RFU2
-    INX
-    CPX #32
-    BNE RFU1
-    RTS
-RFU2:   LDA #12 ;pistol fire UP AI
-    STA UNIT_TYPE,X
-    LDA #244    ;tile for horizontal weapons fire
-    JMP ROLLERBOT_AFTER_FIRE
-    
-ROLLERBOT_FIRE_DOWN:
-    ;Check to see if distance is less than 5
-    LDA UNIT_LOC_Y  ;player
-    SEC
-    SBC UNIT_LOC_Y,X    ;robot
-    CMP #4
-    BCC RFD0
-    RTS 
-RFD0:   LDX #28
-RFD1:   LDA UNIT_TYPE,X
-    CMP #0
-    BEQ RFD2
-    INX
-    CPX #32
-    BNE RFD1
-    RTS
-RFD2:   LDA #13 ;pistol fire DOWN AI
-    STA UNIT_TYPE,X
-    LDA #244    ;tile for horizontal weapons fire
-    JMP ROLLERBOT_AFTER_FIRE
-
-ROLLERBOT_AFTER_FIRE:
-    STA UNIT_TILE,X
-    LDA #5      ;travel distance.
-    STA UNIT_A,X
-    LDA #0      ;weapon-type = pistol
-    STA UNIT_B,X
-    STA UNIT_TIMER_A,X
-    LDA TEMP_A
-    STA UNIT_LOC_X,X
-    LDA TEMP_B
-    STA UNIT_LOC_Y,X
-    LDA #9      ;PISTOL SOUND
-    JSR PLAY_SOUND  ;SOUND PLAY
-    RTS
-
-ROLLERBOT_ANIMATE:
-    LDA UNIT_TIMER_B,X
-    CMP #0
-    BEQ ROLAN2
-    DEC UNIT_TIMER_B,X
-    RTS
-ROLAN2: LDA #3
-    STA UNIT_TIMER_B,X  ;RESET ANIMATE TIMER
-    LDA UNIT_TILE,X
-    CMP #164
-    BNE ROLAN1
-    LDA #165        ;ROLLERBOT TILE
-    STA UNIT_TILE,X
-    JSR CHECK_FOR_WINDOW_REDRAW
-    RTS
-ROLAN1: LDA #164        ;ROLLERBOT TILE
-    STA UNIT_TILE,X
-    JSR CHECK_FOR_WINDOW_REDRAW
-    RTS
-
-
-
-;UNIT_A: 0=always active    1=only active when all robots are dead
-;UNIT_B: 0=completes level 1=send to coordinates
-;UNIT_C: X-coordinate
-;UNIT_D: Y-coordinate
-
-;The "DEMATERIALIZE" part of this AI routine has to be in the main 
-;source for each individual computer, because the screen effects
-;are created uniquely for each one.
+/* 6502 TODO
 
 TRANSPORTER_PAD:
     ;first determine if the player is standing here
@@ -4513,269 +4454,8 @@ TCPIECE2:   !BYTE 00
 TCPIECE3:   !BYTE 00
 TCPIECE4:   !BYTE 00
 
-WATER_DROID:
-    ;first rotate the tiles
-    LDX UNIT
-    INC UNIT_TILE,X
-    LDA UNIT_TILE,X
-    CMP #143
-    BNE WD01
-    LDA #140
-    STA UNIT_TILE,X
-WD01:   DEC UNIT_A,X
-    LDA UNIT_A,X
-    CMP #0
-    BEQ WD02
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-WD02:   ;kill unit after countdown reaches zero. 
-    LDA #08 ;Dead robot type
-    STA UNIT_TYPE,X
-    LDA #255
-    STA UNIT_TIMER_A,X
-    LDA #115    ;dead robot tile
-    STA UNIT_TILE,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
 
-PISTOL_FIRE_UP:
-    ;Check if it has reached limits.
-    LDX UNIT    
-    LDA UNIT_A,X
-    CMP #0
-    BNE PFU02
-    ;if it has reached max range, then it vanishes.
-    JSR DEACTIVATE_WEAPON
-    JMP PFU05
-PFU02:  DEC UNIT_LOC_Y,X    ;move it up one.
-    JMP PISTOL_AI_COMMON
-PFU05:  JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
 
-PISTOL_FIRE_DOWN:
-    ;Check if it has reached limits.
-    LDX UNIT    
-    LDA UNIT_A,X
-    CMP #0
-    BNE PFD02
-    ;if it has reached max range, then it vanishes.
-    JSR DEACTIVATE_WEAPON
-    JMP PFD05
-PFD02:  INC UNIT_LOC_Y,X    ;move it down one.
-    JMP PISTOL_AI_COMMON
-PFD05:  JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-PISTOL_FIRE_LEFT:
-    ;Check if it has reached limits.
-    LDX UNIT    
-    LDA UNIT_A,X
-    CMP #0
-    BNE PFL02
-    ;if it has reached max range, then it vanishes.
-    JSR DEACTIVATE_WEAPON
-    JMP PFL05
-PFL02:  DEC UNIT_LOC_X,X    ;move it left one.
-    JMP PISTOL_AI_COMMON
-PFL05:  JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-PISTOL_FIRE_RIGHT:
-    ;Check if it has reached limits.
-    LDX UNIT    
-    LDA UNIT_A,X
-    CMP #0
-    BNE PFR02
-    ;if it has reached max range, then it vanishes.
-    JSR DEACTIVATE_WEAPON
-    JMP PFR05
-PFR02:  INC UNIT_LOC_X,X    ;move it right one.
-    JMP PISTOL_AI_COMMON
-PFR05:  JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-DEACTIVATE_WEAPON:
-    LDA #0
-    STA UNIT_TYPE,X
-    LDA UNIT_B,X
-    CMP #1
-    BNE DEW1
-    LDA #0
-    STA UNIT_B,X
-    STA PLASMA_ACT
-DEW1:   RTS
-
-PISTOL_AI_COMMON:
-    LDA UNIT_B,X    ;is it pistol or plasma?
-    CMP #0
-    BEQ PAIC02
-    JMP PLASMA_AI_COMMON
-PAIC02: DEC UNIT_A,X    ;reduce range by one
-    ;Now check what map object it is on.
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    JSR GET_TILE_FROM_MAP
-    LDY TILE
-    CMP #131    ;explosive cannister
-    BNE PAIC04
-    ;hit an explosive cannister
-    LDA #135    ;Blown cannister
-    LDY #0
-    STA ($FD),Y
-    LDX UNIT
-    LDA #6  ;bomb AI
-    STA UNIT_TYPE,X
-    LDA #131    ;Cannister tile
-    STA UNIT_TILE,X
-    LDA MAP_X
-    STA UNIT_LOC_X,X
-    LDA MAP_Y
-    STA UNIT_LOC_Y,X
-    LDA #5      ;How long until exposion?
-    STA UNIT_TIMER_A,X
-    LDA #0
-    STA UNIT_A,X
-    JMP AILP
-PAIC04: LDA TILE_ATTRIB,Y
-    ;AND    #%00000010  ;Check, can hover on this?
-    ;CMP    #%00000010
-    AND     #%00010000  ;can see through tile?
-    CMP #%00010000
-    BEQ PAIC05
-    ;Hit object that can't pass through, convert to explosion
-    LDA #11 ;SMALL EXPLOSION
-    STA UNIT_TYPE,X
-    LDA #248    ;first tile for explosion
-    STA UNIT_TILE,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-PAIC05: ;check if it encountered a robot/human
-    JSR CHECK_FOR_UNIT
-    LDA UNIT_FIND
-    CMP #255    ;NO UNIT ENCOUNTERED.
-    BNE PAIC06
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-PAIC06: ;struck a robot/human
-    LDX UNIT
-    LDA #11 ;SMALL EXPLOSION
-    STA UNIT_TYPE,X
-    LDA #248    ;first tile for explosion
-    STA UNIT_TILE,X
-    LDA #1  ;set damage for pistol
-    STA TEMP_A  
-    JSR INFLICT_DAMAGE
-    JSR ALTER_AI
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-PLASMA_AI_COMMON:
-    DEC UNIT_A,X    ;reduce range by one
-    ;find what tile we are over
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    JSR GET_TILE_FROM_MAP
-    LDY TILE
-    CPY #131    ;cannister tile
-    BEQ PLAI11
-    LDA TILE_ATTRIB,Y
-    AND     #%00010000  ;can see through tile?
-    CMP #%00010000
-    BEQ PLAI05
-    JMP PLAI11
-PLAI05: ;check if it encountered a human/robot
-    JSR CHECK_FOR_UNIT
-    LDA UNIT_FIND
-    CMP #255    ;NO UNIT ENCOUNTERED.
-    BNE PLAI11
-PLAI10: ;no impacts detected:
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-PLAI11: ;impact detected. convert to explosion
-    LDX UNIT
-    LDA #6  ;bomb AI
-    STA UNIT_TYPE,X
-    LDA #1      ;How long until exposion?
-    STA UNIT_TIMER_A,X
-    LDA #0
-    STA UNIT_A,X
-    STA PLASMA_ACT
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-;This routine checks to see if the robot being shot
-;is a hoverbot, if so it will alter it's AI to attack 
-;mode.
-ALTER_AI:
-    LDX UNIT_FIND
-    LDA UNIT_TYPE,X
-    CMP #2  ;hoverbot left/right
-    BEQ ATKMOD
-    CMP #3  ;hoverbot UP/DOWN
-    BEQ ATKMOD
-    RTS
-ATKMOD: LDA #4  ;Attack AI
-    STA UNIT_TYPE,X
-    RTS
-    
-
-;This routine will inflict damage on whatever is defined in
-;UNIT_FIND in the amount set in TEMP_A.  If the damage is more
-;than the health of that unit, it will delete the unit.
-INFLICT_DAMAGE:
-    LDX UNIT_FIND
-    LDA UNIT_HEALTH,X
-    SEC
-    SBC TEMP_A
-    STA UNIT_HEALTH,X
-    BCC UNIT_DEAD
-    CMP #0
-    BEQ UNIT_DEAD
-    CPX #0  ;IS IT THE PLAYER?
-    BNE IND1
-    JSR DISPLAY_PLAYER_HEALTH
-    LDA #10
-    STA BORDER
-IND1:   RTS
-UNIT_DEAD:
-    LDA #0
-    STA UNIT_HEALTH,X
-    CPX #0  ;Is it the player that is dead?
-    BEQ UD01
-    LDA #08 ;Dead robot type
-    CMP UNIT_TYPE,X ;is it a dead robot already?
-    BEQ UD0A
-    STA UNIT_TYPE,X
-    LDA #255
-    STA UNIT_TIMER_A,X
-    LDA #115    ;dead robot tile
-    STA UNIT_TILE,X
-UD0A:   RTS
-UD01:   LDA #0
-    STA UNIT_TYPE,X
-    JSR DISPLAY_PLAYER_HEALTH
-    LDA #10
-    STA BORDER
-    RTS
-    
-SMALL_EXPLOSION:
-    LDA #0
-    STA UNIT_TIMER_A,X
-    INC UNIT_TILE,X
-    LDA UNIT_TILE,X
-    CMP #252
-    BEQ SEXP1
-    JSR CHECK_FOR_WINDOW_REDRAW
-    JMP AILP
-SEXP1:  LDA #0
-    STA UNIT_TYPE,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP        
-    
 HOVER_ATTACK:
     LDX UNIT
     LDA #0
@@ -5475,24 +5155,6 @@ ELPN2:  ;PLAYER DETECTED, START ELEVATOR PANEL
     STA $FC
     JSR PRINT_INFO
     JSR ELEVATOR_SELECT
-    RTS
-
-PLOT_TILE_TO_MAP:
-    LDY #0
-    LDA MAP_Y
-    CLC
-    ROR
-    PHP
-    CLC
-    ADC #>MAP
-    STA $FE ;HIGH BYTE OF MAP SOURCE
-    LDA #$0
-    PLP
-    ROR
-    ORA MAP_X
-    STA $FD ;LOW BYTE OF MAP SOURCE
-    LDA TILE
-    STA ($FD),Y
     RTS
 
 ;In this AI routine, the droid simply goes left until it

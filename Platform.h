@@ -32,6 +32,7 @@ public:
     virtual int framesPerSecond() = 0;
     virtual void chrout(uint8_t) = 0;
     virtual uint8_t getin() = 0;
+    virtual void clearKeyBuffer() = 0;
     virtual void load(const char* filename, uint8_t* destination, uint32_t size) = 0;
 	virtual void writeToScreenMemory(uint16_t address, uint8_t value) = 0;
 	virtual void playNote(uint8_t note) = 0;

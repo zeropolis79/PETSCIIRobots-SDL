@@ -187,6 +187,10 @@ uint8_t PlatformAmiga::getin()
     return 0;
 }
 
+void PlatformAmiga::clearKeyBuffer()
+{
+}
+
 void PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t size)
 {
     BPTR file = Open((char*)filename, MODE_OLDFILE);

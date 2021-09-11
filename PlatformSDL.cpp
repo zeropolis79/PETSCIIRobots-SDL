@@ -11,7 +11,7 @@ PlatformSDL::PlatformSDL() :
     framesPerSecond_(50),
     audioAngle(0),
     audioFrequency(440),
-    audioVolume(INT16_MAX),
+    audioVolume(INT16_MAX >> 4),
     interruptIntervalInSamples(0),
     samplesSinceInterrupt(0)
 {
@@ -85,9 +85,9 @@ int PlatformSDL::framesPerSecond()
     return framesPerSecond_;
 }
 
-void PlatformSDL::chrout(uint8_t)
+void PlatformSDL::chrout(uint8_t character)
 {
-    // TODO
+    putchar(character == 0x0d ? 0x0a : character);
 }
 
 uint8_t PlatformSDL::getin()
@@ -183,6 +183,12 @@ uint8_t PlatformSDL::getin()
     return 0;
 }
 
+void PlatformSDL::clearKeyBuffer()
+{
+    SDL_Event event;
+    while (SDL_PollEvent(&event));
+}
+
 void PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t size)
 {
     FILE* file = fopen(filename, "r");
@@ -252,7 +258,8 @@ static const float noteToFrequency[] = {
 void PlatformSDL::playNote(uint8_t note)
 {
     audioFrequency = noteToFrequency[note];
-    audioVolume = audioFrequency > 0 ? INT16_MAX : 0;
+    audioVolume = audioFrequency > 0 ? (INT16_MAX >> 4) : 0;
+    audioAngle = 0;
 }
 
 void PlatformSDL::stopNote()
