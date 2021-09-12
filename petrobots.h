@@ -48,7 +48,7 @@ extern uint8_t UNIT_A[64];
 extern uint8_t UNIT_B[64];
 extern uint8_t UNIT_C[64];
 extern uint8_t UNIT_D[64];
-extern uint8_t UNIT_HEALTH[64];    // Unit health (0 to 11) (64 bytes)
+extern int8_t UNIT_HEALTH[64];    // Unit health (0 to 11) (64 bytes)
 extern uint8_t MAP[8 * 1024];      // Location of MAP (8K)
 // END OF MAP FILE
 
@@ -378,8 +378,9 @@ void BEX1_NW();
 void BEX1_SE();
 void BEX1_SW();
 void BEX_PART1();
-void BEX_PART2();
+bool BEX_PART2();
 void BEX_PART3();
+void BEXCEN();
 void BIG_EXP_PHASE2();
 void RESTORE_TILE();
 void TRASH_COMPACTOR();
@@ -398,10 +399,21 @@ void HOVER_ATTACK();
 void CREATE_PLAYER_EXPLOSION();
 void EVILBOT();
 void AI_DOOR();
+extern void (*AIDB[])(void);
+void DOOR_OPEN_A();
+void DOOR_OPEN_B();
+void DOOR_OPEN_FULL();
+void DOOR_CLOSE_A();
+void DOOR_CLOSE_B();
+void DOOR_CLOSE_FULL();
 void DRAW_VERTICAL_DOOR();
 void DRAW_HORIZONTAL_DOOR();
+extern uint8_t DOORPIECE1;
+extern uint8_t DOORPIECE2;
+extern uint8_t DOORPIECE3;
 void ROBOT_ATTACK_RANGE();
 void DOOR_CHECK_PROXIMITY();
+extern uint8_t PROX_DETECT;
 void ELEVATOR();
 void ELEV_CLOSE_FULL();
 void ELEVATOR_PANEL();

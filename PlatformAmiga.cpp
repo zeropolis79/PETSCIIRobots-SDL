@@ -141,9 +141,9 @@ int PlatformAmiga::framesPerSecond()
     return framesPerSecond_;
 }
 
-void PlatformAmiga::chrout(uint8_t)
+void PlatformAmiga::chrout(uint8_t character)
 {
-    // TODO
+    FPutC(Output(), character == 0x0d ? 0x0a : character);
 }
 
 uint8_t PlatformAmiga::getin()
@@ -176,7 +176,7 @@ uint8_t PlatformAmiga::getin()
                 quit = true;
                 break;
             default:
-                return (uint8_t)(messageCode >= 'a' && messageCode <= 'z' ? (messageCode - 32): messageCode);
+                return (uint8_t)(messageCode >= 'a' && messageCode <= 'z' ? (messageCode - 32) : (messageCode >= 'A' && messageCode <= 'Z' ? (messageCode + 128) : messageCode));
             }
             break;
         default:

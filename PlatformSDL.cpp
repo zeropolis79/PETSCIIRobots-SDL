@@ -63,7 +63,7 @@ void PlatformSDL::audioCallback(void* data, uint8_t* stream, int bytes) {
     int words = bytes >> 1;
     int16_t* output = (int16_t*)stream;
     for (int i = 0; i < words; i++) {
-        output[i] = platform->audioVolume * sin(platform->audioAngle);
+        output[i] = platform->audioVolume * (sin(platform->audioAngle) >= 0 ? 1 : -1);
         platform->audioAngle += 2 * M_PI * platform->audioFrequency / platform->audioSpec.freq;
     }
     platform->samplesSinceInterrupt += words;
@@ -92,6 +92,8 @@ void PlatformSDL::chrout(uint8_t character)
 
 uint8_t PlatformSDL::getin()
 {
+    SDL_RenderPresent(renderer);
+
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
@@ -120,7 +122,7 @@ uint8_t PlatformSDL::getin()
             case SDLK_b:
                 return 'B';
             case SDLK_c:
-                return 'C';
+                return 'C' + (event.key.keysym.mod == KMOD_LSHIFT ? 128 : 0);
             case SDLK_d:
                 return 'D';
             case SDLK_e:

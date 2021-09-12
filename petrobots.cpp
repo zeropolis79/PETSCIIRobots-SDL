@@ -59,7 +59,7 @@ uint8_t UNIT_A[64];
 uint8_t UNIT_B[64];
 uint8_t UNIT_C[64];
 uint8_t UNIT_D[64];
-uint8_t UNIT_HEALTH[64];    // Unit health (0 to 11) (64 bytes)
+int8_t UNIT_HEALTH[64];    // Unit health (0 to 11) (64 bytes)
 uint8_t MAP_UNUSED[256];
 uint8_t MAP[8 * 1024];      // Location of MAP (8K)
 // END OF MAP FILE
@@ -263,7 +263,6 @@ void RUNIRQ()
     if (BORDER != 0) {
         BORDER--;
     }
-    platform->renderFrame();
     // Back to usual IRQ routine
 }
 uint8_t BGTIMER1 = 0;
@@ -333,22 +332,22 @@ void MAIN_GAME_LOOP()
                     UNIT = 0;
                     MOVE_TYPE = 1; // %00000001
                     REQUEST_WALK_RIGHT();
-                    AFTER_MOVE();   // TODO jmp
+                    AFTER_MOVE();
                 } else if (A == 0x9D || A == *KEY_MOVE_LEFT) { // CURSOR LEFT
                     UNIT = 0;
                     MOVE_TYPE = 1;  // %00000001
                     REQUEST_WALK_LEFT();
-                    AFTER_MOVE();   // TODO jmp
+                    AFTER_MOVE();
                 } else if (A == 0x11 || A == *KEY_MOVE_DOWN) { // CURSOR DOWN
                     UNIT = 0;
                     MOVE_TYPE = 1;  // %00000001
                     REQUEST_WALK_DOWN();
-                    AFTER_MOVE();   // TODO jmp
+                    AFTER_MOVE();
                 } else if (A == 0x91 || A == *KEY_MOVE_UP) { // CURSOR UP
                     UNIT = 0;
                     MOVE_TYPE = 1;  // %00000001
                     REQUEST_WALK_UP();
-                    AFTER_MOVE();   // TODO jmp
+                    AFTER_MOVE();
                 } else if (A == *KEY_CYCLE_WEAPONS) {
                     CYCLE_WEAPON();
                     CLEAR_KEY_BUFFER();
@@ -504,7 +503,7 @@ void USE_BOMB()
 {
     USER_SELECT_OBJECT();
     // NOW TEST TO SEE IF THAT SPOT IS OPEN
-    if (BOMB_MAGNET_COMMON1() == 0) {
+    if (BOMB_MAGNET_COMMON1()) {
         // Now scan for any units at that location:
         CHECK_FOR_UNIT();
         if (UNIT_FIND == 255) { // 255 means no unit found.
@@ -537,7 +536,7 @@ void USE_MAGNET()
     }
     USER_SELECT_OBJECT();
     // NOW TEST TO SEE IF THAT SPOT IS OPEN
-    if (BOMB_MAGNET_COMMON1() == 0) {
+    if (BOMB_MAGNET_COMMON1()) {
         for (int X = 28; X != 32; X++) { // Start of weapons units
             if (UNIT_TYPE[X] == 0) {
                 UNIT_TYPE[X] = 20; // MAGNET AI
@@ -569,7 +568,7 @@ bool BOMB_MAGNET_COMMON1()
     MAP_Y = CURSOR_Y + MAP_WINDOW_Y;
     MOVTEMP_UY = MAP_Y;
     GET_TILE_FROM_MAP();
-    return TILE_ATTRIB[TILE] & 1; // is that spot available for something to move onto it?
+    return (TILE_ATTRIB[TILE] & 0x01) == 0x01; // %00000001 is that spot available for something to move onto it?
 }
 
 void BOMB_MAGNET_COMMON2()
@@ -1084,7 +1083,7 @@ void MOVE_OBJECT()
         if (TILE_ATTRIB[TILE] & 0x20) { // %00100000 is that spot available for something to move onto it?
             // Now scan for any units at that location:
             CHECK_FOR_UNIT();
-            if (UNIT_FIND != 255) { // 255 means no unit found.
+            if (UNIT_FIND == 255) { // 255 means no unit found.
                 PLAY_SOUND(6); // move sound, SOUND PLAY
                 MOVTEMP_D = MAP_SOURCE[0]; // Grab current object
                 MAP_SOURCE[0] = MOVTEMP_O; // replace with obect we are moving
@@ -1563,7 +1562,7 @@ void CYCLE_WEAPON()
     SELECT_TIMEOUT = 3; // RESET THE TIMEOUT
     KEYTIMER = 20;
     SELECTED_WEAPON++;
-    if (SELECTED_WEAPON == 2) {
+    if (SELECTED_WEAPON != 2) {
         SELECTED_WEAPON = 0;
     }
     DISPLAY_WEAPON();
@@ -2277,6 +2276,7 @@ void PET_SCREEN_SHAKE()
         source += 40;
     }
     REDRAW_WINDOW = 1;
+    platform->renderFrame();
 }
 
 // So, it doesn't really flash the PET border, instead it
@@ -2298,9 +2298,9 @@ void PET_BORDER_FLASH()
         if (FLASH_STATE != 0) {
             // Remove message from screen
             for (int X = 0; X != 6; X++) {
-                writeToScreenMemory(0x2F2 + X, 0);
-                writeToScreenMemory(0x31A + X, 0);
-                writeToScreenMemory(0x342 + X, 0);
+                writeToScreenMemory(0x2F2 + X, 32);
+                writeToScreenMemory(0x31A + X, 32);
+                writeToScreenMemory(0x342 + X, 32);
             }
             FLASH_STATE = 0;
         }
@@ -2469,6 +2469,7 @@ void BACKGROUND_TASKS()
     if (REDRAW_WINDOW == 1 && BGTIMER1 == 1) {
         REDRAW_WINDOW = 0;
         DRAW_MAP_WINDOW();
+        platform->renderFrame();
     }
     // Now check to see if it is time to run background tasks
     if (BGTIMER1 != 1) {
@@ -2821,92 +2822,408 @@ void ROLLERBOT_ANIMATE()
 
 void TRANSPORTER_PAD()
 {
-    // TODO
+    // first determine if the player is standing here
+    if (UNIT_LOC_X[UNIT] == UNIT_LOC_X[0] && UNIT_LOC_Y[UNIT] == UNIT_LOC_Y[0]) {
+        TRANS_PLAYER_PRESENT();
+    } else {
+        // player not present
+        if (UNIT_A[UNIT] != 1) {
+            TRANS_ACTIVE();
+        } else {
+            // test if all robots are dead
+            for (int X = 1; X != 28; X++) {
+                if (UNIT_TYPE[X] != 0) {
+                    UNIT_TIMER_A[UNIT] = 30;
+                    return;
+                }
+            }
+            UNIT_A[UNIT] = 0; // make unit active
+            UNIT_TIMER_A[UNIT] = 30;
+        }
+    }
 }
 
 void TRANS_PLAYER_PRESENT()
 {
-    // TODO
+    if (UNIT_A[UNIT] != 0) { // unit active
+        PRINT_INFO(MSG_TRANS1);
+        PLAY_SOUND(11); // error-SOUND SOUND PLAY
+        UNIT_TIMER_A[UNIT] = 100;
+    } else {
+        // start transport process
+        UNIT_TYPE[UNIT] = 23; // Convert to different AI
+        UNIT_TIMER_A[UNIT] = 5;
+        UNIT_TIMER_B[UNIT] = 0;
+    }
 }
 
 void TRANS_ACTIVE()
 {
-    // TODO
+    if (UNIT_TIMER_B[UNIT] != 1) {
+        UNIT_TIMER_B[UNIT] = 1;
+        TILE = 30;
+    } else {
+        UNIT_TIMER_B[UNIT] = 0;
+        TILE = 31;
+    }
+    MAP_X = UNIT_LOC_X[UNIT];
+    MAP_Y = UNIT_LOC_Y[UNIT];
+    PLOT_TILE_TO_MAP();
+    CHECK_FOR_WINDOW_REDRAW();
+    UNIT_TIMER_A[UNIT] = 30;
 }
 
 void TIME_BOMB()
 {
-    // TODO
+    if (UNIT_A[UNIT] == 0) {
+        BIG_EXP_PHASE1();
+    } else if (UNIT_A[UNIT] == 1) {
+        BIG_EXP_PHASE2();
+    }
 }
 
+// This is the large explosion used by the time-bomb
+// and plasma gun, and maybe others.  This is the first
+// phase of the explosion, which stores the tiles to
+// a buffer and then changes each tile to an explosion.
 void BIG_EXP_PHASE1()
 {
-    // TODO
+    if (BIG_EXP_ACT != 0) { // Check that no other explosion active.
+        UNIT_TIMER_A[UNIT] = 10;
+        return; // wait for existing explosion to finish.
+    }
+    BIG_EXP_ACT = 1; // Set flag so no other explosions can begin until this one ends.
+    SCREEN_SHAKE = 1;
+    PLAY_SOUND(0); // explosion-sound SOUND PLAY
+    BEX_PART1(); // check center piece for unit
+    BEXCEN(); // check center piece for unit
+    BEX1_NORTH();
+    BEX1_SOUTH();
+    BEX1_EAST();
+    BEX1_WEST();
+    BEX1_NE();
+    BEX1_NW();
+    BEX1_SE();
+    BEX1_SW();
+    UNIT_TILE[UNIT] = 246; // explosion tile
+    UNIT_A[UNIT] = 1; // move to next phase of explosion.
+    UNIT_TIMER_A[UNIT] = 12;
+    REDRAW_WINDOW = 1;
 }
 
+// There are 8 separate subroutines for the large explosion
+// with each one handling a specific outward direction of motion.
+// The "unit" itself changes tiles to an explosion, so we don't
+// need to mess with the center tile.
 void BEX1_NORTH()
 {
-    // TODO
+    BEX_PART1();
+    // first tile
+    MAP_Y--;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[0] = TILE;
+    BEX_PART3();
+    // second tile
+    MAP_Y--;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[1] = TILE;
+    BEX_PART3();
 }
 
 void BEX1_SOUTH()
 {
-    // TODO
+    BEX_PART1();
+    // first tile
+    MAP_Y++;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[2] = TILE;
+    BEX_PART3();
+    // second tile
+    MAP_Y++;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[3] = TILE;
+    BEX_PART3();
 }
 
 void BEX1_EAST()
 {
-    // TODO
+    BEX_PART1();
+    // first tile
+    MAP_X++;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[4] = TILE;
+    BEX_PART3();
+    // second tile
+    MAP_X++;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[5] = TILE;
+    BEX_PART3();
 }
 
 void BEX1_WEST()
 {
-    // TODO
+    BEX_PART1();
+    // first tile
+    MAP_X--;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[6] = TILE;
+    BEX_PART3();
+    // second tile
+    MAP_X--;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[7] = TILE;
+    BEX_PART3();
 }
 
 void BEX1_NE()
 {
-    // TODO
+    BEX_PART1();
+    // first tile
+    MAP_X++;
+    MAP_Y--;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[8] = TILE;
+    BEX_PART3();
+    // second tile
+    MAP_X++;
+    MAP_Y--;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[9] = TILE;
+    BEX_PART3();
 }
 
 void BEX1_NW()
 {
-    // TODO
+    BEX_PART1();
+    // first tile
+    MAP_X--;
+    MAP_Y--;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[10] = TILE;
+    BEX_PART3();
+    // second tile
+    MAP_X--;
+    MAP_Y--;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[11] = TILE;
+    BEX_PART3();
 }
 
 void BEX1_SE()
 {
-    // TODO
+    BEX_PART1();
+    // first tile
+    MAP_X++;
+    MAP_Y++;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[12] = TILE;
+    BEX_PART3();
+    // second tile
+    MAP_X++;
+    MAP_Y++;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[13] = TILE;
+    BEX_PART3();
 }
 
 void BEX1_SW()
 {
-    // TODO
+    BEX_PART1();
+    // first tile
+    MAP_X--;
+    MAP_Y++;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[14] = TILE;
+    BEX_PART3();
+    // second tile
+    MAP_X--;
+    MAP_Y++;
+    if (!BEX_PART2()) {
+        return;
+    }
+    EXP_BUFFER[15] = TILE;
+    BEX_PART3();
 }
 
 void BEX_PART1()
 {
-    // TODO
+    MAP_X = UNIT_LOC_X[UNIT];
+    MAP_Y = UNIT_LOC_Y[UNIT];
 }
 
-void BEX_PART2()
+bool BEX_PART2()
 {
-    // TODO
+    GET_TILE_FROM_MAP();
+    return (TILE_ATTRIB[TILE] & 0x10) == 0x10; // can see through tile?
 }
 
 void BEX_PART3()
 {
-    // TODO
+    MAP_SOURCE[0] = 246;
+    BEXCEN();
+}
+
+void BEXCEN()
+{
+    CHECK_FOR_UNIT();
+    if (UNIT_FIND != 255) {
+        TEMP_A = 11;
+        INFLICT_DAMAGE();
+    }
 }
 
 void BIG_EXP_PHASE2()
 {
-    // TODO
+    // Do the center tile first.
+    BEX_PART1();
+    GET_TILE_FROM_MAP();
+    MAP_SOURCE[0] = 246;
+    TEMP_A = TILE;
+    RESTORE_TILE();
+    // tile #0 north 1
+    BEX_PART1();
+    MAP_Y--;
+    TEMP_A = EXP_BUFFER[0];
+    RESTORE_TILE();
+    // tile #1 north 2
+    MAP_Y--;
+    TEMP_A = EXP_BUFFER[1];
+    RESTORE_TILE();
+    // tile #2 south 1
+    BEX_PART1();
+    MAP_Y++;
+    TEMP_A = EXP_BUFFER[2];
+    RESTORE_TILE();
+    // tile #3 south 2
+    MAP_Y++;
+    TEMP_A = EXP_BUFFER[3];
+    RESTORE_TILE();
+    // tile #4 east 1
+    BEX_PART1();
+    MAP_X++;
+    TEMP_A = EXP_BUFFER[4];
+    RESTORE_TILE();
+    // tile #5 east 2
+    MAP_X++;
+    TEMP_A = EXP_BUFFER[5];
+    RESTORE_TILE();
+    // tile #6 west 1
+    BEX_PART1();
+    MAP_X--;
+    TEMP_A = EXP_BUFFER[6];
+    RESTORE_TILE();
+    // tile #7 west 2
+    MAP_X--;
+    TEMP_A = EXP_BUFFER[7];
+    RESTORE_TILE();
+    // tile #8 northeast 1
+    BEX_PART1();
+    MAP_Y--;
+    MAP_X++;
+    TEMP_A = EXP_BUFFER[8];
+    RESTORE_TILE();
+    // tile #9 northeast 2
+    MAP_Y--;
+    MAP_X++;
+    TEMP_A = EXP_BUFFER[9];
+    RESTORE_TILE();
+    // tile #10 northwest 1
+    BEX_PART1();
+    MAP_Y--;
+    MAP_X--;
+    TEMP_A = EXP_BUFFER[10];
+    RESTORE_TILE();
+    // tile #11 northwest 2
+    MAP_Y--;
+    MAP_X--;
+    TEMP_A = EXP_BUFFER[11];
+    RESTORE_TILE();
+    // tile #12 southeast 1
+    BEX_PART1();
+    MAP_Y++;
+    MAP_X++;
+    TEMP_A = EXP_BUFFER[12];
+    RESTORE_TILE();
+    // tile #13 southeast 2
+    MAP_Y++;
+    MAP_X++;
+    TEMP_A = EXP_BUFFER[13];
+    RESTORE_TILE();
+    // tile #14 southwest 1
+    BEX_PART1();
+    MAP_Y++;
+    MAP_X--;
+    TEMP_A = EXP_BUFFER[14];
+    RESTORE_TILE();
+    // tile #15 southwest 2
+    MAP_Y++;
+    MAP_X--;
+    TEMP_A = EXP_BUFFER[15];
+    RESTORE_TILE();
+    REDRAW_WINDOW = 1;
+    UNIT_TYPE[UNIT] = 0; // Deactivate this AI
+    BIG_EXP_ACT = 0;
+    SCREEN_SHAKE = 0;
 }
 
 void RESTORE_TILE()
 {
-    // TODO
+    GET_TILE_FROM_MAP();
+    if (TILE != 246) {
+        return;
+    }
+    if (TEMP_A != 131) { // Cannister tile
+        if ((TILE_ATTRIB[TEMP_A] & 0x08) == 0x08) { // %00001000 can it be destroyed?
+            MAP_SOURCE[0] = DESTRUCT_PATH[TEMP_A];
+        } else {
+            MAP_SOURCE[0] = TEMP_A;
+        }
+    } else {
+        // What to do if we encounter an explosive cannister
+        MAP_SOURCE[0] = 135; // Blown cannister
+        for (int X = 28; X != 32; X++) { // Start of weapons units
+            if (UNIT_TYPE[X] == 0) {
+                UNIT_TYPE[X] = 6; // bomb AI
+                UNIT_TILE[X] = 131; // Cannister tile
+                UNIT_LOC_X[X] = MAP_X;
+                UNIT_LOC_Y[X] = MAP_Y;
+                UNIT_TIMER_A[X] = 10; // How long until exposion?
+                UNIT_A[X] = 0;
+                return;
+            }
+        }
+        // no slots available right now, abort.
+    }
 }
 
 void TRASH_COMPACTOR()
@@ -3113,43 +3430,328 @@ void SMALL_EXPLOSION()
 
 void HOVER_ATTACK()
 {
-    // TODO
+    UNIT_TIMER_B[UNIT] = 0;
+    HOVERBOT_ANIMATE(UNIT);
+    UNIT_TIMER_A[UNIT] = 7;
+    MOVE_TYPE = 0x02; // %00000010 HOVER
+    // CHECK FOR HORIZONTAL MOVEMENT
+    if (UNIT_LOC_X[UNIT] > UNIT_LOC_X[0]) {
+        REQUEST_WALK_LEFT();
+    } else if (UNIT_LOC_X[UNIT] < UNIT_LOC_X[0]) {
+        REQUEST_WALK_RIGHT();
+    }
+    // NOW CHECK FOR VERITCAL MOVEMENT
+    if (UNIT_LOC_Y[UNIT] > UNIT_LOC_Y[0]) {
+        REQUEST_WALK_UP();
+    } else if (UNIT_LOC_Y[UNIT] < UNIT_LOC_Y[0]) {
+        REQUEST_WALK_DOWN();
+    }
+    ROBOT_ATTACK_RANGE();
+    if (PROX_DETECT == 1) { // 1=Robot next to player 0=not
+        TEMP_A = 1; // amount of damage it will inflict
+        UNIT_FIND = 0; // unit to inflict damage on.
+        INFLICT_DAMAGE();
+        CREATE_PLAYER_EXPLOSION();
+        PLAY_SOUND(7); // electric shock SOUND PLAY
+        UNIT_TIMER_A[UNIT] = 30; // rate of attack on player.
+        // add some code here to create explosion
+    }
+    CHECK_FOR_WINDOW_REDRAW();
 }
 
 void CREATE_PLAYER_EXPLOSION()
 {
-    // TODO
+    int X;
+    for (X = 28; X != 32; X++) { // max unit for weaponsfire
+        if (UNIT_TYPE[X] == 0) {
+            break;
+        }
+    }
+    UNIT_TYPE[X] = 11; // Small explosion AI type
+    UNIT_TILE[X] = 248; // first tile for explosion
+    UNIT_TIMER_A[X] = 1;
+    UNIT_LOC_X[X] = UNIT_LOC_X[0];
+    UNIT_LOC_Y[X] = UNIT_LOC_Y[0];
 }
 
 void EVILBOT()
 {
-    // TODO
+    UNIT_TIMER_A[UNIT] = 5;
+    // first animate evilbot
+    if (UNIT_TILE[UNIT] == 100) {
+        UNIT_TILE[UNIT]++;
+    } else if (UNIT_TILE[UNIT] == 101) {
+        UNIT_TILE[UNIT]++;
+    } else if (UNIT_TILE[UNIT] == 102) {
+        UNIT_TILE[UNIT]++;
+    } else {
+        UNIT_TILE[UNIT] = 100;
+    }
+    // now figure out movement
+    if (UNIT_TIMER_B[UNIT] != 0) {
+        UNIT_TIMER_B[UNIT]--;
+        CHECK_FOR_WINDOW_REDRAW();
+    } else {
+        UNIT_TIMER_B[UNIT] = 1; // Reset timer B
+        MOVE_TYPE = 0x01; // %00000001 WALK
+        // CHECK FOR HORIZONTAL MOVEMENT
+        if (UNIT_LOC_X[UNIT] > UNIT_LOC_X[0]) {
+            REQUEST_WALK_LEFT();
+        } else if (UNIT_LOC_X[UNIT] < UNIT_LOC_X[0]) {
+            REQUEST_WALK_RIGHT();
+        }
+        // NOW CHECK FOR VERITCAL MOVEMENT
+        if (UNIT_LOC_Y[UNIT] > UNIT_LOC_Y[0]) {
+            REQUEST_WALK_UP();
+        } else if (UNIT_LOC_Y[UNIT] < UNIT_LOC_Y[0]) {
+            REQUEST_WALK_DOWN();
+        }
+        ROBOT_ATTACK_RANGE();
+        if (PROX_DETECT == 1) { // 1=Robot next to player 0=not
+            TEMP_A = 5; // amount of damage it will inflict
+            UNIT_FIND = 0; // unit to inflict damage on.
+            INFLICT_DAMAGE();
+            CREATE_PLAYER_EXPLOSION();
+            PLAY_SOUND(7); // electric shock sound SOUND PLAY
+            UNIT_TIMER_A[UNIT] = 15; // rate of attack on player.
+        }
+        CHECK_FOR_WINDOW_REDRAW();
+    }
 }
 
+// This routine handles automatic sliding doors.
+// UNIT_B register means:
+// 0=opening-A 1=opening-B 2=OPEN 3=closing-A 4=closing-B 5-CLOSED
 void AI_DOOR()
 {
-    // TODO
+    if (UNIT_B[UNIT] < 6) { // make sure number is in bounds
+        AIDB[UNIT_B[UNIT]]();
+    }
+    // -SHOULD NEVER NEED TO HAPPEN
+}
+void (*AIDB[])(void) = {
+    DOOR_OPEN_A,
+    DOOR_OPEN_B,
+    DOOR_OPEN_FULL,
+    DOOR_CLOSE_A,
+    DOOR_CLOSE_B,
+    DOOR_CLOSE_FULL
+};
+
+void DOOR_OPEN_A()
+{
+    if (UNIT_A[UNIT] != 1) {
+        // HORIZONTAL DOOR
+        DOORPIECE1 = 88;
+        DOORPIECE2 = 89;
+        DOORPIECE3 = 86;
+        DRAW_HORIZONTAL_DOOR();
+    } else {
+        // VERTICAL DOOR
+        DOORPIECE1 = 70;
+        DOORPIECE2 = 74;
+        DOORPIECE3 = 78;
+        DRAW_VERTICAL_DOOR();
+    }
+    UNIT_B[UNIT] = 1;
+    UNIT_TIMER_A[UNIT] = 5;
+    CHECK_FOR_WINDOW_REDRAW();
+}
+
+void DOOR_OPEN_B()
+{
+    if (UNIT_A[UNIT] != 1) {
+        // HORIZONTAL DOOR
+        DOORPIECE1 = 17;
+        DOORPIECE2 = 9;
+        DOORPIECE3 = 91;
+        DRAW_HORIZONTAL_DOOR();
+    } else {
+        // VERTICAL DOOR
+        DOORPIECE1 = 27;
+        DOORPIECE2 = 9;
+        DOORPIECE3 = 15;
+        DRAW_VERTICAL_DOOR();
+    }
+    UNIT_B[UNIT] = 2;
+    UNIT_TIMER_A[UNIT] = 30;
+    CHECK_FOR_WINDOW_REDRAW();
+}
+
+void DOOR_OPEN_FULL()
+{
+    DOOR_CHECK_PROXIMITY();
+    if (PROX_DETECT == 1) {
+        UNIT_TIMER_B[UNIT] = 30; // RESET TIMER
+        return;
+    }
+    // if nobody near door, lets close it.
+    // check for object in the way first.
+    MAP_X = UNIT_LOC_X[UNIT];
+    MAP_Y = UNIT_LOC_Y[UNIT];
+    GET_TILE_FROM_MAP();
+    if (TILE != 9) { // FLOOR-TILE
+        // SOMETHING IN THE WAY, ABORT
+        UNIT_TIMER_A[UNIT] = 35;
+        return;
+    }
+    PLAY_SOUND(14); // DOOR-SOUND SOUND PLAY
+    if (UNIT_A[UNIT] != 1) {
+        // HORIZONTAL DOOR
+        DOORPIECE1 = 88;
+        DOORPIECE2 = 89;
+        DOORPIECE3 = 86;
+        DRAW_HORIZONTAL_DOOR();
+    } else {
+        // VERTICAL DOOR
+        DOORPIECE1 = 70;
+        DOORPIECE2 = 74;
+        DOORPIECE3 = 78;
+        DRAW_VERTICAL_DOOR();
+    }
+    UNIT_B[UNIT] = 3;
+    UNIT_TIMER_A[UNIT] = 5;
+    CHECK_FOR_WINDOW_REDRAW();
+}
+
+void DOOR_CLOSE_A()
+{
+    if (UNIT_A[UNIT] != 1) {
+        // HORIZONTAL DOOR
+        DOORPIECE1 = 84;
+        DOORPIECE2 = 85;
+        DOORPIECE3 = 86;
+        DRAW_HORIZONTAL_DOOR();
+    } else {
+        // VERTICAL DOOR
+        DOORPIECE1 = 69;
+        DOORPIECE2 = 73;
+        DOORPIECE3 = 77;
+        DRAW_VERTICAL_DOOR();
+    }
+    UNIT_B[UNIT] = 4;
+    UNIT_TIMER_A[UNIT] = 5;
+    CHECK_FOR_WINDOW_REDRAW();
+}
+
+void DOOR_CLOSE_B()
+{
+    if (UNIT_A[UNIT] != 1) {
+        // HORIZONTAL DOOR
+        DOORPIECE1 = 80;
+        DOORPIECE2 = 81;
+        DOORPIECE3 = 82;
+        DRAW_HORIZONTAL_DOOR();
+    } else {
+        // VERTICAL DOOR
+        DOORPIECE1 = 68;
+        DOORPIECE2 = 72;
+        DOORPIECE3 = 76;
+        DRAW_VERTICAL_DOOR();
+    }
+    UNIT_B[UNIT] = 5;
+    UNIT_TIMER_A[UNIT] = 5;
+    CHECK_FOR_WINDOW_REDRAW();
+}
+
+void DOOR_CLOSE_FULL()
+{
+    DOOR_CHECK_PROXIMITY();
+    if (PROX_DETECT != 0) {
+        // if player near door, lets open it.
+        // first check if locked
+        if (UNIT_C[UNIT] == 0 || // Lock status
+            (UNIT_C[UNIT] == 1 && (KEYS & 0x01) == 0x01) || // SPADE KEY
+            (UNIT_C[UNIT] == 2 && (KEYS & 0x02) == 0x02) || // HEART KEY
+            (UNIT_C[UNIT] == 3 && (KEYS & 0x04) == 0x04)) { // STAR KEY
+            // Start open door process
+            PLAY_SOUND(14); // DOOR-SOUND SOUND PLAY
+            if (UNIT_A[UNIT] != 1) {
+                // HORIZONTAL DOOR
+                DOORPIECE1 = 84;
+                DOORPIECE2 = 85;
+                DOORPIECE3 = 86;
+                DRAW_HORIZONTAL_DOOR();
+            } else {
+                // VERTICAL DOOR
+                DOORPIECE1 = 69;
+                DOORPIECE2 = 73;
+                DOORPIECE3 = 77;
+                DRAW_VERTICAL_DOOR();
+            }
+            UNIT_B[UNIT] = 0;
+            UNIT_TIMER_A[UNIT] = 5;
+            CHECK_FOR_WINDOW_REDRAW();
+            return;
+        }
+    }
+    UNIT_TIMER_A[UNIT] = 20; // RESET TIMER
 }
 
 void DRAW_VERTICAL_DOOR()
 {
-    // TODO
+    MAP_Y = UNIT_LOC_Y[UNIT];
+    MAP_Y--;
+    MAP_X = UNIT_LOC_X[UNIT];
+    if (MAP_Y == 37)
+    TILE = DOORPIECE1;
+    PLOT_TILE_TO_MAP();
+    MAP_SOURCE += 128;
+    MAP_SOURCE[0] = DOORPIECE2;
+    MAP_SOURCE += 128;
+    MAP_SOURCE[0] = DOORPIECE3;
 }
 
 void DRAW_HORIZONTAL_DOOR()
 {
-    // TODO
+    MAP_X = UNIT_LOC_X[UNIT];
+    MAP_X--;
+    MAP_Y = UNIT_LOC_Y[UNIT];
+    TILE = DOORPIECE1;
+    PLOT_TILE_TO_MAP();
+    MAP_SOURCE[1] = DOORPIECE2;
+    MAP_SOURCE[2] = DOORPIECE3;
 }
+uint8_t DOORPIECE1 = 0;
+uint8_t DOORPIECE2 = 0;
+uint8_t DOORPIECE3 = 0;
 
 void ROBOT_ATTACK_RANGE()
 {
-    // TODO
+    // First check horizontal proximity to door
+    int A = ABS(UNIT_LOC_X[UNIT] - UNIT_LOC_X[0]); // ROBOT UNIT, PLAYER UNIT
+    if (A > 1) { // 1 HORIZONTAL TILE FROM PLAYER
+        PROX_DETECT = 0; // player not detected
+        return;
+    }
+    // Now check vertical proximity
+    A = ABS(UNIT_LOC_Y[UNIT] - UNIT_LOC_Y[0]); // DOOR UNIT, PLAYER UNIT
+    if (A > 1) { // 1 VERTICAL TILE FROM PLAYER
+        PROX_DETECT = 0; // player not detected
+        return;
+    }
+    // PLAYER DETECTED, CHANGE DOOR MODE.
+    PROX_DETECT = 1;
 }
 
 void DOOR_CHECK_PROXIMITY()
 {
-    // TODO
+    // First check horizontal proximity to door
+    int A = ABS(UNIT_LOC_X[UNIT] - UNIT_LOC_X[0]); // DOOR UNIT, PLAYER UNIT
+    if (A > 2) { // 2 HORIZONTAL TILES FROM PLAYER
+        PROX_DETECT = 0; // player not detected
+        return;
+    }
+    // Now check vertical proximity
+    A = ABS(UNIT_LOC_Y[UNIT] - UNIT_LOC_Y[0]); // DOOR UNIT, PLAYER UNIT
+    if (A > 2) { // 2 VERTICAL TILES FROM PLAYER
+        PROX_DETECT = 0; // player not detected
+        return;
+    }
+    // PLAYER DETECTED, CHANGE DOOR MODE.
+    PROX_DETECT = 1;
 }
+uint8_t PROX_DETECT = 0; // 0=NO 1=YES
 
 void ELEVATOR()
 {
@@ -3168,7 +3770,8 @@ void ELEVATOR_PANEL()
 
 void PLOT_TILE_TO_MAP()
 {
-    MAP[(MAP_Y << 7) + MAP_X] = TILE;
+    MAP_SOURCE = MAP + (MAP_Y << 7) + MAP_X;
+    MAP_SOURCE[0] = TILE;
 }
 
 // This routine will return the tile for a specific X/Y
@@ -3176,17 +3779,56 @@ void PLOT_TILE_TO_MAP()
 // The result is stored in TILE.
 void GET_TILE_FROM_MAP()
 {
-    TILE = MAP[(MAP_Y << 7) + MAP_X];
+    MAP_SOURCE = MAP + ((MAP_Y << 7) + MAP_X);
+    TILE = MAP_SOURCE[0];
 }
 
+// In this AI routine, the droid simply goes left until it
+// hits an object, and then reverses direction and does the
+// same, bouncing back and forth.
 void LEFT_RIGHT_DROID()
 {
-    // TODO
+    HOVERBOT_ANIMATE(UNIT);
+    UNIT_TIMER_A[UNIT] = 10; // reset timer to 10
+    if (UNIT_A[UNIT] != 1) { // GET DIRECTION 0=LEFT 1=RIGHT
+        MOVE_TYPE = 0x02; // %00000010
+        REQUEST_WALK_LEFT();
+        if (MOVE_RESULT != 1) {
+            UNIT_A[UNIT] = 1; // CHANGE DIRECTION
+        }
+        CHECK_FOR_WINDOW_REDRAW();
+    } else {
+        MOVE_TYPE = 0x02; // %00000010
+        REQUEST_WALK_RIGHT();
+        if (MOVE_RESULT != 1) {
+            UNIT_A[UNIT] = 0; // CHANGE DIRECTION
+        }
+        CHECK_FOR_WINDOW_REDRAW();
+    }
 }
 
+// In this AI routine, the droid simply goes UP until it
+// hits an object, and then reverses direction and does the
+// same, bouncing back and forth.
 void UP_DOWN_DROID()
 {
-    // TODO
+    HOVERBOT_ANIMATE(UNIT);
+    UNIT_TIMER_A[UNIT] = 10; // reset timer to 10
+    if (UNIT_A[UNIT] != 1) { // GET DIRECTION 0=UP 1=DOWN
+        MOVE_TYPE = 0x02; // %00000010
+        REQUEST_WALK_UP();
+        if (MOVE_RESULT != 1) {
+            UNIT_A[UNIT] = 1; // CHANGE DIRECTION
+        }
+        CHECK_FOR_WINDOW_REDRAW();
+    } else {
+        MOVE_TYPE = 0x02; // %00000010
+        REQUEST_WALK_DOWN();
+        if (MOVE_RESULT != 1) {
+            UNIT_A[UNIT] = 0; // CHANGE DIRECTION
+        }
+        CHECK_FOR_WINDOW_REDRAW();
+    }
 }
 
 void HOVERBOT_ANIMATE(uint8_t X)
@@ -3777,497 +4419,6 @@ void writeToScreenMemory(uint16_t address, uint8_t value)
 
 /* 6502 TODO
 
-TRANSPORTER_PAD:
-    ;first determine if the player is standing here
-    LDX UNIT
-    LDA UNIT_LOC_X,X
-    CMP UNIT_LOC_X
-    BNE TRP01
-    LDA UNIT_LOC_Y,X
-    CMP UNIT_LOC_Y
-    BNE TRP01
-    JMP TRANS_PLAYER_PRESENT    
-TRP01:  ;player not present
-    LDA UNIT_A,X
-    CMP #1
-    BEQ TRP02
-    JMP TRANS_ACTIVE
-TRP02:  ;test if all robots are dead
-    LDX #1
-TRP03:  LDA UNIT_TYPE,X
-    CMP #0
-    BNE TRP04
-    INX
-    CPX #28
-    BNE TRP03
-    LDX UNIT
-    LDA #0
-    STA UNIT_A,X    ;make unit active
-TRP04:  LDX UNIT
-    LDA #30
-    STA UNIT_TIMER_A,X
-    JMP AILP        
-
-TRANS_PLAYER_PRESENT:
-    LDX UNIT
-    LDA UNIT_A,X
-    CMP #0  ;unit active
-    BEQ TRPL1
-    LDA #<MSG_TRANS1
-    STA $FB
-    LDA #>MSG_TRANS1
-    STA $FC
-    JSR PRINT_INFO
-    LDA #11     ;error-SOUND
-    JSR PLAY_SOUND  ;SOUND PLAY
-    LDX UNIT
-    LDA #100
-    STA UNIT_TIMER_A,X
-    JMP AILP
-TRPL1:  ;start transport process
-    LDA #23 ;Convert to different AI
-    STA UNIT_TYPE,X
-    LDA #5
-    STA UNIT_TIMER_A,X
-    LDA #0
-    STA UNIT_TIMER_B,X
-    JMP AILP
-
-TRANS_ACTIVE:
-    LDA UNIT_TIMER_B,X
-    CMP #1
-    BEQ TRAC1
-    LDA #1
-    STA UNIT_TIMER_B,X
-    LDA #30
-    STA TILE
-    JMP TRAC2
-TRAC1:  LDA #0
-    STA UNIT_TIMER_B,X
-    LDA #31
-    STA TILE
-TRAC2:  LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    JSR PLOT_TILE_TO_MAP
-    JSR CHECK_FOR_WINDOW_REDRAW
-    LDA #30
-    STA UNIT_TIMER_A,X
-    JMP AILP
-
-TIME_BOMB:
-    LDX UNIT
-    LDA UNIT_A,X
-    CMP #0
-    BNE TB01
-    JMP BIG_EXP_PHASE1
-TB01:   CMP #1
-    BNE TB02
-    JMP BIG_EXP_PHASE2
-TB02:   JMP AILP
-
-;This is the large explosion used by the time-bomb
-;and plasma gun, and maybe others.  This is the first
-;phase of the explosion, which stores the tiles to
-;a buffer and then changes each tile to an explosion.
-BIG_EXP_PHASE1:
-    LDA BIG_EXP_ACT
-    CMP #0  ;Check that no other explosion active.
-    BEQ BEX001
-    LDX UNIT
-    LDA #10
-    STA UNIT_TIMER_A,X
-    JMP AILP    ;wait for existing explosion to finish.
-BEX001:
-    LDA #1      ;Set flag so no other explosions
-    STA BIG_EXP_ACT ;can begin until this one ends.
-    STA SCREEN_SHAKE
-    LDA #0  ;explosion-sound
-    JSR PLAY_SOUND  ;SOUND PLAY
-    JSR BEX_PART1   ;check center piece for unit
-    JSR BEXCEN      ;check center piece for unit
-    JSR BEX1_NORTH
-    JSR BEX1_SOUTH
-    JSR BEX1_EAST
-    JSR BEX1_WEST
-    JSR BEX1_NE
-    JSR BEX1_NW
-    JSR BEX1_SE
-    JSR BEX1_SW
-    LDX UNIT
-    LDA #246        ;explosion tile
-    STA UNIT_TILE,X
-    LDA #1      ;move to next phase of explosion.
-    STA UNIT_A,X
-    LDA #12
-    STA UNIT_TIMER_A,X
-    LDA #1
-    STA REDRAW_WINDOW
-    JMP AILP
-
-;There are 8 separate subroutines for the large explosion
-;with each one handling a specific outward direction of motion.
-;The "unit" itself changes tiles to an explosion, so we don't
-;need to mess with the center tile.
-BEX1_NORTH:
-    JSR BEX_PART1
-    ;first tile
-    DEC MAP_Y
-    JSR BEX_PART2
-    BEQ BEX1N1
-    RTS
-BEX1N1: LDA TILE
-    STA EXP_BUFFER+0
-    JSR BEX_PART3
-    ;second tile
-    DEC MAP_Y
-JSR BEX_PART2
-    BEQ BEX1N2
-    RTS
-BEX1N2: LDA TILE
-    STA EXP_BUFFER+1
-    JSR BEX_PART3
-    RTS
-
-BEX1_SOUTH:
-    JSR BEX_PART1
-    ;first tile
-    INC MAP_Y
-    JSR BEX_PART2
-    BEQ BEX1S1
-    RTS
-BEX1S1: LDA TILE
-    STA EXP_BUFFER+2
-    JSR BEX_PART3
-    ;second tile
-    INC MAP_Y
-    JSR BEX_PART2
-    BEQ BEX1S2
-    RTS
-BEX1S2: LDA TILE
-    STA EXP_BUFFER+3
-    JSR BEX_PART3
-    RTS
-
-BEX1_EAST:
-    JSR BEX_PART1
-    ;first tile
-    INC MAP_X
-    JSR BEX_PART2
-    BEQ BEX1E1
-    RTS
-BEX1E1: LDA TILE
-    STA EXP_BUFFER+4
-    JSR BEX_PART3
-    ;second tile
-    INC MAP_X
-    JSR BEX_PART2
-    BEQ BEX1E2
-    RTS
-BEX1E2: LDA TILE
-    STA EXP_BUFFER+5
-    JSR BEX_PART3
-    RTS
-
-BEX1_WEST:
-    JSR BEX_PART1
-    ;first tile
-    DEC MAP_X
-    JSR BEX_PART2
-    BEQ BEX1W1
-    RTS
-BEX1W1: LDA TILE
-    STA EXP_BUFFER+6
-    JSR BEX_PART3
-    ;second tile
-    DEC MAP_X
-    JSR BEX_PART2
-    BEQ BEX1W2
-    RTS
-BEX1W2: LDA TILE
-    STA EXP_BUFFER+7
-    JSR BEX_PART3
-    RTS
-
-BEX1_NE:
-    JSR BEX_PART1
-    ;first tile
-    INC MAP_X
-    DEC MAP_Y
-    JSR BEX_PART2
-    BEQ BEX1NE1
-    RTS
-BEX1NE1:LDA TILE
-    STA EXP_BUFFER+8
-    JSR BEX_PART3
-    ;second tile
-    INC MAP_X
-    DEC MAP_Y
-    JSR BEX_PART2
-    BEQ BEX1NE2
-    RTS
-BEX1NE2:LDA TILE
-    STA EXP_BUFFER+9
-    JSR BEX_PART3
-    RTS
-
-BEX1_NW:
-    JSR BEX_PART1
-    ;first tile
-    DEC MAP_X
-    DEC MAP_Y
-    JSR BEX_PART2
-    BEQ BEX1NW1
-    RTS
-BEX1NW1:LDA TILE
-    STA EXP_BUFFER+10
-    JSR BEX_PART3
-    ;second tile
-    DEC MAP_X
-    DEC MAP_Y
-    JSR BEX_PART2
-    BEQ BEX1NW2
-    RTS
-BEX1NW2:LDA TILE
-    STA EXP_BUFFER+11
-    JSR BEX_PART3
-    RTS
-
-BEX1_SE:
-    JSR BEX_PART1
-    ;first tile
-    INC MAP_X
-    INC MAP_Y
-    JSR BEX_PART2
-    BEQ BEX1SE1
-    RTS
-BEX1SE1:LDA TILE
-    STA EXP_BUFFER+12
-    JSR BEX_PART3
-    ;second tile
-    INC MAP_X
-    INC MAP_Y
-    JSR BEX_PART2
-    BEQ BEX1SE2
-    RTS
-BEX1SE2:LDA TILE
-    STA EXP_BUFFER+13
-    JSR BEX_PART3
-    RTS
-
-BEX1_SW:
-    JSR BEX_PART1
-    ;first tile
-    DEC MAP_X
-    INC MAP_Y
-    JSR BEX_PART2
-    BEQ BEX1SW1
-    RTS
-BEX1SW1:LDA TILE
-    STA EXP_BUFFER+14
-    JSR BEX_PART3
-    ;second tile
-    DEC MAP_X
-    INC MAP_Y
-    JSR BEX_PART2
-    BEQ BEX1SW2
-    RTS
-BEX1SW2:LDA TILE
-    STA EXP_BUFFER+15
-    JSR BEX_PART3
-    RTS
-
-BEX_PART1:
-    LDX UNIT
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    RTS
-
-BEX_PART2:
-    JSR GET_TILE_FROM_MAP
-    LDY TILE
-    LDA TILE_ATTRIB,Y
-    AND #%00010000  ;can see through tile?
-    CMP #%00010000
-    RTS
-
-BEX_PART3:
-    LDA #246
-    LDY #0
-    STA ($FD),Y
-BEXCEN: JSR CHECK_FOR_UNIT
-    LDA UNIT_FIND
-    CMP #255
-    BEQ EPT2    
-    LDA #11
-    STA TEMP_A
-    JSR INFLICT_DAMAGE
-EPT2:   RTS
-
-BIG_EXP_PHASE2:
-    ;Do the center tile first.
-    JSR BEX_PART1
-    JSR GET_TILE_FROM_MAP
-    LDA #246
-    STA ($FD),Y
-    LDA TILE
-    STA TEMP_A
-    JSR RESTORE_TILE    
-    ;tile #0 north 1
-    JSR BEX_PART1
-    DEC MAP_Y
-    LDA EXP_BUFFER+0
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #1 north 2
-    DEC MAP_Y
-    LDA EXP_BUFFER+1
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #2 south 1
-    JSR BEX_PART1
-    INC MAP_Y
-    LDA EXP_BUFFER+2
-    STA TEMP_A
-    JSR RESTORE_TILE    
-    ;tile #3 south 2
-    INC MAP_Y
-    LDA EXP_BUFFER+3
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #4 east 1
-    JSR BEX_PART1
-    INC MAP_X
-    LDA EXP_BUFFER+4
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #5 east 2
-    INC MAP_X
-    LDA EXP_BUFFER+5
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #6 west 1
-    JSR BEX_PART1
-    DEC MAP_X
-    LDA EXP_BUFFER+6
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #7 west 2
-    DEC MAP_X
-    LDA EXP_BUFFER+7
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #8 northeast 1
-    JSR BEX_PART1
-    DEC MAP_Y
-    INC MAP_X
-    LDA EXP_BUFFER+8
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #9 northeast 2
-    DEC MAP_Y
-    INC MAP_X
-    LDA EXP_BUFFER+9
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #10 northwest 1
-    JSR BEX_PART1
-    DEC MAP_Y
-    DEC MAP_X
-    LDA EXP_BUFFER+10
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #11 northwest 2
-    DEC MAP_Y
-    DEC MAP_X
-    LDA EXP_BUFFER+11
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #12 southeast 1
-    JSR BEX_PART1
-    INC MAP_Y
-    INC MAP_X
-    LDA EXP_BUFFER+12
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #13 southeast 2
-    INC MAP_Y
-    INC MAP_X
-    LDA EXP_BUFFER+13
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #14 southwest 1
-    JSR BEX_PART1
-    INC MAP_Y
-    DEC MAP_X
-    LDA EXP_BUFFER+14
-    STA TEMP_A
-    JSR RESTORE_TILE
-    ;tile #15 southwest 2
-    INC MAP_Y
-    DEC MAP_X
-    LDA EXP_BUFFER+15
-    STA TEMP_A
-    JSR RESTORE_TILE
-    LDA #1
-    STA REDRAW_WINDOW
-    LDX UNIT
-    LDA #0
-    STA UNIT_TYPE,X ;Deactivate this AI
-    STA BIG_EXP_ACT
-    STA SCREEN_SHAKE
-    JMP AILP
-
-RESTORE_TILE:
-    JSR GET_TILE_FROM_MAP
-    LDA TILE
-    CMP #246
-    BEQ REST0
-    RTS
-    
-REST0:  LDY TEMP_A
-    CPY #131    ;Cannister tile
-    BEQ REST3
-    LDA TILE_ATTRIB,Y
-    AND #%00001000  ;can it be destroyed?
-    CMP #%00001000
-    BNE REST2
-    LDA DESTRUCT_PATH,Y
-    LDY #0
-    STA ($FD),Y
-    RTS
-REST2:  LDA TEMP_A
-    LDY #0
-    STA ($FD),Y
-    RTS
-REST3:  ;What to do if we encounter an explosive cannister
-    LDA #135    ;Blown cannister
-    LDY #0
-    STA ($FD),Y
-    LDX #28 ;Start of weapons units
-REST4:  LDA UNIT_TYPE,X
-    CMP #0
-    BEQ REST5
-    INX
-    CPX #32
-    BNE REST4
-    RTS ;no slots available right now, abort.
-REST5:  LDA #6  ;bomb AI
-    STA UNIT_TYPE,X
-    LDA #131    ;Cannister tile
-    STA UNIT_TILE,X
-    LDA MAP_X
-    STA UNIT_LOC_X,X
-    LDA MAP_Y
-    STA UNIT_LOC_Y,X
-    LDA #10     ;How long until exposion?
-    STA UNIT_TIMER_A,X
-    LDA #0
-    STA UNIT_A,X
-    RTS
 
 TRASH_COMPACTOR:
     LDX UNIT    
@@ -4453,517 +4604,6 @@ TCPIECE1:   !BYTE 00
 TCPIECE2:   !BYTE 00
 TCPIECE3:   !BYTE 00
 TCPIECE4:   !BYTE 00
-
-
-
-HOVER_ATTACK:
-    LDX UNIT
-    LDA #0
-    STA UNIT_TIMER_B,X
-    JSR HOVERBOT_ANIMATE
-    LDA #7
-    STA UNIT_TIMER_A,X
-    LDA #%00000010  ;HOVER
-    STA MOVE_TYPE
-    ;CHECK FOR HORIZONTAL MOVEMENT
-    LDA UNIT_LOC_X,X
-    CMP UNIT_LOC_X
-    BEQ HOAT13
-    BCC HOAT12
-    JSR REQUEST_WALK_LEFT
-    JMP HOAT13
-HOAT12: JSR REQUEST_WALK_RIGHT
-HOAT13: ;NOW CHECK FOR VERITCAL MOVEMENT
-    LDA UNIT_LOC_Y,X
-    CMP UNIT_LOC_Y
-    BEQ HOAT20
-    BCC HOAT14
-    JSR REQUEST_WALK_UP
-    JMP HOAT20
-HOAT14: JSR REQUEST_WALK_DOWN   
-HOAT20: JSR ROBOT_ATTACK_RANGE
-    LDA PROX_DETECT
-    CMP #1  ;1=Robot next to player 0=not
-    BNE HOAT21  
-    LDA #1  ;amount of damage it will inflict
-    STA TEMP_A  
-    LDA #0  ;unit to inflict damage on.
-    STA UNIT_FIND
-    JSR INFLICT_DAMAGE
-    JSR CREATE_PLAYER_EXPLOSION
-    LDA #07     ;electric shock
-    JSR PLAY_SOUND  ;SOUND PLAY
-    LDX UNIT
-    LDA #30     ;rate of attack on player.
-    STA UNIT_TIMER_A,X
-    ;add some code here to create explosion
-HOAT21: JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-CREATE_PLAYER_EXPLOSION:
-    LDX #28
-TE01:   LDA UNIT_TYPE,X
-    CMP #0
-    BEQ TE02
-    INX
-    CPX #32 ;max unit for weaponsfire
-    BNE TE01    
-TE02:   LDA #11 ;Small explosion AI type
-    STA UNIT_TYPE,X
-    LDA #248    ;first tile for explosion
-    STA UNIT_TILE,X
-    LDA #1
-    STA UNIT_TIMER_A,X
-    LDA UNIT_LOC_X
-    STA UNIT_LOC_X,X
-    LDA UNIT_LOC_Y
-    STA UNIT_LOC_Y,X
-    RTS 
-
-EVILBOT:
-    LDX UNIT
-    LDA #5
-    STA UNIT_TIMER_A,X
-    ;first animate evilbot
-    LDA UNIT_TILE,X
-    CMP #100
-    BNE EVIL1
-    INC UNIT_TILE,X
-    JMP EVIL10
-EVIL1:  CMP #101
-    BNE EVIL2
-    INC UNIT_TILE,X
-    JMP EVIL10
-EVIL2:  CMP #102
-    BNE EVIL3
-    INC UNIT_TILE,X
-    JMP EVIL10
-EVIL3:  LDA #100
-    STA UNIT_TILE,X
-EVIL10: ;now figure out movement
-    LDA UNIT_TIMER_B,X
-    CMP #0
-    BEQ EVIL11
-    DEC UNIT_TIMER_B,X
-    JSR CHECK_FOR_WINDOW_REDRAW
-    JMP AILP
-EVIL11: LDA #1  ;Reset timer B
-    STA UNIT_TIMER_B,X
-    LDA #%00000001  ;WALK
-    STA MOVE_TYPE
-    ;CHECK FOR HORIZONTAL MOVEMENT
-    LDA UNIT_LOC_X,X
-    CMP UNIT_LOC_X
-    BEQ EVIL13
-    BCC EVIL12
-    JSR REQUEST_WALK_LEFT
-    JMP EVIL13
-EVIL12: JSR REQUEST_WALK_RIGHT
-EVIL13: ;NOW CHECK FOR VERITCAL MOVEMENT
-    LDA UNIT_LOC_Y,X
-    CMP UNIT_LOC_Y
-    BEQ EVIL20
-    BCC EVIL14
-    JSR REQUEST_WALK_UP
-    JMP EVIL20
-EVIL14: JSR REQUEST_WALK_DOWN   
-EVIL20: JSR ROBOT_ATTACK_RANGE
-    LDA PROX_DETECT
-    CMP #1  ;1=Robot next to player 0=not
-    BNE EVIL21  
-    LDA #5  ;amount of damage it will inflict
-    STA TEMP_A  
-    LDA #0  ;unit to inflict damage on.
-    STA UNIT_FIND
-    JSR INFLICT_DAMAGE
-    JSR CREATE_PLAYER_EXPLOSION
-    LDA #07     ;electric shock sound
-    JSR PLAY_SOUND  ;SOUND PLAY
-    LDX UNIT
-    LDA #15     ;rate of attack on player.
-    STA UNIT_TIMER_A,X
-EVIL21: JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-;This routine handles automatic sliding doors.
-;UNIT_B register means:
-;0=opening-A 1=opening-B 2=OPEN 3=closing-A 4=closing-B 5-CLOSED
-AI_DOOR:
-    LDX UNIT
-    LDA UNIT_B,X
-    CMP #06 ;make sure number is in bounds
-    BCS DOORA
-    TAY
-    LDA AIDB_L,Y
-    STA DOORJ+1
-    LDA AIDB_H,Y
-    STA DOORJ+2
-DOORJ:  JMP $0000   ;self modifying code
-DOORA:  JMP AILP    ;-SHOULD NEVER NEED TO HAPPEN
-AIDB_L: 
-    <DOOR_OPEN_A
-    <DOOR_OPEN_B
-    <DOOR_OPEN_FULL
-    <DOOR_CLOSE_A
-    <DOOR_CLOSE_B
-    <DOOR_CLOSE_FULL
-AIDB_H: 
-    >DOOR_OPEN_A
-    >DOOR_OPEN_B
-    >DOOR_OPEN_FULL
-    >DOOR_CLOSE_A
-    >DOOR_CLOSE_B
-    >DOOR_CLOSE_FULL
-
-DOOR_OPEN_A:
-    LDA UNIT_A,X
-    CMP #1
-    BEQ DOA1
-    ;HORIZONTAL DOOR
-    LDA #88
-    STA DOORPIECE1
-    LDA #89
-    STA DOORPIECE2
-    LDA #86
-    STA DOORPIECE3
-    JSR DRAW_HORIZONTAL_DOOR
-    JMP DOA2
-DOA1:   ;VERTICAL DOOR
-    LDA #70
-    STA DOORPIECE1
-    LDA #74
-    STA DOORPIECE2
-    LDA #78
-    STA DOORPIECE3
-    JSR DRAW_VERTICAL_DOOR
-DOA2:   LDY UNIT
-    LDA #1
-    STA UNIT_B,X
-    LDA #5
-    STA UNIT_TIMER_A,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-DOOR_OPEN_B:
-    LDA UNIT_A,X
-    CMP #1
-    BEQ DOB1
-    ;HORIZONTAL DOOR
-    LDA #17
-    STA DOORPIECE1
-    LDA #09
-    STA DOORPIECE2
-    LDA #91
-    STA DOORPIECE3
-    JSR DRAW_HORIZONTAL_DOOR
-    JMP DOB2
-DOB1:   ;VERTICAL DOOR
-    LDA #27
-    STA DOORPIECE1
-    LDA #09
-    STA DOORPIECE2
-    LDA #15
-    STA DOORPIECE3
-    JSR DRAW_VERTICAL_DOOR
-DOB2:   LDX UNIT
-    LDA #2
-    STA UNIT_B,X
-    LDA #30
-    STA UNIT_TIMER_A,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-DOOR_OPEN_FULL:
-    LDX UNIT
-    JSR DOOR_CHECK_PROXIMITY    
-    LDA PROX_DETECT
-    CMP #1
-    BNE DOF1
-    LDA #30
-    STA UNIT_TIMER_B,X  ;RESET TIMER
-    JMP AILP
-DOF1:   ;if nobody near door, lets close it.
-    ;check for object in the way first.
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    JSR GET_TILE_FROM_MAP
-    LDA TILE
-    CMP #09 ;FLOOR-TILE
-    BEQ DOFB
-    ;SOMETHING IN THE WAY, ABORT
-    LDA #35
-    STA UNIT_TIMER_A,X
-    JMP AILP
-DOFB:   LDA #14     ;DOOR-SOUND
-    JSR PLAY_SOUND  ;SOUND PLAY
-    LDX UNIT
-    LDA UNIT_A,X
-    CMP #1
-    BEQ DOF2
-    ;HORIZONTAL_DOOR
-    LDA #88
-    STA DOORPIECE1
-    LDA #89
-    STA DOORPIECE2
-    LDA #86
-    STA DOORPIECE3
-    JSR DRAW_HORIZONTAL_DOOR
-    JMP DOF3
-DOF2:   ;VERTICAL DOOR
-    LDA #70
-    STA DOORPIECE1
-    LDA #74
-    STA DOORPIECE2
-    LDA #78
-    STA DOORPIECE3
-    JSR DRAW_VERTICAL_DOOR
-DOF3:   LDY UNIT
-    LDA #3
-    STA UNIT_B,X
-    LDA #5
-    STA UNIT_TIMER_A,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-DOOR_CLOSE_A:
-    LDA UNIT_A,X
-    CMP #1
-    BEQ DCA2
-    ;HORIZONTAL DOOR
-    LDA #84
-    STA DOORPIECE1
-    LDA #85
-    STA DOORPIECE2
-    LDA #86
-    STA DOORPIECE3
-    JSR DRAW_HORIZONTAL_DOOR
-    JMP DCA3
-DCA2:   ;VERTICAL DOOR
-    LDA #69
-    STA DOORPIECE1
-    LDA #73
-    STA DOORPIECE2
-    LDA #77
-    STA DOORPIECE3
-    JSR DRAW_VERTICAL_DOOR
-DCA3:   LDY UNIT
-    LDA #4
-    STA UNIT_B,X
-    LDA #5
-    STA UNIT_TIMER_A,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-DOOR_CLOSE_B:
-    LDA UNIT_A,X
-    CMP #1
-    BEQ DCB2
-    ;HORIZONTAL DOOR
-    LDA #80
-    STA DOORPIECE1
-    LDA #81
-    STA DOORPIECE2
-    LDA #82
-    STA DOORPIECE3
-    JSR DRAW_HORIZONTAL_DOOR
-    JMP DCB3
-DCB2:   ;VERTICAL DOOR
-    LDA #68
-    STA DOORPIECE1
-    LDA #72
-    STA DOORPIECE2
-    LDA #76
-    STA DOORPIECE3
-    JSR DRAW_VERTICAL_DOOR
-DCB3:   LDY UNIT
-    LDA #5
-    STA UNIT_B,X
-    LDA #5
-    STA UNIT_TIMER_A,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-DOOR_CLOSE_FULL:
-    LDX UNIT
-    JSR DOOR_CHECK_PROXIMITY    
-    LDA PROX_DETECT
-    CMP #0
-    BNE DCF1
-DCF0:   LDA #20
-    STA UNIT_TIMER_A,X  ;RESET TIMER
-    JMP AILP
-DCF1:   ;if player near door, lets open it.
-    ;first check if locked
-    LDA UNIT_C,X    ;Lock status
-    CMP #0  ;UNLOCKED
-    BEQ DCFZ
-    CMP #1  ;SPADE KEY
-    BNE DCFB        
-    LDA KEYS
-    AND #%00000001  ;CHECK FOR SPADE KEY
-    CMP #%00000001
-    BEQ DCFZ
-    JMP DCF0
-DCFB:   CMP #2  ;HEART KEY
-    BNE DCFC        
-    LDA KEYS
-    AND #%00000010  ;CHECK FOR HEART KEY
-    CMP #%00000010
-    BEQ DCFZ
-    JMP DCF0
-DCFC:   CMP #3  ;STAR KEY
-    BNE DCF0    ;SHOULD NEVER HAPPEN    
-    LDA KEYS
-    AND #%00000100  ;CHECK FOR STAR KEY
-    CMP #%00000100
-    BEQ DCFZ
-    JMP DCF0
-DCFZ:   ;Start open door process
-    LDA #14     ;DOOR-SOUND
-    JSR PLAY_SOUND  ;SOUND PLAY
-    LDX UNIT
-    LDA UNIT_A,X
-    CMP #1
-    BEQ DCF2
-    ;HORIZONTAL DOOR
-    LDA #84
-    STA DOORPIECE1
-    LDA #85
-    STA DOORPIECE2
-    LDA #86
-    STA DOORPIECE3
-    JSR DRAW_HORIZONTAL_DOOR
-    JMP DCF3
-    ;VERTICAL DOOR
-DCF2:   LDA #69
-    STA DOORPIECE1
-    LDA #73
-    STA DOORPIECE2
-    LDA #77
-    STA DOORPIECE3
-    JSR DRAW_VERTICAL_DOOR
-DCF3:   LDY UNIT
-    LDA #0
-    STA UNIT_B,X
-    LDA #5
-    STA UNIT_TIMER_A,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-DRAW_VERTICAL_DOOR:
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    DEC MAP_Y
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA DOORPIECE1
-    STA TILE
-    JSR PLOT_TILE_TO_MAP
-    LDA $FD
-    CLC
-    ADC #128
-    STA $FD
-    LDA $FE
-    ADC #$00
-    STA $FE
-    LDA DOORPIECE2
-    STA ($FD),Y
-    LDA $FD
-    CLC
-    ADC #128
-    STA $FD
-    LDA $FE
-    ADC #$00
-    STA $FE
-    LDA DOORPIECE3
-    STA ($FD),Y 
-    RTS
-
-DRAW_HORIZONTAL_DOOR:
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    DEC MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    LDA DOORPIECE1
-    STA TILE
-    JSR PLOT_TILE_TO_MAP
-    INY
-    LDA DOORPIECE2
-    STA ($FD),Y
-    INY
-    LDA DOORPIECE3
-    STA ($FD),Y
-    RTS
-DOORPIECE1  00
-DOORPIECE2  00
-DOORPIECE3  00
-
-ROBOT_ATTACK_RANGE:
-    ;First check horizontal proximity to door
-    LDA UNIT_LOC_X,X    ;ROBOT UNIT
-    SEC     ;always set carry before subtraction
-    SBC     UNIT_LOC_X  ;PLAYER UNIT
-    BCC     RAR1 ;if carry cleared then its negative
-    JMP RAR2
-RAR1:   EOR     #$FF ;convert two's comp back to positive
-    ADC     #$01 ;no need for CLC here, already cleared
-RAR2:   CMP #1  ;1 HORIZONTAL TILE FROM PLAYER
-    BCC RAR3
-    LDA #0  ;player not detected
-    STA PROX_DETECT
-    RTS 
-RAR3:   ;Now check vertical proximity
-    LDA UNIT_LOC_Y,X    ;DOOR UNIT
-    SEC     ;always set carry before subtraction
-    SBC     UNIT_LOC_Y  ;PLAYER UNIT
-    BCC     RAR4 ;if carry cleared then its negative
-    JMP RAR5
-RAR4:   EOR     #$FF ;convert two's comp back to positive
-    ADC     #$01 ;no need for CLC here, already cleared
-RAR5:   CMP #1  ;1 VERTICAL TILE FROM PLAYER
-    BCC RAR6
-    LDA #0  ;player not detected
-    STA PROX_DETECT
-    RTS     
-RAR6:   ;PLAYER DETECTED, CHANGE DOOR MODE.
-    LDA #1
-    STA PROX_DETECT
-    RTS     
-
-DOOR_CHECK_PROXIMITY:
-    ;First check horizontal proximity to door
-    LDA UNIT_LOC_X,X    ;DOOR UNIT
-    SEC     ;always set carry before subtraction
-    SBC     UNIT_LOC_X  ;PLAYER UNIT
-    BCC     PRD1 ;if carry cleared then its negative
-    JMP PRD2
-PRD1:   EOR     #$FF ;convert two's comp back to positive
-    ADC     #$01 ;no need for CLC here, already cleared
-PRD2:   CMP #2  ;2 HORIZONTAL TILES FROM PLAYER
-    BCC PRD3
-    LDA #0  ;player not detected
-    STA PROX_DETECT
-    RTS 
-PRD3:   ;Now check vertical proximity
-    LDA UNIT_LOC_Y,X    ;DOOR UNIT
-    SEC     ;always set carry before subtraction
-    SBC     UNIT_LOC_Y  ;PLAYER UNIT
-    BCC     PRD4 ;if carry cleared then its negative
-    JMP PRD5
-PRD4:   EOR     #$FF ;convert two's comp back to positive
-    ADC     #$01 ;no need for CLC here, already cleared
-PRD5:   CMP #2  ;2 VERTICAL TILES FROM PLAYER
-    BCC PRD6
-    LDA #0  ;player not detected
-    STA PROX_DETECT
-    RTS     
-PRD6:   ;PLAYER DETECTED, CHANGE DOOR MODE.
-    LDA #1
-    STA PROX_DETECT
-    RTS 
-PROX_DETECT 00  ;0=NO 1=YES
 
 ;This routine handles automatic sliding doors.
 ;UNIT_B register means:
@@ -5157,73 +4797,6 @@ ELPN2:  ;PLAYER DETECTED, START ELEVATOR PANEL
     JSR ELEVATOR_SELECT
     RTS
 
-;In this AI routine, the droid simply goes left until it
-;hits an object, and then reverses direction and does the
-;same, bouncing back and forth.
-LEFT_RIGHT_DROID:
-    LDX UNIT
-    JSR HOVERBOT_ANIMATE
-    LDA #10     ;reset timer to 10
-    STA UNIT_TIMER_A,X  
-    LDA UNIT_A,X        ;GET DIRECTION
-    CMP #1  ;0=LEFT 1=RIGHT
-    BEQ LRD01
-    LDA #%00000010
-    STA MOVE_TYPE
-    JSR REQUEST_WALK_LEFT
-    LDA MOVE_RESULT
-    CMP #1
-    BEQ LRD02
-    LDA #1
-    LDX UNIT
-    STA UNIT_A,X    ;CHANGE DIRECTION
-    JSR CHECK_FOR_WINDOW_REDRAW
-    JMP AILP
-LRD01:  LDA #%00000010
-    STA MOVE_TYPE
-    JSR REQUEST_WALK_RIGHT
-    LDA MOVE_RESULT
-    CMP #1
-    BEQ LRD02
-    LDA #0
-    LDX UNIT
-    STA UNIT_A,X    ;CHANGE DIRECTION
-LRD02:  JSR CHECK_FOR_WINDOW_REDRAW
-    JMP AILP
-
-;In this AI routine, the droid simply goes UP until it
-;hits an object, and then reverses direction and does the
-;same, bouncing back and forth.
-UP_DOWN_DROID:
-    LDX UNIT
-    JSR HOVERBOT_ANIMATE
-    LDA #10     ;reset timer to 10
-    STA UNIT_TIMER_A,X  
-    LDA UNIT_A,X        ;GET DIRECTION
-    CMP #1  ;0=UP 1=DOWN
-    BEQ UDD01
-    LDA #%00000010
-    STA MOVE_TYPE
-    JSR REQUEST_WALK_UP
-    LDA MOVE_RESULT
-    CMP #1
-    BEQ UDD02
-    LDA #1
-    LDX UNIT
-    STA UNIT_A,X    ;CHANGE DIRECTION
-    JSR CHECK_FOR_WINDOW_REDRAW
-    JMP AILP
-UDD01:  LDA #%00000010
-    STA MOVE_TYPE
-    JSR REQUEST_WALK_DOWN
-    LDA MOVE_RESULT
-    CMP #1
-    BEQ UDD02
-    LDA #0
-    LDX UNIT
-    STA UNIT_A,X    ;CHANGE DIRECTION
-UDD02:  JSR CHECK_FOR_WINDOW_REDRAW
-    JMP AILP
 */
 
 // NOTES ABOUT UNIT TYPES
