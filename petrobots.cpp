@@ -11,7 +11,6 @@
 #else
 #include "PlatformSDL.h"
 #endif
-#include <string.h>
 #include "petrobots.h"
 
 uint8_t DESTRUCT_PATH[256]; // Destruct path array (256 bytes)
@@ -105,8 +104,13 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    strncpy(MAPNAME, "level-a", sizeof(MAPNAME));
-    strncpy(LOAD_MSG2, "loading map:", sizeof(LOAD_MSG2));
+    int i;
+    for (i = 0; i < sizeof(MAPNAME); i++) {
+        MAPNAME[i] = "level-a"[i];
+    }
+    for (i = 0; i < sizeof(LOAD_MSG2); i++) {
+        LOAD_MSG2[i] = "loading map:"[i];
+    }
 
     platform->stopNote(); // RESET SOUND TO ZERO
     DISPLAY_LOAD_MESSAGE1();
@@ -2164,7 +2168,7 @@ uint8_t ELEVATOR_CURRENT_FLOOR = 0;
 
 void ELEVATOR_INVERT()
 {
-    writeToScreenMemory(0x3C5 + ELEVATOR_CURRENT_FLOOR, SCREEN_MEMORY[0x3C5 + ELEVATOR_CURRENT_FLOOR]);
+    writeToScreenMemory(0x3C5 + ELEVATOR_CURRENT_FLOOR, SCREEN_MEMORY[0x3C5 + ELEVATOR_CURRENT_FLOOR] ^ 0x80); // %10000000
 }
 
 void ELEVATOR_INC()
@@ -3228,13 +3232,105 @@ void RESTORE_TILE()
 
 void TRASH_COMPACTOR()
 {
-    // TODO
+    if (UNIT_A[UNIT] == 0) { // OPEN
+        MAP_X = UNIT_LOC_X[UNIT];
+        MAP_Y = UNIT_LOC_Y[UNIT];
+        GET_TILE_FROM_MAP();
+        if (TILE == 148) { // Usual tile for trash compactor danger zone
+            MAP_SOURCE[1] = TILE;
+            UNIT_TIMER_A[UNIT] = 20;
+            // now check for units in the compactor
+            MAP_X = UNIT_LOC_X[UNIT];
+            MAP_Y = UNIT_LOC_Y[UNIT];
+            CHECK_FOR_UNIT();
+            if (UNIT_FIND == 255) {
+                return; // Nothing found, do nothing.
+            }
+        }
+        // Object has been detected in TC, start closing.
+        TCPIECE1 = 146;
+        TCPIECE2 = 147;
+        TCPIECE3 = 150;
+        TCPIECE4 = 151;
+        DRAW_TRASH_COMPACTOR();
+        UNIT_A[UNIT]++;
+        UNIT_TIMER_A[UNIT] = 10;
+        PLAY_SOUND(14); // door sound SOUND PLAY
+    } else if (UNIT_A[UNIT] == 1) { // MID-CLOSING STATE
+        TCPIECE1 = 152;
+        TCPIECE2 = 153;
+        TCPIECE3 = 156;
+        TCPIECE4 = 157;
+        DRAW_TRASH_COMPACTOR();
+        UNIT_A[UNIT]++;
+        UNIT_TIMER_A[UNIT] = 50;
+        // Now check for any live units in the compactor
+        MAP_X = UNIT_LOC_X[UNIT];
+        MAP_Y = UNIT_LOC_Y[UNIT];
+        CHECK_FOR_UNIT();
+        if (UNIT_FIND == 255) {
+            MAP_X++; // check second tile
+            CHECK_FOR_UNIT();
+            if (UNIT_FIND == 255) {
+                return;
+            }
+        }
+        // Found unit in compactor, kill it.
+        PRINT_INFO(MSG_TERMINATED);
+        PLAY_SOUND(0); // EXPLOSION sound SOUND PLAY
+        UNIT_TYPE[UNIT_FIND] = 0;
+        UNIT_HEALTH[UNIT_FIND] = 0;
+        for (int X = 28; X != 32; X++) { // start of weapons
+            if (UNIT_TYPE[X] == 0) {
+                UNIT_TYPE[X] = 11; // SMALL EXPLOSION
+                UNIT_TILE[X] = 248; // first tile for explosion
+                UNIT_LOC_X[X] = UNIT_LOC_X[UNIT];
+                UNIT_LOC_Y[X] = UNIT_LOC_Y[UNIT];
+                if (UNIT_FIND == 0) { // is it the player
+                    BORDER = 10;
+                }
+                break;
+            }
+        }
+        CHECK_FOR_WINDOW_REDRAW();
+    } else if (UNIT_A[UNIT] == 2) { // CLOSED STATE
+        TCPIECE1 = 146;
+        TCPIECE2 = 147;
+        TCPIECE3 = 150;
+        TCPIECE4 = 151;
+        DRAW_TRASH_COMPACTOR();
+        UNIT_A[UNIT]++;
+        UNIT_TIMER_A[UNIT] = 10;
+    } else if (UNIT_A[UNIT] == 3) { // MID-OPENING STATE
+        TCPIECE1 = 144;
+        TCPIECE2 = 145;
+        TCPIECE3 = 148;
+        TCPIECE4 = 148;
+        DRAW_TRASH_COMPACTOR();
+        UNIT_A[UNIT] = 0;
+        UNIT_TIMER_A[UNIT] = 20;
+        PLAY_SOUND(14); // door sound SOUND PLAY
+    } else {
+        // should never get here.
+    }
 }
 
 void DRAW_TRASH_COMPACTOR()
 {
-    // TODO
+    MAP_Y = UNIT_LOC_Y[UNIT];
+    MAP_Y--; // start one tile above
+    MAP_X = UNIT_LOC_X[UNIT];
+    TILE = TCPIECE1;
+    PLOT_TILE_TO_MAP();
+    MAP_SOURCE[1] = TCPIECE2;
+    MAP_SOURCE[128] = TCPIECE3;
+    MAP_SOURCE[129] = TCPIECE4;
+    CHECK_FOR_WINDOW_REDRAW();
 }
+uint8_t TCPIECE1 = 0;
+uint8_t TCPIECE2 = 0;
+uint8_t TCPIECE3 = 0;
+uint8_t TCPIECE4 = 0;
 
 void WATER_DROID()
 {
@@ -3693,7 +3789,6 @@ void DRAW_VERTICAL_DOOR()
     MAP_Y = UNIT_LOC_Y[UNIT];
     MAP_Y--;
     MAP_X = UNIT_LOC_X[UNIT];
-    if (MAP_Y == 37)
     TILE = DOORPIECE1;
     PLOT_TILE_TO_MAP();
     MAP_SOURCE += 128;
@@ -3753,19 +3848,129 @@ void DOOR_CHECK_PROXIMITY()
 }
 uint8_t PROX_DETECT = 0; // 0=NO 1=YES
 
+// This routine handles automatic sliding doors.
+// UNIT_B register means:
+// 0=opening-A 1=opening-B 2=OPEN 3=closing-A 4=closing-B 5-CLOSED
 void ELEVATOR()
 {
-    // TODO
+    if (UNIT_B[UNIT] < 6) { // make sure number is in bounds
+        ELDB[UNIT_B[UNIT]]();
+    }
+    // -SHOULD NEVER NEED TO HAPPEN
+}
+void (*ELDB[])(void) = {
+    ELEV_OPEN_A,
+    ELEV_OPEN_B,
+    ELEV_OPEN_FULL,
+    ELEV_CLOSE_A,
+    ELEV_CLOSE_B,
+    ELEV_CLOSE_FULL
+};
+
+void ELEV_OPEN_A()
+{
+    DOORPIECE1 = 181;
+    DOORPIECE2 = 89;
+    DOORPIECE3 = 173;
+    DRAW_HORIZONTAL_DOOR();
+    UNIT_B[UNIT] = 1;
+    UNIT_TIMER_A[UNIT] = 5;
+    CHECK_FOR_WINDOW_REDRAW();
+}
+
+void ELEV_OPEN_B()
+{
+    DOORPIECE1 = 182;
+    DOORPIECE2 = 9;
+    DOORPIECE3 = 172;
+    DRAW_HORIZONTAL_DOOR();
+    UNIT_B[UNIT] = 2;
+    UNIT_TIMER_A[UNIT] = 50;
+    CHECK_FOR_WINDOW_REDRAW();
+}
+
+void ELEV_OPEN_FULL()
+{
+    // CLOSE DOOR
+    // check for object in the way first.
+    MAP_X = UNIT_LOC_X[UNIT];
+    MAP_Y = UNIT_LOC_Y[UNIT];
+    GET_TILE_FROM_MAP();
+    if (TILE != 9) { // FLOOR-TILE
+        // SOMETHING IN THE WAY, ABORT
+        UNIT_TIMER_A[UNIT] = 35;
+        return;
+    }
+    // check for player or robot in the way
+    CHECK_FOR_UNIT();
+    if (UNIT_FIND != 255) {
+        UNIT_TIMER_A[UNIT] = 35;
+        return;
+    }
+    // START TO CLOSE ELEVATOR DOOR
+    PLAY_SOUND(14); // DOOR SOUND SOUND PLAY
+    DOORPIECE1 = 181;
+    DOORPIECE2 = 89;
+    DOORPIECE3 = 173;
+    DRAW_HORIZONTAL_DOOR();
+    UNIT_B[UNIT] = 3;
+    UNIT_TIMER_A[UNIT] = 5;
+    CHECK_FOR_WINDOW_REDRAW();
+}
+
+void ELEV_CLOSE_A()
+{
+    DOORPIECE1 = 84;
+    DOORPIECE2 = 85;
+    DOORPIECE3 = 173;
+    DRAW_HORIZONTAL_DOOR();
+    UNIT_B[UNIT] = 4;
+    UNIT_TIMER_A[UNIT] = 5;
+    CHECK_FOR_WINDOW_REDRAW();
+}
+
+void ELEV_CLOSE_B()
+{
+    DOORPIECE1 = 80;
+    DOORPIECE2 = 81;
+    DOORPIECE3 = 174;
+    DRAW_HORIZONTAL_DOOR();
+    UNIT_B[UNIT] = 5;
+    UNIT_TIMER_A[UNIT] = 5;
+    CHECK_FOR_WINDOW_REDRAW();
+    ELEVATOR_PANEL();
 }
 
 void ELEV_CLOSE_FULL()
 {
-    // TODO
+    DOOR_CHECK_PROXIMITY();
+    if (PROX_DETECT == 0) {
+        UNIT_TIMER_A[UNIT] = 20; // RESET TIMER
+        return;
+    }
+    // Start open door process
+    PLAY_SOUND(14); // DOOR SOUND SOUND PLAY
+    DOORPIECE1 = 84;
+    DOORPIECE2 = 85;
+    DOORPIECE3 = 173;
+    DRAW_HORIZONTAL_DOOR();
+    UNIT_B[UNIT] = 0;
+    UNIT_TIMER_A[UNIT] = 5;
+    CHECK_FOR_WINDOW_REDRAW();
 }
 
 void ELEVATOR_PANEL()
 {
-    // TODO
+    // Check to see if player is standing in the
+    // elevator first.
+    if ((UNIT_LOC_X[UNIT] != UNIT_LOC_X[0]) || // elevator X location, player X location
+        ((UNIT_LOC_Y[UNIT] - 1) != UNIT_LOC_Y[0])) { // elevator Y location, player Y location
+        return;
+    }
+    // PLAYER DETECTED, START ELEVATOR PANEL
+    PRINT_INFO(MSG_ELEVATOR);
+    PRINT_INFO(MSG_LEVELS);
+    ELEVATOR_SELECT();
 }
 
 void PLOT_TILE_TO_MAP()
@@ -4416,388 +4621,6 @@ void writeToScreenMemory(uint16_t address, uint8_t value)
     SCREEN_MEMORY[address] = value;
     platform->writeToScreenMemory(address, value);
 }
-
-/* 6502 TODO
-
-
-TRASH_COMPACTOR:
-    LDX UNIT    
-    LDA UNIT_A,X
-    CMP #0  ;OPEN
-    BNE TRS01
-    JMP TC_OPEN_STATE
-TRS01:  CMP #1  ;MID-CLOSING STATE
-    BNE TRS02
-    JMP TC_MID_CLOSING
-TRS02:  CMP #2  ;CLOSED STATE
-    BNE TRS03
-    JMP TC_CLOSED_STATE
-TRS03:  CMP #3  ;MID-OPENING STATE
-    BNE TRS04
-    JMP TC_MID_OPENING
-TRS04:  JMP AILP    ;should never get here. 
-    
-TC_OPEN_STATE:
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    JSR GET_TILE_FROM_MAP
-    CMP #148    ;Usual tile for trash compactor danger zone
-    BNE TRS15
-TRS10:  INY 
-    LDA ($FD),Y
-    CMP #148    ;Usual tile for trash compactor danger zone
-    BNE TRS15
-    LDA #20
-    STA UNIT_TIMER_A,X
-    ;now check for units in the compactor
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    JSR CHECK_FOR_UNIT
-    LDA UNIT_FIND
-    CMP #255
-    BNE TRS15
-    JMP AILP    ;Nothing found, do nothing.
-TRS15:  ;Object has been detected in TC, start closing.
-    LDA #146
-    STA TCPIECE1
-    LDA #147
-    STA TCPIECE2
-    LDA #150
-    STA TCPIECE3
-    LDA #151
-    STA TCPIECE4
-    JSR DRAW_TRASH_COMPACTOR
-    INC UNIT_A,X
-    LDA #10
-    STA UNIT_TIMER_A,X  
-    LDA #14     ;door sound
-    JSR PLAY_SOUND  ;SOUND PLAY
-    JMP AILP
-
-TC_MID_CLOSING:
-    LDA #152
-    STA TCPIECE1
-    LDA #153
-    STA TCPIECE2
-    LDA #156
-    STA TCPIECE3
-    LDA #157
-    STA TCPIECE4
-    JSR DRAW_TRASH_COMPACTOR
-    INC UNIT_A,X
-    LDA #50
-    STA UNIT_TIMER_A,X
-    ;Now check for any live units in the compactor
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    JSR CHECK_FOR_UNIT
-    LDA UNIT_FIND
-    CMP #255
-    BNE TCMC1
-    INC MAP_X   ;check second tile
-    JSR CHECK_FOR_UNIT
-    LDA UNIT_FIND
-    CMP #255
-    BNE TCMC1
-    JMP AILP
-TCMC1:  ;Found unit in compactor, kill it.
-    LDA #<MSG_TERMINATED
-    STA $FB
-    LDA #>MSG_TERMINATED
-    STA $FC
-    JSR PRINT_INFO
-    LDA #0  ;EXPLOSION sound
-    JSR PLAY_SOUND  ;SOUND PLAY
-    LDX UNIT_FIND
-    LDA #0
-    STA UNIT_TYPE,X
-    STA UNIT_HEALTH,X
-    LDX #28 ;start of weapons
-TCMC2:  LDA UNIT_TYPE,X
-    CMP #0
-    BEQ TCMC3
-    INX
-    CPX #32
-    BNE TCMC2
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-TCMC3:  LDA #11 ;SMALL EXPLOSION
-    STA UNIT_TYPE,X
-    LDA #248    ;first tile for explosion
-    STA UNIT_TILE,X
-    LDY UNIT
-    LDA UNIT_LOC_X,Y
-    STA UNIT_LOC_X,X
-    LDA UNIT_LOC_Y,Y
-    STA UNIT_LOC_Y,X
-    LDA UNIT_FIND
-    CMP #0  ;is it the player?
-    BNE TCMC4
-    LDA #10
-    STA BORDER
-TCMC4:  JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-TC_CLOSED_STATE:
-    LDA #146
-    STA TCPIECE1
-    LDA #147
-    STA TCPIECE2
-    LDA #150
-    STA TCPIECE3
-    LDA #151
-    STA TCPIECE4
-    JSR DRAW_TRASH_COMPACTOR
-    INC UNIT_A,X
-    LDA #10
-    STA UNIT_TIMER_A,X  
-    JMP AILP
-
-TC_MID_OPENING:
-    LDA #144
-    STA TCPIECE1
-    LDA #145
-    STA TCPIECE2
-    LDA #148
-    STA TCPIECE3
-    LDA #148
-    STA TCPIECE4
-    JSR DRAW_TRASH_COMPACTOR    
-    LDA #0
-    STA UNIT_A,X
-    LDA #20
-    STA UNIT_TIMER_A,X
-    LDA #14     ;door sound
-    JSR PLAY_SOUND  ;SOUND PLAY 
-    JMP AILP
-
-DRAW_TRASH_COMPACTOR:
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    DEC MAP_Y   ;start one tile above
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA TCPIECE1
-    STA TILE
-    JSR PLOT_TILE_TO_MAP
-    INY
-    LDA TCPIECE2
-    STA ($FD),Y 
-    TYA
-    CLC
-    ADC #127
-    TAY
-    LDA TCPIECE3
-    STA ($FD),Y
-    LDA TCPIECE4
-    INY 
-    STA ($FD),Y
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    RTS
-TCPIECE1:   !BYTE 00
-TCPIECE2:   !BYTE 00
-TCPIECE3:   !BYTE 00
-TCPIECE4:   !BYTE 00
-
-;This routine handles automatic sliding doors.
-;UNIT_B register means:
-;0=opening-A 1=opening-B 2=OPEN 3=closing-A 4=closing-B 5-CLOSED
-ELEVATOR:
-    LDX UNIT
-    LDA UNIT_B,X
-    CMP #06 ;make sure number is in bounds
-    BCS ELEVA
-    TAY
-    LDA ELDB_L,Y
-    STA ELEVJ+1
-    LDA ELDB_H,Y
-    STA ELEVJ+2
-ELEVJ:  JMP $0000   ;self modifying code
-ELEVA:  JMP AILP    ;-SHOULD NEVER NEED TO HAPPEN
-ELDB_L: 
-    <ELEV_OPEN_A
-    <ELEV_OPEN_B
-    <ELEV_OPEN_FULL
-    <ELEV_CLOSE_A
-    <ELEV_CLOSE_B
-    <ELEV_CLOSE_FULL
-ELDB_H: 
-    >ELEV_OPEN_A
-    >ELEV_OPEN_B
-    >ELEV_OPEN_FULL
-    >ELEV_CLOSE_A
-    >ELEV_CLOSE_B
-    >ELEV_CLOSE_FULL
-
-ELEV_OPEN_A:
-    LDA #181
-    STA DOORPIECE1
-    LDA #89
-    STA DOORPIECE2
-    LDA #173
-    STA DOORPIECE3
-    JSR DRAW_HORIZONTAL_DOOR
-    LDY UNIT
-    LDA #1
-    STA UNIT_B,X
-    LDA #5
-    STA UNIT_TIMER_A,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-    
-ELEV_OPEN_B:
-    LDA #182
-    STA DOORPIECE1
-    LDA #09
-    STA DOORPIECE2
-    LDA #172
-    STA DOORPIECE3
-    JSR DRAW_HORIZONTAL_DOOR
-    LDX UNIT
-    LDA #2
-    STA UNIT_B,X
-    LDA #50
-    STA UNIT_TIMER_A,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-ELEV_OPEN_FULL:
-    LDX UNIT
-EVOF1:  ;CLOSE DOOR
-    ;check for object in the way first.
-    LDA UNIT_LOC_X,X
-    STA MAP_X
-    LDA UNIT_LOC_Y,X
-    STA MAP_Y
-    JSR GET_TILE_FROM_MAP
-    LDA TILE
-    CMP #09 ;FLOOR-TILE
-    BEQ EVOF3
-    ;SOMETHING IN THE WAY, ABORT
-EVOF2:  LDA #35
-    STA UNIT_TIMER_A,X
-    JMP AILP
-EVOF3:  ;check for player or robot in the way
-    JSR CHECK_FOR_UNIT
-    LDX UNIT
-    LDA UNIT_FIND   
-    CMP #255
-    BNE EVOF2
-EVOFB:  ;START TO CLOSE ELEVATOR DOOR
-    LDA #14     ;DOOR SOUND
-    JSR PLAY_SOUND  ;SOUND PLAY
-    LDX UNIT
-    LDA #181
-    STA DOORPIECE1
-    LDA #89
-    STA DOORPIECE2
-    LDA #173
-    STA DOORPIECE3
-    JSR DRAW_HORIZONTAL_DOOR
-    LDX UNIT
-    LDA #3
-    STA UNIT_B,X
-    LDA #5
-    STA UNIT_TIMER_A,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-ELEV_CLOSE_A:
-    LDA #84
-    STA DOORPIECE1
-    LDA #85
-    STA DOORPIECE2
-    LDA #173
-    STA DOORPIECE3
-    JSR DRAW_HORIZONTAL_DOOR
-    LDY UNIT
-    LDA #4
-    STA UNIT_B,X
-    LDA #5
-    STA UNIT_TIMER_A,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-ELEV_CLOSE_B:
-    LDA #80
-    STA DOORPIECE1
-    LDA #81
-    STA DOORPIECE2
-    LDA #174
-    STA DOORPIECE3
-    JSR DRAW_HORIZONTAL_DOOR
-    LDY UNIT
-    LDA #5
-    STA UNIT_B,X
-    LDA #5
-    STA UNIT_TIMER_A,X
-    JSR CHECK_FOR_WINDOW_REDRAW
-    JSR ELEVATOR_PANEL
-    JMP AILP
-
-ELEV_CLOSE_FULL:
-    LDX UNIT
-    JSR DOOR_CHECK_PROXIMITY    
-    LDA PROX_DETECT
-    CMP #0
-    BNE EVF1
-    LDA #20
-    STA UNIT_TIMER_A,X  ;RESET TIMER
-    JMP AILP
-EVF1:   ;Start open door process
-    LDA #14     ;DOOR SOUND
-    JSR PLAY_SOUND  ;SOUND PLAY
-    LDX UNIT
-    LDA #84
-    STA DOORPIECE1
-    LDA #85
-    STA DOORPIECE2
-    LDA #173
-    STA DOORPIECE3
-    JSR DRAW_HORIZONTAL_DOOR
-    LDY UNIT
-    LDA #0
-    STA UNIT_B,X
-    LDA #5
-    STA UNIT_TIMER_A,X
-    JSR CHECK_FOR_WINDOW_REDRAW 
-    JMP AILP
-
-ELEVATOR_PANEL:
-    ;Check to see if player is standing in the
-    ;elevator first.
-    LDX UNIT
-    LDA UNIT_LOC_X,X    ;elevator X location
-    CMP UNIT_LOC_X  ;player X location
-    BEQ ELPN1
-    RTS
-ELPN1:  LDA UNIT_LOC_Y,X    ;elevator Y location
-    SEC
-    SBC #01
-    CMP UNIT_LOC_Y  ;player Y location
-    BEQ ELPN2
-    RTS
-ELPN2:  ;PLAYER DETECTED, START ELEVATOR PANEL
-    LDA #<MSG_ELEVATOR
-    STA $FB
-    LDA #>MSG_ELEVATOR
-    STA $FC
-    JSR PRINT_INFO
-    LDA #<MSG_LEVELS
-    STA $FB
-    LDA #>MSG_LEVELS
-    STA $FC
-    JSR PRINT_INFO
-    JSR ELEVATOR_SELECT
-    RTS
-
-*/
 
 // NOTES ABOUT UNIT TYPES
 // ----------------------

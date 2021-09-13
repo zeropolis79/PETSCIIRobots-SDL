@@ -38,7 +38,7 @@ PlatformAmiga::PlatformAmiga() :
     newScreen.Width = 320;
     newScreen.Height = 200;
     newScreen.Depth = 1;
-    newScreen.Type = CUSTOMSCREEN;
+    newScreen.Type = CUSTOMSCREEN | SCREENBEHIND;
     newScreen.DefaultTitle = (UBYTE*)"Attack of the PETSCII robots";
     screen = OpenScreen((NewScreen*)&newScreen);
     if (!screen) {
@@ -59,6 +59,8 @@ PlatformAmiga::PlatformAmiga() :
     if (!window) {
         return;
     }
+
+    ScreenToFront(screen);
 
     verticalBlankInterrupt->is_Node.ln_Type = NT_INTERRUPT;
     verticalBlankInterrupt->is_Node.ln_Pri = 127;
@@ -143,7 +145,9 @@ int PlatformAmiga::framesPerSecond()
 
 void PlatformAmiga::chrout(uint8_t character)
 {
-    FPutC(Output(), character == 0x0d ? 0x0a : character);
+    uint8_t buffer[1] = { character == 0x0d ? 0x0a : character };
+
+    Write(Output(), buffer, 1);
 }
 
 uint8_t PlatformAmiga::getin()
