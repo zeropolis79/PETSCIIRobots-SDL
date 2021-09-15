@@ -52,7 +52,7 @@ PlatformAmiga::PlatformAmiga() :
     newWindow.Width = 320;
     newWindow.Height = 200;
     newWindow.Flags = WFLG_SIMPLE_REFRESH | WFLG_BACKDROP | WFLG_BORDERLESS | WFLG_ACTIVATE | WFLG_RMBTRAP;
-    newWindow.IDCMPFlags = IDCMP_RAWKEY| IDCMP_VANILLAKEY;
+    newWindow.IDCMPFlags = IDCMP_RAWKEY;
     newWindow.Screen = screen;
     newWindow.Type = CUSTOMSCREEN;
     window = OpenWindow((NewWindow*)&newWindow);
@@ -150,37 +150,47 @@ void PlatformAmiga::chrout(uint8_t character)
     Write(Output(), buffer, 1);
 }
 
+const uint8_t rawKeyMap[] = {
+    '~', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '+', '|',   0,   0,
+    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}',   0,   0,   0,   0,
+    'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '*',   0,   0,   0,   0,   0,
+      0, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?',   0,   0,   0,   0,   0,
+    ' '
+};
+
 uint8_t PlatformAmiga::getin()
 {
     IntuiMessage* message;
     while ((message = (IntuiMessage*)GetMsg(window->UserPort))) {
         uint32_t messageClass = message->Class;
         uint16_t messageCode = message->Code;
+        uint16_t messageQualifier = message->Qualifier;
 
         ReplyMsg((Message*)message);
 
         switch (messageClass) {
         case IDCMP_RAWKEY:
             switch (messageCode) {
-            case 0x4f:
-                return 0x9D;
-            case 0x4e:
-                return 0x1D;
-            case 0x4c: 
-                return 0x91;
-            case 0x4d:
-                return 0x11;
-            default:
-                break;
-            }
-            break;
-        case IDCMP_VANILLAKEY:
-            switch (messageCode) {
-            case 0x1b:
+            case 0x45: // Esc
                 quit = true;
                 break;
+            case 0x4f: // Cursor left
+                return 0x9D;
+            case 0x4e: // Cursor right
+                return 0x1D;
+            case 0x4c: // Cursor down
+                return 0x91;
+            case 0x4d: // Cursor up
+                return 0x11;
+            case 0x63: // Control
+                return 0x03;
+            case 0x44: // Return
+                return 0x0d;
             default:
-                return (uint8_t)(messageCode >= 'a' && messageCode <= 'z' ? (messageCode - 32) : (messageCode >= 'A' && messageCode <= 'Z' ? (messageCode + 128) : messageCode));
+                if (messageCode <= 0x40) {
+                    return rawKeyMap[messageCode] + ((messageQualifier & IEQUALIFIER_LSHIFT) ? 128 : 0);
+                }
+                break;
             }
             break;
         default:
@@ -193,6 +203,10 @@ uint8_t PlatformAmiga::getin()
 
 void PlatformAmiga::clearKeyBuffer()
 {
+    IntuiMessage* message;
+    while ((message = (IntuiMessage*)GetMsg(window->UserPort))) {
+        ReplyMsg((Message*)message);
+    }
 }
 
 void PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t size)

@@ -448,7 +448,7 @@ bool PAUSE_GAME()
     // display message to user
     SCROLL_INFO();
     PRINT_INFO(MSG_PAUSED);
-    for (BGTIMER1 = 0; BGTIMER1 != 1;); // to prevent double-tap of run/stop
+//    for (BGTIMER1 = 0; BGTIMER1 != 1;); // to prevent double-tap of run/stop
     CLEAR_KEY_BUFFER();
     while (true) {
         switch (platform->getin()) {
@@ -4155,9 +4155,9 @@ void CHECK_FOR_HIDDEN_UNIT()
     for (int X = 48; X != 64; X++) {
         if (UNIT_TYPE[X] != 0 &&
             (UNIT_LOC_X[X] == MAP_X || // first compare horizontal position
-             (UNIT_LOC_X[X] >= MAP_X && UNIT_LOC_X[X] < (MAP_X + UNIT_C[X]))) && // add hidden unit width
+             (UNIT_LOC_X[X] <= MAP_X && (UNIT_LOC_X[X] + UNIT_C[X]) >= MAP_X)) && // add hidden unit width
             (UNIT_LOC_Y[X] == MAP_Y || // now compare vertical position
-             (UNIT_LOC_Y[X] >= MAP_Y && UNIT_LOC_Y[X] < (MAP_Y + UNIT_D[X])))) { // add hidden unit HEIGHT
+             (UNIT_LOC_Y[X] <= MAP_Y && (UNIT_LOC_Y[X] + UNIT_D[X]) >= MAP_Y))) { // add hidden unit HEIGHT
             UNIT_FIND = X;
             return;
         }
