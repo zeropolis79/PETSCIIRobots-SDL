@@ -5,9 +5,8 @@ PlatformSDL::PlatformSDL() :
     audioSpec({0}),
     audioDeviceID(0),
     window(0),
-    renderer(0),
+    windowSurface(0),
     fontSurface(0),
-    fontTexture(0),
     framesPerSecond_(50),
     audioAngle(0),
     audioFrequency(440),
@@ -40,19 +39,22 @@ PlatformSDL::PlatformSDL() :
     SDL_PauseAudioDevice(audioDeviceID, 0);
 
     window = SDL_CreateWindow("Attack of the PETSCII robots", 0, 0, 320, 200, 0);
-    renderer = SDL_CreateRenderer(window, -1, SDL_RENDERER_SOFTWARE);
+    windowSurface = SDL_GetWindowSurface(window);
     fontSurface = IMG_Load("petfont.png");
-    fontTexture = SDL_CreateTextureFromSurface(renderer, fontSurface);
-    SDL_FreeSurface(fontSurface);
-    SDL_RenderClear(renderer);
+    SDL_SetSurfaceBlendMode(fontSurface, SDL_BLENDMODE_NONE);
+    for (int i = 0; i < 256; i++) {
+        tileSurfaces[i] = SDL_CreateRGBSurface(0, 24, 24, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+    }
 
     platform = this;
 }
 
 PlatformSDL::~PlatformSDL()
 {
-    SDL_DestroyTexture(fontTexture);
-    SDL_DestroyRenderer(renderer);     
+    for (int i = 0; i < 256; i++) {
+        SDL_FreeSurface(tileSurfaces[i]);
+    }
+    SDL_FreeSurface(fontSurface);
     SDL_DestroyWindow(window);     
     SDL_CloseAudioDevice(audioDeviceID);
     SDL_Quit();
@@ -92,8 +94,6 @@ void PlatformSDL::chrout(uint8_t character)
 
 uint8_t PlatformSDL::getin()
 {
-    SDL_RenderPresent(renderer);
-
     SDL_Event event;
     while (SDL_PollEvent(&event)) {
         switch (event.type) {
@@ -201,6 +201,120 @@ void PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t size
     }
 }
 
+void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
+{
+    uint8_t* topLeft = tileData;
+    uint8_t* topMiddle = topLeft + 256;
+    uint8_t* topRight = topMiddle + 256;
+    uint8_t* middleLeft = topRight + 256;
+    uint8_t* middleMiddle = middleLeft + 256;
+    uint8_t* middleRight = middleMiddle + 256;
+    uint8_t* bottomLeft = middleRight + 256;
+    uint8_t* bottomMiddle = bottomLeft + 256;
+    uint8_t* bottomRight = bottomMiddle + 256;
+
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.w = 8;
+    sourceRect.h = 8;
+    destinationRect.w = 8;
+    destinationRect.h = 8;
+    for (int tile = 0; tile < 256; tile++) {
+        uint8_t characters[3][3] = {
+            { topLeft[tile], topMiddle[tile], topRight[tile] },
+            { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
+            { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
+        };
+
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 3; x++) {
+                sourceRect.x = characters[y][x] << 3;
+                sourceRect.y = 0;
+                destinationRect.x = x << 3;
+                destinationRect.y = y << 3;
+                SDL_SetSurfaceAlphaMod(fontSurface, ((tileAttributes[tile] & 0x80) == 0 || characters[y][x] != 0x3A) ? 255 : 0);
+                SDL_BlitSurface(fontSurface, &sourceRect, tileSurfaces[tile], &destinationRect);
+            }
+        }
+    }
+    SDL_SetSurfaceAlphaMod(fontSurface, 255);
+}
+
+void PlatformSDL::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles)
+{
+    uint8_t* topLeft = tileData;
+    uint8_t* topMiddle = topLeft + 256;
+    uint8_t* topRight = topMiddle + 256;
+    uint8_t* middleLeft = topRight + 256;
+    uint8_t* middleMiddle = middleLeft + 256;
+    uint8_t* middleRight = middleMiddle + 256;
+    uint8_t* bottomLeft = middleRight + 256;
+    uint8_t* bottomMiddle = bottomLeft + 256;
+    uint8_t* bottomRight = bottomMiddle + 256;
+
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.w = 8;
+    sourceRect.h = 8;
+    destinationRect.w = 8;
+    destinationRect.h = 8;
+    for (int i = 0; i < numTiles; i++) {
+        uint8_t tile = tiles[i];
+        uint8_t characters[3][3] = {
+            { topLeft[tile], topMiddle[tile], topRight[tile] },
+            { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
+            { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
+        };
+
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 3; x++) {
+                sourceRect.x = characters[y][x] << 3;
+                sourceRect.y = 0;
+                destinationRect.x = x << 3;
+                destinationRect.y = y << 3;
+                SDL_BlitSurface(fontSurface, &sourceRect, tileSurfaces[tile], &destinationRect);
+            }
+        }
+    }
+}
+
+void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent)
+{
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.x = 0;
+    sourceRect.y = 0;
+    sourceRect.w = 24;
+    sourceRect.h = 24;
+    destinationRect.x = x;
+    destinationRect.y = y;
+    destinationRect.w = 24;
+    destinationRect.h = 24;
+    SDL_SetSurfaceBlendMode(tileSurfaces[tile], transparent ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
+    SDL_BlitSurface(tileSurfaces[tile], &sourceRect, windowSurface, &destinationRect);
+}
+
+void PlatformSDL::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
+{
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.x = sourceX;
+    sourceRect.y = sourceY;
+    sourceRect.w = width;
+    sourceRect.h = height;
+    destinationRect.x = destinationX;
+    destinationRect.y = destinationY;
+    destinationRect.w = width;
+    destinationRect.h = height;
+    SDL_BlitSurface(windowSurface, &sourceRect, windowSurface, &destinationRect);
+}
+
+void PlatformSDL::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
+{
+    SDL_Rect rect;
+    rect.x = x;
+    rect.y = y;
+    rect.w = width;
+    rect.h = height;
+    SDL_FillRect(windowSurface, &rect, 0xff000000);
+}
+
 void PlatformSDL::writeToScreenMemory(uint16_t address, uint8_t value)
 {
     SDL_Rect sourceRect, destinationRect;
@@ -212,7 +326,7 @@ void PlatformSDL::writeToScreenMemory(uint16_t address, uint8_t value)
     destinationRect.y = (address / 40) << 3;
     destinationRect.w = 8;
     destinationRect.h = 8;
-    SDL_RenderCopy(renderer, fontTexture, &sourceRect, &destinationRect);
+    SDL_BlitSurface(fontSurface, &sourceRect, windowSurface, &destinationRect); // blit it to the screen
 }
 
 static const float noteToFrequency[] = {
@@ -271,5 +385,5 @@ void PlatformSDL::stopNote()
 
 void PlatformSDL::renderFrame()
 {
-    SDL_RenderPresent(renderer);
+    SDL_UpdateWindowSurface(window);
 }

@@ -5,6 +5,8 @@
 #include <exec/libraries.h>
 #include <exec/interrupts.h>
 #include <exec/io.h>
+#include <exec/memory.h>
+#include <graphics/gfx.h>
 #include <intuition/intuition.h>
 #include <hardware/intbits.h>
 #include <devices/audio.h>
@@ -26,7 +28,11 @@ PlatformAmiga::PlatformAmiga() :
     verticalBlankInterrupt(new Interrupt),
     ioAudio(new IOAudio),
     messagePort(0),
-    clock(3546895)
+    clock(3546895),
+    screenPlanes(0),
+    tilesPlanes(0),
+    tilesMask(0),
+    tilesBitMap(new BitMap)
 {
     for (int y = 0, i = 0; y < 25; y++) {
         for (int x = 0; x < 40; x++, i++) {
@@ -34,16 +40,40 @@ PlatformAmiga::PlatformAmiga() :
         }
     }
 
+    screenPlanes = (uint8_t*)AllocMem(320 / 8 * 200, MEMF_CHIP | MEMF_CLEAR);
+    if (!screenPlanes) {
+        return;
+    }
+
+    tilesPlanes = (uint8_t*)AllocMem(32 / 8 * 24 * 256, MEMF_CHIP | MEMF_CLEAR);
+    if (!tilesPlanes) {
+        return;
+    }
+
+    tilesMask = (uint8_t*)AllocMem(32 / 8 * 24 * 256, MEMF_CHIP | MEMF_CLEAR);
+    if (!tilesMask) {
+        return;
+    }
+
+    BitMap screenBitmap;
+    InitBitMap(&screenBitmap, 1, 320, 200);
+    screenBitmap.Planes[0] = screenPlanes;
+
+    InitBitMap(tilesBitMap, 1, 32, 24 * 256);
+    tilesBitMap->Planes[0] = tilesPlanes;
+
     ExtNewScreen newScreen = {0};
     newScreen.Width = 320;
     newScreen.Height = 200;
     newScreen.Depth = 1;
-    newScreen.Type = CUSTOMSCREEN | SCREENBEHIND;
+    newScreen.Type = CUSTOMBITMAP | CUSTOMSCREEN | SCREENBEHIND;
     newScreen.DefaultTitle = (UBYTE*)"Attack of the PETSCII robots";
+    newScreen.CustomBitMap = &screenBitmap;
     screen = OpenScreen((NewScreen*)&newScreen);
     if (!screen) {
         return;
     }
+    SetAPen(&screen->RastPort, 0);
 
     uint16_t colors[] = { 0x000, 0x0c0 };
     LoadRGB4(&screen->ViewPort, colors, 2);
@@ -122,6 +152,19 @@ PlatformAmiga::~PlatformAmiga()
         CloseScreen(screen);
     }
 
+    if (tilesMask) {
+        FreeMem(tilesMask, 32 / 8 * 24 * 256);
+    }
+
+    if (tilesPlanes) {
+        FreeMem(tilesPlanes, 32 / 8 * 24 * 256);
+    }
+
+    if (screenPlanes) {
+        FreeMem(screenPlanes, 320 / 8 * 200);
+    }
+
+    delete tilesBitMap;
     delete ioAudio;
     delete verticalBlankInterrupt;
 }
@@ -219,11 +262,95 @@ void PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t si
     }
 }
 
+void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
+{
+    uint8_t* topLeft = tileData;
+    uint8_t* topMiddle = topLeft + 256;
+    uint8_t* topRight = topMiddle + 256;
+    uint8_t* middleLeft = topRight + 256;
+    uint8_t* middleMiddle = middleLeft + 256;
+    uint8_t* middleRight = middleMiddle + 256;
+    uint8_t* bottomLeft = middleRight + 256;
+    uint8_t* bottomMiddle = bottomLeft + 256;
+    uint8_t* bottomRight = bottomMiddle + 256;
+    uint8_t* tiles = tilesPlanes;
+    uint8_t* mask = tilesMask;
+
+    for (int tile = 0; tile < 256; tile++) {
+        uint8_t characters[3][3] = {
+            { topLeft[tile], topMiddle[tile], topRight[tile] },
+            { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
+            { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
+        };
+
+        for (int y = 0; y < 3; y++, tiles += 7 * 4 + 1, mask += 7 * 4 + 1) {
+            for (int x = 0; x < 3; x++, tiles++, mask++) {
+                uint8_t* font = petFont + characters[y][x];
+                for (int offset = 0; offset < 8 * 4; offset += 4, font += 256) {
+                    tiles[offset] = *font;
+                    mask[offset] = ((tileAttributes[tile] & 0x80) == 0 || characters[y][x] != 0x3a) ? 0xff : 0;
+                }
+            }
+        }
+    }
+}
+
+void PlatformAmiga::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles)
+{
+    uint8_t* topLeft = tileData;
+    uint8_t* topMiddle = topLeft + 256;
+    uint8_t* topRight = topMiddle + 256;
+    uint8_t* middleLeft = topRight + 256;
+    uint8_t* middleMiddle = middleLeft + 256;
+    uint8_t* middleRight = middleMiddle + 256;
+    uint8_t* bottomLeft = middleRight + 256;
+    uint8_t* bottomMiddle = bottomLeft + 256;
+    uint8_t* bottomRight = bottomMiddle + 256;
+
+    for (int i = 0; i < numTiles; i++) {
+        uint8_t tile = tiles[i];
+        uint8_t characters[3][3] = {
+            { topLeft[tile], topMiddle[tile], topRight[tile] },
+            { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
+            { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
+        };
+
+        uint8_t* destination = tilesPlanes + tile * 4 * 24;
+        for (int y = 0; y < 3; y++, destination += 7 * 4 + 1) {
+            for (int x = 0; x < 3; x++, destination++) {
+                uint8_t* font = petFont + characters[y][x];
+                for (int offset = 0; offset < 8 * 4; offset += 4, font += 256) {
+                    destination[offset] = *font;
+                }
+            }
+        }
+    }
+}
+
+void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent)
+{
+    if (transparent) {
+        BltMaskBitMapRastPort(tilesBitMap, 0, tile * 24, &screen->RastPort, x, y, 24, 24, (ABC|ABNC|ANBC), tilesMask);
+    } else {
+        BltBitMap(tilesBitMap, 0, tile * 24, &screen->BitMap, x, y, 24, 24, 0xc0, 0xff, 0);
+    }
+}
+
+void PlatformAmiga::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
+{
+    BltBitMap(&screen->BitMap, sourceX, sourceY, &screen->BitMap, destinationX, destinationY, width, height, 0xc0, 0xff, 0);
+}
+
+void PlatformAmiga::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
+{
+    RectFill(&screen->RastPort, x, y, x + width - 1, y + height - 1);
+}
+
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
 {
     uint8_t* source = petFont + value;
     uint8_t* destination = screen->RastPort.BitMap->Planes[0] + addressMap[address];
-    for (int Y = 0; Y != 8; Y++, source += 256, destination += 40) {
+    for (int y = 0; y < 8; y++, source += 256, destination += 40) {
         *destination = *source;
     }
 }

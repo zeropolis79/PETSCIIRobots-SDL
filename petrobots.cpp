@@ -318,6 +318,7 @@ void SET_INITIAL_TIMERS()
 
 void MAIN_GAME_LOOP()
 {
+    platform->renderFrame();
     bool done = false;
     while (!done && !platform->quit) {
         PET_SCREEN_SHAKE();
@@ -450,6 +451,7 @@ bool PAUSE_GAME()
     PRINT_INFO(MSG_PAUSED);
 //    for (BGTIMER1 = 0; BGTIMER1 != 1;); // to prevent double-tap of run/stop
     CLEAR_KEY_BUFFER();
+    platform->renderFrame();
     while (true) {
         switch (platform->getin()) {
         case 03: // RUN/STOP
@@ -457,6 +459,7 @@ bool PAUSE_GAME()
             SCROLL_INFO();
             SCROLL_INFO();
             SCROLL_INFO();
+            platform->renderFrame();
             CLEAR_KEY_BUFFER();
             CLOCK_ACTIVE = 1;
             PLAY_SOUND(15);
@@ -1177,11 +1180,13 @@ void DRAW_MAP_WINDOW()
             MAP_SOURCE = MAP + (((MAP_WINDOW_Y + TEMP_Y) << 7) + TEMP_X + MAP_WINDOW_X);
             TILE = MAP_SOURCE[0];
             // NOW FIGURE OUT WHERE TO PLACE IT ON SCREEN.
-            PLOT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X);
+//            PLOT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X);
+            PLOT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X, TEMP_X, TEMP_Y);
             // now check for sprites in this location
             if (MAP_PRECALC[PRECALC_COUNT] != 0) {
                 TILE = MAP_PRECALC[PRECALC_COUNT];
-                PLOT_TRANSPARENT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X);
+//                PLOT_TRANSPARENT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X);
+                PLOT_TRANSPARENT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X, TEMP_X, TEMP_Y);
             }
             PRECALC_COUNT++;
         }
@@ -1214,6 +1219,25 @@ void PLOT_TILE(uint16_t destination)
     writeToScreenMemory(destination + 80, TILE_DATA_BL[TILE]);
     writeToScreenMemory(destination + 81, TILE_DATA_BM[TILE]);
     writeToScreenMemory(destination + 82, TILE_DATA_BR[TILE]);
+}
+
+void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y)
+{
+    // DRAW THE TOP 3 CHARACTERS
+    SCREEN_MEMORY[destination + 0] = TILE_DATA_TL[TILE];
+    SCREEN_MEMORY[destination + 1] = TILE_DATA_TM[TILE];
+    SCREEN_MEMORY[destination + 2] = TILE_DATA_TR[TILE];
+    // MOVE DOWN TO NEXT LINE
+    // DRAW THE MIDDLE 3 CHARACTERS
+    SCREEN_MEMORY[destination + 40] = TILE_DATA_ML[TILE];
+    SCREEN_MEMORY[destination + 41] = TILE_DATA_MM[TILE];
+    SCREEN_MEMORY[destination + 42] = TILE_DATA_MR[TILE];
+    // MOVE DOWN TO NEXT LINE
+    // DRAW THE BOTTOM 3 CHARACTERS
+    SCREEN_MEMORY[destination + 80] = TILE_DATA_BL[TILE];
+    SCREEN_MEMORY[destination + 81] = TILE_DATA_BM[TILE];
+    SCREEN_MEMORY[destination + 82] = TILE_DATA_BR[TILE];
+    platform->renderTile(TILE, x * 24, y * 24, false);
 }
 
 // This routine plots a transparent tile from the tile database
@@ -1256,6 +1280,43 @@ void PLOT_TRANSPARENT_TILE(uint16_t destination)
     if (TILE_DATA_BR[TILE] != 0x3A) {
         writeToScreenMemory(destination + 82, TILE_DATA_BR[TILE]);
     }
+}
+
+void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y)
+{
+    // DRAW THE TOP 3 CHARACTERS
+    if (TILE_DATA_TL[TILE] != 0x3A) {
+        SCREEN_MEMORY[destination + 0] = TILE_DATA_TL[TILE];
+    }
+    if (TILE_DATA_TM[TILE] != 0x3A) {
+        SCREEN_MEMORY[destination + 1] = TILE_DATA_TM[TILE];
+    }
+    if (TILE_DATA_TR[TILE] != 0x3A) {
+        SCREEN_MEMORY[destination + 2] = TILE_DATA_TR[TILE];
+    }
+    // MOVE DOWN TO NEXT LINE
+    // DRAW THE MIDDLE 3 CHARACTERS
+    if (TILE_DATA_ML[TILE] != 0x3A) {
+        SCREEN_MEMORY[destination + 40] = TILE_DATA_ML[TILE];
+    }
+    if (TILE_DATA_MM[TILE] != 0x3A) {
+        SCREEN_MEMORY[destination + 41] = TILE_DATA_MM[TILE];
+    }
+    if (TILE_DATA_MR[TILE] != 0x3A) {
+        SCREEN_MEMORY[destination + 42] = TILE_DATA_MR[TILE];
+    }
+    // MOVE DOWN TO NEXT LINE
+    // DRAW THE BOTTOM 3 CHARACTERS
+    if (TILE_DATA_BL[TILE] != 0x3A) {
+        SCREEN_MEMORY[destination + 80] = TILE_DATA_BL[TILE];
+    }
+    if (TILE_DATA_BM[TILE] != 0x3A) {
+        SCREEN_MEMORY[destination + 81] = TILE_DATA_BM[TILE];
+    }
+    if (TILE_DATA_BR[TILE] != 0x3A) {
+        SCREEN_MEMORY[destination + 82] = TILE_DATA_BR[TILE];
+    }
+    platform->renderTile(TILE, x * 24, y * 24, true);
 }
 
 void REVERSE_TILE()
@@ -1302,6 +1363,7 @@ uint8_t DECTEMP = 0;
 void TILE_LOAD_ROUTINE()
 {
     platform->load(TILENAME, DESTRUCT_PATH, 2816);
+    platform->generateTiles(TILE_DATA_TL, TILE_ATTRIB);
 }
 
 // The following routine loads the map from disk
@@ -1658,6 +1720,8 @@ void DISPLAY_BLANK_WEAPON()
 
 void DISPLAY_KEYS()
 {
+    platform->clearRect(272, 120, 48, 16); // ERASE ALL 3 SPOTS
+    /*
     writeToScreenMemory(0x27A, 32); // ERASE ALL 3 SPOTS
     writeToScreenMemory(0x27B, 32);
     writeToScreenMemory(0x27C, 32);
@@ -1670,6 +1734,7 @@ void DISPLAY_KEYS()
     writeToScreenMemory(0x2A5, 32);
     writeToScreenMemory(0x2A6, 32);
     writeToScreenMemory(0x2A7, 32);
+    */
     if (KEYS & 0x01) { // %00000001 Spade key
         writeToScreenMemory(0x27A, 0x63);
         writeToScreenMemory(0x27B, 0x4D);
@@ -1712,7 +1777,9 @@ void GAME_OVER()
         writeToScreenMemory(0x1C3 + X, GAMEOVER3[X]);
     }
     KEYTIMER = 100;
-    while (KEYTIMER != 0);
+    while (KEYTIMER != 0) {
+        platform->renderFrame();
+    }
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     while (platform->getin() == 0);
     GOM4();
@@ -1724,6 +1791,7 @@ void GOM4()
     MUSIC_ON = 0;
     DISPLAY_ENDGAME_SCREEN();
     DISPLAY_WIN_LOSE();
+    platform->renderFrame();
     while (platform->getin() == 0);
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
 }
@@ -1783,6 +1851,7 @@ uint8_t PRINTX = 0; // used to store X-cursor location
 // a new row at the bottom.
 void SCROLL_INFO()
 {
+    /*
     int X;
     for (X = 0; X != 33; X++) {
         writeToScreenMemory(0x370 + X, SCREEN_MEMORY[0x398 + X]);
@@ -1792,6 +1861,10 @@ void SCROLL_INFO()
     for (X = 0; X != 33; X++) {
         writeToScreenMemory(0x3C0 + X, 32); // BOTTOM ROW
     }
+    */
+    platform->copyRect(0, 184, 0, 176, 264, 16);
+    // NOW CLEAR BOTTOM ROW
+    platform->clearRect(0, 192, 264, 8);
 }
 
 void RESET_KEYS_AMMO()
@@ -1822,6 +1895,7 @@ void INTRO_SCREEN()
     START_INTRO_MUSIC();
     MENUY = 0;
     REVERSE_MENU_OPTION();
+    platform->renderFrame();
     bool done = false;
     while (!done && !platform->quit) {
         uint8_t A = platform->getin();
@@ -1846,6 +1920,7 @@ void INTRO_SCREEN()
                 PLAY_SOUND(15); // menu beep, SOUND PLAY
                 done = EXEC_COMMAND();
             }
+            platform->renderFrame();
         }
     }
 }
@@ -2115,6 +2190,8 @@ void ANIMATE_WATER()
     } else {
         TILE_DATA_MR[143] = 0xD7;
     }
+    uint8_t tiles[] = { 204, 221, 148, 196, 197, 200, 201, 20, 21, 22, 143 };
+    platform->updateTiles(TILE_DATA_TL, tiles, 11);
     REDRAW_WINDOW = 1;
 }
 
@@ -2155,6 +2232,7 @@ void ELEVATOR_SELECT()
                     CLEAR_KEY_BUFFER();
                     return;
                 }
+                platform->renderFrame();
             }
         }
     } else {
@@ -2197,9 +2275,9 @@ void ELEVATOR_FIND_XY()
         if (UNIT_TYPE[X] == 19) { // elevator
             if (UNIT_C[X] == ELEVATOR_CURRENT_FLOOR) {
                 UNIT_LOC_X[0] = UNIT_LOC_X[X]; // player location = new elevator location
-                MAP_WINDOW_X = UNIT_LOC_X[0] - 5;
+                MAP_WINDOW_X = UNIT_LOC_X[X] - 5;
                 UNIT_LOC_Y[0] = UNIT_LOC_Y[X] - 1; // player location = new elevator location
-                MAP_WINDOW_Y = UNIT_LOC_Y[0] - 4;
+                MAP_WINDOW_Y = UNIT_LOC_Y[X] - 4;
                 DRAW_MAP_WINDOW();
                 PLAY_SOUND(17); // elevator sound SOUND PLAY
                 break;
@@ -2242,6 +2320,7 @@ void SET_CUSTOM_KEYS()
         return;
     }
     DECOMPRESS_SCREEN(SCR_CUSTOM_KEYS);
+    platform->renderFrame();
     uint16_t destination = 0x151;
     for (TEMP_A = 0; TEMP_A != 13;) {
         uint8_t A = platform->getin();
@@ -2251,6 +2330,7 @@ void SET_CUSTOM_KEYS()
             DECWRITE(destination);
             destination += 40;
             TEMP_A++;
+            platform->renderFrame();
         }
     }
     KEYS_DEFINED = 1;

@@ -35,6 +35,11 @@ public:
     virtual uint8_t getin() = 0;
     virtual void clearKeyBuffer() = 0;
     virtual void load(const char* filename, uint8_t* destination, uint32_t size) = 0;
+    virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes) = 0;
+    virtual void updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles) = 0;
+    virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent) = 0;
+    virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height) = 0;
+    virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) = 0;
 	virtual void writeToScreenMemory(uint16_t address, uint8_t value) = 0;
 	virtual void playNote(uint8_t note) = 0;
     virtual void stopNote() = 0;
