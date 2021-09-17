@@ -2307,8 +2307,8 @@ uint8_t STANDARD_CONTROLS[] = {
     83, // FIRE DOWN
     65, // FIRE LEFT
     68, // FIRE RIGHT
-    44, // CYCLE WEAPONS orig: 60 (<)
-    46, // CYCLE ITEMS orig: 62 (>)
+    60, // CYCLE WEAPONS
+    62, // CYCLE ITEMS
     32, // USE ITEM
     90, // SEARCH OBEJCT
     77  // MOVE OBJECT
