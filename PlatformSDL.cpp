@@ -199,7 +199,6 @@ void PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t size
 
 void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
 {
-    /*
     uint8_t* topLeft = tileData;
     uint8_t* topMiddle = topLeft + 256;
     uint8_t* topRight = topMiddle + 256;
@@ -216,6 +215,7 @@ void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
     destinationRect.w = 8;
     destinationRect.h = 8;
     for (int tile = 0; tile < 256; tile++) {
+    /*
         uint8_t characters[3][3] = {
             { topLeft[tile], topMiddle[tile], topRight[tile] },
             { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
@@ -232,9 +232,34 @@ void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                 SDL_BlitSurface(fontSurface, &sourceRect, tileSurfaces[tile], &destinationRect);
             }
         }
-    }
-    SDL_SetSurfaceAlphaMod(fontSurface, 255);
     */
+        if ((tile >= 96 && tile <= 103) ||
+            tile == 111 ||
+            tile == 115 ||
+            tile == 130 ||
+            tile == 134 ||
+            (tile >= 140 && tile <= 142) ||
+            tile == 160 ||
+            (tile >= 164 && tile <= 165)) {
+            uint8_t characters[3][3] = {
+                { topLeft[tile], topMiddle[tile], topRight[tile] },
+                { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
+                { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
+            };
+
+            for (int y = 0; y < 3; y++) {
+                for (int x = 0; x < 3; x++) {
+                    sourceRect.x = characters[y][x] << 3;
+                    sourceRect.y = 0;
+                    destinationRect.x = x << 3;
+                    destinationRect.y = tile * 24 + (y << 3);
+                    if (characters[y][x] != 0x3A) {
+                        SDL_BlitSurface(fontSurface, &sourceRect, tileSurface, &destinationRect);
+                    }
+                }
+            }
+        }
+    }
 }
 
 void PlatformSDL::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles)
@@ -287,7 +312,7 @@ void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transpar
     destinationRect.y = y;
     destinationRect.w = 24;
     destinationRect.h = 24;
-    SDL_SetSurfaceBlendMode(tileSurface, transparent ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
+//    SDL_SetSurfaceBlendMode(tileSurface, tr ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
     SDL_BlitSurface(tileSurface, &sourceRect, windowSurface, &destinationRect);
 }
 

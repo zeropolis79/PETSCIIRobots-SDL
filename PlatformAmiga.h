@@ -3,6 +3,7 @@
 
 #include "Platform.h"
 
+struct BitMap;
 struct Screen;
 struct Window;
 struct Interrupt;
@@ -27,28 +28,34 @@ public:
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent);
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
-    virtual void startShakeScreen();
     virtual void shakeScreen();
     virtual void stopShakeScreen();
 	virtual void writeToScreenMemory(uint16_t address, uint8_t value);
 	virtual void playNote(uint8_t note);
     virtual void stopNote();
+    virtual void renderFrame();
 
 private:
     __saveds void runVerticalBlankInterrupt();
     __asm static void verticalBlankInterruptServer();
     void (*interrupt)(void);
     int framesPerSecond_;
+    BitMap* screenBitmap1;
+    BitMap* screenBitmap2;
+    BitMap* screenBitmap;
     Screen* screen;
     Window* window;
     Interrupt* verticalBlankInterrupt;
     IOAudio* ioAudio;
     MsgPort* messagePort;
     uint32_t clock;
+    uint8_t* screenPlanes1;
+    uint8_t* screenPlanes2;
     uint8_t* screenPlanes;
     uint8_t* tilesMask;
     BitMap* tilesBitMap;
     uint16_t bplcon1DefaultValue;
+    uint16_t shakeStep;
     static uint16_t addressMap[40 * 25];
 };
 

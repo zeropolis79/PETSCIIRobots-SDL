@@ -33,16 +33,22 @@ uint16_t PlatformAmiga::addressMap[40 * 25];
 PlatformAmiga::PlatformAmiga() :
     interrupt(0),
     framesPerSecond_(50),
+    screenBitmap1(new BitMap),
+    screenBitmap2(new BitMap),
+    screenBitmap(0),
     screen(0),
     window(0),
     verticalBlankInterrupt(new Interrupt),
     ioAudio(new IOAudio),
     messagePort(0),
     clock(3546895),
+    screenPlanes1(0),
+    screenPlanes2(0),
     screenPlanes(0),
     tilesMask(0),
     tilesBitMap(new BitMap),
-    bplcon1DefaultValue(0)
+    bplcon1DefaultValue(0),
+    shakeStep(0)
 {
     for (int y = 0, i = 0; y < 25; y++) {
         for (int x = 0; x < 40; x++, i++) {
@@ -50,8 +56,13 @@ PlatformAmiga::PlatformAmiga() :
         }
     }
 
-    screenPlanes = (uint8_t*)AllocMem(SCREEN_SIZE * PLANES, MEMF_CHIP | MEMF_CLEAR);
-    if (!screenPlanes) {
+    screenPlanes1 = (uint8_t*)AllocMem(SCREEN_SIZE * PLANES, MEMF_CHIP | MEMF_CLEAR);
+    if (!screenPlanes1) {
+        return;
+    }
+
+    screenPlanes2 = (uint8_t*)AllocMem(SCREEN_SIZE * PLANES, MEMF_CHIP | MEMF_CLEAR);
+    if (!screenPlanes2) {
         return;
     }
 
@@ -60,15 +71,19 @@ PlatformAmiga::PlatformAmiga() :
         return;
     }
 
-    BitMap screenBitmap;
-    InitBitMap(&screenBitmap, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
+    InitBitMap(screenBitmap1, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
+    InitBitMap(screenBitmap2, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
     InitBitMap(tilesBitMap, PLANES, 32, 24 * 256);
-    uint8_t* screenPlane = screenPlanes;
+    uint8_t* screenPlane1 = screenPlanes1;
+    uint8_t* screenPlane2 = screenPlanes2;
     uint8_t* tilesPlane = tilesPlanes;
-    for (int plane = 0; plane < PLANES; plane++, screenPlane += SCREEN_SIZE, tilesPlane += 32 / 8 * 24 * 256) {
-        screenBitmap.Planes[plane] = screenPlane;
+    for (int plane = 0; plane < PLANES; plane++, screenPlane1 += SCREEN_SIZE, screenPlane2 += SCREEN_SIZE, tilesPlane += 32 / 8 * 24 * 256) {
+        screenBitmap1->Planes[plane] = screenPlane1;
+        screenBitmap2->Planes[plane] = screenPlane2;
         tilesBitMap->Planes[plane] = tilesPlane;
     }
+    screenBitmap = screenBitmap2;
+    screenPlanes = screenPlanes2;
 
     ExtNewScreen newScreen = {0};
     newScreen.Width = SCREEN_WIDTH;
@@ -76,7 +91,7 @@ PlatformAmiga::PlatformAmiga() :
     newScreen.Depth = PLANES;
     newScreen.Type = CUSTOMBITMAP | CUSTOMSCREEN | SCREENBEHIND | SCREENQUIET;
     newScreen.DefaultTitle = (UBYTE*)"Attack of the PETSCII robots";
-    newScreen.CustomBitMap = &screenBitmap;
+    newScreen.CustomBitMap = screenBitmap1;
     screen = OpenScreen((NewScreen*)&newScreen);
     if (!screen) {
         return;
@@ -161,13 +176,19 @@ PlatformAmiga::~PlatformAmiga()
         FreeMem(tilesMask, 32 / 8 * 24 * 256);
     }
 
-    if (screenPlanes) {
-        FreeMem(screenPlanes, SCREEN_SIZE * PLANES);
+    if (screenPlanes2) {
+        FreeMem(screenPlanes2, SCREEN_SIZE * PLANES);
+    }
+
+    if (screenPlanes1) {
+        FreeMem(screenPlanes1, SCREEN_SIZE * PLANES);
     }
 
     delete tilesBitMap;
     delete ioAudio;
     delete verticalBlankInterrupt;
+    delete screenBitmap2;
+    delete screenBitmap1;
 }
 
 void PlatformAmiga::runVerticalBlankInterrupt()
@@ -184,6 +205,8 @@ void PlatformAmiga::setInterrupt(void (*interrupt)(void))
 
 void PlatformAmiga::show()
 {
+    renderFrame();
+
     ScreenToFront(screen);
 
     uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
@@ -310,7 +333,15 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
             }
         }
     */
-        if ((tileAttributes[tile] & 0x80) == 0x80) {
+        if ((tile >= 96 && tile <= 103) ||
+            tile == 111 ||
+            tile == 115 ||
+            tile == 130 ||
+            tile == 134 ||
+            (tile >= 140 && tile <= 142) ||
+            tile == 160 ||
+            (tile >= 164 && tile <= 165) ||
+            tile >= 240) {
             if (tiles[4 * 12 + 1] == 0 && tiles[4 * 24 * 256 + 4 * 12 + 1] == 0 && tiles[2 * 4 * 24 * 256 + 4 * 12 + 1] == 0 && tiles[3 * 4 * 24 * 256 + 4 * 12 + 1] == 0) {
                 uint8_t characters[3][3] = {
                     { topLeft[tile], topMiddle[tile], topRight[tile] },
@@ -382,71 +413,55 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transp
     if (transparent) {
         BltMaskBitMapRastPort(tilesBitMap, 0, tile * 24, &screen->RastPort, x, y, 24, 24, (ABC|ABNC|ANBC), tilesMask);
     } else {
-        BltBitMap(tilesBitMap, 0, tile * 24, &screen->BitMap, x, y, 24, 24, 0xc0, 0xff, 0);
+        BltBitMap(tilesBitMap, 0, tile * 24, screen->RastPort.BitMap, x, y, 24, 24, 0xc0, 0xff, 0);
     }
 }
 
 void PlatformAmiga::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
 {
-    BltBitMap(&screen->BitMap, sourceX, sourceY, &screen->BitMap, destinationX, destinationY, width, height, 0xc0, 0xff, 0);
+    BltBitMap(screenBitmap1, sourceX, sourceY, screenBitmap1, destinationX, destinationY, width, height, 0xc0, 0xff, 0);
+    BltBitMap(screenBitmap2, sourceX, sourceY, screenBitmap2, destinationX, destinationY, width, height, 0xc0, 0xff, 0);
 }
 
 void PlatformAmiga::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 {
-    RectFill(&screen->RastPort, x, y, x + width - 1, y + height - 1);
-}
-
-void PlatformAmiga::startShakeScreen()
-{
-    uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
-    for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
-        if (*copperList++ == offsetof(Custom, bplcon1)) {
-            *copperList = 0xff;
-            break;
-        } else {
-            copperList++;
-        }
-    }
+    BltBitMap(screenBitmap1, x, y, screenBitmap1, x, y, width, height, 0, 0xff, 0);
+    BltBitMap(screenBitmap2, x, y, screenBitmap2, x, y, width, height, 0, 0xff, 0);
 }
 
 void PlatformAmiga::shakeScreen()
 {
-    uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
-    for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
-        if (*copperList++ == offsetof(Custom, bplcon1)) {
-            *copperList++ ^= 0xff;
-            break;
-        } else {
-            copperList++;
-        }
+    shakeStep++;
+    if (shakeStep > 2) {
+        shakeStep = 1;
     }
 }
 
 void PlatformAmiga::stopShakeScreen()
 {
-    uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
-    for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
-        if (*copperList++ == offsetof(Custom, bplcon1)) {
-            *copperList = bplcon1DefaultValue;
-            break;
-        } else {
-            copperList++;
-        }
-    }
+    shakeStep = 0;
 }
 
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
 {
     uint8_t* source = petFont + value;
-    uint8_t* destination1 = screen->RastPort.BitMap->Planes[0] + addressMap[address];
-    uint8_t* destination2 = screen->RastPort.BitMap->Planes[1] + addressMap[address];
-    uint8_t* destination3 = screen->RastPort.BitMap->Planes[2] + addressMap[address];
-    uint8_t* destination4 = screen->RastPort.BitMap->Planes[3] + addressMap[address];
-    for (int y = 0; y < 8; y++, source += 256, destination1 += 40, destination2 += 40, destination3 += 40, destination4 += 40) {
-        *destination1 = *source;
-        *destination2 = 0;
-        *destination3 = 0;
-        *destination4 = 0;
+    uint8_t* destination11 = screenPlanes1 + addressMap[address];
+    uint8_t* destination12 = destination11 + SCREEN_SIZE;
+    uint8_t* destination13 = destination12 + SCREEN_SIZE;
+    uint8_t* destination14 = destination13 + SCREEN_SIZE;
+    uint8_t* destination21 = screenPlanes2 + addressMap[address];
+    uint8_t* destination22 = destination21 + SCREEN_SIZE;
+    uint8_t* destination23 = destination22 + SCREEN_SIZE;
+    uint8_t* destination24 = destination23 + SCREEN_SIZE;
+    for (int y = 0; y < 8; y++, source += 256, destination11 += 40, destination12 += 40, destination13 += 40, destination14 += 40, destination21 += 40, destination22 += 40, destination23 += 40, destination24 += 40) {
+        *destination11 = *source;
+        *destination12 = 0;
+        *destination13 = 0;
+        *destination14 = 0;
+        *destination21 = *source;
+        *destination22 = 0;
+        *destination23 = 0;
+        *destination24 = 0;
     }
 }
 
@@ -505,4 +520,35 @@ void PlatformAmiga::stopNote()
 {
     ioAudio->ioa_Volume = 0;
     BeginIO((IORequest*)ioAudio);
+}
+
+void PlatformAmiga::renderFrame()
+{
+    MakeScreen(screen);
+    RethinkDisplay();
+
+    uint16_t bplcon1Value = bplcon1DefaultValue;
+    if (shakeStep == 1) {
+        if (bplcon1Value < 0xff) {
+            bplcon1Value += 0x11;
+        }
+    } else if (shakeStep == 2) {
+        if (bplcon1Value > 0x00) {
+            bplcon1Value -= 0x11;
+        }
+    }
+    uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
+    for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
+        if (*copperList++ == offsetof(Custom, bplcon1)) {
+            *copperList++ = bplcon1Value;
+            break;
+        } else {
+            copperList++;
+        }
+    }
+
+    screenBitmap = screenBitmap == screenBitmap1 ? screenBitmap2 : screenBitmap1;
+    screenPlanes = screenPlanes == screenPlanes1 ? screenPlanes2 : screenPlanes1;
+    screen->RastPort.BitMap = screenBitmap;
+    screen->ViewPort.RasInfo->BitMap = screenBitmap;
 }

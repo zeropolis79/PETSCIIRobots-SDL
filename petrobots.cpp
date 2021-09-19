@@ -1342,9 +1342,9 @@ void REVERSE_TILE()
 void CHECK_FOR_WINDOW_REDRAW()
 {
     if (UNIT_LOC_X[UNIT] >= MAP_WINDOW_X && // FIRST CHECK HORIZONTAL
-        UNIT_LOC_X[UNIT] < (MAP_WINDOW_X + 10) &&
+        UNIT_LOC_X[UNIT] <= (MAP_WINDOW_X + 10) &&
         UNIT_LOC_Y[UNIT] >= MAP_WINDOW_Y && // NOW CHECK VERTICAL
-        UNIT_LOC_Y[UNIT] < (MAP_WINDOW_Y + 6)) {
+        UNIT_LOC_Y[UNIT] <= (MAP_WINDOW_Y + 6)) {
         REDRAW_WINDOW = 1;
     }
 }
@@ -2219,6 +2219,7 @@ void ELEVATOR_SELECT()
     ELEVATOR_CURRENT_FLOOR = UNIT_C[UNIT]; // what level are we on now?
     // Now highlight current level
     ELEVATOR_INVERT();
+    platform->renderFrame();
     // Now get user input
     if (CONTROL != 2) {
         // KEYBOARD INPUT
@@ -2236,7 +2237,6 @@ void ELEVATOR_SELECT()
                     CLEAR_KEY_BUFFER();
                     return;
                 }
-                platform->renderFrame();
             }
         }
     } else {
@@ -2260,6 +2260,7 @@ void ELEVATOR_INC()
         ELEVATOR_CURRENT_FLOOR++;
         ELEVATOR_INVERT();
         ELEVATOR_FIND_XY();
+        platform->renderFrame();
     }
 }
 
@@ -2270,6 +2271,7 @@ void ELEVATOR_DEC()
         ELEVATOR_CURRENT_FLOOR--;
         ELEVATOR_INVERT();
         ELEVATOR_FIND_XY();
+        platform->renderFrame();
     }
 }
 
