@@ -21,6 +21,7 @@ public:
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent);
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
+    virtual void shakeScreen();
 	virtual void writeToScreenMemory(uint16_t address, uint8_t value);
 	virtual void playNote(uint8_t note);
     virtual void stopNote();
@@ -34,7 +35,7 @@ private:
     SDL_Window* window;
     SDL_Surface* windowSurface;
     SDL_Surface* fontSurface;
-    SDL_Surface* tileSurfaces[256];
+    SDL_Surface* tileSurface;
     int framesPerSecond_;
     float audioAngle;
     float audioFrequency;

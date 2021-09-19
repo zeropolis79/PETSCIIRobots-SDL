@@ -7,17 +7,27 @@
 #include <exec/io.h>
 #include <exec/memory.h>
 #include <graphics/gfx.h>
+#include <graphics/gfxbase.h>
+#include <graphics/view.h>
 #include <intuition/intuition.h>
 #include <hardware/intbits.h>
+#include <hardware/custom.h>
 #include <devices/audio.h>
 #include "PlatformAmiga.h"
 #include <stdio.h>
+#include <stddef.h>
 
-static const char version[] = "$VER:Attack of the PETSCII robots (2021-09-09) (C)2021 David Murray, Vesa Halttunen";
+#define SCREEN_WIDTH 320
+#define SCREEN_HEIGHT 200
+#define SCREEN_SIZE (SCREEN_WIDTH / 8 * SCREEN_HEIGHT)
+#define PLANES 4
 
+static const char version[] = "$VER:Attack of the PETSCII robots (2021-09-17) (C)2021 David Murray, Vesa Halttunen";
+
+__far extern Custom custom;
 __far extern uint8_t petFont[];
+__chip extern uint8_t tilesPlanes[];
 __chip int8_t sample[2] = { 127, -128 };
-
 uint16_t PlatformAmiga::addressMap[40 * 25];
 
 PlatformAmiga::PlatformAmiga() :
@@ -30,9 +40,9 @@ PlatformAmiga::PlatformAmiga() :
     messagePort(0),
     clock(3546895),
     screenPlanes(0),
-    tilesPlanes(0),
     tilesMask(0),
-    tilesBitMap(new BitMap)
+    tilesBitMap(new BitMap),
+    bplcon1DefaultValue(0)
 {
     for (int y = 0, i = 0; y < 25; y++) {
         for (int x = 0; x < 40; x++, i++) {
@@ -40,13 +50,8 @@ PlatformAmiga::PlatformAmiga() :
         }
     }
 
-    screenPlanes = (uint8_t*)AllocMem(320 / 8 * 200, MEMF_CHIP | MEMF_CLEAR);
+    screenPlanes = (uint8_t*)AllocMem(SCREEN_SIZE * PLANES, MEMF_CHIP | MEMF_CLEAR);
     if (!screenPlanes) {
-        return;
-    }
-
-    tilesPlanes = (uint8_t*)AllocMem(32 / 8 * 24 * 256, MEMF_CHIP | MEMF_CLEAR);
-    if (!tilesPlanes) {
         return;
     }
 
@@ -56,17 +61,20 @@ PlatformAmiga::PlatformAmiga() :
     }
 
     BitMap screenBitmap;
-    InitBitMap(&screenBitmap, 1, 320, 200);
-    screenBitmap.Planes[0] = screenPlanes;
-
-    InitBitMap(tilesBitMap, 1, 32, 24 * 256);
-    tilesBitMap->Planes[0] = tilesPlanes;
+    InitBitMap(&screenBitmap, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
+    InitBitMap(tilesBitMap, PLANES, 32, 24 * 256);
+    uint8_t* screenPlane = screenPlanes;
+    uint8_t* tilesPlane = tilesPlanes;
+    for (int plane = 0; plane < PLANES; plane++, screenPlane += SCREEN_SIZE, tilesPlane += 32 / 8 * 24 * 256) {
+        screenBitmap.Planes[plane] = screenPlane;
+        tilesBitMap->Planes[plane] = tilesPlane;
+    }
 
     ExtNewScreen newScreen = {0};
-    newScreen.Width = 320;
-    newScreen.Height = 200;
-    newScreen.Depth = 1;
-    newScreen.Type = CUSTOMBITMAP | CUSTOMSCREEN | SCREENBEHIND;
+    newScreen.Width = SCREEN_WIDTH;
+    newScreen.Height = SCREEN_HEIGHT;
+    newScreen.Depth = PLANES;
+    newScreen.Type = CUSTOMBITMAP | CUSTOMSCREEN | SCREENBEHIND | SCREENQUIET;
     newScreen.DefaultTitle = (UBYTE*)"Attack of the PETSCII robots";
     newScreen.CustomBitMap = &screenBitmap;
     screen = OpenScreen((NewScreen*)&newScreen);
@@ -75,12 +83,11 @@ PlatformAmiga::PlatformAmiga() :
     }
     SetAPen(&screen->RastPort, 0);
 
-    uint16_t colors[] = { 0x000, 0x0c0 };
-    LoadRGB4(&screen->ViewPort, colors, 2);
+    LoadRGB4(&screen->ViewPort, (uint16_t*)(tilesPlanes + 32 / 8 * 24 * 256 * PLANES), (1 << PLANES));
 
     ExtNewWindow newWindow = {0};
-    newWindow.Width = 320;
-    newWindow.Height = 200;
+    newWindow.Width = SCREEN_WIDTH;
+    newWindow.Height = SCREEN_HEIGHT;
     newWindow.Flags = WFLG_SIMPLE_REFRESH | WFLG_BACKDROP | WFLG_BORDERLESS | WFLG_ACTIVATE | WFLG_RMBTRAP;
     newWindow.IDCMPFlags = IDCMP_RAWKEY;
     newWindow.Screen = screen;
@@ -89,8 +96,6 @@ PlatformAmiga::PlatformAmiga() :
     if (!window) {
         return;
     }
-
-    ScreenToFront(screen);
 
     verticalBlankInterrupt->is_Node.ln_Type = NT_INTERRUPT;
     verticalBlankInterrupt->is_Node.ln_Pri = 127;
@@ -156,12 +161,8 @@ PlatformAmiga::~PlatformAmiga()
         FreeMem(tilesMask, 32 / 8 * 24 * 256);
     }
 
-    if (tilesPlanes) {
-        FreeMem(tilesPlanes, 32 / 8 * 24 * 256);
-    }
-
     if (screenPlanes) {
-        FreeMem(screenPlanes, 320 / 8 * 200);
+        FreeMem(screenPlanes, SCREEN_SIZE * PLANES);
     }
 
     delete tilesBitMap;
@@ -179,6 +180,21 @@ void PlatformAmiga::runVerticalBlankInterrupt()
 void PlatformAmiga::setInterrupt(void (*interrupt)(void))
 {
     this->interrupt = interrupt;
+}
+
+void PlatformAmiga::show()
+{
+    ScreenToFront(screen);
+
+    uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
+    for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
+        if (*copperList++ == offsetof(Custom, bplcon1)) {
+            bplcon1DefaultValue = *copperList;
+            break;
+        } else {
+            copperList++;
+        }
+    }
 }
 
 int PlatformAmiga::framesPerSecond()
@@ -277,6 +293,7 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
     uint8_t* mask = tilesMask;
 
     for (int tile = 0; tile < 256; tile++) {
+    /*
         uint8_t characters[3][3] = {
             { topLeft[tile], topMiddle[tile], topRight[tile] },
             { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
@@ -292,11 +309,43 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                 }
             }
         }
+    */
+        if ((tileAttributes[tile] & 0x80) == 0x80) {
+            if (tiles[4 * 12 + 1] == 0 && tiles[4 * 24 * 256 + 4 * 12 + 1] == 0 && tiles[2 * 4 * 24 * 256 + 4 * 12 + 1] == 0 && tiles[3 * 4 * 24 * 256 + 4 * 12 + 1] == 0) {
+                uint8_t characters[3][3] = {
+                    { topLeft[tile], topMiddle[tile], topRight[tile] },
+                    { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
+                    { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
+                };
+
+                for (int y = 0; y < 3; y++, tiles += 7 * 4 + 1, mask += 7 * 4 + 1) {
+                    for (int x = 0; x < 3; x++, tiles++, mask++) {
+                        uint8_t* font = petFont + characters[y][x];
+                        for (int offset = 0; offset < 8 * 4; offset += 4, font += 256) {
+                            tiles[offset] = *font;
+                            mask[offset] = characters[y][x] != 0x3a ? 0xff : 0;
+                        }
+                    }
+                }
+            } else {
+                uint32_t* tilesLong = (uint32_t*)tiles;
+                uint32_t* maskLong = (uint32_t*)mask;
+                for (int y = 0; y < 24; y++) {
+                    *maskLong++ = tilesLong[24 * 256] | tilesLong[2 * 24 * 256] | tilesLong[3 * 24 * 256] | *tilesLong++;
+                }
+                tiles += 4 * 24;
+                mask += 4 * 24;
+            }
+        } else {
+            tiles += 4 * 24;
+            mask += 4 * 24;
+        }
     }
 }
 
 void PlatformAmiga::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles)
 {
+    /*
     uint8_t* topLeft = tileData;
     uint8_t* topMiddle = topLeft + 256;
     uint8_t* topRight = topMiddle + 256;
@@ -325,6 +374,7 @@ void PlatformAmiga::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTi
             }
         }
     }
+    */
 }
 
 void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent)
@@ -346,12 +396,57 @@ void PlatformAmiga::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t h
     RectFill(&screen->RastPort, x, y, x + width - 1, y + height - 1);
 }
 
+void PlatformAmiga::startShakeScreen()
+{
+    uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
+    for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
+        if (*copperList++ == offsetof(Custom, bplcon1)) {
+            *copperList = 0xff;
+            break;
+        } else {
+            copperList++;
+        }
+    }
+}
+
+void PlatformAmiga::shakeScreen()
+{
+    uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
+    for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
+        if (*copperList++ == offsetof(Custom, bplcon1)) {
+            *copperList++ ^= 0xff;
+            break;
+        } else {
+            copperList++;
+        }
+    }
+}
+
+void PlatformAmiga::stopShakeScreen()
+{
+    uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
+    for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
+        if (*copperList++ == offsetof(Custom, bplcon1)) {
+            *copperList = bplcon1DefaultValue;
+            break;
+        } else {
+            copperList++;
+        }
+    }
+}
+
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
 {
     uint8_t* source = petFont + value;
-    uint8_t* destination = screen->RastPort.BitMap->Planes[0] + addressMap[address];
-    for (int y = 0; y < 8; y++, source += 256, destination += 40) {
-        *destination = *source;
+    uint8_t* destination1 = screen->RastPort.BitMap->Planes[0] + addressMap[address];
+    uint8_t* destination2 = screen->RastPort.BitMap->Planes[1] + addressMap[address];
+    uint8_t* destination3 = screen->RastPort.BitMap->Planes[2] + addressMap[address];
+    uint8_t* destination4 = screen->RastPort.BitMap->Planes[3] + addressMap[address];
+    for (int y = 0; y < 8; y++, source += 256, destination1 += 40, destination2 += 40, destination3 += 40, destination4 += 40) {
+        *destination1 = *source;
+        *destination2 = 0;
+        *destination3 = 0;
+        *destination4 = 0;
     }
 }
 
@@ -410,8 +505,4 @@ void PlatformAmiga::stopNote()
 {
     ioAudio->ioa_Volume = 0;
     BeginIO((IORequest*)ioAudio);
-}
-
-void PlatformAmiga::renderFrame()
-{
 }

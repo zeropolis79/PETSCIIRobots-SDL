@@ -5,4 +5,20 @@ Platform::Platform() :
 {
 }
 
+void Platform::show()
+{
+}
+
+void Platform::startShakeScreen()
+{
+}
+
+void Platform::stopShakeScreen()
+{
+}
+
+void Platform::renderFrame()
+{
+}
+
 Platform* platform = 0;

@@ -1,4 +1,4 @@
-OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o PETFont.o
+OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o PETFont.o Tiles.o
 
 all: petrobots 
 
@@ -13,6 +13,8 @@ PlatformAmiga.o: PlatformAmiga.cpp
 PlatformAmigaAssembler.o: PlatformAmigaAssembler.s
 PETFont.o: PETFont.raw
     Bin2Hunk PETFont.raw PETFont.o NAME _petFont HUNK data
+Tiles.o: Tiles.raw
+    Bin2Hunk Tiles.raw Tiles.o NAME _tilesPlanes CHIP
 
 clean:
     delete $(OBJECTS) petrobots petrobots.info petrobots.lnk

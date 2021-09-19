@@ -267,6 +267,9 @@ void RUNIRQ()
     if (BORDER != 0) {
         BORDER--;
     }
+    if (SCREEN_SHAKE != 0) {
+        platform->shakeScreen();
+    }
     // Back to usual IRQ routine
 }
 uint8_t BGTIMER1 = 0;
@@ -1892,6 +1895,7 @@ void INTRO_SCREEN()
     DISPLAY_INTRO_SCREEN();
     DISPLAY_MAP_NAME();
     CHANGE_DIFFICULTY_LEVEL();
+    platform->show();
     START_INTRO_MUSIC();
     MENUY = 0;
     REVERSE_MENU_OPTION();
@@ -2350,6 +2354,7 @@ void PET_SCREEN_SHAKE()
     if (SCREEN_SHAKE != 1) {
         return;
     }
+    /*
     uint16_t source = 1;
     uint16_t destination = 0;
     for (int Y = 0; Y != 21; Y++) {
@@ -2359,6 +2364,7 @@ void PET_SCREEN_SHAKE()
         destination += 40;
         source += 40;
     }
+    */
     REDRAW_WINDOW = 1;
     platform->renderFrame();
 }
@@ -2978,6 +2984,7 @@ void BIG_EXP_PHASE1()
     }
     BIG_EXP_ACT = 1; // Set flag so no other explosions can begin until this one ends.
     SCREEN_SHAKE = 1;
+    platform->startShakeScreen();
     PLAY_SOUND(0); // explosion-sound SOUND PLAY
     BEX_PART1(); // check center piece for unit
     BEXCEN(); // check center piece for unit
@@ -3278,6 +3285,7 @@ void BIG_EXP_PHASE2()
     UNIT_TYPE[UNIT] = 0; // Deactivate this AI
     BIG_EXP_ACT = 0;
     SCREEN_SHAKE = 0;
+    platform->stopShakeScreen();
 }
 
 void RESTORE_TILE()

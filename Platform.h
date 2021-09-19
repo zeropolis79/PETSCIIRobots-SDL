@@ -30,6 +30,7 @@ public:
     Platform();
 
     virtual void setInterrupt(void (*interrupt)(void)) = 0;
+    virtual void show();
     virtual int framesPerSecond() = 0;
     virtual void chrout(uint8_t) = 0;
     virtual uint8_t getin() = 0;
@@ -40,10 +41,13 @@ public:
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent) = 0;
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height) = 0;
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) = 0;
+    virtual void startShakeScreen();
+    virtual void shakeScreen() = 0;
+    virtual void stopShakeScreen();
 	virtual void writeToScreenMemory(uint16_t address, uint8_t value) = 0;
 	virtual void playNote(uint8_t note) = 0;
     virtual void stopNote() = 0;
-    virtual void renderFrame() = 0;
+    virtual void renderFrame();
     bool quit;
 };
 
