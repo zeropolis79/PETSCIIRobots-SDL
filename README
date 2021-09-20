@@ -1,7 +1,14 @@
-Attack of the PETSCII robots SDL port (to be turned into an Amiga port)
+Attack of the PETSCII Robots C++
 
 Work in progress
+
+SDL version:
 
 brew install sdl2 sdl2_image
 make
 ./petrobots
+
+Amiga version:
+
+smake
+petrobots
