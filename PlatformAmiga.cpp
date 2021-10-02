@@ -19,10 +19,11 @@
 
 #define SCREEN_WIDTH 320
 #define SCREEN_HEIGHT 200
-#define SCREEN_SIZE (SCREEN_WIDTH / 8 * SCREEN_HEIGHT)
+#define SCREEN_WIDTH_IN_BYTES (SCREEN_WIDTH >> 3)
+#define SCREEN_SIZE (SCREEN_WIDTH_IN_BYTES * SCREEN_HEIGHT)
 #define PLANES 4
 
-static const char version[] = "$VER:Attack of the PETSCII robots (2021-09-17) (C)2021 David Murray, Vesa Halttunen";
+static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-02) (C)2021 David Murray, Vesa Halttunen";
 
 __far extern Custom custom;
 __far extern uint8_t petFont[];
@@ -52,7 +53,7 @@ PlatformAmiga::PlatformAmiga() :
 {
     for (int y = 0, i = 0; y < 25; y++) {
         for (int x = 0; x < 40; x++, i++) {
-            addressMap[i] = y * 40 * 8 + x;
+            addressMap[i] = y * SCREEN_WIDTH_IN_BYTES * PLANES * 8 + x;
         }
     }
 
@@ -66,7 +67,7 @@ PlatformAmiga::PlatformAmiga() :
         return;
     }
 
-    tilesMask = (uint8_t*)AllocMem(32 / 8 * 24 * 256, MEMF_CHIP | MEMF_CLEAR);
+    tilesMask = (uint8_t*)AllocMem(32 / 8 * 24 * PLANES * 256, MEMF_CHIP | MEMF_CLEAR);
     if (!tilesMask) {
         return;
     }
@@ -74,10 +75,16 @@ PlatformAmiga::PlatformAmiga() :
     InitBitMap(screenBitmap1, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
     InitBitMap(screenBitmap2, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
     InitBitMap(tilesBitMap, PLANES, 32, 24 * 256);
+    screenBitmap1->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
+    screenBitmap2->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
+    tilesBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
+    screenBitmap1->BytesPerRow = SCREEN_WIDTH_IN_BYTES * PLANES;
+    screenBitmap2->BytesPerRow = SCREEN_WIDTH_IN_BYTES * PLANES;
+    tilesBitMap->BytesPerRow = 4 * PLANES;
     uint8_t* screenPlane1 = screenPlanes1;
     uint8_t* screenPlane2 = screenPlanes2;
     uint8_t* tilesPlane = tilesPlanes;
-    for (int plane = 0; plane < PLANES; plane++, screenPlane1 += SCREEN_SIZE, screenPlane2 += SCREEN_SIZE, tilesPlane += 32 / 8 * 24 * 256) {
+    for (int plane = 0; plane < PLANES; plane++, screenPlane1 += SCREEN_WIDTH_IN_BYTES, screenPlane2 += SCREEN_WIDTH_IN_BYTES, tilesPlane += 4) {
         screenBitmap1->Planes[plane] = screenPlane1;
         screenBitmap2->Planes[plane] = screenPlane2;
         tilesBitMap->Planes[plane] = tilesPlane;
@@ -172,8 +179,9 @@ PlatformAmiga::~PlatformAmiga()
         CloseScreen(screen);
     }
 
+
     if (tilesMask) {
-        FreeMem(tilesMask, 32 / 8 * 24 * 256);
+        FreeMem(tilesMask, 32 / 8 * 24 * PLANES * 256);
     }
 
     if (screenPlanes2) {
@@ -342,19 +350,26 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
             tile == 160 ||
             (tile >= 164 && tile <= 165) ||
             tile >= 240) {
-            if (tiles[4 * 12 + 1] == 0 && tiles[4 * 24 * 256 + 4 * 12 + 1] == 0 && tiles[2 * 4 * 24 * 256 + 4 * 12 + 1] == 0 && tiles[3 * 4 * 24 * 256 + 4 * 12 + 1] == 0) {
+            if (tiles[4 * 12 * PLANES + 1] == 0 && tiles[4 * 12 * PLANES + 4 + 1] == 0 && tiles[4 * 12 * PLANES + 8 + 1] == 0 && tiles[4 * 12 * PLANES + 12 + 1] == 0) {
                 uint8_t characters[3][3] = {
                     { topLeft[tile], topMiddle[tile], topRight[tile] },
                     { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
                     { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
                 };
 
-                for (int y = 0; y < 3; y++, tiles += 7 * 4 + 1, mask += 7 * 4 + 1) {
+                for (int y = 0; y < 3; y++, tiles += 8 * 4 * PLANES - 3, mask += 8 * 4 * PLANES - 3) {
                     for (int x = 0; x < 3; x++, tiles++, mask++) {
-                        uint8_t* font = petFont + characters[y][x];
-                        for (int offset = 0; offset < 8 * 4; offset += 4, font += 256) {
+                        uint8_t character = characters[y][x];
+                        uint8_t* font = petFont + character;
+                        for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font += 256) {
                             tiles[offset] = *font;
-                            mask[offset] = characters[y][x] != 0x3a ? 0xff : 0;
+                            tiles[offset + 4] = 0;
+                            tiles[offset + 8] = 0;
+                            tiles[offset + 12] = 0;
+                            mask[offset] = character != 0x3a ? *font : 0;
+                            mask[offset + 4] = mask[offset];
+                            mask[offset + 8] = mask[offset];
+                            mask[offset + 12] = mask[offset];
                         }
                     }
                 }
@@ -362,14 +377,18 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                 uint32_t* tilesLong = (uint32_t*)tiles;
                 uint32_t* maskLong = (uint32_t*)mask;
                 for (int y = 0; y < 24; y++) {
-                    *maskLong++ = tilesLong[24 * 256] | tilesLong[2 * 24 * 256] | tilesLong[3 * 24 * 256] | *tilesLong++;
+                    uint32_t allPlanes = *tilesLong++ | *tilesLong++ | *tilesLong++ | *tilesLong++;
+                    *maskLong++ = allPlanes;
+                    *maskLong++ = allPlanes;
+                    *maskLong++ = allPlanes;
+                    *maskLong++ = allPlanes;
                 }
-                tiles += 4 * 24;
-                mask += 4 * 24;
+                tiles += 4 * 24 * PLANES;
+                mask += 4 * 24 * PLANES;
             }
         } else {
-            tiles += 4 * 24;
-            mask += 4 * 24;
+            tiles += 4 * 24 * PLANES;
+            mask += 4 * 24 * PLANES;
         }
     }
 }
@@ -445,23 +464,17 @@ void PlatformAmiga::stopShakeScreen()
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
 {
     uint8_t* source = petFont + value;
-    uint8_t* destination11 = screenPlanes1 + addressMap[address];
-    uint8_t* destination12 = destination11 + SCREEN_SIZE;
-    uint8_t* destination13 = destination12 + SCREEN_SIZE;
-    uint8_t* destination14 = destination13 + SCREEN_SIZE;
-    uint8_t* destination21 = screenPlanes2 + addressMap[address];
-    uint8_t* destination22 = destination21 + SCREEN_SIZE;
-    uint8_t* destination23 = destination22 + SCREEN_SIZE;
-    uint8_t* destination24 = destination23 + SCREEN_SIZE;
-    for (int y = 0; y < 8; y++, source += 256, destination11 += 40, destination12 += 40, destination13 += 40, destination14 += 40, destination21 += 40, destination22 += 40, destination23 += 40, destination24 += 40) {
-        *destination11 = *source;
-        *destination12 = 0;
-        *destination13 = 0;
-        *destination14 = 0;
-        *destination21 = *source;
-        *destination22 = 0;
-        *destination23 = 0;
-        *destination24 = 0;
+    uint8_t* destination1 = screenPlanes1 + addressMap[address];
+    uint8_t* destination2 = screenPlanes2 + addressMap[address];
+    for (int y = 0; y < 8; y++, source += 256, destination1 += PLANES * SCREEN_WIDTH_IN_BYTES, destination2 += PLANES * SCREEN_WIDTH_IN_BYTES) {
+        *destination1 = *source;
+        destination1[1 * SCREEN_WIDTH_IN_BYTES] = 0;
+        destination1[2 * SCREEN_WIDTH_IN_BYTES] = 0;
+        destination1[3 * SCREEN_WIDTH_IN_BYTES] = 0;
+        *destination2 = *source;
+        destination2[1 * SCREEN_WIDTH_IN_BYTES] = 0;
+        destination2[2 * SCREEN_WIDTH_IN_BYTES] = 0;
+        destination2[3 * SCREEN_WIDTH_IN_BYTES] = 0;
     }
 }
 
