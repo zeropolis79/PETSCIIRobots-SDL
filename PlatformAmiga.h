@@ -56,7 +56,8 @@ private:
     BitMap* tilesBitMap;
     uint16_t bplcon1DefaultValue;
     uint16_t shakeStep;
-    static uint16_t addressMap[40 * 25];
+    static uint16_t addressMap[];
+    static uint8_t tileMaskMap[];
 };
 
 #endif

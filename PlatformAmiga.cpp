@@ -22,6 +22,7 @@
 #define SCREEN_WIDTH_IN_BYTES (SCREEN_WIDTH >> 3)
 #define SCREEN_SIZE (SCREEN_WIDTH_IN_BYTES * SCREEN_HEIGHT)
 #define PLANES 4
+#define TILES_WITH_MASK 34
 
 static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-02) (C)2021 David Murray, Vesa Halttunen";
 
@@ -29,8 +30,9 @@ __far extern Custom custom;
 __far extern uint8_t petFont[];
 __chip extern uint8_t tilesPlanes[];
 __chip int8_t sample[2] = { 127, -128 };
-__chip int32_t tileMask = 0xffffff00;
+__chip int32_t simpleTileMask = 0xffffff00;
 uint16_t PlatformAmiga::addressMap[40 * 25];
+uint8_t PlatformAmiga::tileMaskMap[256];
 
 PlatformAmiga::PlatformAmiga() :
     interrupt(0),
@@ -68,7 +70,7 @@ PlatformAmiga::PlatformAmiga() :
         return;
     }
 
-    tilesMask = (uint8_t*)AllocMem(32 / 8 * 24 * PLANES * 256, MEMF_CHIP | MEMF_CLEAR);
+    tilesMask = (uint8_t*)AllocMem(32 / 8 * 24 * PLANES * TILES_WITH_MASK, MEMF_CHIP | MEMF_CLEAR);
     if (!tilesMask) {
         return;
     }
@@ -182,7 +184,7 @@ PlatformAmiga::~PlatformAmiga()
 
 
     if (tilesMask) {
-        FreeMem(tilesMask, 32 / 8 * 24 * PLANES * 256);
+        FreeMem(tilesMask, 32 / 8 * 24 * PLANES * TILES_WITH_MASK);
     }
 
     if (screenPlanes2) {
@@ -324,7 +326,7 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
     uint8_t* tiles = tilesPlanes;
     uint8_t* mask = tilesMask;
 
-    for (int tile = 0; tile < 256; tile++) {
+    for (int tile = 0, tileMask = 0; tile < 256; tile++) {
     /*
         uint8_t characters[3][3] = {
             { topLeft[tile], topMiddle[tile], topRight[tile] },
@@ -387,9 +389,9 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                 tiles += 4 * 24 * PLANES;
                 mask += 4 * 24 * PLANES;
             }
+            tileMaskMap[tile] = tileMask++;
         } else {
             tiles += 4 * 24 * PLANES;
-            mask += 4 * 24 * PLANES;
         }
     }
 }
@@ -438,6 +440,7 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transp
 
         bool shifted = x & 8;
         uint32_t thirdOfTileOffset = tile << 7;
+        uint32_t thirdOfTileMaskOffset = tileMaskMap[tile] << 7;
         uint32_t screenOffsetXInWords = x >> 4;
         uint32_t screenOffset = y * SCREEN_WIDTH_IN_BYTES * PLANES + screenOffsetXInWords + screenOffsetXInWords;
         custom.bltafwm = 0xffff;
@@ -449,7 +452,7 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transp
         custom.bltcmod = SCREEN_WIDTH_IN_BYTES - (32 >> 3);
         custom.bltdmod = SCREEN_WIDTH_IN_BYTES - (32 >> 3);
         custom.bltapt = tilesPlanes + thirdOfTileOffset + thirdOfTileOffset + thirdOfTileOffset;
-        custom.bltbpt = tilesMask + thirdOfTileOffset + thirdOfTileOffset + thirdOfTileOffset;
+        custom.bltbpt = tilesMask + thirdOfTileMaskOffset + thirdOfTileMaskOffset + thirdOfTileMaskOffset;
         custom.bltcpt = screenPlanes + screenOffset;
         custom.bltdpt = screenPlanes + screenOffset;
         custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
@@ -474,7 +477,7 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transp
         custom.bltcmod = SCREEN_WIDTH_IN_BYTES - (32 >> 3);
         custom.bltdmod = SCREEN_WIDTH_IN_BYTES - (32 >> 3);
         custom.bltapt = tilesPlanes + thirdOfTileOffset + thirdOfTileOffset + thirdOfTileOffset;
-        custom.bltbpt = &tileMask;
+        custom.bltbpt = &simpleTileMask;
         custom.bltcpt = screenPlanes + screenOffset;
         custom.bltdpt = screenPlanes + screenOffset;
         custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
