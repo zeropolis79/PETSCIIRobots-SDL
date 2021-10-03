@@ -2356,7 +2356,7 @@ void PET_SCREEN_SHAKE()
     if (SCREEN_SHAKE != 1) {
         return;
     }
-    /*
+#ifndef AMIGA
     uint16_t source = 1;
     uint16_t destination = 0;
     for (int Y = 0; Y != 21; Y++) {
@@ -2366,9 +2366,9 @@ void PET_SCREEN_SHAKE()
         destination += 40;
         source += 40;
     }
-    */
     REDRAW_WINDOW = 1;
     platform->renderFrame();
+#endif
 }
 
 // So, it doesn't really flash the PET border, instead it
