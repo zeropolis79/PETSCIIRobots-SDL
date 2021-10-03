@@ -6,7 +6,7 @@
  * vesuri@jormas.com
  */
 
-#ifdef AMIGA
+#ifdef _AMIGA
 #include "PlatformAmiga.h"
 #else
 #include "PlatformSDL.h"
@@ -94,7 +94,7 @@ uint8_t SCREEN_MEMORY[40 * 25]; // $8000
 
 int main(int argc, char *argv[])
 {
-#ifdef AMIGA
+#ifdef _AMIGA
     PlatformAmiga platformAmiga;
 #else
     PlatformSDL platformSDL;
@@ -167,7 +167,7 @@ uint8_t RANDOM = 0; // used for random number generation
 uint8_t BORDER = 0; // Used for border flash timing
 uint8_t SCREEN_SHAKE = 0; // 1=shake 0=no shake
 uint8_t CONTROL = 0; // 0=keyboard 1=custom keys 2=snes
-#ifdef AMIGA
+#ifdef _AMIGA
 const char* INTRO_MESSAGE   = "welcome to amiga-robots!\xff"
                               "by david murray 2021\xff"
                               "amiga port by vesa halttunen";
@@ -2355,7 +2355,7 @@ void PET_SCREEN_SHAKE()
     if (SCREEN_SHAKE != 1) {
         return;
     }
-#ifndef AMIGA
+#ifndef _AMIGA
     uint16_t source = 1;
     uint16_t destination = 0;
     for (int Y = 0; Y != 21; Y++) {
