@@ -431,7 +431,30 @@ void PlatformAmiga::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTi
 void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent)
 {
     if (transparent) {
-        BltMaskBitMapRastPort(tilesBitMap, 0, tile * 24, &screen->RastPort, x, y, 24, 24, (ABC|ABNC|ANBC), tilesMask);
+//        BltMaskBitMapRastPort(tilesBitMap, 0, tile * 24, &screen->RastPort, x, y, 24, 24, (ABC|ABNC|ANBC), tilesMask);
+
+        OwnBlitter();
+        WaitBlit();
+
+        bool shifted = x & 8;
+        uint32_t thirdOfTileOffset = tile << 7;
+        uint32_t screenOffsetXInWords = x >> 4;
+        uint32_t screenOffset = y * SCREEN_WIDTH_IN_BYTES * PLANES + screenOffsetXInWords + screenOffsetXInWords;
+        custom.bltafwm = 0xffff;
+        custom.bltalwm = 0xff00;
+        custom.bltcon1 = (uint16_t)(shifted ? (8 << 12) : 0);
+        custom.bltcon0 = (uint16_t)(BC0F_SRCA | BC0F_SRCB | BC0F_SRCC | BC0F_DEST | ABC | ABNC | NANBC | ANBC | (shifted ? (8 << 12) : 0));
+        custom.bltamod = 0;
+        custom.bltbmod = 0;
+        custom.bltcmod = SCREEN_WIDTH_IN_BYTES - (32 >> 3);
+        custom.bltdmod = SCREEN_WIDTH_IN_BYTES - (32 >> 3);
+        custom.bltapt = tilesPlanes + thirdOfTileOffset + thirdOfTileOffset + thirdOfTileOffset;
+        custom.bltbpt = tilesMask + thirdOfTileOffset + thirdOfTileOffset + thirdOfTileOffset;
+        custom.bltcpt = screenPlanes + screenOffset;
+        custom.bltdpt = screenPlanes + screenOffset;
+        custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
+
+        DisownBlitter();
     } else {
 //        BltBitMap(tilesBitMap, 0, tile * 24, screen->RastPort.BitMap, x, y, 24, 24, 0xc0, 0xff, 0);
 
