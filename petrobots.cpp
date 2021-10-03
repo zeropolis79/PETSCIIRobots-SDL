@@ -1781,9 +1781,8 @@ void GAME_OVER()
     }
     KEYTIMER = 100;
     while (KEYTIMER != 0) {
-        platform->renderFrame();
+        platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     }
-    platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     while (platform->getin() == 0);
     GOM4();
 }
