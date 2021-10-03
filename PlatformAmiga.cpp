@@ -24,7 +24,7 @@
 #define PLANES 4
 #define TILES_WITH_MASK 34
 
-static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-02) (C)2021 David Murray, Vesa Halttunen";
+static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-03) (C)2021 David Murray, Vesa Halttunen";
 
 __far extern Custom custom;
 __far extern uint8_t petFont[];
