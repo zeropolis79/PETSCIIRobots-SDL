@@ -342,8 +342,8 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                 for (int y = 0; y < 3; y++, tiles += 8 * 4 * PLANES - 3, mask += 8 * 4 * PLANES - 3) {
                     for (int x = 0; x < 3; x++, tiles++, mask++) {
                         uint8_t character = characters[y][x];
-                        uint8_t* font = petFont + character;
-                        for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font += 256) {
+                        uint8_t* font = petFont + (character << 3);
+                        for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
                             tiles[offset] = *font;
                             tiles[offset + 4] = 0;
                             tiles[offset + 8] = 0;
@@ -520,10 +520,10 @@ void PlatformAmiga::stopShakeScreen()
 
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
 {
-    uint8_t* source = petFont + value;
+    uint8_t* source = petFont + (value << 3);
     uint8_t* destination = screenPlanes + addressMap[address];
-    for (int y = 0; y < 8; y++, source += 256, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
-        *destination = *source;
+    for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
+        *destination = *source++;
         destination[1 * SCREEN_WIDTH_IN_BYTES] = 0;
         destination[2 * SCREEN_WIDTH_IN_BYTES] = 0;
         destination[3 * SCREEN_WIDTH_IN_BYTES] = 0;
