@@ -504,11 +504,41 @@ void PlatformAmiga::shakeScreen()
     if (shakeStep > 2) {
         shakeStep = 1;
     }
+
+    uint16_t bplcon1Value = bplcon1DefaultValue;
+    if (shakeStep == 1) {
+        if (bplcon1Value < 0xff) {
+            bplcon1Value += 0x11;
+        }
+    } else if (shakeStep == 2) {
+        if (bplcon1Value > 0x00) {
+            bplcon1Value -= 0x11;
+        }
+    }
+    uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
+    for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
+        if (*copperList++ == offsetof(Custom, bplcon1)) {
+            *copperList++ = bplcon1Value;
+            break;
+        } else {
+            copperList++;
+        }
+    }
 }
 
 void PlatformAmiga::stopShakeScreen()
 {
     shakeStep = 0;
+
+    uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
+    for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
+        if (*copperList++ == offsetof(Custom, bplcon1)) {
+            *copperList++ = bplcon1DefaultValue;
+            break;
+        } else {
+            copperList++;
+        }
+    }
 }
 
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
@@ -589,26 +619,6 @@ void PlatformAmiga::renderFrame()
 {
     MakeScreen(screen);
     RethinkDisplay();
-
-    uint16_t bplcon1Value = bplcon1DefaultValue;
-    if (shakeStep == 1) {
-        if (bplcon1Value < 0xff) {
-            bplcon1Value += 0x11;
-        }
-    } else if (shakeStep == 2) {
-        if (bplcon1Value > 0x00) {
-            bplcon1Value -= 0x11;
-        }
-    }
-    uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
-    for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
-        if (*copperList++ == offsetof(Custom, bplcon1)) {
-            *copperList++ = bplcon1Value;
-            break;
-        } else {
-            copperList++;
-        }
-    }
 
     screenBitmap = screenBitmap == screenBitmap1 ? screenBitmap2 : screenBitmap1;
     screenPlanes = screenPlanes == screenPlanes1 ? screenPlanes2 : screenPlanes1;
