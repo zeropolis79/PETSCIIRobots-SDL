@@ -518,6 +518,7 @@ void PlatformAmiga::stopShakeScreen()
     }
 }
 
+/*
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
 {
     uint8_t* source = petFont + (value << 3);
@@ -529,6 +530,7 @@ void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
         destination[3 * SCREEN_WIDTH_IN_BYTES] = 0;
     }
 }
+*/
 
 static const uint16_t noteToFrequency[] = {
     0,
