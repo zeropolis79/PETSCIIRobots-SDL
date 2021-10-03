@@ -37,17 +37,13 @@ uint8_t PlatformAmiga::tileMaskMap[256];
 PlatformAmiga::PlatformAmiga() :
     interrupt(0),
     framesPerSecond_(50),
-    screenBitmap1(new BitMap),
-    screenBitmap2(new BitMap),
-    screenBitmap(0),
+    screenBitmap(new BitMap),
     screen(0),
     window(0),
     verticalBlankInterrupt(new Interrupt),
     ioAudio(new IOAudio),
     messagePort(0),
     clock(3546895),
-    screenPlanes1(0),
-    screenPlanes2(0),
     screenPlanes(0),
     tilesMask(0),
     tilesBitMap(new BitMap),
@@ -60,13 +56,8 @@ PlatformAmiga::PlatformAmiga() :
         }
     }
 
-    screenPlanes1 = (uint8_t*)AllocMem(SCREEN_SIZE * PLANES, MEMF_CHIP | MEMF_CLEAR);
-    if (!screenPlanes1) {
-        return;
-    }
-
-    screenPlanes2 = (uint8_t*)AllocMem(SCREEN_SIZE * PLANES, MEMF_CHIP | MEMF_CLEAR);
-    if (!screenPlanes2) {
+    screenPlanes = (uint8_t*)AllocMem(SCREEN_SIZE * PLANES, MEMF_CHIP | MEMF_CLEAR);
+    if (!screenPlanes) {
         return;
     }
 
@@ -75,25 +66,18 @@ PlatformAmiga::PlatformAmiga() :
         return;
     }
 
-    InitBitMap(screenBitmap1, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
-    InitBitMap(screenBitmap2, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
+    InitBitMap(screenBitmap, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
     InitBitMap(tilesBitMap, PLANES, 32, 24 * 256);
-    screenBitmap1->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
-    screenBitmap2->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
+    screenBitmap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     tilesBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
-    screenBitmap1->BytesPerRow = SCREEN_WIDTH_IN_BYTES * PLANES;
-    screenBitmap2->BytesPerRow = SCREEN_WIDTH_IN_BYTES * PLANES;
+    screenBitmap->BytesPerRow = SCREEN_WIDTH_IN_BYTES * PLANES;
     tilesBitMap->BytesPerRow = 4 * PLANES;
-    uint8_t* screenPlane1 = screenPlanes1;
-    uint8_t* screenPlane2 = screenPlanes2;
+    uint8_t* screenPlane = screenPlanes;
     uint8_t* tilesPlane = tilesPlanes;
-    for (int plane = 0; plane < PLANES; plane++, screenPlane1 += SCREEN_WIDTH_IN_BYTES, screenPlane2 += SCREEN_WIDTH_IN_BYTES, tilesPlane += 4) {
-        screenBitmap1->Planes[plane] = screenPlane1;
-        screenBitmap2->Planes[plane] = screenPlane2;
+    for (int plane = 0; plane < PLANES; plane++, screenPlane += SCREEN_WIDTH_IN_BYTES, tilesPlane += 4) {
+        screenBitmap->Planes[plane] = screenPlane;
         tilesBitMap->Planes[plane] = tilesPlane;
     }
-    screenBitmap = screenBitmap2;
-    screenPlanes = screenPlanes2;
 
     ExtNewScreen newScreen = {0};
     newScreen.Width = SCREEN_WIDTH;
@@ -101,7 +85,7 @@ PlatformAmiga::PlatformAmiga() :
     newScreen.Depth = PLANES;
     newScreen.Type = CUSTOMBITMAP | CUSTOMSCREEN | SCREENBEHIND | SCREENQUIET;
     newScreen.DefaultTitle = (UBYTE*)"Attack of the PETSCII robots";
-    newScreen.CustomBitMap = screenBitmap1;
+    newScreen.CustomBitMap = screenBitmap;
     screen = OpenScreen((NewScreen*)&newScreen);
     if (!screen) {
         return;
@@ -187,19 +171,14 @@ PlatformAmiga::~PlatformAmiga()
         FreeMem(tilesMask, 32 / 8 * 24 * PLANES * TILES_WITH_MASK);
     }
 
-    if (screenPlanes2) {
-        FreeMem(screenPlanes2, SCREEN_SIZE * PLANES);
-    }
-
-    if (screenPlanes1) {
-        FreeMem(screenPlanes1, SCREEN_SIZE * PLANES);
+    if (screenPlanes) {
+        FreeMem(screenPlanes, SCREEN_SIZE * PLANES);
     }
 
     delete tilesBitMap;
     delete ioAudio;
     delete verticalBlankInterrupt;
-    delete screenBitmap2;
-    delete screenBitmap1;
+    delete screenBitmap;
 }
 
 void PlatformAmiga::runVerticalBlankInterrupt()
@@ -488,14 +467,12 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transp
 
 void PlatformAmiga::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
 {
-    BltBitMap(screenBitmap1, sourceX, sourceY, screenBitmap1, destinationX, destinationY, width, height, 0xc0, 0xff, 0);
-    BltBitMap(screenBitmap2, sourceX, sourceY, screenBitmap2, destinationX, destinationY, width, height, 0xc0, 0xff, 0);
+    BltBitMap(screenBitmap, sourceX, sourceY, screenBitmap, destinationX, destinationY, width, height, 0xc0, 0xff, 0);
 }
 
 void PlatformAmiga::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 {
-    BltBitMap(screenBitmap1, x, y, screenBitmap1, x, y, width, height, 0, 0xff, 0);
-    BltBitMap(screenBitmap2, x, y, screenBitmap2, x, y, width, height, 0, 0xff, 0);
+    BltBitMap(screenBitmap, x, y, screenBitmap, x, y, width, height, 0, 0xff, 0);
 }
 
 void PlatformAmiga::shakeScreen()
@@ -544,17 +521,12 @@ void PlatformAmiga::stopShakeScreen()
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
 {
     uint8_t* source = petFont + value;
-    uint8_t* destination1 = screenPlanes1 + addressMap[address];
-    uint8_t* destination2 = screenPlanes2 + addressMap[address];
-    for (int y = 0; y < 8; y++, source += 256, destination1 += PLANES * SCREEN_WIDTH_IN_BYTES, destination2 += PLANES * SCREEN_WIDTH_IN_BYTES) {
-        *destination1 = *source;
-        destination1[1 * SCREEN_WIDTH_IN_BYTES] = 0;
-        destination1[2 * SCREEN_WIDTH_IN_BYTES] = 0;
-        destination1[3 * SCREEN_WIDTH_IN_BYTES] = 0;
-        *destination2 = *source;
-        destination2[1 * SCREEN_WIDTH_IN_BYTES] = 0;
-        destination2[2 * SCREEN_WIDTH_IN_BYTES] = 0;
-        destination2[3 * SCREEN_WIDTH_IN_BYTES] = 0;
+    uint8_t* destination = screenPlanes + addressMap[address];
+    for (int y = 0; y < 8; y++, source += 256, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
+        *destination = *source;
+        destination[1 * SCREEN_WIDTH_IN_BYTES] = 0;
+        destination[2 * SCREEN_WIDTH_IN_BYTES] = 0;
+        destination[3 * SCREEN_WIDTH_IN_BYTES] = 0;
     }
 }
 
@@ -617,11 +589,4 @@ void PlatformAmiga::stopNote()
 
 void PlatformAmiga::renderFrame()
 {
-    MakeScreen(screen);
-    RethinkDisplay();
-
-    screenBitmap = screenBitmap == screenBitmap1 ? screenBitmap2 : screenBitmap1;
-    screenPlanes = screenPlanes == screenPlanes1 ? screenPlanes2 : screenPlanes1;
-    screen->RastPort.BitMap = screenBitmap;
-    screen->ViewPort.RasInfo->BitMap = screenBitmap;
 }

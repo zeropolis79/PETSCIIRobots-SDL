@@ -40,8 +40,6 @@ private:
     __asm static void verticalBlankInterruptServer();
     void (*interrupt)(void);
     int framesPerSecond_;
-    BitMap* screenBitmap1;
-    BitMap* screenBitmap2;
     BitMap* screenBitmap;
     Screen* screen;
     Window* window;
@@ -49,8 +47,6 @@ private:
     IOAudio* ioAudio;
     MsgPort* messagePort;
     uint32_t clock;
-    uint8_t* screenPlanes1;
-    uint8_t* screenPlanes2;
     uint8_t* screenPlanes;
     uint8_t* tilesMask;
     BitMap* tilesBitMap;
