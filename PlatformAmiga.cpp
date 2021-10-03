@@ -29,6 +29,7 @@ __far extern Custom custom;
 __far extern uint8_t petFont[];
 __chip extern uint8_t tilesPlanes[];
 __chip int8_t sample[2] = { 127, -128 };
+__chip int32_t tileMask = 0xffffff00;
 uint16_t PlatformAmiga::addressMap[40 * 25];
 
 PlatformAmiga::PlatformAmiga() :
@@ -432,7 +433,30 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transp
     if (transparent) {
         BltMaskBitMapRastPort(tilesBitMap, 0, tile * 24, &screen->RastPort, x, y, 24, 24, (ABC|ABNC|ANBC), tilesMask);
     } else {
-        BltBitMap(tilesBitMap, 0, tile * 24, screen->RastPort.BitMap, x, y, 24, 24, 0xc0, 0xff, 0);
+//        BltBitMap(tilesBitMap, 0, tile * 24, screen->RastPort.BitMap, x, y, 24, 24, 0xc0, 0xff, 0);
+
+        OwnBlitter();
+        WaitBlit();
+
+        bool shifted = x & 8;
+        uint32_t thirdOfTileOffset = tile << 7;
+        uint32_t screenOffsetXInWords = x >> 4;
+        uint32_t screenOffset = y * SCREEN_WIDTH_IN_BYTES * PLANES + screenOffsetXInWords + screenOffsetXInWords;
+        custom.bltafwm = 0xffff;
+        custom.bltalwm = 0xff00;
+        custom.bltcon1 = (uint16_t)(shifted ? (8 << 12) : 0);
+        custom.bltcon0 = (uint16_t)(BC0F_SRCA | BC0F_SRCB | BC0F_SRCC | BC0F_DEST | ABC | ABNC | NANBC | ANBC | (shifted ? (8 << 12) : 0));
+        custom.bltamod = 0;
+        custom.bltbmod = -4;
+        custom.bltcmod = SCREEN_WIDTH_IN_BYTES - (32 >> 3);
+        custom.bltdmod = SCREEN_WIDTH_IN_BYTES - (32 >> 3);
+        custom.bltapt = tilesPlanes + thirdOfTileOffset + thirdOfTileOffset + thirdOfTileOffset;
+        custom.bltbpt = &tileMask;
+        custom.bltcpt = screenPlanes + screenOffset;
+        custom.bltdpt = screenPlanes + screenOffset;
+        custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
+
+        DisownBlitter();
     }
 }
 
