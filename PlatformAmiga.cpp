@@ -591,4 +591,5 @@ void PlatformAmiga::stopNote()
 
 void PlatformAmiga::renderFrame()
 {
+    WaitTOF();
 }
