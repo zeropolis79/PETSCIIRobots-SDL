@@ -1931,7 +1931,7 @@ void INTRO_SCREEN()
 void START_INTRO_MUSIC()
 {
 #ifdef _AMIGA
-    platform->playModule("mod.intro_music");
+    platform->playModule(1);
 #else
     DATA_LINE = 0;
     SOUND_EFFECT = 0xFF;
@@ -1946,6 +1946,7 @@ bool EXEC_COMMAND()
         SET_CONTROLS();
 #ifdef _AMIGA
         platform->stopModule();
+        platform->playModule(0);
 #else
         MUSIC_ON = 0;
 #endif
@@ -2447,6 +2448,9 @@ void ANIMATE_PLAYER()
 
 void PLAY_SOUND(int sound)
 {
+#ifdef _AMIGA
+    platform->playSample(sound);
+#else
     // check if music is playing
     if (MUSIC_ON != 0 && SOUND_EFFECT == 0xFF) { // no sound effect currently being played
         PATTERN_TEMP = CUR_PATTERN;
@@ -2463,6 +2467,7 @@ void PLAY_SOUND(int sound)
     CUR_PATTERN = SOUND_LIBRARY[sound]; // Get waiting sound# from accumulator
     SOUND_EFFECT = sound;
     DATA_LINE = 0;
+#endif
 }
 
 uint8_t* PATTERN_TEMP;

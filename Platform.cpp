@@ -17,11 +17,15 @@ void Platform::stopShakeScreen()
 {
 }
 
-void Platform::playModule(const char* name)
+void Platform::playModule(uint8_t)
 {
 }
 
 void Platform::stopModule()
+{
+}
+
+void Platform::playSample(uint8_t)
 {
 }
 

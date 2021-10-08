@@ -47,8 +47,9 @@ public:
 	virtual void writeToScreenMemory(uint16_t address, uint8_t value) = 0;
 	virtual void playNote(uint8_t note) = 0;
     virtual void stopNote() = 0;
-    virtual void playModule(const char* name);
+    virtual void playModule(uint8_t songPosition);
     virtual void stopModule();
+    virtual void playSample(uint8_t sample);
     virtual void renderFrame();
     bool quit;
 };

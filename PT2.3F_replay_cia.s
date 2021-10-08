@@ -4,7 +4,9 @@
 	xdef	_mt_music__Fv
 	xdef	_mt_end__Fv
 	xdef	_mt_Enable
+	xdef	_mt_SongPos
 	xdef	_mt_PatternPos
+	xdef	_mt_chan4data
 
 	section	code
 
@@ -361,11 +363,14 @@ mt_GetNewNote
 	MOVE.B	n_volume(A6),D0
 	MOVE.W	D0,8(A5)
 	LEA	$DFF0D0,A5
+	lea	mt_chan4data,a0
+	moveq	#0,d1
 	LEA	mt_chan4temp(PC),A6
 	BSR.S	mt_PlayVoice
 	MOVEQ	#0,D0
 	MOVE.B	n_volume(A6),D0
 	MOVE.W	D0,8(A5)
+	clr.l	mt_chan4data
 	BRA	mt_SetDMA
 
 mt_PlayVoice
@@ -1368,6 +1373,7 @@ _mt_data:
 mt_SongDataPtr	dc.l 0
 mt_speed	dc.b 6
 mt_counter	dc.b 0
+_mt_SongPos
 mt_SongPos	dc.b 0
 mt_PBreakPos	dc.b 0
 mt_PosJumpFlag	dc.b 0
@@ -1380,5 +1386,7 @@ mt_Enable	dc.b 0
 _mt_PatternPos:
 mt_PatternPos	dc.w 0
 mt_DMACONtemp	dc.w 0
+_mt_chan4data
+mt_chan4data:	dc.l 0
 
 	end

@@ -25,12 +25,12 @@
 #define PLANES 4
 #define TILES_WITH_MASK 34
 
-static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-03) (C)2021 David Murray, Vesa Halttunen";
+static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-08) (C)2021 David Murray, Vesa Halttunen";
 
 __far extern Custom custom;
 __far extern uint8_t petFont[];
 __chip extern uint8_t tilesPlanes[];
-__chip extern uint8_t introMusic[];
+__chip extern uint8_t music[];
 __chip int8_t sample[2] = { 127, -128 };
 __chip int32_t simpleTileMask = 0xffffff00;
 uint16_t PlatformAmiga::addressMap[40 * 25];
@@ -603,10 +603,13 @@ void PlatformAmiga::stopNote()
     }
 }
 
-void PlatformAmiga::playModule(const char* name)
+void PlatformAmiga::playModule(uint8_t songPosition)
 {
-    mt_init(introMusic);
-    mt_Enable = true;
+    if (!mt_Enable) {
+        mt_init(music);
+        mt_SongPos = songPosition;
+        mt_Enable = true;
+    }
 }
 
 void PlatformAmiga::stopModule()
@@ -615,6 +618,12 @@ void PlatformAmiga::stopModule()
         mt_Enable = false;
         mt_end();
     }
+}
+
+void PlatformAmiga::playSample(uint8_t sample)
+{
+    mt_chan4data[0] = 0x1000 + 320;
+    mt_chan4data[1] = sample << 12;
 }
 
 void PlatformAmiga::renderFrame()
