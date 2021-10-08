@@ -13,6 +13,7 @@
 #include <hardware/intbits.h>
 #include <hardware/custom.h>
 #include <devices/audio.h>
+#include "PT2.3F_replay_cia.h"
 #include "PlatformAmiga.h"
 #include <stdio.h>
 #include <stddef.h>
@@ -29,19 +30,20 @@ static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-03) (C
 __far extern Custom custom;
 __far extern uint8_t petFont[];
 __chip extern uint8_t tilesPlanes[];
+__chip extern uint8_t introMusic[];
 __chip int8_t sample[2] = { 127, -128 };
 __chip int32_t simpleTileMask = 0xffffff00;
 uint16_t PlatformAmiga::addressMap[40 * 25];
 uint8_t PlatformAmiga::tileMaskMap[256];
 
-PlatformAmiga::PlatformAmiga() :
+PlatformAmiga::PlatformAmiga(bool petAudio) :
     interrupt(0),
     framesPerSecond_(50),
     screenBitmap(new BitMap),
     screen(0),
     window(0),
     verticalBlankInterrupt(new Interrupt),
-    ioAudio(new IOAudio),
+    ioAudio(0),
     messagePort(0),
     clock(3546895),
     screenPlanes(0),
@@ -113,41 +115,46 @@ PlatformAmiga::PlatformAmiga() :
     verticalBlankInterrupt->is_Code = (__stdargs void(*)())&verticalBlankInterruptServer;
     AddIntServer(INTB_VERTB, verticalBlankInterrupt);
 
-    messagePort = CreatePort(NULL, 0);
-    if (!messagePort) {
-        return;
+    if (petAudio) {
+        messagePort = CreatePort(NULL, 0);
+        if (!messagePort) {
+            return;
+        }
+
+        // Don't care which channel gets allocated
+        uint8_t requestChannels[4] = { 1, 8, 2, 4 };
+        ioAudio = new IOAudio;
+        ioAudio->ioa_Request.io_Message.mn_ReplyPort = messagePort;
+        ioAudio->ioa_Request.io_Message.mn_Node.ln_Pri = -50;
+        ioAudio->ioa_Request.io_Command = ADCMD_ALLOCATE;
+        ioAudio->ioa_Request.io_Flags = ADIOF_NOWAIT;
+        ioAudio->ioa_Data = requestChannels;
+        ioAudio->ioa_Length = 4;
+
+        if (OpenDevice((UBYTE*)AUDIONAME, 0, (IORequest*)ioAudio, 0)) {
+            return;
+        }
+
+        ioAudio->ioa_Request.io_Command = CMD_WRITE;
+        ioAudio->ioa_Request.io_Flags = ADIOF_PERVOL | IOF_QUICK;
+        ioAudio->ioa_Volume = 64;
+        ioAudio->ioa_Cycles = 0;
+        ioAudio->ioa_Data = (uint8_t*)sample;
+        ioAudio->ioa_Length = 2;
+        ioAudio->ioa_Period = (uint16_t)(clock / 440 / 2);
+        BeginIO((IORequest*)ioAudio);
+
+        ioAudio->ioa_Request.io_Command = ADCMD_PERVOL;
     }
-
-    // Don't care which channel gets allocated
-    uint8_t requestChannels[4] = { 1, 8, 2, 4 };
-    ioAudio->ioa_Request.io_Message.mn_ReplyPort = messagePort;
-    ioAudio->ioa_Request.io_Message.mn_Node.ln_Pri = -50;
-    ioAudio->ioa_Request.io_Command = ADCMD_ALLOCATE;
-    ioAudio->ioa_Request.io_Flags = ADIOF_NOWAIT;
-    ioAudio->ioa_Data = requestChannels;
-    ioAudio->ioa_Length = 4;
-
-    if (OpenDevice((UBYTE*)AUDIONAME, 0, (IORequest*)ioAudio, 0)) {
-        return;
-    }
-
-    ioAudio->ioa_Request.io_Command = CMD_WRITE;
-    ioAudio->ioa_Request.io_Flags = ADIOF_PERVOL | IOF_QUICK;
-    ioAudio->ioa_Volume = 64;
-    ioAudio->ioa_Cycles = 0;
-    ioAudio->ioa_Data = (uint8_t*)sample;
-    ioAudio->ioa_Length = 2;
-    ioAudio->ioa_Period = (uint16_t)(clock / 440 / 2);
-    BeginIO((IORequest*)ioAudio);
-
-    ioAudio->ioa_Request.io_Command = ADCMD_PERVOL;
 
     platform = this;
 }
 
 PlatformAmiga::~PlatformAmiga()
 {
-    if (ioAudio->ioa_Request.io_Device) {
+    stopModule();
+
+    if (ioAudio && ioAudio->ioa_Request.io_Device) {
         AbortIO((IORequest*)ioAudio);
         CloseDevice((IORequest*)ioAudio);
     }
@@ -183,6 +190,9 @@ PlatformAmiga::~PlatformAmiga()
 
 void PlatformAmiga::runVerticalBlankInterrupt()
 {
+    if (mt_Enable) {
+        mt_music();        
+    }
     if (interrupt) {
         interrupt();
     }
@@ -576,17 +586,35 @@ static const uint16_t noteToFrequency[] = {
 
 void PlatformAmiga::playNote(uint8_t note)
 {
-    ioAudio->ioa_Volume = noteToFrequency[note] ? 64 : 0;
-    if (noteToFrequency[note]) {
-        ioAudio->ioa_Period = (uint16_t)(clock / noteToFrequency[note] / 2);
+    if (ioAudio) {
+        ioAudio->ioa_Volume = noteToFrequency[note] ? 64 : 0;
+        if (noteToFrequency[note]) {
+            ioAudio->ioa_Period = (uint16_t)(clock / noteToFrequency[note] / 2);
+        }
+        BeginIO((IORequest*)ioAudio);
     }
-    BeginIO((IORequest*)ioAudio);
 }
 
 void PlatformAmiga::stopNote()
 {
-    ioAudio->ioa_Volume = 0;
-    BeginIO((IORequest*)ioAudio);
+    if (ioAudio) {
+        ioAudio->ioa_Volume = 0;
+        BeginIO((IORequest*)ioAudio);
+    }
+}
+
+void PlatformAmiga::playModule(const char* name)
+{
+    mt_init(introMusic);
+    mt_Enable = true;
+}
+
+void PlatformAmiga::stopModule()
+{
+    if (mt_Enable) {
+        mt_Enable = false;
+        mt_end();
+    }
 }
 
 void PlatformAmiga::renderFrame()

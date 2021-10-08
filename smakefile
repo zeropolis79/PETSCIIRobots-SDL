@@ -1,4 +1,4 @@
-OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o PETFont.o Tiles.o
+OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o PT2.3F_replay_cia.o PETFont.o Tiles.o IntroMusic.o
 
 all: petrobots 
 
@@ -11,10 +11,13 @@ petrobots.o: petrobots.cpp
 Platform.o: Platform.cpp
 PlatformAmiga.o: PlatformAmiga.cpp
 PlatformAmigaAssembler.o: PlatformAmigaAssembler.s
+PT2.3F_replay_cia.o: PT2.3F_replay_cia.s
 PETFont.o: PETFont.raw
     Bin2Hunk PETFont.raw PETFont.o NAME _petFont HUNK data
 Tiles.o: Tiles.raw
     Bin2Hunk Tiles.raw Tiles.o NAME _tilesPlanes CHIP
+IntroMusic.o: mod.intro_music
+    Bin2Hunk mod.intro_music IntroMusic.o NAME _introMusic CHIP
 
 clean:
     delete $(OBJECTS) petrobots petrobots.info petrobots.lnk

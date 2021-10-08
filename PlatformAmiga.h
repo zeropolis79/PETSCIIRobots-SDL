@@ -13,7 +13,7 @@ struct BitMap;
 
 class PlatformAmiga : public Platform {
 public:
-    PlatformAmiga();
+    PlatformAmiga(bool petAudio = false);
     ~PlatformAmiga();
 
     virtual void setInterrupt(void (*interrupt)(void));
@@ -33,6 +33,8 @@ public:
 	virtual void writeToScreenMemory(uint16_t address, uint8_t value);
 	virtual void playNote(uint8_t note);
     virtual void stopNote();
+    virtual void playModule(const char* name);
+    virtual void stopModule();
     virtual void renderFrame();
 
 private:

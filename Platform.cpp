@@ -17,6 +17,14 @@ void Platform::stopShakeScreen()
 {
 }
 
+void Platform::playModule(const char* name)
+{
+}
+
+void Platform::stopModule()
+{
+}
+
 void Platform::renderFrame()
 {
 }

@@ -1930,17 +1930,25 @@ void INTRO_SCREEN()
 
 void START_INTRO_MUSIC()
 {
+#ifdef _AMIGA
+    platform->playModule("mod.intro_music");
+#else
     DATA_LINE = 0;
     SOUND_EFFECT = 0xFF;
     CUR_PATTERN = INTRO_MUSIC;
     MUSIC_ON = 1;
+#endif
 }
 
 bool EXEC_COMMAND()
 {
     if (MENUY == 0) { // START GAME
         SET_CONTROLS();
+#ifdef _AMIGA
+        platform->stopModule();
+#else
         MUSIC_ON = 0;
+#endif
         platform->stopNote(); // turn off sound
         INIT_GAME();
         return true;
