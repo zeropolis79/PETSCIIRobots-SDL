@@ -400,7 +400,11 @@ void TOGGLE_MUSIC()
     if (MUSIC_ON == 1) {
         PRINT_INFO(MSG_MUSICOFF);
         MUSIC_ON = 0;
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+        platform->playModule(0);
+#else
         platform->stopNote(); // turn off sound
+#endif
     } else {
         PRINT_INFO(MSG_MUSICON);
         MUSIC_ON = 1;
@@ -410,6 +414,9 @@ void TOGGLE_MUSIC()
 
 void START_IN_GAME_MUSIC()
 {
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    platform->playModule(LEVEL_MUSIC[SELECTED_MAP]);
+#else
     MUSIC_ON = 1;
     if (SOUND_EFFECT == 0xFF) { // FF=NO sound effect in progress
         DATA_LINE = 0;
@@ -419,9 +426,14 @@ void START_IN_GAME_MUSIC()
         DATA_LINE_TEMP = 0;
         PATTERN_TEMP = IN_GAME_MUSIC1 + (LEVEL_MUSIC[SELECTED_MAP] << 8);
     }
+#endif
 }
 
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+uint8_t LEVEL_MUSIC[] = { 7,7,7,7,7,7,7,7,7,7 };
+#else
 uint8_t LEVEL_MUSIC[] = { 0,1,2,0,1,2,0,1,2,0 };
+#endif
 
 // TEMP ROUTINE TO GIVE ME ALL ITEMS AND WEAPONS
 void CHEATER()
@@ -1759,8 +1771,12 @@ void GAME_OVER()
     // stop game clock
     CLOCK_ACTIVE = 0;
     // disable music
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    platform->stopModule();
+#else
     MUSIC_ON = 0;
     platform->stopNote(); // turn off sound
+#endif
     // Did player die or win?
     if (UNIT_TYPE[0] == 0) {
         UNIT_TILE[0] = 111; // // dead player tile
@@ -1806,13 +1822,21 @@ void DISPLAY_WIN_LOSE()
         for (int X = 0; X != 8; X++) {
             writeToScreenMemory(0x088 + X, convertToPETSCII(WIN_MSG[X]));
         }
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+        platform->playModule(5);
+#else
         PLAY_SOUND(18); // win music
+#endif
     } else {
         // LOSE MESSAGE
         for (int X = 0; X != 9; X++) {
             writeToScreenMemory(0x088 + X, convertToPETSCII(LOS_MSG[X]));
         }
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+        platform->playModule(6);
+#else
         PLAY_SOUND(19); // LOSE music
+#endif
     }
 }
 
@@ -2550,6 +2574,9 @@ void MUSIC_ROUTINE()
 
 void STOP_SONG()
 {
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    platform->stopModule();
+#else
     // actually, stop sound effect.
     platform->stopNote(); // turn off sound;
     SOUND_EFFECT = 0xFF;
@@ -2561,6 +2588,7 @@ void STOP_SONG()
     CUR_PATTERN = PATTERN_TEMP;
     DATA_LINE = DATA_LINE_TEMP;
     TEMPO = TEMPO_TEMP;
+#endif
 }
 
 void BACKGROUND_TASKS()
