@@ -626,7 +626,7 @@ void PlatformAmiga::stopModule()
 void PlatformAmiga::playSample(uint8_t sample)
 {
     mt_chan4data[0] = 0x1000 + 320;
-    mt_chan4data[1] = sample << 12;
+    mt_chan4data[1] = (sample < 16 ? sample : 15) << 12;
 }
 
 void PlatformAmiga::renderFrame()
