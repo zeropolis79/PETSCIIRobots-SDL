@@ -608,6 +608,8 @@ void PlatformAmiga::playModule(uint8_t songPosition)
     stopModule();
     if (!mt_Enable) {
         mt_init(music);
+        mt_chan4data[0] = 0;
+        mt_chan4data[1] = 0;
         mt_SongPos = songPosition;
         mt_Enable = true;
     }
