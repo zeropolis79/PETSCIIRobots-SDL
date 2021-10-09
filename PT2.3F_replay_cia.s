@@ -283,7 +283,7 @@ mtskip2
 
 	; initialize stuff
 	OR.B	#2,$BFE001
-	MOVE.B	#6,mt_speed
+	MOVE.B	#4,mt_speed
 	CLR.B	mt_counter
 	CLR.B	mt_SongPos
 	CLR.W	mt_PatternPos
