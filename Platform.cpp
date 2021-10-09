@@ -21,11 +21,19 @@ void Platform::playModule(uint8_t)
 {
 }
 
+void Platform::setSongPosition(uint8_t)
+{
+}
+
 void Platform::stopModule()
 {
 }
 
 void Platform::playSample(uint8_t)
+{
+}
+
+void Platform::stopSample()
 {
 }
 

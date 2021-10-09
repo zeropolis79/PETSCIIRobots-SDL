@@ -30,6 +30,7 @@ static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-08) (C
 __far extern Custom custom;
 __far extern uint8_t petFont[];
 __chip extern uint8_t tilesPlanes[];
+__chip extern uint8_t introMusic[];
 __chip extern uint8_t music[];
 __chip int8_t sample[2] = { 127, -128 };
 __chip int32_t simpleTileMask = 0xffffff00;
@@ -603,16 +604,21 @@ void PlatformAmiga::stopNote()
     }
 }
 
-void PlatformAmiga::playModule(uint8_t songPosition)
+void PlatformAmiga::playModule(uint8_t module)
 {
     stopModule();
     if (!mt_Enable) {
-        mt_init(music);
+        mt_init(module == 0 ? introMusic : music);
         mt_chan4data[0] = 0;
         mt_chan4data[1] = 0;
-        mt_SongPos = songPosition;
         mt_Enable = true;
     }
+}
+
+void PlatformAmiga::setSongPosition(uint8_t songPosition)
+{
+    mt_SongPos = songPosition;
+    mt_PatternPos = 0;
 }
 
 void PlatformAmiga::stopModule()
@@ -627,6 +633,12 @@ void PlatformAmiga::playSample(uint8_t sample)
 {
     mt_chan4data[0] = 0x1000 + 320;
     mt_chan4data[1] = (sample < 16 ? sample : 15) << 12;
+}
+
+void PlatformAmiga::stopSample()
+{
+    mt_chan4data[0] = 0;
+    mt_chan4data[1] = 0;
 }
 
 void PlatformAmiga::renderFrame()

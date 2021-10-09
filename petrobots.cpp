@@ -401,7 +401,7 @@ void TOGGLE_MUSIC()
         PRINT_INFO(MSG_MUSICOFF);
         MUSIC_ON = 0;
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->playModule(0);
+        platform->setSongPosition(0);
 #else
         platform->stopNote(); // turn off sound
 #endif
@@ -415,7 +415,8 @@ void TOGGLE_MUSIC()
 void START_IN_GAME_MUSIC()
 {
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->playModule(LEVEL_MUSIC[SELECTED_MAP]);
+    platform->playModule(1);
+    platform->setSongPosition(LEVEL_MUSIC[SELECTED_MAP]);
 #else
     MUSIC_ON = 1;
     if (SOUND_EFFECT == 0xFF) { // FF=NO sound effect in progress
@@ -1772,7 +1773,7 @@ void GAME_OVER()
     CLOCK_ACTIVE = 0;
     // disable music
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->playModule(0);
+    platform->setSongPosition(0);
 #else
     MUSIC_ON = 0;
     platform->stopNote(); // turn off sound
@@ -1823,7 +1824,7 @@ void DISPLAY_WIN_LOSE()
             writeToScreenMemory(0x088 + X, convertToPETSCII(WIN_MSG[X]));
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->playModule(5);
+        platform->setSongPosition(5);
 #else
         PLAY_SOUND(18); // win music
 #endif
@@ -1833,7 +1834,7 @@ void DISPLAY_WIN_LOSE()
             writeToScreenMemory(0x088 + X, convertToPETSCII(LOS_MSG[X]));
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->playModule(6);
+        platform->setSongPosition(6);
 #else
         PLAY_SOUND(19); // LOSE music
 #endif
@@ -1951,7 +1952,8 @@ void INTRO_SCREEN()
 void START_INTRO_MUSIC()
 {
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->playModule(1);
+    platform->playModule(0);
+    platform->setSongPosition(1);
 #else
     DATA_LINE = 0;
     SOUND_EFFECT = 0xFF;
@@ -1965,7 +1967,7 @@ bool EXEC_COMMAND()
     if (MENUY == 0) { // START GAME
         SET_CONTROLS();
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->playModule(0);
+        platform->playModule(1);
 #else
         MUSIC_ON = 0;
 #endif
@@ -2575,7 +2577,7 @@ void MUSIC_ROUTINE()
 void STOP_SONG()
 {
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->stopModule();
+    platform->stopSample();
 #else
     // actually, stop sound effect.
     platform->stopNote(); // turn off sound;

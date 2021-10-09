@@ -1,4 +1,4 @@
-OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o PT2.3F_replay_cia.o PETFont.o Tiles.o Music.o
+OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o PT2.3F_replay_cia.o PETFont.o Tiles.o IntroMusic.o Music.o
 
 all: petrobots 
 
@@ -16,6 +16,8 @@ PETFont.o: PETFont.raw
     Bin2Hunk PETFont.raw PETFont.o NAME _petFont HUNK data
 Tiles.o: Tiles.raw
     Bin2Hunk Tiles.raw Tiles.o NAME _tilesPlanes CHIP
+IntroMusic.o: mod.intromusic
+    Bin2Hunk mod.intromusic IntroMusic.o NAME _introMusic CHIP
 Music.o: mod.petrobots
     Bin2Hunk mod.petrobots Music.o NAME _music CHIP
 
