@@ -94,11 +94,7 @@ uint8_t SCREEN_MEMORY[40 * 25]; // $8000
 
 int main(int argc, char *argv[])
 {
-#ifdef _AMIGA
-    PlatformAmiga platformAmiga;
-#else
-    PlatformSDL platformSDL;
-#endif
+    PlatformClass platformInstance;
 
     if (!platform) {
         return 1;
@@ -1930,7 +1926,7 @@ void INTRO_SCREEN()
 
 void START_INTRO_MUSIC()
 {
-#ifdef _AMIGA
+#ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->playModule(1);
 #else
     DATA_LINE = 0;
@@ -1944,8 +1940,7 @@ bool EXEC_COMMAND()
 {
     if (MENUY == 0) { // START GAME
         SET_CONTROLS();
-#ifdef _AMIGA
-        platform->stopModule();
+#ifdef PLATFORM_MODULE_BASED_AUDIO
         platform->playModule(0);
 #else
         MUSIC_ON = 0;
@@ -2364,7 +2359,7 @@ void PET_SCREEN_SHAKE()
     if (SCREEN_SHAKE != 1) {
         return;
     }
-#ifndef _AMIGA
+#ifndef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
     uint16_t source = 1;
     uint16_t destination = 0;
     for (int Y = 0; Y != 21; Y++) {
@@ -2448,7 +2443,7 @@ void ANIMATE_PLAYER()
 
 void PLAY_SOUND(int sound)
 {
-#ifdef _AMIGA
+#ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->playSample(sound);
 #else
     // check if music is playing

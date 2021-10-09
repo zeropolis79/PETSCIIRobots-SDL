@@ -1,6 +1,8 @@
 #ifndef _PLATFORMSDL_H
 #define _PLATFORMSDL_H
 
+#define PlatformClass PlatformSDL
+
 #include <SDL.h>
 #include <SDL_image.h>
 #include "Platform.h"

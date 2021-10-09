@@ -36,7 +36,7 @@ __chip int32_t simpleTileMask = 0xffffff00;
 uint16_t PlatformAmiga::addressMap[40 * 25];
 uint8_t PlatformAmiga::tileMaskMap[256];
 
-PlatformAmiga::PlatformAmiga(bool petAudio) :
+PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     interrupt(0),
     framesPerSecond_(50),
     screenBitmap(new BitMap),
@@ -115,7 +115,7 @@ PlatformAmiga::PlatformAmiga(bool petAudio) :
     verticalBlankInterrupt->is_Code = (__stdargs void(*)())&verticalBlankInterruptServer;
     AddIntServer(INTB_VERTB, verticalBlankInterrupt);
 
-    if (petAudio) {
+    if (!moduleBasedAudio) {
         messagePort = CreatePort(NULL, 0);
         if (!messagePort) {
             return;
@@ -605,6 +605,7 @@ void PlatformAmiga::stopNote()
 
 void PlatformAmiga::playModule(uint8_t songPosition)
 {
+    stopModule();
     if (!mt_Enable) {
         mt_init(music);
         mt_SongPos = songPosition;

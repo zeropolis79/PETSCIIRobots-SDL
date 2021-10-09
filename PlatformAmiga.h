@@ -1,6 +1,10 @@
 #ifndef _PLATFORMAMIGA_H
 #define _PLATFORMAMIGA_H
 
+#define PLATFORM_MODULE_BASED_AUDIO
+#define PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
+#define PlatformClass PlatformAmiga
+
 #include "Platform.h"
 
 struct BitMap;
@@ -13,7 +17,7 @@ struct BitMap;
 
 class PlatformAmiga : public Platform {
 public:
-    PlatformAmiga(bool petAudio = false);
+    PlatformAmiga(bool moduleBasedAudio = true);
     ~PlatformAmiga();
 
     virtual void setInterrupt(void (*interrupt)(void));
