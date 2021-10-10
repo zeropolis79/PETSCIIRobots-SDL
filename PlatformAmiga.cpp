@@ -25,10 +25,10 @@
 #define PLANES 4
 #define TILES_WITH_MASK 34
 
-static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-08) (C)2021 David Murray, Vesa Halttunen";
+static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-10) (C)2021 David Murray, Vesa Halttunen";
 
 __far extern Custom custom;
-__far extern uint8_t petFont[];
+__far extern uint8_t c64Font[];
 __chip extern uint8_t tilesPlanes[];
 __chip extern uint8_t introMusic[];
 __chip extern uint8_t music[];
@@ -326,8 +326,8 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
 
         for (int y = 0; y < 3; y++, tiles += 7 * 4 + 1, mask += 7 * 4 + 1) {
             for (int x = 0; x < 3; x++, tiles++, mask++) {
-                uint8_t* font = petFont + characters[y][x];
-                for (int offset = 0; offset < 8 * 4; offset += 4, font += 256) {
+                uint8_t* font = c64Font + (characters[y][x] << 3);
+                for (int offset = 0; offset < 8 * 4; offset += 4, font++) {
                     tiles[offset] = *font;
                     mask[offset] = ((tileAttributes[tile] & 0x80) == 0 || characters[y][x] != 0x3a) ? 0xff : 0;
                 }
@@ -353,7 +353,7 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                 for (int y = 0; y < 3; y++, tiles += 8 * 4 * PLANES - 3, mask += 8 * 4 * PLANES - 3) {
                     for (int x = 0; x < 3; x++, tiles++, mask++) {
                         uint8_t character = characters[y][x];
-                        uint8_t* font = petFont + (character << 3);
+                        uint8_t* font = c64Font + (character << 3);
                         for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
                             tiles[offset] = *font;
                             tiles[offset + 4] = 0;
@@ -410,8 +410,8 @@ void PlatformAmiga::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTi
         uint8_t* destination = tilesPlanes + tile * 4 * 24;
         for (int y = 0; y < 3; y++, destination += 7 * 4 + 1) {
             for (int x = 0; x < 3; x++, destination++) {
-                uint8_t* font = petFont + characters[y][x];
-                for (int offset = 0; offset < 8 * 4; offset += 4, font += 256) {
+                uint8_t* font = c64Font + (characters[y][x] << 3);
+                for (int offset = 0; offset < 8 * 4; offset += 4, font++) {
                     destination[offset] = *font;
                 }
             }
@@ -532,7 +532,7 @@ void PlatformAmiga::stopShakeScreen()
 /*
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
 {
-    uint8_t* source = petFont + (value << 3);
+    uint8_t* source = c64Font + (value << 3);
     uint8_t* destination = screenPlanes + addressMap[address];
     for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
         *destination = *source++;

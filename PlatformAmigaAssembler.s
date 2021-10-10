@@ -2,7 +2,7 @@
 	xdef	@writeToScreenMemory__13PlatformAmigaFUsUc
 	xref	@runVerticalBlankInterrupt__13PlatformAmigaFv
 	xref	_addressMap__13PlatformAmiga
-	xref	_petFont
+	xref	_c64Font
 
 	section	code
 
@@ -23,7 +23,7 @@ _verticalBlankInterruptServer__13PlatformAmigaFv:
 	move.w	(a1,d0.w),d0
 	move.l	$2a(a0),a1
 	add.w	d0,a1
-	lea	_petFont,a0
+	lea	_c64Font,a0
 	add.w	d1,d1
 	add.w	d1,d1
 	add.w	d1,a0
