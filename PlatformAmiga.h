@@ -3,6 +3,7 @@
 
 #define PLATFORM_MODULE_BASED_AUDIO
 #define PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
+#define PLATFORM_COLOR_SUPPORT
 #define PlatformClass PlatformAmiga
 
 #include "Platform.h"
@@ -34,7 +35,8 @@ public:
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     virtual void shakeScreen();
     virtual void stopShakeScreen();
-	virtual void writeToScreenMemory(uint16_t address, uint8_t value);
+    virtual void writeToScreenMemory(uint16_t address, uint8_t value);
+    virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color);
 	virtual void playNote(uint8_t note);
     virtual void stopNote();
     virtual void playModule(uint8_t module);

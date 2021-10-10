@@ -44,8 +44,9 @@ public:
     virtual void startShakeScreen();
     virtual void shakeScreen() = 0;
     virtual void stopShakeScreen();
-	virtual void writeToScreenMemory(uint16_t address, uint8_t value) = 0;
-	virtual void playNote(uint8_t note) = 0;
+    virtual void writeToScreenMemory(uint16_t address, uint8_t value) = 0;
+    virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color) = 0;
+    virtual void playNote(uint8_t note) = 0;
     virtual void stopNote() = 0;
     virtual void playModule(uint8_t module);
     virtual void setSongPosition(uint8_t songPosition);

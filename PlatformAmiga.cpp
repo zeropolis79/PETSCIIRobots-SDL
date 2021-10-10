@@ -529,19 +529,22 @@ void PlatformAmiga::stopShakeScreen()
     }
 }
 
-/*
-void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
+void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color)
 {
+    bool writePlane1 = color & 1;
+    bool writePlane2 = color & 2;
+    bool writePlane3 = color & 4;
+    bool writePlane4 = color & 8;
     uint8_t* source = c64Font + (value << 3);
     uint8_t* destination = screenPlanes + addressMap[address];
     for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
-        *destination = *source++;
-        destination[1 * SCREEN_WIDTH_IN_BYTES] = 0;
-        destination[2 * SCREEN_WIDTH_IN_BYTES] = 0;
-        destination[3 * SCREEN_WIDTH_IN_BYTES] = 0;
+        uint8_t font = *source++;
+        *destination = writePlane1 ? font : 0;
+        destination[1 * SCREEN_WIDTH_IN_BYTES] = writePlane2 ? font : 0;
+        destination[2 * SCREEN_WIDTH_IN_BYTES] = writePlane3 ? font : 0;
+        destination[3 * SCREEN_WIDTH_IN_BYTES] = writePlane4 ? font : 0;
     }
 }
-*/
 
 static const uint16_t noteToFrequency[] = {
     0,

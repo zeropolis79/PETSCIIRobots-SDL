@@ -1918,7 +1918,7 @@ void INTRO_SCREEN()
     platform->show();
     START_INTRO_MUSIC();
     MENUY = 0;
-    REVERSE_MENU_OPTION();
+    REVERSE_MENU_OPTION(true);
     platform->renderFrame();
     bool done = false;
     while (!done && !platform->quit) {
@@ -1926,16 +1926,16 @@ void INTRO_SCREEN()
         if (A != 0) {
             if (A == 0x11 || A == *KEY_MOVE_DOWN) { // CURSOR DOWN
                 if (MENUY != 3) {
-                    REVERSE_MENU_OPTION();
+                    REVERSE_MENU_OPTION(false);
                     MENUY++;
-                    REVERSE_MENU_OPTION();
+                    REVERSE_MENU_OPTION(true);
                     PLAY_SOUND(15); // menu beep
                 }
             } else if (A == 0x91 || A == *KEY_MOVE_UP) { // CURSOR UP
                 if (MENUY != 0) {
-                    REVERSE_MENU_OPTION();
+                    REVERSE_MENU_OPTION(false);
                     MENUY--;
-                    REVERSE_MENU_OPTION();
+                    REVERSE_MENU_OPTION(true);
                     PLAY_SOUND(15); // menu beep
                 }
             } else if (A == 32) { // SPACE
@@ -2034,11 +2034,17 @@ const char* CALC_MAP_NAME()
     return MAP_NAMES + (SELECTED_MAP << 4); // multiply by 16 by shifting 4 times to left.
 }
 
-void REVERSE_MENU_OPTION()
+void REVERSE_MENU_OPTION(bool reverse)
 {
+#ifdef PLATFORM_COLOR_SUPPORT
+    for (int Y = 0; Y != 10; Y++) {
+        writeToScreenMemory(MENU_CHART_L[MENUY] + Y, SCREEN_MEMORY[MENU_CHART_L[MENUY] + Y], reverse ? 2 : 1);
+    }
+#else
     for (int Y = 0; Y != 10; Y++) {
         writeToScreenMemory(MENU_CHART_L[MENUY] + Y, SCREEN_MEMORY[MENU_CHART_L[MENUY] + Y] ^ 0x80);
     }
+#endif
 }
 
 uint8_t MENUY = 0; // CURRENT MENU SELECTION
@@ -4743,10 +4749,14 @@ char convertToPETSCII(char value)
     return value >= 96 ? (value - 96) : value;
 }
 
-void writeToScreenMemory(uint16_t address, uint8_t value)
+void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color)
 {
     SCREEN_MEMORY[address] = value;
+#ifdef PLATFORM_COLOR_SUPPORT
+    platform->writeToScreenMemory(address, value, color);
+#else
     platform->writeToScreenMemory(address, value);
+#endif
 }
 
 // NOTES ABOUT UNIT TYPES

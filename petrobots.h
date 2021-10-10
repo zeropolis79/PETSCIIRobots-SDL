@@ -287,7 +287,7 @@ extern uint8_t CONTROLSTART[];
 void CYCLE_MAP();
 void DISPLAY_MAP_NAME();
 const char* CALC_MAP_NAME();
-void REVERSE_MENU_OPTION();
+void REVERSE_MENU_OPTION(bool reverse);
 
 extern uint8_t MENUY; // CURRENT MENU SELECTION
 extern uint8_t MENU_CHART_L[];
@@ -495,6 +495,6 @@ extern uint8_t IN_GAME_MUSIC2[];
 extern uint8_t IN_GAME_MUSIC3[];
 
 char convertToPETSCII(char value);
-void writeToScreenMemory(uint16_t address, uint8_t value);
+void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color = 1);
 
 #endif
