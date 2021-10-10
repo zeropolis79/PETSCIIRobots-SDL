@@ -9,6 +9,14 @@ void Platform::show()
 {
 }
 
+void Platform::displayImage(uint8_t)
+{
+}
+
+void Platform::updateTiles(uint8_t*, uint8_t*, uint8_t)
+{
+}
+
 void Platform::startShakeScreen()
 {
 }

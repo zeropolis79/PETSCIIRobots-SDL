@@ -3,6 +3,7 @@
 
 #define PLATFORM_MODULE_BASED_AUDIO
 #define PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
+#define PLATFORM_IMAGE_SUPPORT
 #define PLATFORM_COLOR_SUPPORT
 #define PlatformClass PlatformAmiga
 
@@ -28,8 +29,8 @@ public:
     virtual uint8_t getin();
     virtual void clearKeyBuffer();
     virtual void load(const char* filename, uint8_t* destination, uint32_t size);
+    virtual void displayImage(uint8_t image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
-    virtual void updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles);
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent);
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);

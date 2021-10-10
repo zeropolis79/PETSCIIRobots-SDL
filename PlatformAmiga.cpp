@@ -28,6 +28,8 @@
 static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-10) (C)2021 David Murray, Vesa Halttunen";
 
 __far extern Custom custom;
+__far extern uint8_t introScreen[];
+__far extern uint8_t gameScreen[];
 __far extern uint8_t c64Font[];
 __chip extern uint8_t tilesPlanes[];
 __chip extern uint8_t introMusic[];
@@ -302,6 +304,25 @@ void PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t si
     }
 }
 
+void PlatformAmiga::displayImage(uint8_t image)
+{
+    uint32_t* source = (uint32_t*)(image == IMAGE_INTRO ? introScreen : gameScreen);
+    uint32_t* destination = (uint32_t*)screenPlanes;
+    for (int y = 0; y < SCREEN_HEIGHT * PLANES; y++) {
+        *destination++ = *source++;
+        *destination++ = *source++;
+        *destination++ = *source++;
+        *destination++ = *source++;
+        *destination++ = *source++;
+        *destination++ = *source++;
+        *destination++ = *source++;
+        *destination++ = *source++;
+        *destination++ = *source++;
+        *destination++ = *source++;
+    }
+    LoadRGB4(&screen->ViewPort, (uint16_t*)source, (1 << PLANES));
+}
+
 void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
 {
     uint8_t* topLeft = tileData;
@@ -384,40 +405,6 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
             tiles += 4 * 24 * PLANES;
         }
     }
-}
-
-void PlatformAmiga::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles)
-{
-    /*
-    uint8_t* topLeft = tileData;
-    uint8_t* topMiddle = topLeft + 256;
-    uint8_t* topRight = topMiddle + 256;
-    uint8_t* middleLeft = topRight + 256;
-    uint8_t* middleMiddle = middleLeft + 256;
-    uint8_t* middleRight = middleMiddle + 256;
-    uint8_t* bottomLeft = middleRight + 256;
-    uint8_t* bottomMiddle = bottomLeft + 256;
-    uint8_t* bottomRight = bottomMiddle + 256;
-
-    for (int i = 0; i < numTiles; i++) {
-        uint8_t tile = tiles[i];
-        uint8_t characters[3][3] = {
-            { topLeft[tile], topMiddle[tile], topRight[tile] },
-            { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
-            { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
-        };
-
-        uint8_t* destination = tilesPlanes + tile * 4 * 24;
-        for (int y = 0; y < 3; y++, destination += 7 * 4 + 1) {
-            for (int x = 0; x < 3; x++, destination++) {
-                uint8_t* font = c64Font + (characters[y][x] << 3);
-                for (int offset = 0; offset < 8 * 4; offset += 4, font++) {
-                    destination[offset] = *font;
-                }
-            }
-        }
-    }
-    */
 }
 
 void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent)
@@ -611,7 +598,7 @@ void PlatformAmiga::playModule(uint8_t module)
 {
     stopModule();
     if (!mt_Enable) {
-        mt_init(module == 0 ? introMusic : music);
+        mt_init(module == MODULE_INTRO ? introMusic : music);
         mt_chan4data[0] = 0;
         mt_chan4data[1] = 0;
         mt_Enable = true;

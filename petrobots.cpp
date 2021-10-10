@@ -415,7 +415,7 @@ void TOGGLE_MUSIC()
 void START_IN_GAME_MUSIC()
 {
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->playModule(1);
+    platform->playModule(MODULE_GAME);
     platform->setSongPosition(LEVEL_MUSIC[SELECTED_MAP]);
 #else
     MUSIC_ON = 1;
@@ -1386,12 +1386,20 @@ void MAP_LOAD_ROUTINE()
 
 void DISPLAY_GAME_SCREEN()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    platform->displayImage(IMAGE_GAME);
+#else
     DECOMPRESS_SCREEN(SCR_TEXT);
+#endif
 }
 
 void DISPLAY_INTRO_SCREEN()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    platform->displayImage(IMAGE_INTRO);
+#else
     DECOMPRESS_SCREEN(INTRO_TEXT);
+#endif
 }
 
 void DISPLAY_ENDGAME_SCREEN()
@@ -1574,6 +1582,16 @@ void PRESELECT_ITEM()
 
 void DISPLAY_TIMEBOMB()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    for (int Y = 0; Y != 6; Y++) {
+        writeToScreenMemory(0x112 + Y, TBOMB1A[Y]);
+        writeToScreenMemory(0x13A + Y, TBOMB1B[Y]);
+        writeToScreenMemory(0x162 + Y, TBOMB1C[Y]);
+        writeToScreenMemory(0x18A + Y, TBOMB1D[Y]);
+    }
+    DECNUM = INV_BOMBS;
+    DECWRITE(0x18D);
+#else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, TBOMB1A[Y]);
         writeToScreenMemory(0x18A + Y, TBOMB1B[Y]);
@@ -1582,10 +1600,21 @@ void DISPLAY_TIMEBOMB()
     }
     DECNUM = INV_BOMBS;
     DECWRITE(0x205);
+#endif
 }
 
 void DISPLAY_EMP()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    for (int Y = 0; Y != 6; Y++) {
+        writeToScreenMemory(0x112 + Y, EMP1A[Y]);
+        writeToScreenMemory(0x13A + Y, EMP1B[Y]);
+        writeToScreenMemory(0x162 + Y, EMP1C[Y]);
+        writeToScreenMemory(0x18A + Y, EMP1D[Y]);
+    }
+    DECNUM = INV_EMP;
+    DECWRITE(0x18D);
+#else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, EMP1A[Y]);
         writeToScreenMemory(0x18A + Y, EMP1B[Y]);
@@ -1594,10 +1623,21 @@ void DISPLAY_EMP()
     }
     DECNUM = INV_EMP;
     DECWRITE(0x205);
+#endif
 }
 
 void DISPLAY_MEDKIT()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    for (int Y = 0; Y != 6; Y++) {
+        writeToScreenMemory(0x112 + Y, MED1A[Y]);
+        writeToScreenMemory(0x13A + Y, MED1B[Y]);
+        writeToScreenMemory(0x162 + Y, MED1C[Y]);
+        writeToScreenMemory(0x18A + Y, MED1D[Y]);
+    }
+    DECNUM = INV_MEDKIT;
+    DECWRITE(0x18D);
+#else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, MED1A[Y]);
         writeToScreenMemory(0x18A + Y, MED1B[Y]);
@@ -1606,10 +1646,21 @@ void DISPLAY_MEDKIT()
     }
     DECNUM = INV_MEDKIT;
     DECWRITE(0x205);
+#endif
 }
 
 void DISPLAY_MAGNET()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    for (int Y = 0; Y != 6; Y++) {
+        writeToScreenMemory(0x112 + Y, MAG1A[Y]);
+        writeToScreenMemory(0x13A + Y, MAG1B[Y]);
+        writeToScreenMemory(0x162 + Y, MAG1C[Y]);
+        writeToScreenMemory(0x18A + Y, MAG1D[Y]);
+    }
+    DECNUM = INV_MAGNET;
+    DECWRITE(0x18D);
+#else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, MAG1A[Y]);
         writeToScreenMemory(0x18A + Y, MAG1B[Y]);
@@ -1618,10 +1669,17 @@ void DISPLAY_MAGNET()
     }
     DECNUM = INV_MAGNET;
     DECWRITE(0x205);
+#endif
 }
 
 void DISPLAY_BLANK_ITEM()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    platform->clearRect(272, 48, 48, 32);
+#else
+    platform->clearRect(272, 56, 48, 32);
+#endif
+/*
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, 32);
         writeToScreenMemory(0x18A + Y, 32);
@@ -1629,6 +1687,7 @@ void DISPLAY_BLANK_ITEM()
         writeToScreenMemory(0x1DA + Y, 32);
         writeToScreenMemory(0x202 + Y, 32);
     }
+*/
 }
 
 void CYCLE_WEAPON()
@@ -1703,24 +1762,37 @@ void DISPLAY_PLASMA_GUN()
         writeToScreenMemory(0x0C2 + Y, WEAPON1D[Y]);
     }
     DECNUM = AMMO_PLASMA;
+#ifdef PLATFORM_IMAGE_SUPPORT
+    DECWRITE(0x0C2);
+#else
     DECWRITE(0x0ED);
+#endif
 }
 
 void DISPLAY_PISTOL()
 {
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x04A + Y,PISTOL1A[Y]);
+        writeToScreenMemory(0x04A + Y, PISTOL1A[Y]);
         writeToScreenMemory(0x072 + Y, PISTOL1B[Y]);
         writeToScreenMemory(0x09A + Y, PISTOL1C[Y]);
         writeToScreenMemory(0x0C2 + Y, PISTOL1D[Y]);
     }
     DECNUM = AMMO_PISTOL;
+#ifdef PLATFORM_IMAGE_SUPPORT
+    DECWRITE(0x0C2);
+#else
     DECWRITE(0x0ED);
-
+#endif
 }
 
 void DISPLAY_BLANK_WEAPON()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    platform->clearRect(272, 8, 48, 32);
+#else
+    platform->clearRect(272, 16, 48, 32);
+#endif
+    /*
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x04A + Y, 32);
         writeToScreenMemory(0x072 + Y, 32);
@@ -1728,10 +1800,46 @@ void DISPLAY_BLANK_WEAPON()
         writeToScreenMemory(0x0C2 + Y, 32);
         writeToScreenMemory(0x0EA + Y, 32);
     }
+    */
 }
 
 void DISPLAY_KEYS()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    platform->clearRect(272, 88, 48, 32); // ERASE ALL 3 SPOTS
+    /*
+    writeToScreenMemory(0x27A, 32); // ERASE ALL 3 SPOTS
+    writeToScreenMemory(0x27B, 32);
+    writeToScreenMemory(0x27C, 32);
+    writeToScreenMemory(0x27D, 32);
+    writeToScreenMemory(0x27E, 32);
+    writeToScreenMemory(0x27F, 32);
+    writeToScreenMemory(0x2A2, 32);
+    writeToScreenMemory(0x2A3, 32);
+    writeToScreenMemory(0x2A4, 32);
+    writeToScreenMemory(0x2A5, 32);
+    writeToScreenMemory(0x2A6, 32);
+    writeToScreenMemory(0x2A7, 32);
+    */
+    if (KEYS & 0x01) { // %00000001 Spade key
+        writeToScreenMemory(0x22A, 0x63);
+        writeToScreenMemory(0x22B, 0x4D);
+        writeToScreenMemory(0x252, 0x41);
+        writeToScreenMemory(0x253, 0x67);
+    }
+    if (KEYS & 0x02) { // %00000010 heart key
+        writeToScreenMemory(0x22C, 0x63);
+        writeToScreenMemory(0x22D, 0x4D);
+        writeToScreenMemory(0x254, 0x53);
+        writeToScreenMemory(0x255, 0x67);
+    }
+    if (KEYS & 0x04) { // %00000100 star key
+        writeToScreenMemory(0x22E, 0x63);
+        writeToScreenMemory(0x22F, 0x4D);
+        writeToScreenMemory(0x256, 0x2A);
+        writeToScreenMemory(0x257, 0x67);
+    }
+#else
     platform->clearRect(272, 120, 48, 16); // ERASE ALL 3 SPOTS
     /*
     writeToScreenMemory(0x27A, 32); // ERASE ALL 3 SPOTS
@@ -1765,6 +1873,7 @@ void DISPLAY_KEYS()
         writeToScreenMemory(0x2A6, 0x2A);
         writeToScreenMemory(0x2A7, 0x67);
     }
+#endif
 }
 
 void GAME_OVER()
@@ -1952,7 +2061,7 @@ void INTRO_SCREEN()
 void START_INTRO_MUSIC()
 {
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->playModule(0);
+    platform->playModule(MODULE_INTRO);
     platform->setSongPosition(1);
 #else
     DATA_LINE = 0;
@@ -1967,7 +2076,7 @@ bool EXEC_COMMAND()
     if (MENUY == 0) { // START GAME
         SET_CONTROLS();
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->playModule(1);
+        platform->playModule(MODULE_GAME);
 #else
         MUSIC_ON = 0;
 #endif
@@ -2022,7 +2131,11 @@ void DISPLAY_MAP_NAME()
 {
     const char* name = CALC_MAP_NAME();
     for (int Y = 0; Y != 16; Y++) {
+#ifdef PLATFORM_IMAGE_SUPPORT
+        writeToScreenMemory(0x119 + Y, convertToPETSCII(name[Y]));
+#else
         writeToScreenMemory(0x16A + Y, convertToPETSCII(name[Y]));
+#endif
     }
     // now set the mapname for the filesystem load
     MAPNAME[6] = SELECTED_MAP + 65;
@@ -2052,6 +2165,7 @@ uint8_t MENU_CHART_L[] = {  0x54, 0x7C, 0xA4, 0xCC };
 
 void CHANGE_DIFFICULTY_LEVEL()
 {
+#ifndef PLATFORM_IMAGE_SUPPORT
     int Y = FACE_LEVEL[DIFF_LEVEL];
     // DO CHARACTERS FIRST
     writeToScreenMemory(0x0DD, ROBOT_FACE[Y++]);
@@ -2062,6 +2176,7 @@ void CHANGE_DIFFICULTY_LEVEL()
     writeToScreenMemory(0x0E3, ROBOT_FACE[Y++]);
     writeToScreenMemory(0x107, ROBOT_FACE[Y++]);
     writeToScreenMemory(0x109, ROBOT_FACE[Y]);
+#endif
 }
 
 uint8_t DIFF_LEVEL = 1; // default medium
