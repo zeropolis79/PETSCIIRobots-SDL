@@ -1584,13 +1584,13 @@ void DISPLAY_TIMEBOMB()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x112 + Y, TBOMB1A[Y]);
-        writeToScreenMemory(0x13A + Y, TBOMB1B[Y]);
-        writeToScreenMemory(0x162 + Y, TBOMB1C[Y]);
-        writeToScreenMemory(0x18A + Y, TBOMB1D[Y]);
+        writeToScreenMemory(0x162 + Y, TBOMB1A[Y]);
+        writeToScreenMemory(0x18A + Y, TBOMB1B[Y]);
+        writeToScreenMemory(0x1B2 + Y, TBOMB1C[Y]);
+        writeToScreenMemory(0x1DA + Y, TBOMB1D[Y]);
     }
     DECNUM = INV_BOMBS;
-    DECWRITE(0x18D);
+    DECWRITE(0x205);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, TBOMB1A[Y]);
@@ -1607,13 +1607,13 @@ void DISPLAY_EMP()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x112 + Y, EMP1A[Y]);
-        writeToScreenMemory(0x13A + Y, EMP1B[Y]);
-        writeToScreenMemory(0x162 + Y, EMP1C[Y]);
-        writeToScreenMemory(0x18A + Y, EMP1D[Y]);
+        writeToScreenMemory(0x162 + Y, EMP1A[Y]);
+        writeToScreenMemory(0x18A + Y, EMP1B[Y]);
+        writeToScreenMemory(0x1B2 + Y, EMP1C[Y]);
+        writeToScreenMemory(0x1DA + Y, EMP1D[Y]);
     }
     DECNUM = INV_EMP;
-    DECWRITE(0x18D);
+    DECWRITE(0x205);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, EMP1A[Y]);
@@ -1630,13 +1630,13 @@ void DISPLAY_MEDKIT()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x112 + Y, MED1A[Y]);
-        writeToScreenMemory(0x13A + Y, MED1B[Y]);
-        writeToScreenMemory(0x162 + Y, MED1C[Y]);
-        writeToScreenMemory(0x18A + Y, MED1D[Y]);
+        writeToScreenMemory(0x162 + Y, MED1A[Y]);
+        writeToScreenMemory(0x18A + Y, MED1B[Y]);
+        writeToScreenMemory(0x1B2 + Y, MED1C[Y]);
+        writeToScreenMemory(0x1DA + Y, MED1D[Y]);
     }
     DECNUM = INV_MEDKIT;
-    DECWRITE(0x18D);
+    DECWRITE(0x205);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, MED1A[Y]);
@@ -1653,13 +1653,13 @@ void DISPLAY_MAGNET()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x112 + Y, MAG1A[Y]);
-        writeToScreenMemory(0x13A + Y, MAG1B[Y]);
-        writeToScreenMemory(0x162 + Y, MAG1C[Y]);
-        writeToScreenMemory(0x18A + Y, MAG1D[Y]);
+        writeToScreenMemory(0x162 + Y, MAG1A[Y]);
+        writeToScreenMemory(0x18A + Y, MAG1B[Y]);
+        writeToScreenMemory(0x1B2 + Y, MAG1C[Y]);
+        writeToScreenMemory(0x1DA + Y, MAG1D[Y]);
     }
     DECNUM = INV_MAGNET;
-    DECWRITE(0x18D);
+    DECWRITE(0x205);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, MAG1A[Y]);
@@ -1675,7 +1675,7 @@ void DISPLAY_MAGNET()
 void DISPLAY_BLANK_ITEM()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->clearRect(272, 48, 48, 32);
+    platform->clearRect(272, 56, 48, 48);
 #else
     platform->clearRect(272, 56, 48, 32);
 #endif
@@ -1763,7 +1763,7 @@ void DISPLAY_PLASMA_GUN()
     }
     DECNUM = AMMO_PLASMA;
 #ifdef PLATFORM_IMAGE_SUPPORT
-    DECWRITE(0x0C2);
+    DECWRITE(0x0ED);
 #else
     DECWRITE(0x0ED);
 #endif
@@ -1779,7 +1779,7 @@ void DISPLAY_PISTOL()
     }
     DECNUM = AMMO_PISTOL;
 #ifdef PLATFORM_IMAGE_SUPPORT
-    DECWRITE(0x0C2);
+    DECWRITE(0x0ED);
 #else
     DECWRITE(0x0ED);
 #endif
@@ -1788,7 +1788,7 @@ void DISPLAY_PISTOL()
 void DISPLAY_BLANK_WEAPON()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->clearRect(272, 8, 48, 32);
+    platform->clearRect(272, 8, 48, 48);
 #else
     platform->clearRect(272, 16, 48, 32);
 #endif
@@ -1806,7 +1806,7 @@ void DISPLAY_BLANK_WEAPON()
 void DISPLAY_KEYS()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->clearRect(272, 88, 48, 32); // ERASE ALL 3 SPOTS
+    platform->clearRect(272, 120, 48, 16); // ERASE ALL 3 SPOTS
     /*
     writeToScreenMemory(0x27A, 32); // ERASE ALL 3 SPOTS
     writeToScreenMemory(0x27B, 32);
@@ -1822,22 +1822,22 @@ void DISPLAY_KEYS()
     writeToScreenMemory(0x2A7, 32);
     */
     if (KEYS & 0x01) { // %00000001 Spade key
-        writeToScreenMemory(0x22A, 0x63);
-        writeToScreenMemory(0x22B, 0x4D);
-        writeToScreenMemory(0x252, 0x41);
-        writeToScreenMemory(0x253, 0x67);
+        writeToScreenMemory(0x27A, 0x63);
+        writeToScreenMemory(0x27B, 0x4D);
+        writeToScreenMemory(0x2A2, 0x41);
+        writeToScreenMemory(0x2A3, 0x67);
     }
     if (KEYS & 0x02) { // %00000010 heart key
-        writeToScreenMemory(0x22C, 0x63);
-        writeToScreenMemory(0x22D, 0x4D);
-        writeToScreenMemory(0x254, 0x53);
-        writeToScreenMemory(0x255, 0x67);
+        writeToScreenMemory(0x27C, 0x63);
+        writeToScreenMemory(0x27D, 0x4D);
+        writeToScreenMemory(0x2A4, 0x53);
+        writeToScreenMemory(0x2A5, 0x67);
     }
     if (KEYS & 0x04) { // %00000100 star key
-        writeToScreenMemory(0x22E, 0x63);
-        writeToScreenMemory(0x22F, 0x4D);
-        writeToScreenMemory(0x256, 0x2A);
-        writeToScreenMemory(0x257, 0x67);
+        writeToScreenMemory(0x27E, 0x63);
+        writeToScreenMemory(0x27F, 0x4D);
+        writeToScreenMemory(0x2A6, 0x2A);
+        writeToScreenMemory(0x2A7, 0x67);
     }
 #else
     platform->clearRect(272, 120, 48, 16); // ERASE ALL 3 SPOTS
