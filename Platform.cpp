@@ -17,6 +17,10 @@ void Platform::updateTiles(uint8_t*, uint8_t*, uint8_t)
 {
 }
 
+void Platform::renderItem(uint8_t, uint16_t, uint16_t)
+{
+}
+
 void Platform::startShakeScreen()
 {
 }

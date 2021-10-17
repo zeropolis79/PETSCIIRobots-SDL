@@ -1583,14 +1583,7 @@ void PRESELECT_ITEM()
 void DISPLAY_TIMEBOMB()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x162 + Y, TBOMB1A[Y]);
-        writeToScreenMemory(0x18A + Y, TBOMB1B[Y]);
-        writeToScreenMemory(0x1B2 + Y, TBOMB1C[Y]);
-        writeToScreenMemory(0x1DA + Y, TBOMB1D[Y]);
-    }
-    DECNUM = INV_BOMBS;
-    DECWRITE(0x205);
+    platform->renderItem(5, 272, 64);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, TBOMB1A[Y]);
@@ -1598,22 +1591,15 @@ void DISPLAY_TIMEBOMB()
         writeToScreenMemory(0x1B2 + Y, TBOMB1C[Y]);
         writeToScreenMemory(0x1DA + Y, TBOMB1D[Y]);
     }
+#endif
     DECNUM = INV_BOMBS;
     DECWRITE(0x205);
-#endif
 }
 
 void DISPLAY_EMP()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x162 + Y, EMP1A[Y]);
-        writeToScreenMemory(0x18A + Y, EMP1B[Y]);
-        writeToScreenMemory(0x1B2 + Y, EMP1C[Y]);
-        writeToScreenMemory(0x1DA + Y, EMP1D[Y]);
-    }
-    DECNUM = INV_EMP;
-    DECWRITE(0x205);
+    platform->renderItem(3, 272, 64);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, EMP1A[Y]);
@@ -1621,22 +1607,15 @@ void DISPLAY_EMP()
         writeToScreenMemory(0x1B2 + Y, EMP1C[Y]);
         writeToScreenMemory(0x1DA + Y, EMP1D[Y]);
     }
+#endif
     DECNUM = INV_EMP;
     DECWRITE(0x205);
-#endif
 }
 
 void DISPLAY_MEDKIT()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x162 + Y, MED1A[Y]);
-        writeToScreenMemory(0x18A + Y, MED1B[Y]);
-        writeToScreenMemory(0x1B2 + Y, MED1C[Y]);
-        writeToScreenMemory(0x1DA + Y, MED1D[Y]);
-    }
-    DECNUM = INV_MEDKIT;
-    DECWRITE(0x205);
+    platform->renderItem(2, 272, 64);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, MED1A[Y]);
@@ -1644,22 +1623,15 @@ void DISPLAY_MEDKIT()
         writeToScreenMemory(0x1B2 + Y, MED1C[Y]);
         writeToScreenMemory(0x1DA + Y, MED1D[Y]);
     }
+#endif
     DECNUM = INV_MEDKIT;
     DECWRITE(0x205);
-#endif
 }
 
 void DISPLAY_MAGNET()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x162 + Y, MAG1A[Y]);
-        writeToScreenMemory(0x18A + Y, MAG1B[Y]);
-        writeToScreenMemory(0x1B2 + Y, MAG1C[Y]);
-        writeToScreenMemory(0x1DA + Y, MAG1D[Y]);
-    }
-    DECNUM = INV_MAGNET;
-    DECWRITE(0x205);
+    platform->renderItem(4, 272, 64);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, MAG1A[Y]);
@@ -1667,15 +1639,15 @@ void DISPLAY_MAGNET()
         writeToScreenMemory(0x1B2 + Y, MAG1C[Y]);
         writeToScreenMemory(0x1DA + Y, MAG1D[Y]);
     }
+#endif
     DECNUM = INV_MAGNET;
     DECWRITE(0x205);
-#endif
 }
 
 void DISPLAY_BLANK_ITEM()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->clearRect(272, 56, 48, 48);
+    platform->clearRect(272, 64, 48, 48);
 #else
     platform->clearRect(272, 56, 48, 32);
 #endif
@@ -1755,34 +1727,34 @@ void PRESELECT_WEAPON()
 
 void DISPLAY_PLASMA_GUN()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    platform->renderItem(1, 272, 8);
+#else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x04A + Y, WEAPON1A[Y]);
         writeToScreenMemory(0x072 + Y, WEAPON1B[Y]);
         writeToScreenMemory(0x09A + Y, WEAPON1C[Y]);
         writeToScreenMemory(0x0C2 + Y, WEAPON1D[Y]);
     }
-    DECNUM = AMMO_PLASMA;
-#ifdef PLATFORM_IMAGE_SUPPORT
-    DECWRITE(0x0ED);
-#else
-    DECWRITE(0x0ED);
 #endif
+    DECNUM = AMMO_PLASMA;
+    DECWRITE(0x0ED);
 }
 
 void DISPLAY_PISTOL()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    platform->renderItem(0, 272, 8);
+#else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x04A + Y, PISTOL1A[Y]);
         writeToScreenMemory(0x072 + Y, PISTOL1B[Y]);
         writeToScreenMemory(0x09A + Y, PISTOL1C[Y]);
         writeToScreenMemory(0x0C2 + Y, PISTOL1D[Y]);
     }
-    DECNUM = AMMO_PISTOL;
-#ifdef PLATFORM_IMAGE_SUPPORT
-    DECWRITE(0x0ED);
-#else
-    DECWRITE(0x0ED);
 #endif
+    DECNUM = AMMO_PISTOL;
+    DECWRITE(0x0ED);
 }
 
 void DISPLAY_BLANK_WEAPON()
