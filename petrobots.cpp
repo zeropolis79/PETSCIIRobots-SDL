@@ -1393,9 +1393,22 @@ void DISPLAY_GAME_SCREEN()
 #endif
 }
 
+const char* introText[] = {
+    "start game",
+    "select map",
+    "difficulty",
+    "controls  "
+};
+
 void DISPLAY_INTRO_SCREEN()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
+    uint8_t* row = SCREEN_MEMORY + MENU_CHART_L[0];
+    for (int Y = 0; Y < 4; Y++, row += 40) {
+        for (int X = 0; X < 10; X++) {
+            row[X] = convertToPETSCII(introText[Y][X]);
+        }
+    }
     platform->displayImage(IMAGE_INTRO);
 #else
     DECOMPRESS_SCREEN(INTRO_TEXT);
@@ -2123,7 +2136,7 @@ void REVERSE_MENU_OPTION(bool reverse)
 {
 #ifdef PLATFORM_COLOR_SUPPORT
     for (int Y = 0; Y != 10; Y++) {
-        writeToScreenMemory(MENU_CHART_L[MENUY] + Y, SCREEN_MEMORY[MENU_CHART_L[MENUY] + Y], reverse ? 2 : 1);
+        writeToScreenMemory(MENU_CHART_L[MENUY] + Y, SCREEN_MEMORY[MENU_CHART_L[MENUY] + Y], reverse ? 1 : 13);
     }
 #else
     for (int Y = 0; Y != 10; Y++) {
@@ -2133,7 +2146,11 @@ void REVERSE_MENU_OPTION(bool reverse)
 }
 
 uint8_t MENUY = 0; // CURRENT MENU SELECTION
-uint8_t MENU_CHART_L[] = {  0x54, 0x7C, 0xA4, 0xCC };
+#ifdef PLATFORM_COLOR_SUPPORT
+uint8_t MENU_CHART_L[] = { 0x2C, 0x54, 0x7C, 0xA4 };
+#else
+uint8_t MENU_CHART_L[] = { 0x54, 0x7C, 0xA4, 0xCC };
+#endif
 
 void CHANGE_DIFFICULTY_LEVEL()
 {
