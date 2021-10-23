@@ -33,6 +33,7 @@ public:
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent);
     virtual void renderItem(uint8_t item, uint16_t x, uint16_t y);
+    virtual void renderHealth(uint8_t health, uint16_t x, uint16_t y);
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     virtual void shakeScreen();
@@ -64,6 +65,7 @@ private:
     uint8_t* tilesMask;
     BitMap* tilesBitMap;
     BitMap* itemsBitMap;
+    BitMap* healthBitMap;
     uint16_t bplcon1DefaultValue;
     uint16_t shakeStep;
     static uint16_t addressMap[];

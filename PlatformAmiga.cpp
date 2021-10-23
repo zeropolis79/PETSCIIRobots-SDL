@@ -33,6 +33,7 @@ __far extern uint8_t gameScreen[];
 __far extern uint8_t c64Font[];
 __chip extern uint8_t tilesPlanes[];
 __chip extern uint8_t itemsPlanes[];
+__chip extern uint8_t healthPlanes[];
 __chip extern uint8_t introMusic[];
 __chip extern uint8_t music[];
 __chip int8_t sample[2] = { 127, -128 };
@@ -54,6 +55,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     tilesMask(0),
     tilesBitMap(new BitMap),
     itemsBitMap(new BitMap),
+    healthBitMap(new BitMap),
     bplcon1DefaultValue(0),
     shakeStep(0)
 {
@@ -76,19 +78,24 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     InitBitMap(screenBitmap, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
     InitBitMap(tilesBitMap, PLANES, 32, 24 * 256);
     InitBitMap(itemsBitMap, PLANES, 48, 32 * 6);
+    InitBitMap(healthBitMap, PLANES, 48, 56 * 6);
     screenBitmap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     tilesBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     itemsBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
+    healthBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     screenBitmap->BytesPerRow = SCREEN_WIDTH_IN_BYTES * PLANES;
     tilesBitMap->BytesPerRow = 4 * PLANES;
     itemsBitMap->BytesPerRow = 6 * PLANES;
+    healthBitMap->BytesPerRow = 6 * PLANES;
     uint8_t* screenPlane = screenPlanes;
     uint8_t* tilesPlane = tilesPlanes;
     uint8_t* itemsPlane = itemsPlanes;
-    for (int plane = 0; plane < PLANES; plane++, screenPlane += SCREEN_WIDTH_IN_BYTES, tilesPlane += 4, itemsPlane += 6) {
+    uint8_t* healthPlane = healthPlanes;
+    for (int plane = 0; plane < PLANES; plane++, screenPlane += SCREEN_WIDTH_IN_BYTES, tilesPlane += 4, itemsPlane += 6, healthPlane += 6) {
         screenBitmap->Planes[plane] = screenPlane;
         tilesBitMap->Planes[plane] = tilesPlane;
         itemsBitMap->Planes[plane] = itemsPlane;
+        healthBitMap->Planes[plane] = healthPlane;
     }
 
     ExtNewScreen newScreen = {0};
@@ -192,6 +199,7 @@ PlatformAmiga::~PlatformAmiga()
         FreeMem(screenPlanes, SCREEN_SIZE * PLANES);
     }
 
+    delete healthBitMap;
     delete itemsBitMap;
     delete tilesBitMap;
     delete ioAudio;
@@ -476,6 +484,11 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transp
 void PlatformAmiga::renderItem(uint8_t item, uint16_t x, uint16_t y)
 {
     BltBitMap(itemsBitMap, 0, item * 32, screen->RastPort.BitMap, x, y, 48, 32, 0xc0, 0xff, 0);
+}
+
+void PlatformAmiga::renderHealth(uint8_t health, uint16_t x, uint16_t y)
+{
+    BltBitMap(healthBitMap, 0, health * 56, screen->RastPort.BitMap, x, y, 48, 56, 0xc0, 0xff, 0);
 }
 
 void PlatformAmiga::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)

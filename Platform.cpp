@@ -21,6 +21,10 @@ void Platform::renderItem(uint8_t, uint16_t, uint16_t)
 {
 }
 
+void Platform::renderHealth(uint8_t, uint16_t, uint16_t)
+{
+}
+
 void Platform::startShakeScreen()
 {
 }

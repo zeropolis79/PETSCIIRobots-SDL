@@ -1509,7 +1509,14 @@ void DISPLAY_PLAYER_HEALTH()
     while (Y != 6) {
         writeToScreenMemory(baseAddress + Y++, 0x20); // SPACE
     }
+
+#ifdef PLATFORM_IMAGE_SUPPORT
+    platform->renderHealth(5 - MIN(TEMP_A, 5), 272, 128);
+#endif
 }
+
+#ifdef PLATFORM_IMAGE_SUPPORT
+#endif
 
 void CYCLE_ITEM()
 {
@@ -2537,9 +2544,7 @@ void PET_BORDER_FLASH()
             // copy flash message to screen
             for (int X = 0; X != 6; X++) {
 #ifdef PLATFORM_IMAGE_SUPPORT
-                writeToScreenMemory(0x36A + X, OUCH1[X]);
-                writeToScreenMemory(0x392 + X, OUCH2[X]);
-                writeToScreenMemory(0x3BA + X, OUCH3[X]);
+                writeToScreenMemory(0x3BA + X, OUCH2[X]);
 #else
                 writeToScreenMemory(0x2F2 + X, OUCH1[X]);
                 writeToScreenMemory(0x31A + X, OUCH2[X]);
@@ -2552,7 +2557,7 @@ void PET_BORDER_FLASH()
         if (FLASH_STATE != 0) {
             // Remove message from screen
 #ifdef PLATFORM_IMAGE_SUPPORT
-            platform->clearRect(272, 168, 48, 24);
+            platform->clearRect(272, 184, 48, 8);
 #else
             for (int X = 0; X != 6; X++) {
                 writeToScreenMemory(0x2F2 + X, 32);

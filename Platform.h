@@ -46,6 +46,7 @@ public:
     virtual void updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles);
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent) = 0;
     virtual void renderItem(uint8_t item, uint16_t x, uint16_t y);
+    virtual void renderHealth(uint8_t health, uint16_t x, uint16_t y);
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height) = 0;
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) = 0;
     virtual void startShakeScreen();
