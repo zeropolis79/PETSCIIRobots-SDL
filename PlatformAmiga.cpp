@@ -489,18 +489,18 @@ void PlatformAmiga::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t h
 void PlatformAmiga::shakeScreen()
 {
     shakeStep++;
-    if (shakeStep > 2) {
+    if (shakeStep > 4) {
         shakeStep = 1;
     }
 
     uint16_t bplcon1Value = bplcon1DefaultValue;
-    if (shakeStep == 1) {
-        if (bplcon1Value < 0xff) {
-            bplcon1Value += 0x11;
+    if (shakeStep < 3) {
+        if (bplcon1Value <= 0xcc) {
+            bplcon1Value += 0x33;
         }
     } else if (shakeStep == 2) {
-        if (bplcon1Value > 0x00) {
-            bplcon1Value -= 0x11;
+        if (bplcon1Value >= 0x33) {
+            bplcon1Value -= 0x33;
         }
     }
     uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
