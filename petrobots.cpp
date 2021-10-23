@@ -1494,15 +1494,20 @@ uint8_t RPT = 0; // repeat value
 void DISPLAY_PLAYER_HEALTH()
 {
     TEMP_A = UNIT_HEALTH[0] >> 1; // No index needed because it is the player, divide by two
+#ifdef PLATFORM_IMAGE_SUPPORT
+    int baseAddress = 0x3E2;
+#else
+    int baseAddress = 0x3BA;
+#endif
     int Y = 0;
     while (Y != TEMP_A) {
-        writeToScreenMemory(0x3BA + Y++, 0x66); // GRAY BLOCK
+        writeToScreenMemory(baseAddress + Y++, 0x66); // GRAY BLOCK
     }
     if (UNIT_HEALTH[0] & 0x01) {
-        writeToScreenMemory(0x3BA + Y++, 0x5C); // HALF GRAY BLOCK
+        writeToScreenMemory(baseAddress + Y++, 0x5C); // HALF GRAY BLOCK
     }
     while (Y != 6) {
-        writeToScreenMemory(0x3BA + Y++, 0x20); // SPACE
+        writeToScreenMemory(baseAddress + Y++, 0x20); // SPACE
     }
 }
 
@@ -2531,20 +2536,30 @@ void PET_BORDER_FLASH()
         if (FLASH_STATE != 1) { // Is it already flashing?
             // copy flash message to screen
             for (int X = 0; X != 6; X++) {
+#ifdef PLATFORM_IMAGE_SUPPORT
+                writeToScreenMemory(0x36A + X, OUCH1[X]);
+                writeToScreenMemory(0x392 + X, OUCH2[X]);
+                writeToScreenMemory(0x3BA + X, OUCH3[X]);
+#else
                 writeToScreenMemory(0x2F2 + X, OUCH1[X]);
                 writeToScreenMemory(0x31A + X, OUCH2[X]);
                 writeToScreenMemory(0x342 + X, OUCH3[X]);
+#endif
             }
             FLASH_STATE = 1;
         }
     } else {
         if (FLASH_STATE != 0) {
             // Remove message from screen
+#ifdef PLATFORM_IMAGE_SUPPORT
+            platform->clearRect(272, 168, 48, 24);
+#else
             for (int X = 0; X != 6; X++) {
                 writeToScreenMemory(0x2F2 + X, 32);
                 writeToScreenMemory(0x31A + X, 32);
                 writeToScreenMemory(0x342 + X, 32);
             }
+#endif
             FLASH_STATE = 0;
         }
     }
@@ -2552,7 +2567,7 @@ void PET_BORDER_FLASH()
 
 uint8_t FLASH_STATE = 0;
 uint8_t OUCH1[] = { 0xCD, 0xA0, 0xA0, 0xA0, 0xA0, 0xCE };
-uint8_t OUCH2[] = { 0xA0, 0x8F, 0x95, 0x83, 0x88, 0xA0 };
+uint8_t OUCH2[] = { 0xA0, 0x0F, 0x15, 0x03, 0x08, 0xA0 };
 uint8_t OUCH3[] = { 0xCE, 0xA0, 0xA0, 0xA0, 0xA0, 0xCD };
 
 // This is actually part of a background routine, but it has to be in the main
