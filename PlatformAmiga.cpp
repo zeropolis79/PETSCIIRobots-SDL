@@ -382,13 +382,15 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                 for (int y = 0; y < 3; y++, tiles += 8 * 4 * PLANES - 3, mask += 8 * 4 * PLANES - 3) {
                     for (int x = 0; x < 3; x++, tiles++, mask++) {
                         uint8_t character = characters[y][x];
-                        uint8_t* font = c64Font + (character << 3);
+                        bool reverse = character > 127;
+                        uint8_t* font = c64Font + ((character & 127) << 3);
                         for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
-                            tiles[offset] = *font;
+                            uint8_t byte = reverse ? ~*font : *font;
+                            tiles[offset] = byte;
                             tiles[offset + 4] = 0;
                             tiles[offset + 8] = 0;
                             tiles[offset + 12] = 0;
-                            mask[offset] = character != 0x3a ? *font : 0;
+                            mask[offset] = character != 0x3a ? byte : 0;
                             mask[offset + 4] = mask[offset];
                             mask[offset + 8] = mask[offset];
                             mask[offset + 12] = mask[offset];
@@ -531,18 +533,29 @@ void PlatformAmiga::stopShakeScreen()
 
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color)
 {
+    bool reverse = value > 127;
     bool writePlane1 = color & 1;
     bool writePlane2 = color & 2;
     bool writePlane3 = color & 4;
     bool writePlane4 = color & 8;
-    uint8_t* source = c64Font + (value << 3);
+    uint8_t* source = c64Font + ((value & 127) << 3);
     uint8_t* destination = screenPlanes + addressMap[address];
-    for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
-        uint8_t font = *source++;
-        *destination = writePlane1 ? font : 0;
-        destination[1 * SCREEN_WIDTH_IN_BYTES] = writePlane2 ? font : 0;
-        destination[2 * SCREEN_WIDTH_IN_BYTES] = writePlane3 ? font : 0;
-        destination[3 * SCREEN_WIDTH_IN_BYTES] = writePlane4 ? font : 0;
+    if (reverse) {
+        for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
+            uint8_t font = ~*source++;
+            *destination = writePlane1 ? font : 0;
+            destination[1 * SCREEN_WIDTH_IN_BYTES] = writePlane2 ? font : 0;
+            destination[2 * SCREEN_WIDTH_IN_BYTES] = writePlane3 ? font : 0;
+            destination[3 * SCREEN_WIDTH_IN_BYTES] = writePlane4 ? font : 0;
+        }
+    } else {
+        for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
+            uint8_t font = *source++;
+            *destination = writePlane1 ? font : 0;
+            destination[1 * SCREEN_WIDTH_IN_BYTES] = writePlane2 ? font : 0;
+            destination[2 * SCREEN_WIDTH_IN_BYTES] = writePlane3 ? font : 0;
+            destination[3 * SCREEN_WIDTH_IN_BYTES] = writePlane4 ? font : 0;
+        }
     }
 }
 
