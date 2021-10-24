@@ -2140,7 +2140,7 @@ void DISPLAY_MAP_NAME()
     const char* name = CALC_MAP_NAME();
     for (int Y = 0; Y != 16; Y++) {
 #ifdef PLATFORM_IMAGE_SUPPORT
-        writeToScreenMemory(0x119 + Y, convertToPETSCII(name[Y]));
+        writeToScreenMemory(0x119 + Y, convertToPETSCII(name[Y]), 13);
 #else
         writeToScreenMemory(0x16A + Y, convertToPETSCII(name[Y]));
 #endif
