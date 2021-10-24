@@ -222,7 +222,7 @@ void PLOT_TRANSPARENT_TILE(uint16_t destination);
 void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y);
 void REVERSE_TILE();
 void CHECK_FOR_WINDOW_REDRAW();
-void DECWRITE(uint16_t destination);
+void DECWRITE(uint16_t destination, uint8_t color = 10);
 
 extern uint8_t DECA[];
 extern uint8_t DECB;
@@ -495,6 +495,6 @@ extern uint8_t IN_GAME_MUSIC2[];
 extern uint8_t IN_GAME_MUSIC3[];
 
 char convertToPETSCII(char value);
-void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color = 1);
+void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color = 10);
 
 #endif
