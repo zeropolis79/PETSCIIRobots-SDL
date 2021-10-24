@@ -1388,6 +1388,13 @@ void DISPLAY_GAME_SCREEN()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
     platform->displayImage(IMAGE_GAME);
+
+    writeToScreenMemory(0x3E2, 0x71, 15);
+    writeToScreenMemory(0x3E3, 0x71, 15);
+    writeToScreenMemory(0x3E4, 0x71, 12);
+    writeToScreenMemory(0x3E5, 0x71, 12);
+    writeToScreenMemory(0x3E6, 0x71, 9);
+    writeToScreenMemory(0x3E7, 0x71, 9);
 #else
     DECOMPRESS_SCREEN(SCR_TEXT);
 #endif
@@ -1494,29 +1501,21 @@ uint8_t RPT = 0; // repeat value
 void DISPLAY_PLAYER_HEALTH()
 {
     TEMP_A = UNIT_HEALTH[0] >> 1; // No index needed because it is the player, divide by two
-#ifdef PLATFORM_IMAGE_SUPPORT
-    int baseAddress = 0x3E2;
-#else
-    int baseAddress = 0x3BA;
-#endif
     int Y = 0;
     while (Y != TEMP_A) {
-        writeToScreenMemory(baseAddress + Y++, 0x66); // GRAY BLOCK
+        writeToScreenMemory(0x3BA + Y++, 0x66); // GRAY BLOCK
     }
     if (UNIT_HEALTH[0] & 0x01) {
-        writeToScreenMemory(baseAddress + Y++, 0x5C); // HALF GRAY BLOCK
+        writeToScreenMemory(0x3BA + Y++, 0x5C); // HALF GRAY BLOCK
     }
     while (Y != 6) {
-        writeToScreenMemory(baseAddress + Y++, 0x20); // SPACE
+        writeToScreenMemory(0x3BA + Y++, 0x20); // SPACE
     }
 
 #ifdef PLATFORM_IMAGE_SUPPORT
     platform->renderHealth(5 - MIN(TEMP_A, 5), 272, 128);
 #endif
 }
-
-#ifdef PLATFORM_IMAGE_SUPPORT
-#endif
 
 void CYCLE_ITEM()
 {
@@ -2544,7 +2543,7 @@ void PET_BORDER_FLASH()
             // copy flash message to screen
             for (int X = 0; X != 6; X++) {
 #ifdef PLATFORM_IMAGE_SUPPORT
-                writeToScreenMemory(0x3BA + X, OUCH2[X]);
+                writeToScreenMemory(0x392 + X, OUCH2[X], 15);
 #else
                 writeToScreenMemory(0x2F2 + X, OUCH1[X]);
                 writeToScreenMemory(0x31A + X, OUCH2[X]);
@@ -2557,7 +2556,7 @@ void PET_BORDER_FLASH()
         if (FLASH_STATE != 0) {
             // Remove message from screen
 #ifdef PLATFORM_IMAGE_SUPPORT
-            platform->clearRect(272, 184, 48, 8);
+            platform->clearRect(272, 176, 48, 8);
 #else
             for (int X = 0; X != 6; X++) {
                 writeToScreenMemory(0x2F2 + X, 32);
