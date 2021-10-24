@@ -111,8 +111,6 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     }
     SetAPen(&screen->RastPort, 0);
 
-    LoadRGB4(&screen->ViewPort, (uint16_t*)(tilesPlanes + 32 / 8 * 24 * 256 * PLANES), (1 << PLANES));
-
     ExtNewWindow newWindow = {0};
     newWindow.Width = SCREEN_WIDTH;
     newWindow.Height = SCREEN_HEIGHT;
