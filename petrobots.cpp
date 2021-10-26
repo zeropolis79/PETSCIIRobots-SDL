@@ -2350,6 +2350,7 @@ void ANIMATE_WATER()
         return;
     }
     WATER_TIMER = 0;
+#ifndef PLATFORM_IMAGE_SUPPORT
     WATER_TEMP1 = TILE_DATA_BR[204];
     TILE_DATA_BR[204] = TILE_DATA_MM[204];
     TILE_DATA_BR[221] = TILE_DATA_MM[204];
@@ -2429,6 +2430,7 @@ void ANIMATE_WATER()
     }
     uint8_t tiles[] = { 204, 221, 148, 196, 197, 200, 201, 20, 21, 22, 143 };
     platform->updateTiles(TILE_DATA_TL, tiles, 11);
+#endif
     REDRAW_WINDOW = 1;
 }
 
