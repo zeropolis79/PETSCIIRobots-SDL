@@ -26,7 +26,7 @@
 #define PLANES 4
 #define TILES_WITH_MASK 34
 
-static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-24) (C)2021 David Murray, Vesa Halttunen";
+static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-26) (C)2021 David Murray, Vesa Halttunen";
 
 struct spriteData {
     uint16_t posctl[2];
@@ -202,7 +202,6 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     }
 
     ExtNewScreen newScreen = {0};
-    newScreen.LeftEdge = 42;
     newScreen.Width = SCREEN_WIDTH;
     newScreen.Height = SCREEN_HEIGHT;
     newScreen.Depth = PLANES;
