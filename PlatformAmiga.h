@@ -5,6 +5,7 @@
 #define PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
 #define PLATFORM_IMAGE_SUPPORT
 #define PLATFORM_COLOR_SUPPORT
+#define PLATFORM_CURSOR_SUPPORT
 #define PlatformClass PlatformAmiga
 
 #include "Platform.h"
@@ -16,6 +17,7 @@ struct Interrupt;
 struct IOAudio;
 struct MsgPort;
 struct BitMap;
+struct SimpleSprite;
 
 class PlatformAmiga : public Platform {
 public:
@@ -35,6 +37,8 @@ public:
     virtual void renderSprite(uint8_t sprite, uint16_t x, uint16_t y);
     virtual void renderItem(uint8_t item, uint16_t x, uint16_t y);
     virtual void renderHealth(uint8_t health, uint16_t x, uint16_t y);
+    virtual void showCursor(uint16_t x, uint16_t y);
+    virtual void hideCursor();
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     virtual void shakeScreen();
@@ -68,6 +72,8 @@ private:
     BitMap* spritesBitMap;
     BitMap* itemsBitMap;
     BitMap* healthBitMap;
+    SimpleSprite* cursorSprite1;
+    SimpleSprite* cursorSprite2;
     uint16_t bplcon1DefaultValue;
     uint16_t shakeStep;
     static uint16_t addressMap[];

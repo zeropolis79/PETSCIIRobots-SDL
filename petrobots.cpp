@@ -580,8 +580,12 @@ void USE_MAGNET()
 
 bool BOMB_MAGNET_COMMON1()
 {
+#ifdef PLATFORM_CURSOR_SUPPORT
+    platform->hideCursor();
+#else
     CURSOR_ON = 0;
     DRAW_MAP_WINDOW(); // ERASE THE CURSOR
+#endif
     MAP_X = CURSOR_X + MAP_WINDOW_X;
     MOVTEMP_UX = MAP_X;
     MAP_Y = CURSOR_Y + MAP_WINDOW_Y;
@@ -923,7 +927,11 @@ void SEARCH_OBJECT()
     CALC_COORDINATES();
     GET_TILE_FROM_MAP();
     if ((TILE_ATTRIB[TILE] & 0x40) == 0) { // %01000000 can search attribute
+#ifdef PLATFORM_CURSOR_SUPPORT
+        platform->hideCursor();
+#else
         CURSOR_ON = 0;
+#endif
     } else {
         // is the tile a crate?
         if (TILE == 41 || TILE == 45 || TILE == 199) { // BIG CRATE / small CRATE / "Pi" CRATE
@@ -939,8 +947,12 @@ void SEARCH_OBJECT()
             }
             writeToScreenMemory(0x3C9 + SEARCHBAR, 46); // PERIOD
         }
+#ifdef PLATFORM_CURSOR_SUPPORT
+        platform->hideCursor();
+#else
         CURSOR_ON = 0;
         DRAW_MAP_WINDOW(); // ERASE THE CURSOR
+#endif
         CALC_COORDINATES();
         CHECK_FOR_HIDDEN_UNIT();
         if (UNIT_FIND == 255) {
@@ -1012,29 +1024,49 @@ void USER_SELECT_OBJECT()
     PLAY_SOUND(16); // beep sound, SOUND PLAY
     CURSOR_X = 5;
     CURSOR_Y = 3;
+#ifdef PLATFORM_CURSOR_SUPPORT
+    platform->showCursor(CURSOR_X, CURSOR_Y);
+#else
     CURSOR_ON = 1;
     REVERSE_TILE();
+#endif
     // First ask user which object to move
     while (!platform->quit) {
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
         if (UNIT_TYPE[0] == 0) { // Did player die wile moving something?
+#ifdef PLATFORM_CURSOR_SUPPORT
+            platform->hideCursor();
+#else
             CURSOR_ON = 0;
+#endif
             return;
         }
         if (CONTROL != 2) {
             uint8_t A = platform->getin();
             if (A == 0x1D || A == *KEY_MOVE_RIGHT) { // CURSOR RIGHT
                 CURSOR_X++;
+#ifdef PLATFORM_CURSOR_SUPPORT
+                platform->showCursor(CURSOR_X, CURSOR_Y);
+#endif
                 return;
             } else if (A == 0x9D || A == *KEY_MOVE_LEFT) { // CURSOR LEFT
                 CURSOR_X--;
+#ifdef PLATFORM_CURSOR_SUPPORT
+                platform->showCursor(CURSOR_X, CURSOR_Y);
+#endif
                 return;
             } else if (A == 0x11 || A == *KEY_MOVE_DOWN) { // CURSOR DOWN
                 CURSOR_Y++;
+#ifdef PLATFORM_CURSOR_SUPPORT
+                platform->showCursor(CURSOR_X, CURSOR_Y);
+#endif
                 return;
             } else if (A == 0x91 || A == *KEY_MOVE_UP) { // CURSOR UP
                 CURSOR_Y--;
+#ifdef PLATFORM_CURSOR_SUPPORT
+                platform->showCursor(CURSOR_X, CURSOR_Y);
+#endif
                 return;
             }
         } else {
@@ -1049,8 +1081,12 @@ void MOVE_OBJECT()
     USER_SELECT_OBJECT();
     // now test that object to see if it
     // is allowed to be moved.
+#ifdef PLATFORM_CURSOR_SUPPORT
+    platform->hideCursor();
+#else
     CURSOR_ON = 0;
     DRAW_MAP_WINDOW(); // ERASE THE CURSOR
+#endif
     CALC_COORDINATES();
     CHECK_FOR_HIDDEN_UNIT();
     MOVTEMP_U = UNIT_FIND;
@@ -1063,14 +1099,22 @@ void MOVE_OBJECT()
     MOVTEMP_O = TILE; // Store which tile it is we are moving
     MOVTEMP_X = MAP_X; // Store original location of object
     MOVTEMP_Y = MAP_Y;
+#ifdef PLATFORM_CURSOR_SUPPORT
+    platform->showCursor(CURSOR_X, CURSOR_Y);
+#else
     CURSOR_ON = 1;
     REVERSE_TILE();
+#endif
     // NOW ASK THE USER WHICH DIRECTION TO MOVE IT TO
     while (true) {
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
         if (UNIT_TYPE[0] == 0) { // Did player die wile moving something?
+#ifdef PLATFORM_CURSOR_SUPPORT
+            platform->hideCursor();
+#else
             CURSOR_ON = 0;
+#endif
             return;
         }
         if (CONTROL != 2) { // which controller are we using?
@@ -1092,8 +1136,12 @@ void MOVE_OBJECT()
             // TODO
         }
         // NOW TEST TO SEE IF THAT SPOT IS OPEN
+#ifdef PLATFORM_CURSOR_SUPPORT
+        platform->hideCursor();
+#else
         CURSOR_ON = 0;
         DRAW_MAP_WINDOW(); // ERASE THE CURSOR
+#endif
         MAP_X = CURSOR_X + MAP_WINDOW_X;
         MOVTEMP_UX = MAP_X;
         MAP_Y = CURSOR_Y + MAP_WINDOW_Y;

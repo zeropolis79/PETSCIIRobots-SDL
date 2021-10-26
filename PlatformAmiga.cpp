@@ -9,6 +9,7 @@
 #include <graphics/gfx.h>
 #include <graphics/gfxbase.h>
 #include <graphics/view.h>
+#include <graphics/sprite.h>
 #include <intuition/intuition.h>
 #include <hardware/intbits.h>
 #include <hardware/custom.h>
@@ -27,6 +28,12 @@
 
 static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-24) (C)2021 David Murray, Vesa Halttunen";
 
+struct spriteData {
+    uint16_t posctl[2];
+    uint16_t data[28][2];
+    uint16_t reserved[2];
+};
+
 __far extern Custom custom;
 __far extern uint8_t introScreen[];
 __far extern uint8_t gameScreen[];
@@ -40,6 +47,74 @@ __chip extern uint8_t introMusic[];
 __chip extern uint8_t music[];
 __chip int8_t sample[2] = { 127, -128 };
 __chip int32_t simpleTileMask = 0xffffff00;
+__chip spriteData cursorData1 = {
+    { 0, 0 },
+    {
+        { 0xffff, 0 },
+        { 0xffff, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xc000, 0 },
+        { 0xffff, 0 },
+        { 0xffff, 0 }
+    },
+    { 0, 0 }
+};
+__chip spriteData cursorData2 = {
+    { 0, 0 },
+    {
+        { 0xfff0, 0 },
+        { 0xfff0, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0x0030, 0 },
+        { 0xfff0, 0 },
+        { 0xfff0, 0 }
+    },
+    { 0, 0 }
+};
 uint16_t PlatformAmiga::addressMap[40 * 25];
 uint8_t PlatformAmiga::tileMaskMap[256];
 int8_t PlatformAmiga::tileSpriteMap[256] = {
@@ -77,6 +152,8 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     spritesBitMap(new BitMap),
     itemsBitMap(new BitMap),
     healthBitMap(new BitMap),
+    cursorSprite1(new SimpleSprite),
+    cursorSprite2(new SimpleSprite),
     bplcon1DefaultValue(0),
     shakeStep(0)
 {
@@ -125,9 +202,11 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     }
 
     ExtNewScreen newScreen = {0};
+    newScreen.LeftEdge = 42;
     newScreen.Width = SCREEN_WIDTH;
     newScreen.Height = SCREEN_HEIGHT;
     newScreen.Depth = PLANES;
+    newScreen.ViewModes = SPRITES;
     newScreen.Type = CUSTOMBITMAP | CUSTOMSCREEN | SCREENBEHIND | SCREENQUIET;
     newScreen.DefaultTitle = (UBYTE*)"Attack of the PETSCII robots";
     newScreen.CustomBitMap = screenBitmap;
@@ -148,6 +227,9 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     if (!window) {
         return;
     }
+
+    GetSprite(cursorSprite1, 2);
+    GetSprite(cursorSprite2, 3);
 
     verticalBlankInterrupt->is_Node.ln_Type = NT_INTERRUPT;
     verticalBlankInterrupt->is_Node.ln_Pri = 127;
@@ -206,6 +288,14 @@ PlatformAmiga::~PlatformAmiga()
 
     RemIntServer(INTB_VERTB, verticalBlankInterrupt);
 
+    if (cursorSprite2->num != -1) {
+        FreeSprite(cursorSprite2->num);
+    }
+
+    if (cursorSprite1->num != -1) {
+        FreeSprite(cursorSprite1->num);
+    }
+
     if (window) {
         CloseWindow(window);
     }
@@ -223,6 +313,8 @@ PlatformAmiga::~PlatformAmiga()
         FreeMem(screenPlanes, SCREEN_SIZE * PLANES);
     }
 
+    delete cursorSprite2;
+    delete cursorSprite1;
     delete healthBitMap;
     delete itemsBitMap;
     delete spritesBitMap;
@@ -261,6 +353,16 @@ void PlatformAmiga::show()
         } else {
             copperList++;
         }
+    }
+
+    if (cursorSprite1->num != -1 && cursorSprite2->num != -1) {
+        cursorSprite1->height = 0;
+        cursorSprite2->height = 0;
+        SetRGB4(&screen->ViewPort, 21, 15, 15, 15);
+        ChangeSprite(&screen->ViewPort, cursorSprite1, (uint8_t*)&cursorData1);
+        ChangeSprite(&screen->ViewPort, cursorSprite2, (uint8_t*)&cursorData2);
+        MoveSprite(&screen->ViewPort, cursorSprite1, 0, 0);
+        MoveSprite(&screen->ViewPort, cursorSprite2, 16, 0);
     }
 }
 
@@ -545,6 +647,32 @@ void PlatformAmiga::renderItem(uint8_t item, uint16_t x, uint16_t y)
 void PlatformAmiga::renderHealth(uint8_t health, uint16_t x, uint16_t y)
 {
     BltBitMap(healthBitMap, 0, health * 56, screen->RastPort.BitMap, x, y, 48, 56, 0xc0, 0xff, 0);
+}
+
+void PlatformAmiga::showCursor(uint16_t x, uint16_t y)
+{
+    x <<= 3;
+    y <<= 3;
+    x += x + x - 3;
+    y += y + y - 2;
+    if (cursorSprite1->num != -1 && cursorSprite2->num != -1) {
+        cursorSprite1->height = 28;
+        cursorSprite2->height = 28;
+        ChangeSprite(&screen->ViewPort, cursorSprite1, (uint8_t*)&cursorData1);
+        ChangeSprite(&screen->ViewPort, cursorSprite2, (uint8_t*)&cursorData2);
+        MoveSprite(&screen->ViewPort, cursorSprite1, x, y);
+        MoveSprite(&screen->ViewPort, cursorSprite2, x + 16, y);
+    }
+}
+
+void PlatformAmiga::hideCursor()
+{
+    if (cursorSprite1->num != -1 && cursorSprite2->num != -1) {
+        cursorSprite1->height = 0;
+        cursorSprite2->height = 0;
+        ChangeSprite(&screen->ViewPort, cursorSprite1, (uint8_t*)&cursorData1);
+        ChangeSprite(&screen->ViewPort, cursorSprite2, (uint8_t*)&cursorData2);
+    }
 }
 
 void PlatformAmiga::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
