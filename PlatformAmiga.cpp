@@ -24,7 +24,7 @@
 #define SCREEN_WIDTH_IN_BYTES (SCREEN_WIDTH >> 3)
 #define SCREEN_SIZE (SCREEN_WIDTH_IN_BYTES * SCREEN_HEIGHT)
 #define PLANES 4
-#define TILES_WITH_MASK 34
+#define TILES_WITH_MASK 16
 
 static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-26) (C)2021 David Murray, Vesa Halttunen";
 
@@ -124,11 +124,11 @@ int8_t PlatformAmiga::tileSpriteMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    0, 1, 64, 65, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    0, 1, 64, 65, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 54,
     -1, -1, -1, 63, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
-    -1, -1, -1, -1, 55, 56, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    50, 51, 52, -1, 55, 56, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -497,15 +497,13 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
             }
         }
     */
-        if ((tile >= 96 && tile <= 103) ||
-            tile == 111 ||
-            tile == 115 ||
-            tile == 130 ||
-            tile == 134 ||
-            (tile >= 140 && tile <= 142) ||
-            tile == 160 ||
-            (tile >= 164 && tile <= 165) ||
-            tile >= 240) {
+        if ((tile >= 100 && tile <= 103) || // EVILBOT
+            tile == 130 ||                  // BOMB
+            tile == 134 ||                  // MAGNET
+            (tile >= 240 && tile <= 241) || // VERT/HORIZ PLASMA
+            (tile >= 244 && tile <= 245) || // VERT/HORIZ PISTOL
+            tile == 246 ||                  // BIG EXPLOSION
+            (tile >= 248 && tile <= 252)) { // SMALL EXPLOSION
             if (tiles[4 * 12 * PLANES + 1] == 0 && tiles[4 * 12 * PLANES + 4 + 1] == 0 && tiles[4 * 12 * PLANES + 8 + 1] == 0 && tiles[4 * 12 * PLANES + 12 + 1] == 0) {
                 uint8_t characters[3][3] = {
                     { topLeft[tile], topMiddle[tile], topRight[tile] },
