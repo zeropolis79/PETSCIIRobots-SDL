@@ -159,7 +159,7 @@ uint8_t INV_MAGNET = 0; // How many magnets do we have?
 uint8_t SELECTED_WEAPON = 0; // 0=none 1=pistol 2=plasmagun
 uint8_t SELECTED_ITEM = 0; // 0=none 1=bomb 2=emp 3=medkit 4=magnet
 uint8_t SELECT_TIMEOUT = 0; // can only change weapons once it hits zero
-uint8_t ANIMATE	 = 1; // 0=DISABLED 1=ENABLED
+uint8_t ANIMATE = 1; // 0=DISABLED 1=ENABLED
 uint8_t BIG_EXP_ACT = 0; // 0=No explosion active 1=big explosion active
 uint8_t MAGNET_ACT = 0; // 0=no magnet active 1=magnet active
 uint8_t PLASMA_ACT = 0; // 0=No plasma fire active 1=plasma fire active
