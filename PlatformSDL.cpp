@@ -301,7 +301,7 @@ void PlatformSDL::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTile
     */
 }
 
-void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent)
+void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent)
 {
     SDL_Rect sourceRect, destinationRect;
     sourceRect.x = 0;

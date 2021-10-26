@@ -29,8 +29,10 @@ uint8_t TILE_DATA_BR[256];  // Tile character bottom-right (256 bytes)
 uint8_t UNIT_TIMER_A[64];   // Primary timer for units (64 bytes)
 uint8_t UNIT_TIMER_B[64];   // Secondary timer for units (64 bytes)
 uint8_t UNIT_TILE[32];      // Current tile assigned to unit (32 bytes)
+uint8_t UNIT_DIRECTION[32]; // Movement direction of unit (32 bytes)
 uint8_t EXP_BUFFER[16];     // Explosion Buffer (16 bytes)
 uint8_t MAP_PRECALC[77];    // Stores pre-calculated objects for map window (77 bytes)
+uint8_t MAP_PRECALC_DIRECTION[77];    // Stores pre-calculated object directions for map window (77 bytes)
 
 // The following are the locations where the current
 // key controls are stored.  These must be set before
@@ -64,6 +66,8 @@ uint8_t MAP[8 * 1024];      // Location of MAP (8K)
 // END OF MAP FILE
 
 uint8_t TILE;           // The tile number to be plotted
+uint8_t DIRECTION;      // The direction of the tile to be plotted
+uint8_t WALK_FRAME;     // Player walking animation frame
 uint8_t TEMP_X;         // Temporarily used for loops
 uint8_t TEMP_Y;         // Temporarily used for loops
 uint8_t MAP_X;          // Current X location on map
@@ -1220,6 +1224,7 @@ void MAP_PRE_CALCULATE()
                 }
             }
             MAP_PRECALC[Y] = UNIT_TILE[X];
+            MAP_PRECALC_DIRECTION[Y] = UNIT_DIRECTION[X];
         }
         // continue search
     }
@@ -1245,6 +1250,7 @@ void DRAW_MAP_WINDOW()
             // now check for sprites in this location
             if (MAP_PRECALC[PRECALC_COUNT] != 0) {
                 TILE = MAP_PRECALC[PRECALC_COUNT];
+                DIRECTION = MAP_PRECALC_DIRECTION[PRECALC_COUNT];
 //                PLOT_TRANSPARENT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X);
                 PLOT_TRANSPARENT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X, TEMP_X, TEMP_Y);
             }
@@ -1301,7 +1307,7 @@ void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y)
     SCREEN_MEMORY[destination + 81] = TILE_DATA_BM[TILE];
     SCREEN_MEMORY[destination + 82] = TILE_DATA_BR[TILE];
 #endif
-    platform->renderTile(TILE, x * 24, y * 24, false);
+    platform->renderTile(TILE, x * 24, y * 24);
 }
 
 // This routine plots a transparent tile from the tile database
@@ -1382,7 +1388,18 @@ void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y)
         SCREEN_MEMORY[destination + 82] = TILE_DATA_BR[TILE];
     }
 #endif
-    platform->renderTile(TILE, x * 24, y * 24, true);
+    uint8_t variant = 0;
+    if (TILE == 96) {
+        if (DIRECTION == 0) {
+            variant = 8;
+        } else if (DIRECTION == 2) {
+            variant = 12;
+        } else if (DIRECTION == 3) {
+            variant = 4;
+        }
+        variant += WALK_FRAME + (SELECTED_WEAPON << 4);
+    }
+    platform->renderTile(TILE, x * 24, y * 24, variant, true);
 }
 
 void REVERSE_TILE()
@@ -2655,11 +2672,17 @@ void DEMATERIALIZE()
 
 void ANIMATE_PLAYER()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    UNIT_TILE[0] = 96;
+    WALK_FRAME++;
+    WALK_FRAME &= 3;
+#else
     if (UNIT_TILE[0] == 97) {
         UNIT_TILE[0] = 96;
     } else {
         UNIT_TILE[0] = 97;
     }
+#endif
 }
 
 void PLAY_SOUND(int sound)
@@ -4388,6 +4411,7 @@ void REQUEST_WALK_RIGHT()
             CHECK_FOR_UNIT();
             if (UNIT_FIND == 255) {
                 UNIT_LOC_X[UNIT]++;
+                UNIT_DIRECTION[UNIT] = 3;
                 MOVE_RESULT = 1; // Move success
                 return;
             }
@@ -4407,6 +4431,7 @@ void REQUEST_WALK_LEFT()
             CHECK_FOR_UNIT();
             if (UNIT_FIND == 255) {
                 UNIT_LOC_X[UNIT]--;
+                UNIT_DIRECTION[UNIT] = 2;
                 MOVE_RESULT = 1; // Move success
                 return;
             }
@@ -4426,6 +4451,7 @@ void REQUEST_WALK_DOWN()
             CHECK_FOR_UNIT();
             if (UNIT_FIND == 255) {
                 UNIT_LOC_Y[UNIT]++;
+                UNIT_DIRECTION[UNIT] = 1;
                 MOVE_RESULT = 1; // Move success
                 return;
             }
@@ -4445,6 +4471,7 @@ void REQUEST_WALK_UP()
             CHECK_FOR_UNIT();
             if (UNIT_FIND == 255) {
                 UNIT_LOC_Y[UNIT]--;
+                UNIT_DIRECTION[UNIT] = 0;
                 MOVE_RESULT = 1; // Move success
                 return;
             }

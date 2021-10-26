@@ -549,11 +549,11 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
     }
 }
 
-void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent)
+void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent)
 {
     if (transparent) {
         if (tileSpriteMap[tile] >= 0) {
-            renderSprite(tileSpriteMap[tile], x, y);
+            renderSprite(tileSpriteMap[tile] + variant, x, y);
             return;
         }
 

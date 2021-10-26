@@ -33,7 +33,7 @@ public:
     virtual void load(const char* filename, uint8_t* destination, uint32_t size);
     virtual void displayImage(uint8_t image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
-    virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, bool transparent);
+    virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent);
     virtual void renderSprite(uint8_t sprite, uint16_t x, uint16_t y);
     virtual void renderItem(uint8_t item, uint16_t x, uint16_t y);
     virtual void renderHealth(uint8_t health, uint16_t x, uint16_t y);

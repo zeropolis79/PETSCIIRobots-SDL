@@ -21,6 +21,7 @@ extern uint8_t UNIT_TIMER_B[64];   // Secondary timer for units (64 bytes)
 extern uint8_t UNIT_TILE[32];      // Current tile assigned to unit (32 bytes)
 extern uint8_t EXP_BUFFER[16];     // Explosion Buffer (16 bytes)
 extern uint8_t MAP_PRECALC[77];    // Stores pre-calculated objects for map window (77 bytes)
+extern uint8_t MAP_PRECALC_DIRECTION[77];    // Stores pre-calculated object directions for map window (77 bytes)
 
 // The following are the locations where the current
 // key controls are stored.  These must be set before
@@ -53,6 +54,8 @@ extern uint8_t MAP[8 * 1024];      // Location of MAP (8K)
 // END OF MAP FILE
 
 extern uint8_t TILE;           // The tile number to be plotted
+extern uint8_t DIRECTION;      // The direction of the tile to be plotted
+extern uint8_t WALK_FRAME;     // Player walking animation frame
 extern uint8_t TEMP_X;         // Temporarily used for loops
 extern uint8_t TEMP_Y;         // Temporarily used for loops
 extern uint8_t MAP_X;          // Current X location on map
