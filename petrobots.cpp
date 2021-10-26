@@ -1250,12 +1250,14 @@ void DRAW_MAP_WINDOW()
             }
             PRECALC_COUNT++;
         }
+#ifndef PLATFORM_CURSOR_SUPPORT
         // CHECK FOR CURSOR
         if (CURSOR_ON == 1) { // Is cursor even on?
             if (TEMP_Y == CURSOR_Y) { // is cursor on the same row that were drawing?
                 REVERSE_TILE();
             }
         }
+#endif
     }
 }
 
@@ -1283,6 +1285,7 @@ void PLOT_TILE(uint16_t destination)
 
 void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y)
 {
+#ifndef PLATFORM_SPRITE_SUPPORT
     // DRAW THE TOP 3 CHARACTERS
     SCREEN_MEMORY[destination + 0] = TILE_DATA_TL[TILE];
     SCREEN_MEMORY[destination + 1] = TILE_DATA_TM[TILE];
@@ -1297,6 +1300,7 @@ void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y)
     SCREEN_MEMORY[destination + 80] = TILE_DATA_BL[TILE];
     SCREEN_MEMORY[destination + 81] = TILE_DATA_BM[TILE];
     SCREEN_MEMORY[destination + 82] = TILE_DATA_BR[TILE];
+#endif
     platform->renderTile(TILE, x * 24, y * 24, false);
 }
 
@@ -1344,6 +1348,7 @@ void PLOT_TRANSPARENT_TILE(uint16_t destination)
 
 void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y)
 {
+#ifndef PLATFORM_SPRITE_SUPPORT
     // DRAW THE TOP 3 CHARACTERS
     if (TILE_DATA_TL[TILE] != 0x3A) {
         SCREEN_MEMORY[destination + 0] = TILE_DATA_TL[TILE];
@@ -1376,6 +1381,7 @@ void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y)
     if (TILE_DATA_BR[TILE] != 0x3A) {
         SCREEN_MEMORY[destination + 82] = TILE_DATA_BR[TILE];
     }
+#endif
     platform->renderTile(TILE, x * 24, y * 24, true);
 }
 
