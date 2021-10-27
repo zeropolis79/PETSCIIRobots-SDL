@@ -725,6 +725,20 @@ void PlatformAmiga::stopShakeScreen()
     }
 }
 
+void PlatformAmiga::startFlashScreen()
+{
+    SetRGB4(&screen->ViewPort, 0, 15, 0, 0);
+}
+
+void PlatformAmiga::flashScreen()
+{
+}
+
+void PlatformAmiga::stopFlashScreen()
+{
+    SetRGB4(&screen->ViewPort, 0, 0, 0, 0);
+}
+
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color)
 {
     bool reverse = value > 127;

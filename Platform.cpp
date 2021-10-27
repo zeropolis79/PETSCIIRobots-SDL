@@ -45,6 +45,18 @@ void Platform::stopShakeScreen()
 {
 }
 
+void Platform::startFlashScreen()
+{
+}
+
+void Platform::flashScreen()
+{
+}
+
+void Platform::stopFlashScreen()
+{
+}
+
 void Platform::playModule(uint8_t)
 {
 }

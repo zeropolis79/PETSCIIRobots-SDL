@@ -2619,24 +2619,21 @@ void PET_BORDER_FLASH()
     if (BORDER != 0) {
         // border flash should be active
         if (FLASH_STATE != 1) { // Is it already flashing?
+#ifndef PLATFORM_IMAGE_SUPPORT
             // copy flash message to screen
             for (int X = 0; X != 6; X++) {
-#ifdef PLATFORM_IMAGE_SUPPORT
-                writeToScreenMemory(0x392 + X, OUCH2[X], 15);
-#else
                 writeToScreenMemory(0x2F2 + X, OUCH1[X]);
                 writeToScreenMemory(0x31A + X, OUCH2[X]);
                 writeToScreenMemory(0x342 + X, OUCH3[X]);
-#endif
             }
+#endif
+            platform->startFlashScreen();
             FLASH_STATE = 1;
         }
     } else {
         if (FLASH_STATE != 0) {
+#ifndef PLATFORM_IMAGE_SUPPORT
             // Remove message from screen
-#ifdef PLATFORM_IMAGE_SUPPORT
-            platform->clearRect(272, 176, 48, 8);
-#else
             for (int X = 0; X != 6; X++) {
                 writeToScreenMemory(0x2F2 + X, 32);
                 writeToScreenMemory(0x31A + X, 32);
@@ -2644,6 +2641,7 @@ void PET_BORDER_FLASH()
             }
 #endif
             FLASH_STATE = 0;
+            platform->stopFlashScreen();
         }
     }
 }
