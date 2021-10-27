@@ -18,6 +18,7 @@ struct IOAudio;
 struct MsgPort;
 struct BitMap;
 struct SimpleSprite;
+class Palette;
 
 class PlatformAmiga : public Platform {
 public:
@@ -43,8 +44,8 @@ public:
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     virtual void shakeScreen();
     virtual void stopShakeScreen();
-    virtual void startFlashScreen();
-    virtual void flashScreen();
+    virtual void startFlashScreen(uint16_t color, uint16_t intensity);
+    virtual void flashScreen(uint16_t intensity);
     virtual void stopFlashScreen();
     virtual void writeToScreenMemory(uint16_t address, uint8_t value);
     virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color);
@@ -77,6 +78,7 @@ private:
     BitMap* healthBitMap;
     SimpleSprite* cursorSprite1;
     SimpleSprite* cursorSprite2;
+    Palette* palette;
     uint16_t bplcon1DefaultValue;
     uint16_t shakeStep;
     static uint16_t addressMap[];

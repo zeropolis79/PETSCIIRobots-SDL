@@ -15,6 +15,7 @@
 #include <hardware/custom.h>
 #include <devices/audio.h>
 #include "PT2.3F_replay_cia.h"
+#include "Palette.h"
 #include "PlatformAmiga.h"
 #include <stdio.h>
 #include <stddef.h>
@@ -154,9 +155,12 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     healthBitMap(new BitMap),
     cursorSprite1(new SimpleSprite),
     cursorSprite2(new SimpleSprite),
+    palette(new Palette((uint16_t*)(gameScreen + SCREEN_SIZE * PLANES), 16, 16, 0xf00)),
     bplcon1DefaultValue(0),
     shakeStep(0)
 {
+    Palette::initialize();
+
     for (int y = 0, i = 0; y < 25; y++) {
         for (int x = 0; x < 40; x++, i++) {
             addressMap[i] = y * SCREEN_WIDTH_IN_BYTES * PLANES * 8 + x;
@@ -312,6 +316,7 @@ PlatformAmiga::~PlatformAmiga()
         FreeMem(screenPlanes, SCREEN_SIZE * PLANES);
     }
 
+    delete palette;
     delete cursorSprite2;
     delete cursorSprite1;
     delete healthBitMap;
@@ -725,18 +730,23 @@ void PlatformAmiga::stopShakeScreen()
     }
 }
 
-void PlatformAmiga::startFlashScreen()
+void PlatformAmiga::startFlashScreen(uint16_t color, uint16_t intensity)
 {
-    SetRGB4(&screen->ViewPort, 0, 15, 0, 0);
+    palette->setFadeBaseColor(color);
+    palette->setFade(intensity);
+    LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
 }
 
-void PlatformAmiga::flashScreen()
+void PlatformAmiga::flashScreen(uint16_t intensity)
 {
+    palette->setFade(intensity);
+    LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
 }
 
 void PlatformAmiga::stopFlashScreen()
 {
-    SetRGB4(&screen->ViewPort, 0, 0, 0, 0);
+    palette->setFade(15);
+    LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
 }
 
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color)

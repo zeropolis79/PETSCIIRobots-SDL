@@ -45,11 +45,11 @@ void Platform::stopShakeScreen()
 {
 }
 
-void Platform::startFlashScreen()
+void Platform::startFlashScreen(uint16_t, uint16_t)
 {
 }
 
-void Platform::flashScreen()
+void Platform::flashScreen(uint16_t)
 {
 }
 

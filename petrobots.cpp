@@ -265,6 +265,7 @@ void RUNIRQ()
         KEYTIMER--;
     }
     if (BORDER != 0) {
+        platform->flashScreen(15 - BORDER);
         BORDER--;
     }
     if (SCREEN_SHAKE != 0) {
@@ -2627,7 +2628,7 @@ void PET_BORDER_FLASH()
                 writeToScreenMemory(0x342 + X, OUCH3[X]);
             }
 #endif
-            platform->startFlashScreen();
+            platform->startFlashScreen(0xf00, 15 - BORDER);
             FLASH_STATE = 1;
         }
     } else {

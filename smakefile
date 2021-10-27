@@ -1,4 +1,4 @@
-OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o PT2.3F_replay_cia.o IntroScreen.o GameScreen.o C64Font.o Tiles.o Sprites.o SpritesMask.o Items.o Health.o IntroMusic.o Music.o
+OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o PT2.3F_replay_cia.o IntroScreen.o GameScreen.o C64Font.o Tiles.o Sprites.o SpritesMask.o Items.o Health.o IntroMusic.o Music.o
 
 all: petrobots 
 
@@ -11,6 +11,7 @@ petrobots.o: petrobots.cpp
 Platform.o: Platform.cpp
 PlatformAmiga.o: PlatformAmiga.cpp
 PlatformAmigaAssembler.o: PlatformAmigaAssembler.s
+Palette.o: Palette.cpp
 PT2.3F_replay_cia.o: PT2.3F_replay_cia.s
 IntroScreen.o: IntroScreen.raw
     Bin2Hunk IntroScreen.raw IntroScreen.o NAME _introScreen HUNK data

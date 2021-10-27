@@ -55,8 +55,8 @@ public:
     virtual void startShakeScreen();
     virtual void shakeScreen() = 0;
     virtual void stopShakeScreen();
-    virtual void startFlashScreen();
-    virtual void flashScreen();
+    virtual void startFlashScreen(uint16_t color, uint16_t intensity);
+    virtual void flashScreen(uint16_t intensity);
     virtual void stopFlashScreen();
     virtual void writeToScreenMemory(uint16_t address, uint8_t value) = 0;
     virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color) = 0;
