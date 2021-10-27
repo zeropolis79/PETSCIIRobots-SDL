@@ -93,7 +93,7 @@ extern const char* SNDNAME;
 extern const char* LOADMSG;
 extern const char* LOADMSG;
 extern uint8_t KEYS; // bit0=spade bit2=heart bit3=star
-extern uint16_t AMMO_PISTOL; // how much ammo for the pistol
+extern uint8_t AMMO_PISTOL; // how much ammo for the pistol
 extern uint8_t AMMO_PLASMA; // how many shots of the plasmagun
 extern uint8_t INV_BOMBS; // How many bombs do we have
 extern uint8_t INV_EMP; // How many EMPs do we have
@@ -110,6 +110,7 @@ extern uint8_t RANDOM; // used for random number generation
 extern uint8_t BORDER; // Used for border flash timing
 extern uint8_t SCREEN_SHAKE; // 1=shake 0=no shake
 extern uint8_t CONTROL; // 0=keyboard 1=custom keys 2=snes
+extern uint16_t BORDER_COLOR; // Used for border flash coloring
 extern const char* INTRO_MESSAGE;
 extern const char* MSG_CANTMOVE;
 extern const char* MSG_BLOCKED;

@@ -150,7 +150,7 @@ const char* SNDNAME = "pdrv-pet";
 const char* LOADMSG1 = "loading tiles...\x0d";
 const char* LOADMSG2 = "\x93loading map...\x0d";
 uint8_t KEYS = 0; // bit0=spade bit2=heart bit3=star
-uint16_t AMMO_PISTOL = 0; // how much ammo for the pistol
+uint8_t AMMO_PISTOL = 0; // how much ammo for the pistol
 uint8_t AMMO_PLASMA = 0; // how many shots of the plasmagun
 uint8_t INV_BOMBS = 0; // How many bombs do we have
 uint8_t INV_EMP = 0; // How many EMPs do we have
@@ -167,6 +167,7 @@ uint8_t RANDOM = 0; // used for random number generation
 uint8_t BORDER = 0; // Used for border flash timing
 uint8_t SCREEN_SHAKE = 0; // 1=shake 0=no shake
 uint8_t CONTROL = 0; // 0=keyboard 1=custom keys 2=snes
+uint16_t BORDER_COLOR = 0xf00; // Used for border flash coloring
 #ifdef _AMIGA
 const char* INTRO_MESSAGE   = "welcome to amiga-robots!\xff"
                               "by david murray 2021\xff"
@@ -991,9 +992,10 @@ void SEARCH_OBJECT()
             PRINT_INFO(MSG_FOUNDEMP);
             DISPLAY_ITEM();
         } else if (TEMP_A == 131) { // PISTOL
-            AMMO_PISTOL += TEMP_B;
-            if (AMMO_PISTOL > 255) { // If we rolled over past 255
+            if (AMMO_PISTOL + TEMP_B > 255) { // If we rolled over past 255
                 AMMO_PISTOL = 255; // set it to 255.
+            } else {
+                AMMO_PISTOL += TEMP_B;
             }
             PRINT_INFO(MSG_FOUNDGUN);
             DISPLAY_WEAPON();
@@ -2320,6 +2322,10 @@ uint16_t MAP_CHART[] = {
 
 void EMP_FLASH()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    BORDER_COLOR = 0x00f;
+    BORDER = 10;
+#else
     for (int Y = 0; Y != 33; Y++) {
         writeToScreenMemory(0x000 + Y, SCREEN_MEMORY[0x000 + Y] ^ 0x80); // screen row 00
         writeToScreenMemory(0x028 + Y, SCREEN_MEMORY[0x028 + Y] ^ 0x80); // screen row 01
@@ -2343,6 +2349,7 @@ void EMP_FLASH()
         writeToScreenMemory(0x2F8 + Y, SCREEN_MEMORY[0x2F8 + Y] ^ 0x80); // screen row 19
         writeToScreenMemory(0x320 + Y, SCREEN_MEMORY[0x320 + Y] ^ 0x80); // screen row 20
     }
+#endif
 }
 
 // This routine animates the tile #204 (water) 
@@ -2628,7 +2635,7 @@ void PET_BORDER_FLASH()
                 writeToScreenMemory(0x342 + X, OUCH3[X]);
             }
 #endif
-            platform->startFlashScreen(0xf00, 15 - BORDER);
+            platform->startFlashScreen(BORDER_COLOR, 15 - BORDER);
             FLASH_STATE = 1;
         }
     } else {
@@ -3639,6 +3646,7 @@ void TRASH_COMPACTOR()
                 UNIT_LOC_X[X] = UNIT_LOC_X[UNIT];
                 UNIT_LOC_Y[X] = UNIT_LOC_Y[UNIT];
                 if (UNIT_FIND == 0) { // is it the player
+                    BORDER_COLOR = 0xf00;
                     BORDER = 10;
                 }
                 break;
@@ -3846,6 +3854,7 @@ void INFLICT_DAMAGE()
     if (UNIT_HEALTH[UNIT_FIND] > 0) {
         if (UNIT_FIND == 0) { // IS IT THE PLAYER?
             DISPLAY_PLAYER_HEALTH();
+            BORDER_COLOR = 0xf00;
             BORDER = 10;
         }
         return;
@@ -3860,6 +3869,7 @@ void INFLICT_DAMAGE()
     } else {
         UNIT_TYPE[UNIT_FIND] = 0;
         DISPLAY_PLAYER_HEALTH();
+        BORDER_COLOR = 0xf00;
         BORDER = 10;
     }
 }
