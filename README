@@ -1,14 +1,27 @@
 Attack of the PETSCII Robots C++
-
+================================
 Work in progress
 
 SDL version:
-
+------------
 brew install sdl2 sdl2_image
 make
 ./petrobots
 
 Amiga version:
-
+--------------
 smake
 petrobots
+
+TODO
+----
+- Joystick support
+- Difficulty indicator in intro screen
+- Evilbot graphics
+- Load MODs off the disk
+- Include all MODs
+- Proper sound effects
+- Avoid flicker when rendering sprites
+- Death animation frames
+- Teleport animation frames
+- EMP flash
