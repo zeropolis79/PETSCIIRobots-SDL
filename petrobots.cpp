@@ -211,7 +211,10 @@ const char* MAP_NAMES = "01-research lab "
                         "07-more islands "
                         "08-robot hotel  "
                         "09-forest moon  "
-                        "10-death tower  ";
+                        "10-death tower  "
+                        "11-river death  "
+                        "12-bunker       "
+                        "13-castle       ";
 // THE FOLLOWING ARE USED BY THE SOUND SYSTEM*
 uint8_t TEMPO_TIMER = 0; // used for counting down to the next tick
 uint8_t TEMPO = 7; // How many IRQs between ticks
@@ -2209,7 +2212,7 @@ uint8_t CONTROLSTART[] = { 0, 10, 20 };
 void CYCLE_MAP()
 {
     SELECTED_MAP++;
-    if (SELECTED_MAP == 10) { // Maximum number of maps
+    if (SELECTED_MAP == 13) { // Maximum number of maps
         SELECTED_MAP = 0;
     }
     DISPLAY_MAP_NAME();
