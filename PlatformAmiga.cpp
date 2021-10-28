@@ -412,7 +412,7 @@ uint8_t PlatformAmiga::getin()
         switch (messageClass) {
         case IDCMP_RAWKEY:
             switch (messageCode) {
-            case 0x45: // Esc
+            case 0x59: // F10
                 quit = true;
                 break;
             case 0x4f: // Cursor left
@@ -423,7 +423,7 @@ uint8_t PlatformAmiga::getin()
                 return 0x91;
             case 0x4d: // Cursor up
                 return 0x11;
-            case 0x63: // Control
+            case 0x45: // Esc
                 return 0x03;
             case 0x44: // Return
                 return 0x0d;
