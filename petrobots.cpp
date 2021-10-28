@@ -424,8 +424,7 @@ void TOGGLE_MUSIC()
 void START_IN_GAME_MUSIC()
 {
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->playModule(MODULE_GAME);
-    platform->setSongPosition(LEVEL_MUSIC[SELECTED_MAP]);
+    platform->playModule(LEVEL_MUSIC[SELECTED_MAP]);
 #else
     MUSIC_ON = 1;
     if (SOUND_EFFECT == 0xFF) { // FF=NO sound effect in progress
@@ -440,9 +439,23 @@ void START_IN_GAME_MUSIC()
 }
 
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-uint8_t LEVEL_MUSIC[] = { 7,7,7,7,7,7,7,7,7,7 };
+uint8_t LEVEL_MUSIC[] = {
+    MODULE_IN_GAME_1,
+    MODULE_IN_GAME_2,
+    MODULE_IN_GAME_3,
+    MODULE_IN_GAME_4,
+    MODULE_IN_GAME_1,
+    MODULE_IN_GAME_2,
+    MODULE_IN_GAME_3,
+    MODULE_IN_GAME_4,
+    MODULE_IN_GAME_1,
+    MODULE_IN_GAME_2,
+    MODULE_IN_GAME_3,
+    MODULE_IN_GAME_4,
+    MODULE_IN_GAME_1
+};
 #else
-uint8_t LEVEL_MUSIC[] = { 0,1,2,0,1,2,0,1,2,0 };
+uint8_t LEVEL_MUSIC[] = { 0,1,2,0,1,2,0,1,2,0,1,2,0 };
 #endif
 
 // TEMP ROUTINE TO GIVE ME ALL ITEMS AND WEAPONS
@@ -1454,14 +1467,14 @@ uint8_t DECTEMP = 0;
 // The following routine loads the tileset from disk
 void TILE_LOAD_ROUTINE()
 {
-    platform->load(TILENAME, DESTRUCT_PATH, 2816);
+    platform->load(TILENAME, DESTRUCT_PATH, 2816, 2);
     platform->generateTiles(TILE_DATA_TL, TILE_ATTRIB);
 }
 
 // The following routine loads the map from disk
 void MAP_LOAD_ROUTINE()
 {
-    platform->load(MAPNAME, UNIT_TYPE, 8960);
+    platform->load(MAPNAME, UNIT_TYPE, 8960, 2);
 }
 
 void DISPLAY_GAME_SCREEN()
@@ -2024,7 +2037,7 @@ void DISPLAY_WIN_LOSE()
             writeToScreenMemory(0x088 + X, convertToPETSCII(WIN_MSG[X]));
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->setSongPosition(5);
+        platform->playModule(MODULE_WIN);
 #else
         PLAY_SOUND(18); // win music
 #endif
@@ -2034,7 +2047,7 @@ void DISPLAY_WIN_LOSE()
             writeToScreenMemory(0x088 + X, convertToPETSCII(LOS_MSG[X]));
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->setSongPosition(6);
+        platform->playModule(MODULE_LOSE);
 #else
         PLAY_SOUND(19); // LOSE music
 #endif
@@ -2153,7 +2166,6 @@ void START_INTRO_MUSIC()
 {
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->playModule(MODULE_INTRO);
-    platform->setSongPosition(1);
 #else
     DATA_LINE = 0;
     SOUND_EFFECT = 0xFF;
@@ -2167,7 +2179,7 @@ bool EXEC_COMMAND()
     if (MENUY == 0) { // START GAME
         SET_CONTROLS();
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->playModule(MODULE_GAME);
+        platform->playModule(LEVEL_MUSIC[SELECTED_MAP]);
 #else
         MUSIC_ON = 0;
 #endif

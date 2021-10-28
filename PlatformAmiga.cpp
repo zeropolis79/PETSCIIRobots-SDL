@@ -44,11 +44,9 @@ __chip extern uint8_t spritesPlanes[];
 __chip extern uint8_t spritesMask[];
 __chip extern uint8_t itemsPlanes[];
 __chip extern uint8_t healthPlanes[];
-__chip extern uint8_t introMusic[];
-__chip extern uint8_t music[];
-__chip int8_t sample[2] = { 127, -128 };
-__chip int32_t simpleTileMask = 0xffffff00;
-__chip spriteData cursorData1 = {
+__chip static int8_t squareWave[2] = { 127, -128 };
+__chip static int32_t simpleTileMask = 0xffffff00;
+__chip static spriteData cursorData1 = {
     { 0, 0 },
     {
         { 0xffff, 0 },
@@ -82,7 +80,7 @@ __chip spriteData cursorData1 = {
     },
     { 0, 0 }
 };
-__chip spriteData cursorData2 = {
+__chip static spriteData cursorData2 = {
     { 0, 0 },
     {
         { 0xfff0, 0 },
@@ -116,9 +114,10 @@ __chip spriteData cursorData2 = {
     },
     { 0, 0 }
 };
-uint16_t PlatformAmiga::addressMap[40 * 25];
-uint8_t PlatformAmiga::tileMaskMap[256];
-int8_t PlatformAmiga::tileSpriteMap[256] = {
+__chip static uint8_t moduleData[105804];
+uint16_t addressMap[40 * 25];
+static uint8_t tileMaskMap[256];
+static int8_t tileSpriteMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -135,6 +134,15 @@ int8_t PlatformAmiga::tileSpriteMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+};
+static const char* moduleFilenames[] = {
+    "mod.metal heads",
+    "mod.win",
+    "mod.lose",
+    "mod.metallic bop amiga",
+    "mod.get psyched",
+    "mod.robot attack",
+    "mod.rushin in"
 };
 
 PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
@@ -157,7 +165,8 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     cursorSprite2(new SimpleSprite),
     palette(new Palette((uint16_t*)(gameScreen + SCREEN_SIZE * PLANES), 16, 16, 0xf00)),
     bplcon1DefaultValue(0),
-    shakeStep(0)
+    shakeStep(0),
+    loadedModule(-1)
 {
     Palette::initialize();
 
@@ -265,7 +274,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
         ioAudio->ioa_Request.io_Flags = ADIOF_PERVOL | IOF_QUICK;
         ioAudio->ioa_Volume = 64;
         ioAudio->ioa_Cycles = 0;
-        ioAudio->ioa_Data = (uint8_t*)sample;
+        ioAudio->ioa_Data = (uint8_t*)squareWave;
         ioAudio->ioa_Length = 2;
         ioAudio->ioa_Period = (uint16_t)(clock / 440 / 2);
         BeginIO((IORequest*)ioAudio);
@@ -441,11 +450,13 @@ void PlatformAmiga::clearKeyBuffer()
     }
 }
 
-void PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t size)
+void PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)
 {
     BPTR file = Open((char*)filename, MODE_OLDFILE);
     if (file) {
-        Seek(file, 2, OFFSET_BEGINNING);
+        if (offset > 0) {
+            Seek(file, offset, OFFSET_BEGINNING);
+        }
         Read(file, destination, size);
         Close(file);
     }
@@ -842,7 +853,11 @@ void PlatformAmiga::playModule(uint8_t module)
 {
     stopModule();
     if (!mt_Enable) {
-        mt_init(module == MODULE_INTRO ? introMusic : music);
+        if (loadedModule != module) {
+            load(moduleFilenames[module], moduleData, 105804, 0);
+            loadedModule = module;
+        }
+        mt_init(moduleData);
         mt_chan4data[0] = 0;
         mt_chan4data[1] = 0;
         mt_Enable = true;

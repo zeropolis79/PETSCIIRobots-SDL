@@ -187,11 +187,13 @@ void PlatformSDL::clearKeyBuffer()
     while (SDL_PollEvent(&event));
 }
 
-void PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t size)
+void PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)
 {
     FILE* file = fopen(filename, "r");
     if (file) {
-        fseek(file, 2, SEEK_SET);
+        if (offset > 0) {
+            fseek(file, offset, SEEK_SET);
+        }
         fread(destination, 1, size, file);
         fclose(file);
     }

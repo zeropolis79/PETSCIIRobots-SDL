@@ -1,7 +1,7 @@
 	xdef	_verticalBlankInterruptServer__13PlatformAmigaFv
 	xdef	@writeToScreenMemory__13PlatformAmigaFUsUc
 	xref	@runVerticalBlankInterrupt__13PlatformAmigaFv
-	xref	_addressMap__13PlatformAmiga
+	xref	_addressMap
 	xref	_c64Font
 
 	section	code
@@ -18,7 +18,7 @@ _verticalBlankInterruptServer__13PlatformAmigaFv:
 	rts
 
 @writeToScreenMemory__13PlatformAmigaFUsUc:
-	lea	_addressMap__13PlatformAmiga,a1
+	lea	_addressMap,a1
 	add.w	d0,d0
 	move.w	(a1,d0.w),d0
 	move.l	$2a(a0),a1

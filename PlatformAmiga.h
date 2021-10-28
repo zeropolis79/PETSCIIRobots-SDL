@@ -31,7 +31,7 @@ public:
     virtual void chrout(uint8_t);
     virtual uint8_t getin();
     virtual void clearKeyBuffer();
-    virtual void load(const char* filename, uint8_t* destination, uint32_t size);
+    virtual void load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
     virtual void displayImage(uint8_t image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent);
@@ -81,9 +81,7 @@ private:
     Palette* palette;
     uint16_t bplcon1DefaultValue;
     uint16_t shakeStep;
-    static uint16_t addressMap[];
-    static uint8_t tileMaskMap[];
-    static int8_t tileSpriteMap[];
+    int8_t loadedModule;
 };
 
 #endif

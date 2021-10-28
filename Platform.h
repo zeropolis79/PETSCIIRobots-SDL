@@ -28,7 +28,12 @@ typedef unsigned char bool;
 #define IMAGE_INTRO 0
 #define IMAGE_GAME 1
 #define MODULE_INTRO 0
-#define MODULE_GAME 1
+#define MODULE_WIN 1
+#define MODULE_LOSE 2
+#define MODULE_IN_GAME_1 3
+#define MODULE_IN_GAME_2 4
+#define MODULE_IN_GAME_3 5
+#define MODULE_IN_GAME_4 6
 
 class Platform {
 public:
@@ -40,7 +45,7 @@ public:
     virtual void chrout(uint8_t) = 0;
     virtual uint8_t getin() = 0;
     virtual void clearKeyBuffer() = 0;
-    virtual void load(const char* filename, uint8_t* destination, uint32_t size) = 0;
+    virtual void load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset = 0) = 0;
     virtual void displayImage(uint8_t image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes) = 0;
     virtual void updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles);
