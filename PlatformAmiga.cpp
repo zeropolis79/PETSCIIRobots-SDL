@@ -44,6 +44,15 @@ __chip extern uint8_t spritesPlanes[];
 __chip extern uint8_t spritesMask[];
 __chip extern uint8_t itemsPlanes[];
 __chip extern uint8_t healthPlanes[];
+__chip extern uint8_t soundExplosion[];
+__chip extern uint8_t soundMedkit[];
+__chip extern uint8_t soundPlasma[];
+__chip extern uint8_t soundPistol[];
+__chip extern uint8_t soundError[];
+__chip extern uint8_t soundCycleWeapon[];
+__chip extern uint8_t soundCycleItem[];
+__chip extern uint8_t soundDoor[];
+__chip extern uint8_t soundMenuBeep[];
 __chip static int8_t squareWave[2] = { 127, -128 };
 __chip static int32_t simpleTileMask = 0xffffff00;
 __chip static spriteData cursorData1 = {
@@ -250,7 +259,9 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     verticalBlankInterrupt->is_Code = (__stdargs void(*)())&verticalBlankInterruptServer;
     AddIntServer(INTB_VERTB, verticalBlankInterrupt);
 
-    if (!moduleBasedAudio) {
+    if (moduleBasedAudio) {
+        SetCIAInt();
+    } else {
         messagePort = CreatePort(NULL, 0);
         if (!messagePort) {
             return;
@@ -288,6 +299,8 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
 PlatformAmiga::~PlatformAmiga()
 {
     stopModule();
+
+    ResetCIAInt();
 
     if (ioAudio && ioAudio->ioa_Request.io_Device) {
         AbortIO((IORequest*)ioAudio);
@@ -339,9 +352,6 @@ PlatformAmiga::~PlatformAmiga()
 
 void PlatformAmiga::runVerticalBlankInterrupt()
 {
-    if (mt_Enable) {
-        mt_music();        
-    }
     if (interrupt) {
         interrupt();
     }
@@ -858,6 +868,23 @@ void PlatformAmiga::playModule(uint8_t module)
             loadedModule = module;
         }
         mt_init(moduleData);
+        mt_SampleStarts[15 + 0] = soundExplosion;
+        mt_SampleStarts[15 + 1] = soundMenuBeep; // TODO
+        mt_SampleStarts[15 + 2] = soundMedkit;
+        mt_SampleStarts[15 + 3] = soundMenuBeep; // TODO
+        mt_SampleStarts[15 + 4] = soundMenuBeep; // TODO
+        mt_SampleStarts[15 + 5] = soundMenuBeep; // TODO
+        mt_SampleStarts[15 + 6] = soundMenuBeep; // TODO
+        mt_SampleStarts[15 + 7] = soundMenuBeep; // TODO
+        mt_SampleStarts[15 + 8] = soundPlasma;
+        mt_SampleStarts[15 + 9] = soundPistol;
+        mt_SampleStarts[15 + 10] = soundError;
+        mt_SampleStarts[15 + 11] = soundMenuBeep; // TODO
+        mt_SampleStarts[15 + 12] = soundCycleWeapon;
+        mt_SampleStarts[15 + 13] = soundCycleItem;
+        mt_SampleStarts[15 + 14] = soundDoor;
+        mt_SampleStarts[15 + 15] = soundMenuBeep;
+        // TODO set sample length @ moduleData + 20 + sample * 30 + 22
         mt_chan4data[0] = 0;
         mt_chan4data[1] = 0;
         mt_Enable = true;

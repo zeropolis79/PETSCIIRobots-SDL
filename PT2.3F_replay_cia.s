@@ -3,8 +3,9 @@
 	xdef	_mt_init__FPUc
 	xdef	_mt_music__Fv
 	xdef	_mt_end__Fv
-	xdef	_mt_Enable
+	xdef	_mt_SampleStarts
 	xdef	_mt_SongPos
+	xdef	_mt_Enable
 	xdef	_mt_PatternPos
 	xdef	_mt_chan4data
 
@@ -145,6 +146,11 @@ CIAError
 	RTS
 
 _ResetCIAInt__Fv
+	tst.l	CIAAaddr(PC)
+	bne.s	ResCIAInt
+	rts
+
+ResCIAInt
 	movem.l	d0-d7/a0-a5,-(sp)
 
 	MOVE.L	CIAAbase(PC),D0
@@ -1365,6 +1371,7 @@ mt_chan3temp	dc.l	0,0,0,0,0,$00040000,0,0,0,0
 mt_chan4temp	dc.l	0,0,0,0,0,$00080000,0,0,0,0
 		dc.w	0
 				
+_mt_SampleStarts
 mt_SampleStarts
 	dc.l	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
 	dc.l	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
