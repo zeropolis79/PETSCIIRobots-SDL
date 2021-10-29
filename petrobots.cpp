@@ -2179,7 +2179,7 @@ bool EXEC_COMMAND()
     if (MENUY == 0) { // START GAME
         SET_CONTROLS();
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->playModule(LEVEL_MUSIC[SELECTED_MAP]);
+        platform->stopModule();
 #else
         MUSIC_ON = 0;
 #endif
