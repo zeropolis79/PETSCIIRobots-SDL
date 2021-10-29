@@ -23,3 +23,4 @@ TODO
 - Death animation frames
 - Teleport animation frames
 - Sound effect playback when music is disabled
+- Playing the attack sample plays beyond sample
