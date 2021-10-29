@@ -686,6 +686,7 @@ void FIRE_UP()
     } else {
         FIRE_UP_PLASMA();
     }
+    UNIT_DIRECTION[0] = 0;
 }
 
 void FIRE_UP_PISTOL()
@@ -738,6 +739,7 @@ void FIRE_DOWN()
     } else {
         FIRE_DOWN_PLASMA();
     }
+    UNIT_DIRECTION[0] = 1;
 }
 
 void FIRE_DOWN_PISTOL()
@@ -790,6 +792,7 @@ void FIRE_LEFT()
     } else {
         FIRE_LEFT_PLASMA();
     }
+    UNIT_DIRECTION[0] = 2;
 }
 
 void FIRE_LEFT_PISTOL()
@@ -842,6 +845,7 @@ void FIRE_RIGHT()
     } else {
         FIRE_RIGHT_PLASMA();
     }
+    UNIT_DIRECTION[0] = 3;
 }
 
 void FIRE_RIGHT_PISTOL()
