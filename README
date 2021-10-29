@@ -18,9 +18,8 @@ TODO
 - Joystick support
 - Difficulty indicator in intro screen
 - Evilbot graphics
-- Load MODs off the disk
-- Include all MODs
 - Proper sound effects
 - Avoid flicker when rendering sprites
 - Death animation frames
 - Teleport animation frames
+- Sound effect playback when music is disabled
