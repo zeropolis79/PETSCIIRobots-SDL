@@ -22,5 +22,3 @@ TODO
 - Avoid flicker when rendering sprites
 - Death animation frames
 - Teleport animation frames
-- Sound effect playback when music is disabled
-- Playing the attack sample plays beyond sample
