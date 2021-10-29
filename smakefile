@@ -1,4 +1,4 @@
-OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o PT2.3F_replay_cia.o IntroScreen.o GameScreen.o C64Font.o Tiles.o Sprites.o SpritesMask.o Items.o Health.o SoundExplosion.o SoundMedkit.o SoundPlasma.o SoundPistol.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o
+OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o PT2.3F_replay_cia.o IntroScreen.o GameScreen.o C64Font.o Tiles.o Sprites.o SpritesMask.o Items.o Health.o SoundExplosion.o SoundMedkit.o SoundPlasma.o SoundPistol.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SquareWave.o
 
 all: petrobots 
 
@@ -47,6 +47,8 @@ SoundDoor.o: sounds_dsdoropn.raw
     Bin2Hunk sounds_dsdoropn.raw SoundDoor.o NAME _soundDoor CHIP
 SoundMenuBeep.o: sounds_dsswtchx.raw
     Bin2Hunk sounds_dsswtchx.raw SoundMenuBeep.o NAME _soundMenuBeep CHIP
+SquareWave.o: SquareWave.raw
+    Bin2Hunk SquareWave.raw SquareWave.o NAME _squareWave CHIP
 
 clean:
     delete $(OBJECTS) petrobots petrobots.info petrobots.lnk

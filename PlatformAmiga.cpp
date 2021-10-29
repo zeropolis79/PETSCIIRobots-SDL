@@ -29,10 +29,19 @@
 
 static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-27) (C)2021 David Murray, Vesa Halttunen";
 
-struct spriteData {
+struct SpriteData {
     uint16_t posctl[2];
     uint16_t data[28][2];
     uint16_t reserved[2];
+};
+
+struct SampleData {
+    char name[22];
+    uint16_t length;
+    int8_t finetune;
+    uint8_t volume;
+    uint16_t repeatPoint;
+    uint16_t repeatLength;
 };
 
 __far extern Custom custom;
@@ -44,18 +53,18 @@ __chip extern uint8_t spritesPlanes[];
 __chip extern uint8_t spritesMask[];
 __chip extern uint8_t itemsPlanes[];
 __chip extern uint8_t healthPlanes[];
-__chip extern uint8_t soundExplosion[];
-__chip extern uint8_t soundMedkit[];
-__chip extern uint8_t soundPlasma[];
-__chip extern uint8_t soundPistol[];
-__chip extern uint8_t soundError[];
-__chip extern uint8_t soundCycleWeapon[];
-__chip extern uint8_t soundCycleItem[];
-__chip extern uint8_t soundDoor[];
-__chip extern uint8_t soundMenuBeep[];
-__chip static int8_t squareWave[2] = { 127, -128 };
+__chip extern int8_t soundExplosion[];
+__chip extern int8_t soundMedkit[];
+__chip extern int8_t soundPlasma[];
+__chip extern int8_t soundPistol[];
+__chip extern int8_t soundError[];
+__chip extern int8_t soundCycleWeapon[];
+__chip extern int8_t soundCycleItem[];
+__chip extern int8_t soundDoor[];
+__chip extern int8_t soundMenuBeep[];
+__chip extern int8_t squareWave[];
 __chip static int32_t simpleTileMask = 0xffffff00;
-__chip static spriteData cursorData1 = {
+__chip static SpriteData cursorData1 = {
     { 0, 0 },
     {
         { 0xffff, 0 },
@@ -89,7 +98,7 @@ __chip static spriteData cursorData1 = {
     },
     { 0, 0 }
 };
-__chip static spriteData cursorData2 = {
+__chip static SpriteData cursorData2 = {
     { 0, 0 },
     {
         { 0xfff0, 0 },
@@ -884,7 +893,23 @@ void PlatformAmiga::playModule(uint8_t module)
         mt_SampleStarts[15 + 13] = soundCycleItem;
         mt_SampleStarts[15 + 14] = soundDoor;
         mt_SampleStarts[15 + 15] = soundMenuBeep;
-        // TODO set sample length @ moduleData + 20 + sample * 30 + 22
+        SampleData* sampleData = (SampleData*)(moduleData + 20);
+        sampleData[15 + 0].length = (uint16_t)(soundMedkit - soundExplosion) >> 1;
+        sampleData[15 + 1].length = 0; // TODO
+        sampleData[15 + 2].length = (uint16_t)(soundPlasma - soundMedkit) >> 1;
+        sampleData[15 + 3].length = 0; // TODO
+        sampleData[15 + 4].length = 0; // TODO
+        sampleData[15 + 5].length = 0; // TODO
+        sampleData[15 + 6].length = 0; // TODO
+        sampleData[15 + 7].length = 0; // TODO
+        sampleData[15 + 8].length = (uint16_t)(soundPistol - soundPlasma) >> 1;
+        sampleData[15 + 9].length = (uint16_t)(soundError - soundPistol) >> 1;
+        sampleData[15 + 10].length = (uint16_t)(soundCycleWeapon - soundError) >> 1;
+        sampleData[15 + 11].length = 0; // TODO
+        sampleData[15 + 12].length = (uint16_t)(soundCycleItem - soundCycleWeapon) >> 1;
+        sampleData[15 + 13].length = (uint16_t)(soundDoor - soundCycleItem) >> 1;
+        sampleData[15 + 14].length = (uint16_t)(soundMenuBeep - soundDoor) >> 1;
+        sampleData[15 + 15].length = (uint16_t)(squareWave - soundMenuBeep) >> 1;
         mt_chan4data[0] = 0;
         mt_chan4data[1] = 0;
         mt_Enable = true;
