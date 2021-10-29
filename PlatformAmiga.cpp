@@ -919,17 +919,17 @@ void PlatformAmiga::playModule(Module module)
         mt_init(moduleData);
     }
     mt_SampleStarts[15 + 0] = soundExplosion;
-    mt_SampleStarts[15 + 1] = soundMenuBeep; // TODO
+    mt_SampleStarts[15 + 1] = 0; // TODO
     mt_SampleStarts[15 + 2] = soundMedkit;
-    mt_SampleStarts[15 + 3] = soundMenuBeep; // TODO
-    mt_SampleStarts[15 + 4] = soundMenuBeep; // TODO
-    mt_SampleStarts[15 + 5] = soundMenuBeep; // TODO
-    mt_SampleStarts[15 + 6] = soundMenuBeep; // TODO
-    mt_SampleStarts[15 + 7] = soundMenuBeep; // TODO
+    mt_SampleStarts[15 + 3] = 0; // TODO
+    mt_SampleStarts[15 + 4] = 0; // TODO
+    mt_SampleStarts[15 + 5] = 0; // TODO
+    mt_SampleStarts[15 + 6] = 0; // TODO
+    mt_SampleStarts[15 + 7] = 0; // TODO
     mt_SampleStarts[15 + 8] = soundPlasma;
     mt_SampleStarts[15 + 9] = soundPistol;
     mt_SampleStarts[15 + 10] = soundError;
-    mt_SampleStarts[15 + 11] = soundMenuBeep; // TODO
+    mt_SampleStarts[15 + 11] = 0; // TODO
     mt_SampleStarts[15 + 12] = soundCycleWeapon;
     mt_SampleStarts[15 + 13] = soundCycleItem;
     mt_SampleStarts[15 + 14] = soundDoor;
