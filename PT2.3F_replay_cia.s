@@ -369,8 +369,11 @@ mt_GetNewNote
 	MOVE.B	n_volume(A6),D0
 	MOVE.W	D0,8(A5)
 	LEA	$DFF0D0,A5
+	tst.l	mt_chan4data
+	beq.s	mt_PlayChannel4
 	lea	mt_chan4data,a0
 	moveq	#0,d1
+mt_PlayChannel4
 	LEA	mt_chan4temp(PC),A6
 	BSR.S	mt_PlayVoice
 	MOVEQ	#0,D0
