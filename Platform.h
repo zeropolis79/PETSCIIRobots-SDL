@@ -25,19 +25,25 @@ typedef unsigned char bool;
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define ABS(a) ((a) >= 0 ? (a) : -(a))
 
-#define IMAGE_INTRO 0
-#define IMAGE_GAME 1
-#define MODULE_INTRO 0
-#define MODULE_WIN 1
-#define MODULE_LOSE 2
-#define MODULE_IN_GAME_1 3
-#define MODULE_IN_GAME_2 4
-#define MODULE_IN_GAME_3 5
-#define MODULE_IN_GAME_4 6
-
 class Platform {
 public:
     Platform();
+
+    enum Image {
+        ImageIntro,
+        ImageGame
+    };
+
+    enum Module {
+        ModuleSoundFX,
+        ModuleIntro,
+        ModuleWin,
+        ModuleLose,
+        ModuleInGame1,
+        ModuleInGame2,
+        ModuleInGame3,
+        ModuleInGame4
+    };
 
     virtual void setInterrupt(void (*interrupt)(void)) = 0;
     virtual void show();
@@ -46,7 +52,7 @@ public:
     virtual uint8_t getin() = 0;
     virtual void clearKeyBuffer() = 0;
     virtual void load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset = 0) = 0;
-    virtual void displayImage(uint8_t image);
+    virtual void displayImage(Image image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes) = 0;
     virtual void updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles);
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant = 0, bool transparent = false) = 0;
@@ -67,7 +73,7 @@ public:
     virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color) = 0;
     virtual void playNote(uint8_t note) = 0;
     virtual void stopNote() = 0;
-    virtual void playModule(uint8_t module);
+    virtual void playModule(Module module);
     virtual void setSongPosition(uint8_t songPosition);
     virtual void stopModule();
     virtual void playSample(uint8_t sample);

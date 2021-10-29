@@ -9,7 +9,7 @@ void Platform::show()
 {
 }
 
-void Platform::displayImage(uint8_t)
+void Platform::displayImage(Image)
 {
 }
 
@@ -57,7 +57,7 @@ void Platform::stopFlashScreen()
 {
 }
 
-void Platform::playModule(uint8_t)
+void Platform::playModule(Module)
 {
 }
 

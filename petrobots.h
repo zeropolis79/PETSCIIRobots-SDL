@@ -168,7 +168,11 @@ void MAIN_GAME_LOOP();
 void TOGGLE_MUSIC();
 void START_IN_GAME_MUSIC();
 
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+extern Platform::Module LEVEL_MUSIC[];
+#else
 extern uint8_t LEVEL_MUSIC[];
+#endif
 
 void CHEATER();
 bool PAUSE_GAME();

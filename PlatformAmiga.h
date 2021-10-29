@@ -32,7 +32,7 @@ public:
     virtual uint8_t getin();
     virtual void clearKeyBuffer();
     virtual void load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
-    virtual void displayImage(uint8_t image);
+    virtual void displayImage(Image image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent);
     virtual void renderSprite(uint8_t sprite, uint16_t x, uint16_t y);
@@ -51,7 +51,7 @@ public:
     virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color);
 	virtual void playNote(uint8_t note);
     virtual void stopNote();
-    virtual void playModule(uint8_t module);
+    virtual void playModule(Module module);
     virtual void setSongPosition(uint8_t songPosition);
     virtual void stopModule();
     virtual void playSample(uint8_t sample);
@@ -62,6 +62,7 @@ private:
     __saveds void runVerticalBlankInterrupt();
     __asm static void verticalBlankInterruptServer();
     void (*interrupt)(void);
+    void setSampleLengths(uint8_t* module);
     int framesPerSecond_;
     BitMap* screenBitmap;
     Screen* screen;
@@ -81,7 +82,7 @@ private:
     Palette* palette;
     uint16_t bplcon1DefaultValue;
     uint16_t shakeStep;
-    int8_t loadedModule;
+    Module loadedModule;
 };
 
 #endif

@@ -410,7 +410,7 @@ void TOGGLE_MUSIC()
         PRINT_INFO(MSG_MUSICOFF);
         MUSIC_ON = 0;
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->stopModule();
+        platform->playModule(Platform::ModuleSoundFX);
 #else
         platform->stopNote(); // turn off sound
 #endif
@@ -439,20 +439,20 @@ void START_IN_GAME_MUSIC()
 }
 
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-uint8_t LEVEL_MUSIC[] = {
-    MODULE_IN_GAME_1,
-    MODULE_IN_GAME_2,
-    MODULE_IN_GAME_3,
-    MODULE_IN_GAME_4,
-    MODULE_IN_GAME_1,
-    MODULE_IN_GAME_2,
-    MODULE_IN_GAME_3,
-    MODULE_IN_GAME_4,
-    MODULE_IN_GAME_1,
-    MODULE_IN_GAME_2,
-    MODULE_IN_GAME_3,
-    MODULE_IN_GAME_4,
-    MODULE_IN_GAME_1
+Platform::Module LEVEL_MUSIC[] = {
+    Platform::ModuleInGame1,
+    Platform::ModuleInGame2,
+    Platform::ModuleInGame3,
+    Platform::ModuleInGame4,
+    Platform::ModuleInGame1,
+    Platform::ModuleInGame2,
+    Platform::ModuleInGame3,
+    Platform::ModuleInGame4,
+    Platform::ModuleInGame1,
+    Platform::ModuleInGame2,
+    Platform::ModuleInGame3,
+    Platform::ModuleInGame4,
+    Platform::ModuleInGame1
 };
 #else
 uint8_t LEVEL_MUSIC[] = { 0,1,2,0,1,2,0,1,2,0,1,2,0 };
@@ -1480,7 +1480,7 @@ void MAP_LOAD_ROUTINE()
 void DISPLAY_GAME_SCREEN()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->displayImage(IMAGE_GAME);
+    platform->displayImage(Platform::ImageGame);
 
     writeToScreenMemory(0x3E2, 0x71, 15);
     writeToScreenMemory(0x3E3, 0x71, 15);
@@ -1509,7 +1509,7 @@ void DISPLAY_INTRO_SCREEN()
             row[X] = convertToPETSCII(introText[Y][X]);
         }
     }
-    platform->displayImage(IMAGE_INTRO);
+    platform->displayImage(Platform::ImageIntro);
 #else
     DECOMPRESS_SCREEN(INTRO_TEXT);
 #endif
@@ -1986,7 +1986,7 @@ void GAME_OVER()
     CLOCK_ACTIVE = 0;
     // disable music
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->stopModule();
+    platform->playModule(Platform::ModuleSoundFX);
 #else
     MUSIC_ON = 0;
     platform->stopNote(); // turn off sound
@@ -2037,7 +2037,7 @@ void DISPLAY_WIN_LOSE()
             writeToScreenMemory(0x088 + X, convertToPETSCII(WIN_MSG[X]));
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->playModule(MODULE_WIN);
+        platform->playModule(Platform::ModuleWin);
 #else
         PLAY_SOUND(18); // win music
 #endif
@@ -2047,7 +2047,7 @@ void DISPLAY_WIN_LOSE()
             writeToScreenMemory(0x088 + X, convertToPETSCII(LOS_MSG[X]));
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->playModule(MODULE_LOSE);
+        platform->playModule(Platform::ModuleLose);
 #else
         PLAY_SOUND(19); // LOSE music
 #endif
@@ -2165,7 +2165,7 @@ void INTRO_SCREEN()
 void START_INTRO_MUSIC()
 {
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->playModule(MODULE_INTRO);
+    platform->playModule(Platform::ModuleIntro);
 #else
     DATA_LINE = 0;
     SOUND_EFFECT = 0xFF;
@@ -2179,7 +2179,7 @@ bool EXEC_COMMAND()
     if (MENUY == 0) { // START GAME
         SET_CONTROLS();
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->stopModule();
+        platform->playModule(Platform::ModuleSoundFX);
 #else
         MUSIC_ON = 0;
 #endif

@@ -53,6 +53,7 @@ __chip extern uint8_t spritesPlanes[];
 __chip extern uint8_t spritesMask[];
 __chip extern uint8_t itemsPlanes[];
 __chip extern uint8_t healthPlanes[];
+__chip extern uint8_t soundFXModule[];
 __chip extern int8_t soundExplosion[];
 __chip extern int8_t soundMedkit[];
 __chip extern int8_t soundPlasma[];
@@ -184,7 +185,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     palette(new Palette((uint16_t*)(gameScreen + SCREEN_SIZE * PLANES), 16, 16, 0xf00)),
     bplcon1DefaultValue(0),
     shakeStep(0),
-    loadedModule(-1)
+    loadedModule(ModuleSoundFX)
 {
     Palette::initialize();
 
@@ -269,6 +270,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     AddIntServer(INTB_VERTB, verticalBlankInterrupt);
 
     if (moduleBasedAudio) {
+        // Clear the first two bytes of effect samples to enable the 2-byte no-loop loop
         *((uint16_t*)soundExplosion) = 0;
         *((uint16_t*)soundMedkit) = 0;
         *((uint16_t*)soundPlasma) = 0;
@@ -278,6 +280,8 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
         *((uint16_t*)soundCycleItem) = 0;
         *((uint16_t*)soundDoor) = 0;
         *((uint16_t*)soundMenuBeep) = 0;
+
+        setSampleLengths(soundFXModule);
 
         SetCIAInt();
     } else {
@@ -374,6 +378,27 @@ void PlatformAmiga::runVerticalBlankInterrupt()
     if (interrupt) {
         interrupt();
     }
+}
+
+void PlatformAmiga::setSampleLengths(uint8_t* module)
+{
+    SampleData* sampleData = (SampleData*)(module + 20);
+    sampleData[15 + 0].length = (uint16_t)(soundMedkit - soundExplosion) >> 1;
+    sampleData[15 + 1].length = 0; // TODO
+    sampleData[15 + 2].length = (uint16_t)(soundPlasma - soundMedkit) >> 1;
+    sampleData[15 + 3].length = 0; // TODO
+    sampleData[15 + 4].length = 0; // TODO
+    sampleData[15 + 5].length = 0; // TODO
+    sampleData[15 + 6].length = 0; // TODO
+    sampleData[15 + 7].length = 0; // TODO
+    sampleData[15 + 8].length = (uint16_t)(soundPistol - soundPlasma) >> 1;
+    sampleData[15 + 9].length = (uint16_t)(soundError - soundPistol) >> 1;
+    sampleData[15 + 10].length = (uint16_t)(soundCycleWeapon - soundError) >> 1;
+    sampleData[15 + 11].length = 0; // TODO
+    sampleData[15 + 12].length = (uint16_t)(soundCycleItem - soundCycleWeapon) >> 1;
+    sampleData[15 + 13].length = (uint16_t)(soundDoor - soundCycleItem) >> 1;
+    sampleData[15 + 14].length = (uint16_t)(soundMenuBeep - soundDoor) >> 1;
+    sampleData[15 + 15].length = (uint16_t)(squareWave - soundMenuBeep) >> 1;
 }
 
 void PlatformAmiga::setInterrupt(void (*interrupt)(void))
@@ -491,9 +516,9 @@ void PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t si
     }
 }
 
-void PlatformAmiga::displayImage(uint8_t image)
+void PlatformAmiga::displayImage(Image image)
 {
-    uint32_t* source = (uint32_t*)(image == IMAGE_INTRO ? introScreen : gameScreen);
+    uint32_t* source = (uint32_t*)(image == ImageIntro ? introScreen : gameScreen);
     uint32_t* destination = (uint32_t*)screenPlanes;
     for (int y = 0; y < SCREEN_HEIGHT * PLANES; y++) {
         *destination++ = *source++;
@@ -878,51 +903,38 @@ void PlatformAmiga::stopNote()
     }
 }
 
-void PlatformAmiga::playModule(uint8_t module)
+void PlatformAmiga::playModule(Module module)
 {
     stopModule();
     stopSample();
-    if (!mt_Enable) {
+
+    if (module == ModuleSoundFX) {
+        mt_init(soundFXModule);
+    } else {
         if (loadedModule != module) {
-            load(moduleFilenames[module], moduleData, 105804, 0);
+            load(moduleFilenames[module - 1], moduleData, 105804, 0);
+            setSampleLengths(moduleData);
             loadedModule = module;
         }
         mt_init(moduleData);
-        mt_SampleStarts[15 + 0] = soundExplosion;
-        mt_SampleStarts[15 + 1] = soundMenuBeep; // TODO
-        mt_SampleStarts[15 + 2] = soundMedkit;
-        mt_SampleStarts[15 + 3] = soundMenuBeep; // TODO
-        mt_SampleStarts[15 + 4] = soundMenuBeep; // TODO
-        mt_SampleStarts[15 + 5] = soundMenuBeep; // TODO
-        mt_SampleStarts[15 + 6] = soundMenuBeep; // TODO
-        mt_SampleStarts[15 + 7] = soundMenuBeep; // TODO
-        mt_SampleStarts[15 + 8] = soundPlasma;
-        mt_SampleStarts[15 + 9] = soundPistol;
-        mt_SampleStarts[15 + 10] = soundError;
-        mt_SampleStarts[15 + 11] = soundMenuBeep; // TODO
-        mt_SampleStarts[15 + 12] = soundCycleWeapon;
-        mt_SampleStarts[15 + 13] = soundCycleItem;
-        mt_SampleStarts[15 + 14] = soundDoor;
-        mt_SampleStarts[15 + 15] = soundMenuBeep;
-        SampleData* sampleData = (SampleData*)(moduleData + 20);
-        sampleData[15 + 0].length = (uint16_t)(soundMedkit - soundExplosion) >> 1;
-        sampleData[15 + 1].length = 0; // TODO
-        sampleData[15 + 2].length = (uint16_t)(soundPlasma - soundMedkit) >> 1;
-        sampleData[15 + 3].length = 0; // TODO
-        sampleData[15 + 4].length = 0; // TODO
-        sampleData[15 + 5].length = 0; // TODO
-        sampleData[15 + 6].length = 0; // TODO
-        sampleData[15 + 7].length = 0; // TODO
-        sampleData[15 + 8].length = (uint16_t)(soundPistol - soundPlasma) >> 1;
-        sampleData[15 + 9].length = (uint16_t)(soundError - soundPistol) >> 1;
-        sampleData[15 + 10].length = (uint16_t)(soundCycleWeapon - soundError) >> 1;
-        sampleData[15 + 11].length = 0; // TODO
-        sampleData[15 + 12].length = (uint16_t)(soundCycleItem - soundCycleWeapon) >> 1;
-        sampleData[15 + 13].length = (uint16_t)(soundDoor - soundCycleItem) >> 1;
-        sampleData[15 + 14].length = (uint16_t)(soundMenuBeep - soundDoor) >> 1;
-        sampleData[15 + 15].length = (uint16_t)(squareWave - soundMenuBeep) >> 1;
-        mt_Enable = true;
     }
+    mt_SampleStarts[15 + 0] = soundExplosion;
+    mt_SampleStarts[15 + 1] = soundMenuBeep; // TODO
+    mt_SampleStarts[15 + 2] = soundMedkit;
+    mt_SampleStarts[15 + 3] = soundMenuBeep; // TODO
+    mt_SampleStarts[15 + 4] = soundMenuBeep; // TODO
+    mt_SampleStarts[15 + 5] = soundMenuBeep; // TODO
+    mt_SampleStarts[15 + 6] = soundMenuBeep; // TODO
+    mt_SampleStarts[15 + 7] = soundMenuBeep; // TODO
+    mt_SampleStarts[15 + 8] = soundPlasma;
+    mt_SampleStarts[15 + 9] = soundPistol;
+    mt_SampleStarts[15 + 10] = soundError;
+    mt_SampleStarts[15 + 11] = soundMenuBeep; // TODO
+    mt_SampleStarts[15 + 12] = soundCycleWeapon;
+    mt_SampleStarts[15 + 13] = soundCycleItem;
+    mt_SampleStarts[15 + 14] = soundDoor;
+    mt_SampleStarts[15 + 15] = soundMenuBeep;
+    mt_Enable = true;
 }
 
 void PlatformAmiga::setSongPosition(uint8_t songPosition)
@@ -934,8 +946,8 @@ void PlatformAmiga::setSongPosition(uint8_t songPosition)
 void PlatformAmiga::stopModule()
 {
     if (mt_Enable) {
-        mt_Enable = false;
         mt_end();
+        mt_Enable = false;
     }
 }
 
