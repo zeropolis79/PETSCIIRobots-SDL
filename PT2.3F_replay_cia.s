@@ -246,6 +246,8 @@ n_funkoffset	EQU 35 ; B
 n_wavestart	EQU 36 ; L
 
 _mt_init__FPUc
+	movem.l	d2-d3/a2/a4,-(sp)
+
 	MOVE.L	A0,mt_SongDataPtr
 	
 	; count number of patterns (find highest referred pattern)
@@ -293,6 +295,10 @@ mtskip2
 	CLR.B	mt_counter
 	CLR.B	mt_SongPos
 	CLR.W	mt_PatternPos
+	move.w	#125,d0
+	bsr	SetTempo
+	movem.l	(sp)+,d2-d3/a2/a4
+
 _mt_end__Fv
 	SF	mt_Enable
 	LEA	$DFF000,A0
