@@ -2242,7 +2242,7 @@ void DISPLAY_MAP_NAME()
     const char* name = CALC_MAP_NAME();
     for (int Y = 0; Y != 16; Y++) {
 #ifdef PLATFORM_IMAGE_SUPPORT
-        writeToScreenMemory(0x119 + Y, convertToPETSCII(name[Y]), 13);
+        writeToScreenMemory(0x119 + Y, convertToPETSCII(name[Y]), 15);
 #else
         writeToScreenMemory(0x16A + Y, convertToPETSCII(name[Y]));
 #endif
@@ -2261,7 +2261,7 @@ void REVERSE_MENU_OPTION(bool reverse)
 {
 #ifdef PLATFORM_COLOR_SUPPORT
     for (int Y = 0; Y != 10; Y++) {
-        writeToScreenMemory(MENU_CHART_L[MENUY] + Y, SCREEN_MEMORY[MENU_CHART_L[MENUY] + Y], reverse ? 1 : 13);
+        writeToScreenMemory(MENU_CHART_L[MENUY] + Y, SCREEN_MEMORY[MENU_CHART_L[MENUY] + Y], reverse ? 14 : 15);
     }
 #else
     for (int Y = 0; Y != 10; Y++) {
