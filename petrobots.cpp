@@ -410,7 +410,7 @@ void TOGGLE_MUSIC()
         PRINT_INFO(MSG_MUSICOFF);
         MUSIC_ON = 0;
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->setSongPosition(0);
+        platform->stopModule();
 #else
         platform->stopNote(); // turn off sound
 #endif
@@ -1986,7 +1986,7 @@ void GAME_OVER()
     CLOCK_ACTIVE = 0;
     // disable music
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->setSongPosition(0);
+    platform->stopModule();
 #else
     MUSIC_ON = 0;
     platform->stopNote(); // turn off sound
