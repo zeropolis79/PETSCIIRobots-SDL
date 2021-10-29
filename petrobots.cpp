@@ -423,10 +423,10 @@ void TOGGLE_MUSIC()
 
 void START_IN_GAME_MUSIC()
 {
+    MUSIC_ON = 1;
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->playModule(LEVEL_MUSIC[SELECTED_MAP]);
 #else
-    MUSIC_ON = 1;
     if (SOUND_EFFECT == 0xFF) { // FF=NO sound effect in progress
         DATA_LINE = 0;
         CUR_PATTERN = IN_GAME_MUSIC1 + (LEVEL_MUSIC[SELECTED_MAP] << 8);
@@ -2179,7 +2179,7 @@ bool EXEC_COMMAND()
     if (MENUY == 0) { // START GAME
         SET_CONTROLS();
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->playModule(Platform::ModuleSoundFX);
+        START_IN_GAME_MUSIC();
 #else
         MUSIC_ON = 0;
 #endif
