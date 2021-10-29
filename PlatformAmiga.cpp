@@ -269,6 +269,16 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     AddIntServer(INTB_VERTB, verticalBlankInterrupt);
 
     if (moduleBasedAudio) {
+        *((uint16_t*)soundExplosion) = 0;
+        *((uint16_t*)soundMedkit) = 0;
+        *((uint16_t*)soundPlasma) = 0;
+        *((uint16_t*)soundPistol) = 0;
+        *((uint16_t*)soundError) = 0;
+        *((uint16_t*)soundCycleWeapon) = 0;
+        *((uint16_t*)soundCycleItem) = 0;
+        *((uint16_t*)soundDoor) = 0;
+        *((uint16_t*)soundMenuBeep) = 0;
+
         SetCIAInt();
     } else {
         messagePort = CreatePort(NULL, 0);
@@ -910,15 +920,6 @@ void PlatformAmiga::playModule(uint8_t module)
         sampleData[15 + 13].length = (uint16_t)(soundDoor - soundCycleItem) >> 1;
         sampleData[15 + 14].length = (uint16_t)(soundMenuBeep - soundDoor) >> 1;
         sampleData[15 + 15].length = (uint16_t)(squareWave - soundMenuBeep) >> 1;
-        *((uint16_t*)soundExplosion) = 0;
-        *((uint16_t*)soundMedkit) = 0;
-        *((uint16_t*)soundPlasma) = 0;
-        *((uint16_t*)soundPistol) = 0;
-        *((uint16_t*)soundError) = 0;
-        *((uint16_t*)soundCycleWeapon) = 0;
-        *((uint16_t*)soundCycleItem) = 0;
-        *((uint16_t*)soundDoor) = 0;
-        *((uint16_t*)soundMenuBeep) = 0;
         mt_chan4data[0] = 0;
         mt_chan4data[1] = 0;
         mt_Enable = true;
