@@ -129,6 +129,9 @@ void INIT_GAME()
     RESET_KEYS_AMMO();
     DISPLAY_GAME_SCREEN();
     DISPLAY_LOAD_MESSAGE2();
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    START_IN_GAME_MUSIC();
+#endif
     MAP_LOAD_ROUTINE();
     SET_DIFF_LEVEL();
     ANIMATE_PLAYER();
@@ -2129,11 +2132,11 @@ void RESET_KEYS_AMMO()
 
 void INTRO_SCREEN()
 {
+    START_INTRO_MUSIC();
     DISPLAY_INTRO_SCREEN();
     DISPLAY_MAP_NAME();
     CHANGE_DIFFICULTY_LEVEL();
     platform->show();
-    START_INTRO_MUSIC();
     MENUY = 0;
     REVERSE_MENU_OPTION(true);
     platform->renderFrame();
@@ -2183,7 +2186,7 @@ bool EXEC_COMMAND()
     if (MENUY == 0) { // START GAME
         SET_CONTROLS();
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        START_IN_GAME_MUSIC();
+        platform->stopModule();
 #else
         MUSIC_ON = 0;
 #endif
