@@ -881,6 +881,7 @@ void PlatformAmiga::stopNote()
 void PlatformAmiga::playModule(uint8_t module)
 {
     stopModule();
+    stopSample();
     if (!mt_Enable) {
         if (loadedModule != module) {
             load(moduleFilenames[module], moduleData, 105804, 0);
@@ -920,8 +921,6 @@ void PlatformAmiga::playModule(uint8_t module)
         sampleData[15 + 13].length = (uint16_t)(soundDoor - soundCycleItem) >> 1;
         sampleData[15 + 14].length = (uint16_t)(soundMenuBeep - soundDoor) >> 1;
         sampleData[15 + 15].length = (uint16_t)(squareWave - soundMenuBeep) >> 1;
-        mt_chan4data[0] = 0;
-        mt_chan4data[1] = 0;
         mt_Enable = true;
     }
 }
