@@ -442,16 +442,16 @@ void START_IN_GAME_MUSIC()
 Platform::Module LEVEL_MUSIC[] = {
     Platform::ModuleInGame1,
     Platform::ModuleInGame2,
-    Platform::ModuleInGame3,
-    Platform::ModuleInGame4,
     Platform::ModuleInGame1,
     Platform::ModuleInGame2,
-    Platform::ModuleInGame3,
-    Platform::ModuleInGame4,
     Platform::ModuleInGame1,
     Platform::ModuleInGame2,
-    Platform::ModuleInGame3,
-    Platform::ModuleInGame4,
+    Platform::ModuleInGame1,
+    Platform::ModuleInGame2,
+    Platform::ModuleInGame1,
+    Platform::ModuleInGame2,
+    Platform::ModuleInGame1,
+    Platform::ModuleInGame2,
     Platform::ModuleInGame1
 };
 #else
