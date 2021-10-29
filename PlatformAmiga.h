@@ -80,6 +80,7 @@ private:
     SimpleSprite* cursorSprite1;
     SimpleSprite* cursorSprite2;
     Palette* palette;
+    uint8_t* moduleData;
     uint16_t bplcon1DefaultValue;
     uint16_t shakeStep;
     Module loadedModule;

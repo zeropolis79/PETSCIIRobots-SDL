@@ -133,7 +133,6 @@ __chip static SpriteData cursorData2 = {
     },
     { 0, 0 }
 };
-__chip static uint8_t moduleData[105804];
 uint16_t addressMap[40 * 25];
 static uint8_t tileMaskMap[256];
 static int8_t tileSpriteMap[256] = {
@@ -183,6 +182,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     cursorSprite1(new SimpleSprite),
     cursorSprite2(new SimpleSprite),
     palette(new Palette((uint16_t*)(gameScreen + SCREEN_SIZE * PLANES), 16, 16, 0xf00)),
+    moduleData(0),
     bplcon1DefaultValue(0),
     shakeStep(0),
     loadedModule(ModuleSoundFX)
@@ -203,6 +203,13 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     tilesMask = (uint8_t*)AllocMem(32 / 8 * 24 * PLANES * TILES_WITH_MASK, MEMF_CHIP | MEMF_CLEAR);
     if (!tilesMask) {
         return;
+    }
+
+    if (moduleBasedAudio) {
+        moduleData = (uint8_t*)AllocMem(105804, MEMF_CHIP | MEMF_CLEAR);
+        if (!moduleData) {
+            return;
+        }
     }
 
     InitBitMap(screenBitmap, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -352,6 +359,9 @@ PlatformAmiga::~PlatformAmiga()
         CloseScreen(screen);
     }
 
+    if (moduleData) {
+        FreeMem(moduleData, 105804);
+    }
 
     if (tilesMask) {
         FreeMem(tilesMask, 32 / 8 * 24 * PLANES * TILES_WITH_MASK);
