@@ -29,6 +29,10 @@ void Platform::renderHealth(uint8_t, uint16_t, uint16_t)
 {
 }
 
+void Platform::renderFace(uint8_t, uint16_t, uint16_t)
+{
+}
+
 void Platform::showCursor(uint16_t, uint16_t)
 {
 }

@@ -2279,7 +2279,9 @@ uint8_t MENU_CHART_L[] = { 0x54, 0x7C, 0xA4, 0xCC };
 
 void CHANGE_DIFFICULTY_LEVEL()
 {
-#ifndef PLATFORM_IMAGE_SUPPORT
+#ifdef PLATFORM_IMAGE_SUPPORT
+    platform->renderFace(DIFF_LEVEL, 234, 75);
+#else
     int Y = FACE_LEVEL[DIFF_LEVEL];
     // DO CHARACTERS FIRST
     writeToScreenMemory(0x0DD, ROBOT_FACE[Y++]);

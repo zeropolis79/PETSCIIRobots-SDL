@@ -18,9 +18,9 @@ TODO
 - Joystick support
 - Avoid flicker when rendering sprites
 - Proper sound effects
-- Difficulty indicator in intro screen
-- Add death animation frames
-- Add teleport animation frames
+- Key graphics
+- Death animation frames
+- Teleport animation frames
 - Fix evilbot graphics
 - Fix crash on exit on KS1.3
 - Compression of assets
