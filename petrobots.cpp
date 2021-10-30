@@ -638,9 +638,9 @@ void USE_EMP()
     for (int X = 1; X != 28; X++) { // start with unit#1 (skip player)
         if (UNIT_TYPE[X] != 0 &&                    // CHECK THAT UNIT EXISTS
             UNIT_LOC_X[X] >= MAP_WINDOW_X &&        // CHECK HORIZONTAL POSITION
-            UNIT_LOC_X[X] < (MAP_WINDOW_X + 10) &&  // NOW CHECK VERTICAL
+            UNIT_LOC_X[X] <= (MAP_WINDOW_X + 10) &&  // NOW CHECK VERTICAL
             UNIT_LOC_Y[X] >= MAP_WINDOW_Y &&
-            UNIT_LOC_Y[X] < (MAP_WINDOW_Y + 6)) {
+            UNIT_LOC_Y[X] <= (MAP_WINDOW_Y + 6)) {
             UNIT_TIMER_A[X] = 255;
             // test to see if unit is above water
             MAP_X = UNIT_LOC_X[X];
