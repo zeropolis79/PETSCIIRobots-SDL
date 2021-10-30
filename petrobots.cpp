@@ -272,8 +272,8 @@ void RUNIRQ()
         KEYTIMER--;
     }
     if (BORDER != 0) {
-        platform->flashScreen(15 - BORDER);
         BORDER--;
+        platform->flashScreen(15 - BORDER);
     }
     if (SCREEN_SHAKE != 0) {
         platform->shakeScreen();
