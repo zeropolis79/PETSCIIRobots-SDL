@@ -16,9 +16,13 @@ petrobots
 TODO
 ----
 - Joystick support
-- Difficulty indicator in intro screen
-- Evilbot graphics
-- Proper sound effects
 - Avoid flicker when rendering sprites
-- Death animation frames
-- Teleport animation frames
+- Proper sound effects
+- Difficulty indicator in intro screen
+- Add death animation frames
+- Add teleport animation frames
+- Fix evilbot graphics
+- Fix crash on exit on KS1.3
+- Compression of assets
+- Loading/decompression indication polish
+- Fix flash fade on game over
