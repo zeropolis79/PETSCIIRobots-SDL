@@ -70,7 +70,7 @@ public:
     virtual void flashScreen(uint16_t intensity);
     virtual void stopFlashScreen();
     virtual void writeToScreenMemory(uint16_t address, uint8_t value) = 0;
-    virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color) = 0;
+    virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset) = 0;
     virtual void playNote(uint8_t note) = 0;
     virtual void stopNote() = 0;
     virtual void playModule(Module module);

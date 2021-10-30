@@ -503,6 +503,6 @@ extern uint8_t IN_GAME_MUSIC2[];
 extern uint8_t IN_GAME_MUSIC3[];
 
 char convertToPETSCII(char value);
-void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color = 10);
+void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color = 10, uint8_t yOffset = 0);
 
 #endif

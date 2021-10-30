@@ -824,7 +824,7 @@ void PlatformAmiga::stopFlashScreen()
     LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
 }
 
-void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color)
+void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
     bool reverse = value > 127;
     bool writePlane1 = color & 1;
@@ -833,6 +833,9 @@ void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t
     bool writePlane4 = color & 8;
     uint8_t* source = c64Font + ((value & 127) << 3);
     uint8_t* destination = screenPlanes + addressMap[address];
+    if (yOffset > 0) {
+        destination += yOffset * PLANES * SCREEN_WIDTH_IN_BYTES;
+    }
     if (reverse) {
         for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
             uint8_t font = ~*source++;

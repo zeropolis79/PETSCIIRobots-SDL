@@ -2242,7 +2242,7 @@ void DISPLAY_MAP_NAME()
     const char* name = CALC_MAP_NAME();
     for (int Y = 0; Y != 16; Y++) {
 #ifdef PLATFORM_IMAGE_SUPPORT
-        writeToScreenMemory(0x119 + Y, convertToPETSCII(name[Y]), 15);
+        writeToScreenMemory(0x119 + Y, convertToPETSCII(name[Y]), 15, 5);
 #else
         writeToScreenMemory(0x16A + Y, convertToPETSCII(name[Y]));
 #endif
@@ -2261,7 +2261,7 @@ void REVERSE_MENU_OPTION(bool reverse)
 {
 #ifdef PLATFORM_COLOR_SUPPORT
     for (int Y = 0; Y != 10; Y++) {
-        writeToScreenMemory(MENU_CHART_L[MENUY] + Y, SCREEN_MEMORY[MENU_CHART_L[MENUY] + Y], reverse ? 14 : 15);
+        writeToScreenMemory(MENU_CHART_L[MENUY] + Y, SCREEN_MEMORY[MENU_CHART_L[MENUY] + Y], reverse ? 14 : 15, 5);
     }
 #else
     for (int Y = 0; Y != 10; Y++) {
@@ -5004,11 +5004,11 @@ char convertToPETSCII(char value)
     return value >= 96 ? (value - 96) : value;
 }
 
-void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color)
+void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
     SCREEN_MEMORY[address] = value;
 #ifdef PLATFORM_COLOR_SUPPORT
-    platform->writeToScreenMemory(address, value, color);
+    platform->writeToScreenMemory(address, value, color, yOffset);
 #else
     platform->writeToScreenMemory(address, value);
 #endif
