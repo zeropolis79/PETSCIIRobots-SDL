@@ -524,13 +524,36 @@ void PlatformAmiga::clearKeyBuffer()
 
 void PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)
 {
-    BPTR file = Open((char*)filename, MODE_OLDFILE);
-    if (file) {
-        if (offset > 0) {
-            Seek(file, offset, OFFSET_BEGINNING);
+    const char* nameEnd = filename;
+    while (*++nameEnd);
+    if ((nameEnd - filename) >= 3 && *--nameEnd == 'z' && *--nameEnd == 'g' && *--nameEnd == '.') {
+        BPTR lock = Lock((char*)filename, ACCESS_READ);
+        if (lock) {
+            FileInfoBlock fib;
+            if (Examine(lock, &fib)) {
+                UnLock(lock);
+
+                BPTR file = Open((char*)filename, MODE_OLDFILE);
+                if (file) {
+                    uint8_t* data = new uint8_t[fib.fib_Size];
+                    if (data) {
+                        Read(file, data, fib.fib_Size);
+                        ungzip(data, destination);
+                        delete[] data;
+                    }
+                    Close(file);
+                }
+            }
         }
-        Read(file, destination, size);
-        Close(file);
+    } else {
+        BPTR file = Open((char*)filename, MODE_OLDFILE);
+        if (file) {
+            if (offset > 0) {
+                Seek(file, offset, OFFSET_BEGINNING);
+            }
+            Read(file, destination, size);
+            Close(file);
+        }
     }
 }
 

@@ -88,7 +88,7 @@ extern bool quit;
 void INIT_GAME();
 
 extern const char* TILENAME;
-extern char MAPNAME[8];
+extern char MAPNAME[11];
 extern const char* SNDNAME;
 extern const char* LOADMSG;
 extern const char* LOADMSG;

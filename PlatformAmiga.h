@@ -62,6 +62,7 @@ public:
 private:
     __saveds void runVerticalBlankInterrupt();
     __asm static void verticalBlankInterruptServer();
+    __asm static int32_t ungzip(register __a0 void* input, register __a1 void* output);
     void (*interrupt)(void);
     void setSampleLengths(uint8_t* module);
     int framesPerSecond_;

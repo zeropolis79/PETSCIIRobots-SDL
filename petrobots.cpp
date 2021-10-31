@@ -106,7 +106,7 @@ int main(int argc, char *argv[])
 
     int i;
     for (i = 0; i < sizeof(MAPNAME); i++) {
-        MAPNAME[i] = "level-a"[i];
+        MAPNAME[i] = "level-a.gz"[i];
     }
     for (i = 0; i < sizeof(LOAD_MSG2); i++) {
         LOAD_MSG2[i] = "loading map:"[i];
@@ -148,7 +148,7 @@ void INIT_GAME()
 }
 
 const char* TILENAME = "tileset.pet";
-char MAPNAME[8];
+char MAPNAME[11];
 const char* SNDNAME = "pdrv-pet";
 const char* LOADMSG1 = "loading tiles...\x0d";
 const char* LOADMSG2 = "\x93loading map...\x0d";
@@ -1481,7 +1481,7 @@ void TILE_LOAD_ROUTINE()
 // The following routine loads the map from disk
 void MAP_LOAD_ROUTINE()
 {
-    platform->load(MAPNAME, UNIT_TYPE, 8960, 2);
+    platform->load(MAPNAME, UNIT_TYPE, 8960);
 }
 
 void DISPLAY_GAME_SCREEN()
