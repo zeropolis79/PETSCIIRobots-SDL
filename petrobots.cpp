@@ -242,7 +242,7 @@ void DISPLAY_LOAD_MESSAGE2()
         writeToScreenMemory(0x190 + Y, convertToPETSCII(LOAD_MSG2[Y]));
     }
     const char* name = CALC_MAP_NAME();
-    for (Y = 0; Y != 12; Y++) {
+    for (Y = 0; Y != 16; Y++) {
         writeToScreenMemory(0x19c + Y, convertToPETSCII(name[Y]));
     }
 }
