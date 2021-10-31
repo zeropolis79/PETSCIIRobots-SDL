@@ -25,3 +25,7 @@ TODO
 - Fix crash on exit on KS1.3
 - Compression of assets
 - Loading/decompression indication polish
+- Animate water, servers, trash compactor, and air conditioners
+- Fix mismatched tiles
+- Add live map view
+- Evilbot direction based on movement
