@@ -2219,7 +2219,11 @@ void CYCLE_CONTROLS()
     }
     // display control method on screen
     for (int X = 0, Y = CONTROLSTART[CONTROL]; X != 10; X++, Y++) {
+#ifdef PLATFORM_IMAGE_SUPPORT
+        writeToScreenMemory(0x0A4 + X, convertToPETSCII(CONTROLTEXT[Y]), 14, 5);
+#else
         writeToScreenMemory(0x0CC + X, convertToPETSCII(CONTROLTEXT[Y]) | 0x80);
+#endif
     }
 }
 
