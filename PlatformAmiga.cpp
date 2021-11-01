@@ -209,7 +209,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     }
 
     if (moduleBasedAudio) {
-        moduleData = (uint8_t*)AllocMem(105804, MEMF_CHIP | MEMF_CLEAR);
+        moduleData = (uint8_t*)AllocMem(103754, MEMF_CHIP | MEMF_CLEAR);
         if (!moduleData) {
             return;
         }
@@ -368,7 +368,7 @@ PlatformAmiga::~PlatformAmiga()
     }
 
     if (moduleData) {
-        FreeMem(moduleData, 105804);
+        FreeMem(moduleData, 103754);
     }
 
     if (tilesMask) {
@@ -523,8 +523,9 @@ void PlatformAmiga::clearKeyBuffer()
     }
 }
 
-void PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)
+uint32_t PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)
 {
+    uint32_t bytesRead = 0;
     const char* nameEnd = filename;
     while (*++nameEnd);
     if ((nameEnd - filename) >= 3 && *--nameEnd == 'z' && *--nameEnd == 'g' && *--nameEnd == '.') {
@@ -540,6 +541,9 @@ void PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t si
                     if (data) {
                         Read(file, data, fib.fib_Size);
                         ungzip(data, destination);
+
+                        bytesRead = (data[fib.fib_Size - 1] << 24) | (data[fib.fib_Size - 2] << 16) | (data[fib.fib_Size - 3] << 8) | data[fib.fib_Size - 4];
+
                         delete[] data;
                     }
                     Close(file);
@@ -552,10 +556,11 @@ void PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t si
             if (offset > 0) {
                 Seek(file, offset, OFFSET_BEGINNING);
             }
-            Read(file, destination, size);
+            bytesRead = Read(file, destination, size);
             Close(file);
         }
     }
+    return bytesRead;
 }
 
 void PlatformAmiga::displayImage(Image image)
@@ -954,8 +959,25 @@ void PlatformAmiga::playModule(Module module)
         mt_init(soundFXModule);
     } else {
         if (loadedModule != module) {
-            load(moduleFilenames[module - 1], moduleData, 105804, 0);
+            uint32_t moduleSize = load(moduleFilenames[module - 1], moduleData, 103754, 0);
             setSampleLengths(moduleData);
+
+            uint8_t numPatterns = 0;
+            for (int i = 0; i < moduleData[950]; i++) {
+                numPatterns = MAX(numPatterns, moduleData[952 + i]);
+            }
+            numPatterns++;
+
+            int8_t* samplesStart = (int8_t*)(moduleData + 1084 + (numPatterns << 10));
+            int8_t* samplesEnd = (int8_t*)(moduleData + moduleSize);
+
+            int8_t sample = 0;
+            for (int8_t* sampleData = samplesStart; sampleData < samplesEnd; sampleData++) {
+                int8_t delta = *sampleData;
+                sample += delta;
+                *sampleData = sample;
+            }
+
             loadedModule = module;
         }
         mt_init(moduleData);

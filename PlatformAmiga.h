@@ -31,7 +31,7 @@ public:
     virtual void chrout(uint8_t);
     virtual uint8_t getin();
     virtual void clearKeyBuffer();
-    virtual void load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
+    virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
     virtual void displayImage(Image image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent);
