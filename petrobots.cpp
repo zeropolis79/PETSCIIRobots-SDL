@@ -129,10 +129,10 @@ void INIT_GAME()
     RESET_KEYS_AMMO();
     DISPLAY_GAME_SCREEN();
     DISPLAY_LOAD_MESSAGE2();
+    MAP_LOAD_ROUTINE();
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     START_IN_GAME_MUSIC();
 #endif
-    MAP_LOAD_ROUTINE();
     SET_DIFF_LEVEL();
     ANIMATE_PLAYER();
     CACULATE_AND_REDRAW();
@@ -2023,7 +2023,11 @@ void GAME_OVER()
 void GOM4()
 {
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    platform->stopModule();
+#else
     MUSIC_ON = 0;
+#endif
     DISPLAY_ENDGAME_SCREEN();
     DISPLAY_WIN_LOSE();
     platform->renderFrame();
@@ -2132,10 +2136,10 @@ void RESET_KEYS_AMMO()
 
 void INTRO_SCREEN()
 {
-    START_INTRO_MUSIC();
     DISPLAY_INTRO_SCREEN();
     DISPLAY_MAP_NAME();
     CHANGE_DIFFICULTY_LEVEL();
+    START_INTRO_MUSIC();
     platform->show();
     MENUY = 0;
     REVERSE_MENU_OPTION(true);
