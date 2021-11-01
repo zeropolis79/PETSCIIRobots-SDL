@@ -146,7 +146,7 @@ CIAError
 	RTS
 
 _ResetCIAInt__Fv
-	tst.l	CIAAaddr(PC)
+	tst.l	CIAAaddr
 	bne.s	ResCIAInt
 	rts
 
