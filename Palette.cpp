@@ -17,10 +17,12 @@ Palette::Palette(const uint16_t* palette, uint16_t colorCount, uint16_t fade, ui
     fade(fade),
     fadeBaseColor(fadeBaseColor)
 {
-    setPalette(palette, colorCount);
+    if (palette) {
+        setPalette(palette, colorCount);
 
-    if (fade != 15) {
-        update();
+        if (fade != 15) {
+            update();
+        }
     }
 }
 

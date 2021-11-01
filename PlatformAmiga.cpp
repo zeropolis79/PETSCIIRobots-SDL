@@ -184,7 +184,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     healthBitMap(new BitMap),
     cursorSprite1(new SimpleSprite),
     cursorSprite2(new SimpleSprite),
-    palette(new Palette((uint16_t*)(gameScreen + SCREEN_SIZE * PLANES), 16, 16, 0xf00)),
+    palette(new Palette),
     moduleData(0),
     bplcon1DefaultValue(0),
     shakeStep(0),
@@ -565,6 +565,8 @@ void PlatformAmiga::displayImage(Image image)
     uint32_t* destination = (uint32_t*)screenPlanes;
     ungzip(source, destination);
     LoadRGB4(&screen->ViewPort, (uint16_t*)(screenPlanes + SCREEN_SIZE * PLANES), (1 << PLANES));
+
+    palette->setPalette((uint16_t*)(screenPlanes + SCREEN_SIZE * PLANES), (1 << PLANES));
 }
 
 void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
