@@ -154,6 +154,7 @@ static int8_t tileSpriteMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
+static uint16_t blackPalette[16] = { 0 };
 static const char* moduleFilenames[] = {
     "mod.metal heads",
     "mod.win",
@@ -197,7 +198,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
         }
     }
 
-    screenPlanes = (uint8_t*)AllocMem(SCREEN_SIZE * PLANES, MEMF_CHIP | MEMF_CLEAR);
+    screenPlanes = (uint8_t*)AllocMem(SCREEN_SIZE * PLANES + 16 * 2, MEMF_CHIP | MEMF_CLEAR);
     if (!screenPlanes) {
         return;
     }
@@ -375,7 +376,7 @@ PlatformAmiga::~PlatformAmiga()
     }
 
     if (screenPlanes) {
-        FreeMem(screenPlanes, SCREEN_SIZE * PLANES);
+        FreeMem(screenPlanes, SCREEN_SIZE * PLANES + 16 * 2);
     }
 
     delete palette;
@@ -559,21 +560,11 @@ void PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t si
 
 void PlatformAmiga::displayImage(Image image)
 {
+    LoadRGB4(&screen->ViewPort, blackPalette, (1 << PLANES));
     uint32_t* source = (uint32_t*)(image == ImageIntro ? introScreen : gameScreen);
     uint32_t* destination = (uint32_t*)screenPlanes;
-    for (int y = 0; y < SCREEN_HEIGHT * PLANES; y++) {
-        *destination++ = *source++;
-        *destination++ = *source++;
-        *destination++ = *source++;
-        *destination++ = *source++;
-        *destination++ = *source++;
-        *destination++ = *source++;
-        *destination++ = *source++;
-        *destination++ = *source++;
-        *destination++ = *source++;
-        *destination++ = *source++;
-    }
-    LoadRGB4(&screen->ViewPort, (uint16_t*)source, (1 << PLANES));
+    ungzip(source, destination);
+    LoadRGB4(&screen->ViewPort, (uint16_t*)(screenPlanes + SCREEN_SIZE * PLANES), (1 << PLANES));
 }
 
 void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
