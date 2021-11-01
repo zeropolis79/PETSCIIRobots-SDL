@@ -49,15 +49,15 @@ void Platform::stopShakeScreen()
 {
 }
 
-void Platform::startFlashScreen(uint16_t, uint16_t)
+void Platform::startFadeScreen(uint16_t, uint16_t)
 {
 }
 
-void Platform::flashScreen(uint16_t)
+void Platform::fadeScreen(uint16_t)
 {
 }
 
-void Platform::stopFlashScreen()
+void Platform::stopFadeScreen()
 {
 }
 

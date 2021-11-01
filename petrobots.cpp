@@ -273,7 +273,7 @@ void RUNIRQ()
     }
     if (BORDER != 0) {
         BORDER--;
-        platform->flashScreen(15 - BORDER);
+        platform->fadeScreen(15 - BORDER);
     }
     if (SCREEN_SHAKE != 0) {
         platform->shakeScreen();
@@ -1487,6 +1487,7 @@ void MAP_LOAD_ROUTINE()
 void DISPLAY_GAME_SCREEN()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
+    platform->fadeScreen(0);
     platform->displayImage(Platform::ImageGame);
 
     writeToScreenMemory(0x3E2, 0x71, 15);
@@ -1495,6 +1496,7 @@ void DISPLAY_GAME_SCREEN()
     writeToScreenMemory(0x3E5, 0x71, 12);
     writeToScreenMemory(0x3E6, 0x71, 9);
     writeToScreenMemory(0x3E7, 0x71, 9);
+    platform->fadeScreen(15);
 #else
     DECOMPRESS_SCREEN(SCR_TEXT);
 #endif
@@ -2028,8 +2030,10 @@ void GOM4()
 #else
     MUSIC_ON = 0;
 #endif
+    platform->startFadeScreen(0x000, 0);
     DISPLAY_ENDGAME_SCREEN();
     DISPLAY_WIN_LOSE();
+    platform->fadeScreen(15);
     platform->renderFrame();
     while (platform->getin() == 0);
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
@@ -2136,10 +2140,12 @@ void RESET_KEYS_AMMO()
 
 void INTRO_SCREEN()
 {
+    platform->fadeScreen(0);
     DISPLAY_INTRO_SCREEN();
     DISPLAY_MAP_NAME();
     CHANGE_DIFFICULTY_LEVEL();
     START_INTRO_MUSIC();
+    platform->fadeScreen(15);
     platform->show();
     MENUY = 0;
     REVERSE_MENU_OPTION(true);
@@ -2667,7 +2673,7 @@ void PET_BORDER_FLASH()
                 writeToScreenMemory(0x342 + X, OUCH3[X]);
             }
 #endif
-            platform->startFlashScreen(BORDER_COLOR, 15 - BORDER);
+            platform->startFadeScreen(BORDER_COLOR, 15 - BORDER);
             FLASH_STATE = 1;
         }
     } else {
@@ -2681,7 +2687,7 @@ void PET_BORDER_FLASH()
             }
 #endif
             FLASH_STATE = 0;
-            platform->stopFlashScreen();
+            platform->stopFadeScreen();
         }
     }
 }

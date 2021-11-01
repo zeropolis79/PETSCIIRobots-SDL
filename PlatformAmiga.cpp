@@ -260,6 +260,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     if (!screen) {
         return;
     }
+    LoadRGB4(&screen->ViewPort, blackPalette, (1 << PLANES));
     SetAPen(&screen->RastPort, 0);
 
     ExtNewWindow newWindow = {0};
@@ -568,11 +569,9 @@ uint32_t PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_
 
 void PlatformAmiga::displayImage(Image image)
 {
-    LoadRGB4(&screen->ViewPort, blackPalette, (1 << PLANES));
     uint32_t* source = (uint32_t*)(image == ImageIntro ? introScreen : gameScreen);
     uint32_t* destination = (uint32_t*)screenPlanes;
     ungzip(source, destination);
-    LoadRGB4(&screen->ViewPort, (uint16_t*)(screenPlanes + SCREEN_SIZE * PLANES), (1 << PLANES));
 
     palette->setPalette((uint16_t*)(screenPlanes + SCREEN_SIZE * PLANES), (1 << PLANES));
 }
@@ -842,20 +841,20 @@ void PlatformAmiga::stopShakeScreen()
     }
 }
 
-void PlatformAmiga::startFlashScreen(uint16_t color, uint16_t intensity)
+void PlatformAmiga::startFadeScreen(uint16_t color, uint16_t intensity)
 {
     palette->setFadeBaseColor(color);
     palette->setFade(intensity);
     LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
 }
 
-void PlatformAmiga::flashScreen(uint16_t intensity)
+void PlatformAmiga::fadeScreen(uint16_t intensity)
 {
     palette->setFade(intensity);
     LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
 }
 
-void PlatformAmiga::stopFlashScreen()
+void PlatformAmiga::stopFadeScreen()
 {
     palette->setFade(15);
     LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));

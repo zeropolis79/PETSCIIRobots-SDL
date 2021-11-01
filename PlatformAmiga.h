@@ -45,9 +45,9 @@ public:
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     virtual void shakeScreen();
     virtual void stopShakeScreen();
-    virtual void startFlashScreen(uint16_t color, uint16_t intensity);
-    virtual void flashScreen(uint16_t intensity);
-    virtual void stopFlashScreen();
+    virtual void startFadeScreen(uint16_t color, uint16_t intensity);
+    virtual void fadeScreen(uint16_t intensity);
+    virtual void stopFadeScreen();
     virtual void writeToScreenMemory(uint16_t address, uint8_t value);
     virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset);
 	virtual void playNote(uint8_t note);
