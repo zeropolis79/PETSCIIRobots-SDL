@@ -27,7 +27,7 @@
 #define PLANES 4
 #define TILES_WITH_MASK 16
 
-static const char version[] = "$VER:Attack of the PETSCII robots (2021-10-31) (C)2021 David Murray, Vesa Halttunen";
+static const char version[] = "$VER:Attack of the PETSCII robots (2021-11-01) (C)2021 David Murray, Vesa Halttunen";
 
 struct SpriteData {
     uint16_t posctl[2];
