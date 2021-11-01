@@ -184,7 +184,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     healthBitMap(new BitMap),
     cursorSprite1(new SimpleSprite),
     cursorSprite2(new SimpleSprite),
-    palette(new Palette),
+    palette(new Palette(blackPalette, (1 << PLANES))),
     moduleData(0),
     bplcon1DefaultValue(0),
     shakeStep(0),
