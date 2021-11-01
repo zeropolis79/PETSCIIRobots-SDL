@@ -26,7 +26,7 @@ Amiga memory requirements
 576    CHIP always: faces
 4608   CHIP always: item graphics
 8064   CHIP always: health graphics
-105804 CHIP always: module
+103754 CHIP always: module
 2108   CHIP always: sound fx module
 11228  CHIP always: sounds_dsbarexp.raw
 18184  CHIP always: sounds_dsdoropn.raw
@@ -45,13 +45,7 @@ Amiga memory requirements
 1024   FAST always: C64 font
 14351  FAST always: intro screen
 1333   FAST always: game screen
-105804 CHIP on-demand: mod.get psyched
-17182  CHIP on-demand: mod.lose
-66438  CHIP on-demand: mod.metal heads
-71738  CHIP on-demand: mod.metallic bop amiga
-99498  CHIP on-demand: mod.robot attack
-88656  CHIP on-demand: mod.rushin in
-34098  CHIP on-demand: mod.win
+57248  FAST on-demand: mod.get psyched.gz
 
 Amiga TODO
 ----------
@@ -62,8 +56,7 @@ Amiga TODO
 - Death animation frames
 - Teleport animation frames
 - Fix evilbot graphics
-- Fix crash on exit on KS1.3
-- Compression of assets
+- Fix crash on exit
 - Loading/decompression indication polish
 - Animate water, servers, trash compactor, and air conditioners
 - Fix mismatched tiles
