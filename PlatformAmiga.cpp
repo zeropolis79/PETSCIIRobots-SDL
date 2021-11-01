@@ -164,6 +164,10 @@ static const char* moduleFilenames[] = {
     "mod.robot attack.gz",
     "mod.rushin in.gz"
 };
+static char* unableToAllocateMemoryError = "Unable to allocate memory\n";
+static char* unableToInitializeDisplayError = "Unable to initialize display\n";
+static char* unableToInitializeAudioError = "Unable to initialize audio\n";
+static char* unableToLoadDataError = "Unable to load data\n";
 
 PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     interrupt(0),
@@ -200,17 +204,20 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
 
     screenPlanes = (uint8_t*)AllocMem(SCREEN_SIZE * PLANES + 16 * 2, MEMF_CHIP | MEMF_CLEAR);
     if (!screenPlanes) {
+        Write(Output(), unableToAllocateMemoryError, 26);
         return;
     }
 
     tilesMask = (uint8_t*)AllocMem(32 / 8 * 24 * PLANES * TILES_WITH_MASK, MEMF_CHIP | MEMF_CLEAR);
     if (!tilesMask) {
+        Write(Output(), unableToAllocateMemoryError, 26);
         return;
     }
 
     if (moduleBasedAudio) {
         moduleData = (uint8_t*)AllocMem(103754, MEMF_CHIP | MEMF_CLEAR);
         if (!moduleData) {
+            Write(Output(), unableToAllocateMemoryError, 26);
             return;
         }
     }
@@ -258,6 +265,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     newScreen.CustomBitMap = screenBitmap;
     screen = OpenScreen((NewScreen*)&newScreen);
     if (!screen) {
+        Write(Output(), unableToInitializeDisplayError, 29);
         return;
     }
     LoadRGB4(&screen->ViewPort, blackPalette, (1 << PLANES));
@@ -272,6 +280,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     newWindow.Type = CUSTOMSCREEN;
     window = OpenWindow((NewWindow*)&newWindow);
     if (!window) {
+        Write(Output(), unableToInitializeDisplayError, 29);
         return;
     }
 
@@ -303,6 +312,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     } else {
         messagePort = CreatePort(NULL, 0);
         if (!messagePort) {
+            Write(Output(), unableToInitializeAudioError, 27);
             return;
         }
 
@@ -317,6 +327,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
         ioAudio->ioa_Length = 4;
 
         if (OpenDevice((UBYTE*)AUDIONAME, 0, (IORequest*)ioAudio, 0)) {
+            Write(Output(), unableToInitializeAudioError, 27);
             return;
         }
 
@@ -558,6 +569,9 @@ uint32_t PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_
             bytesRead = Read(file, destination, size);
             Close(file);
         }
+    }
+    if (bytesRead == 0) {
+        Write(Output(), unableToLoadDataError, 20);
     }
     return bytesRead;
 }
