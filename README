@@ -2,19 +2,59 @@ Attack of the PETSCII Robots C++
 ================================
 Work in progress
 
-SDL version:
-------------
+SDL version
+-----------
 brew install sdl2 sdl2_image
 make
 ./petrobots
 
-Amiga version:
---------------
+Amiga version
+-------------
 smake
 petrobots
 
-TODO
-----
+Amiga memory requirements
+-------------------------
+32000  CHIP always: main screen
+98304  CHIP always: tiles
+24576  CHIP always: sprites
+4      CHIP always: generic tile mask
+6144   CHIP always: masks for tiles with transparency
+24576  CHIP always: masks for sprites
+120    CHIP always: cursor sprite left
+120    CHIP always: cursor sprite right
+576    CHIP always: faces
+4608   CHIP always: item graphics
+8064   CHIP always: health graphics
+105804 CHIP always: module
+2108   CHIP always: sound fx module
+11228  CHIP always: sounds_dsbarexp.raw
+18184  CHIP always: sounds_dsdoropn.raw
+4512   CHIP always: sounds_dsgetpow.raw
+2204   CHIP always: sounds_dsitemup.raw
+4264   CHIP always: sounds_dsoof.raw
+5512   CHIP always: sounds_dspistol.raw
+14284  CHIP always: sounds_dsplasma.raw
+8928   CHIP always: sounds_dsplpain.raw
+4264   CHIP always: sounds_dsswtchx.raw
+5732   CHIP always: sounds_dswpnup.raw
+2      CHIP always: SquareWave.raw
+2000   FAST always: PET screen memory address -> Amiga bitplane address mapping
+256    FAST always: offsets to masks for tiles with transparency
+256    FAST always: offsets to sprites for sprite tiles
+1024   FAST always: C64 font
+14351  FAST always: intro screen
+1333   FAST always: game screen
+105804 CHIP on-demand: mod.get psyched
+17182  CHIP on-demand: mod.lose
+66438  CHIP on-demand: mod.metal heads
+71738  CHIP on-demand: mod.metallic bop amiga
+99498  CHIP on-demand: mod.robot attack
+88656  CHIP on-demand: mod.rushin in
+34098  CHIP on-demand: mod.win
+
+Amiga TODO
+----------
 - Joystick support
 - Avoid flicker when rendering sprites
 - Proper sound effects
