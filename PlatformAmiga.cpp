@@ -350,7 +350,9 @@ PlatformAmiga::~PlatformAmiga()
         DeletePort(messagePort);
     }
 
-    RemIntServer(INTB_VERTB, verticalBlankInterrupt);
+    if (verticalBlankInterrupt->is_Data == this) {
+        RemIntServer(INTB_VERTB, verticalBlankInterrupt);
+    }
 
     if (cursorSprite2->num != -1) {
         FreeSprite(cursorSprite2->num);
