@@ -9,6 +9,10 @@ void Platform::show()
 {
 }
 
+void Platform::chrout(uint8_t)
+{
+}
+
 void Platform::displayImage(Image)
 {
 }

@@ -463,13 +463,6 @@ int PlatformAmiga::framesPerSecond()
     return framesPerSecond_;
 }
 
-void PlatformAmiga::chrout(uint8_t character)
-{
-    uint8_t buffer[1] = { character == 0x0d ? 0x0a : character };
-
-    Write(Output(), buffer, 1);
-}
-
 const uint8_t rawKeyMap[] = {
     '~', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '+', '|',   0,   0,
     'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}',   0,   0,   0,   0,

@@ -48,7 +48,7 @@ public:
     virtual void setInterrupt(void (*interrupt)(void)) = 0;
     virtual void show();
     virtual int framesPerSecond() = 0;
-    virtual void chrout(uint8_t) = 0;
+    virtual void chrout(uint8_t);
     virtual uint8_t getin() = 0;
     virtual void clearKeyBuffer() = 0;
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset = 0) = 0;
