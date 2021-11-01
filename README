@@ -29,3 +29,4 @@ TODO
 - Fix mismatched tiles
 - Add live map view
 - Evilbot direction based on movement
+- Palette to black while game over screen is being rendered
