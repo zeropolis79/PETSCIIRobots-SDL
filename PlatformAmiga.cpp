@@ -156,13 +156,13 @@ static int8_t tileSpriteMap[256] = {
 };
 static uint16_t blackPalette[16] = { 0 };
 static const char* moduleFilenames[] = {
-    "mod.metal heads",
-    "mod.win",
-    "mod.lose",
-    "mod.metallic bop amiga",
-    "mod.get psyched",
-    "mod.robot attack",
-    "mod.rushin in"
+    "mod.metal heads.gz",
+    "mod.win.gz",
+    "mod.lose.gz",
+    "mod.metallic bop amiga.gz",
+    "mod.get psyched.gz",
+    "mod.robot attack.gz",
+    "mod.rushin in.gz"
 };
 
 PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
@@ -296,7 +296,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
         *((uint16_t*)soundDoor) = 0;
         *((uint16_t*)soundMenuBeep) = 0;
 
-        setSampleLengths(soundFXModule);
+        setSampleData(soundFXModule);
 
         SetCIAInt();
     } else {
@@ -399,7 +399,7 @@ void PlatformAmiga::runVerticalBlankInterrupt()
     }
 }
 
-void PlatformAmiga::setSampleLengths(uint8_t* module)
+void PlatformAmiga::setSampleData(uint8_t* module)
 {
     SampleData* sampleData = (SampleData*)(module + 20);
     sampleData[15 + 0].length = (uint16_t)(soundMedkit - soundExplosion) >> 1;
@@ -418,6 +418,9 @@ void PlatformAmiga::setSampleLengths(uint8_t* module)
     sampleData[15 + 13].length = (uint16_t)(soundDoor - soundCycleItem) >> 1;
     sampleData[15 + 14].length = (uint16_t)(soundMenuBeep - soundDoor) >> 1;
     sampleData[15 + 15].length = (uint16_t)(squareWave - soundMenuBeep) >> 1;
+    for (int i = 0; i < 16; i++) {
+        sampleData[15 + i].volume = 64;
+    }
 }
 
 void PlatformAmiga::setInterrupt(void (*interrupt)(void))
@@ -960,7 +963,7 @@ void PlatformAmiga::playModule(Module module)
     } else {
         if (loadedModule != module) {
             uint32_t moduleSize = load(moduleFilenames[module - 1], moduleData, 103754, 0);
-            setSampleLengths(moduleData);
+            setSampleData(moduleData);
 
             uint8_t numPatterns = 0;
             for (int i = 0; i < moduleData[950]; i++) {
