@@ -2050,6 +2050,9 @@ void GOM4()
     platform->renderFrame();
     while (platform->getin() == 0);
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    platform->stopModule();
+#endif
 }
 
 uint8_t GAMEOVER1[] = { 0x70, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x40, 0x6e };
