@@ -6,15 +6,11 @@
  * vesuri@jormas.com
  */
 
-#ifdef _AMIGA
-#include "PlatformAmiga.h"
-#else
-#include "PlatformSDL.h"
-#endif
 #include "petrobots.h"
 
 uint8_t DESTRUCT_PATH[256]; // Destruct path array (256 bytes)
 uint8_t TILE_ATTRIB[256];   // Tile attrib array (256 bytes)
+#ifndef PLATFORM_SPRITE_SUPPORT
 uint8_t TILE_DATA_TL[256];  // Tile character top-left (256 bytes)
 uint8_t TILE_DATA_TM[256];  // Tile character top-middle (256 bytes)
 uint8_t TILE_DATA_TR[256];  // Tile character top-right (256 bytes)
@@ -24,6 +20,7 @@ uint8_t TILE_DATA_MR[256];  // Tile character middle-right (256 bytes)
 uint8_t TILE_DATA_BL[256];  // Tile character bottom-left (256 bytes)
 uint8_t TILE_DATA_BM[256];  // Tile character bottom-middle (256 bytes)
 uint8_t TILE_DATA_BR[256];  // Tile character bottom-right (256 bytes)
+#endif
 
 // These arrays can go anywhere in RAM
 uint8_t UNIT_TIMER_A[64];   // Primary timer for units (64 bytes)
@@ -1302,6 +1299,7 @@ void DRAW_MAP_WINDOW()
 // on screen.  But first you must define the tile number in the
 // TILE variable, as well as the starting screen address must
 // be defined in $FB.
+/*
 void PLOT_TILE(uint16_t destination)
 {
     // DRAW THE TOP 3 CHARACTERS
@@ -1319,6 +1317,7 @@ void PLOT_TILE(uint16_t destination)
     writeToScreenMemory(destination + 81, TILE_DATA_BM[TILE]);
     writeToScreenMemory(destination + 82, TILE_DATA_BR[TILE]);
 }
+*/
 
 void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y)
 {
@@ -1347,6 +1346,7 @@ void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y)
 // be defined in $FB.  Also, this routine is slower than the usual
 // tile routine, so is only used for sprites.  The ":" character ($3A)
 // is not drawn.
+/*
 void PLOT_TRANSPARENT_TILE(uint16_t destination)
 {
     // DRAW THE TOP 3 CHARACTERS
@@ -1382,6 +1382,7 @@ void PLOT_TRANSPARENT_TILE(uint16_t destination)
         writeToScreenMemory(destination + 82, TILE_DATA_BR[TILE]);
     }
 }
+*/
 
 void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y)
 {
@@ -1476,8 +1477,12 @@ uint8_t DECTEMP = 0;
 // The following routine loads the tileset from disk
 void TILE_LOAD_ROUTINE()
 {
+#ifdef PLATFORM_SPRITE_SUPPORT
+    platform->load(TILENAME, DESTRUCT_PATH, 512, 2);
+#else
     platform->load(TILENAME, DESTRUCT_PATH, 2816, 2);
     platform->generateTiles(TILE_DATA_TL, TILE_ATTRIB);
+#endif
 }
 
 // The following routine loads the map from disk

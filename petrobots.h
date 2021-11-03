@@ -1,10 +1,15 @@
 #ifndef _PETROBOTS_H
 #define _PETROBOTS_H
 
-#include "Platform.h"
+#ifdef _AMIGA
+#include "PlatformAmiga.h"
+#else
+#include "PlatformSDL.h"
+#endif
 
 extern uint8_t DESTRUCT_PATH[256]; // Destruct path array (256 bytes)
 extern uint8_t TILE_ATTRIB[256];   // Tile attrib array (256 bytes)
+#ifndef PLATFORM_SPRITE_SUPPORT
 extern uint8_t TILE_DATA_TL[256];  // Tile character top-left (256 bytes)
 extern uint8_t TILE_DATA_TM[256];  // Tile character top-middle (256 bytes)
 extern uint8_t TILE_DATA_TR[256];  // Tile character top-right (256 bytes)
@@ -14,6 +19,7 @@ extern uint8_t TILE_DATA_MR[256];  // Tile character middle-right (256 bytes)
 extern uint8_t TILE_DATA_BL[256];  // Tile character bottom-left (256 bytes)
 extern uint8_t TILE_DATA_BM[256];  // Tile character bottom-middle (256 bytes)
 extern uint8_t TILE_DATA_BR[256];  // Tile character bottom-right (256 bytes)
+#endif
 
 // These arrays can go anywhere in RAM
 extern uint8_t UNIT_TIMER_A[64];   // Primary timer for units (64 bytes)
@@ -224,9 +230,9 @@ void MAP_PRE_CALCULATE();
 extern uint8_t PRECALC_ROWS[];
 
 void DRAW_MAP_WINDOW();
-void PLOT_TILE(uint16_t destination);
+//void PLOT_TILE(uint16_t destination);
 void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y);
-void PLOT_TRANSPARENT_TILE(uint16_t destination);
+//void PLOT_TRANSPARENT_TILE(uint16_t destination);
 void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y);
 void REVERSE_TILE();
 void CHECK_FOR_WINDOW_REDRAW();
