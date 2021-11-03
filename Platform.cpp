@@ -65,6 +65,10 @@ void Platform::stopFadeScreen()
 {
 }
 
+void Platform::loadModule(Module)
+{
+}
+
 void Platform::playModule(Module)
 {
 }

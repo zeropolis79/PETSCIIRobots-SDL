@@ -74,6 +74,7 @@ public:
     virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset) = 0;
     virtual void playNote(uint8_t note) = 0;
     virtual void stopNote() = 0;
+    virtual void loadModule(Module module);
     virtual void playModule(Module module);
     virtual void setSongPosition(uint8_t songPosition);
     virtual void stopModule();

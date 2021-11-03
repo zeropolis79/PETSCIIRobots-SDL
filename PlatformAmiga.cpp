@@ -982,6 +982,16 @@ void PlatformAmiga::stopNote()
     }
 }
 
+void PlatformAmiga::loadModule(Module module)
+{
+    if (loadedModule != module) {
+        uint32_t moduleSize = load(moduleFilenames[module - 1], moduleData, LARGEST_MODULE_SIZE, 0);
+        undeltaSamples(moduleData, moduleSize);
+        setSampleData(moduleData);
+        loadedModule = module;
+    }
+}
+
 void PlatformAmiga::playModule(Module module)
 {
     stopModule();
@@ -990,12 +1000,7 @@ void PlatformAmiga::playModule(Module module)
     if (module == ModuleSoundFX) {
         mt_init(soundFXModule);
     } else {
-        if (loadedModule != module) {
-            uint32_t moduleSize = load(moduleFilenames[module - 1], moduleData, LARGEST_MODULE_SIZE, 0);
-            undeltaSamples(moduleData, moduleSize);
-            setSampleData(moduleData);
-            loadedModule = module;
-        }
+        loadModule(module);
         mt_init(moduleData);
     }
     mt_SampleStarts[15 + 0] = soundExplosion;
