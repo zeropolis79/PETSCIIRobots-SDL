@@ -457,10 +457,13 @@ void REQUEST_WALK_UP();
 void CHECK_FOR_UNIT();
 void CHECK_FOR_HIDDEN_UNIT();
 
+#ifndef PLATFORM_IMAGE_SUPPORT
 extern uint8_t INTRO_TEXT[];
 extern uint8_t SCR_TEXT[];
+#endif
 extern uint8_t SCR_ENDGAME[];
 extern uint8_t SCR_CUSTOM_KEYS[];
+#ifndef PLATFORM_IMAGE_SUPPORT
 extern uint8_t CINEMA_MESSAGE[];
 extern uint8_t WEAPON1A[];
 extern uint8_t WEAPON1B[];
@@ -486,6 +489,8 @@ extern uint8_t MED1A[];
 extern uint8_t MED1B[];
 extern uint8_t MED1C[];
 extern uint8_t MED1D[];
+#endif
+#ifndef PLATFORM_MODULE_BASED_AUDIO
 extern uint8_t NOTE_FREQ[];
 extern uint8_t NOTE_OCTAVE[];
 extern uint8_t SND_EXPLOSION[];
@@ -509,6 +514,7 @@ extern uint8_t LOSE_MUSIC[];
 extern uint8_t IN_GAME_MUSIC1[];
 extern uint8_t IN_GAME_MUSIC2[];
 extern uint8_t IN_GAME_MUSIC3[];
+#endif
 
 char convertToPETSCII(char value);
 void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color = 10, uint8_t yOffset = 0);
