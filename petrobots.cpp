@@ -261,7 +261,9 @@ void SETUP_INTERRUPT()
 // there.
 void RUNIRQ()
 {
+#ifndef PLATFORM_MODULE_BASED_AUDIO
     MUSIC_ROUTINE();
+#endif
     UPDATE_GAME_CLOCK();
     ANIMATE_WATER();
     BGTIMER1 = 1;
@@ -2761,6 +2763,7 @@ void PLAY_SOUND(int sound)
 #endif
 }
 
+#ifndef PLATFORM_MODULE_BASED_AUDIO
 uint8_t* PATTERN_TEMP;
 uint8_t DATA_LINE_TEMP;
 uint8_t TEMPO_TEMP;
@@ -2843,6 +2846,7 @@ void MUSIC_ROUTINE()
     TEMPO_TIMER = TEMPO; // reset timer to wait for next line
     DATA_LINE++;
 }
+#endif
 
 void STOP_SONG()
 {
@@ -4775,6 +4779,7 @@ uint8_t MED1D[] = {
 };
 #endif
 
+#ifndef PLATFORM_MODULE_BASED_AUDIO
 uint8_t NOTE_FREQ[] = {
     0,  // placeholder for zero
     251, // Note 01    B   (Lowest note the PET can produce)
@@ -5018,6 +5023,7 @@ uint8_t IN_GAME_MUSIC3[] = {
     0x00, 0x00, 0x11, 0x00, 0x00, 0x00, 0x00, 0x00, 0x00, 0x13, 0x00, 0x00, 0x00, 0x00, 0x00,
     0x00
 };
+#endif
 
 char convertToPETSCII(char value)
 {

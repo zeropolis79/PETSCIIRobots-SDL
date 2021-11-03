@@ -349,6 +349,7 @@ void DEMATERIALIZE();
 void ANIMATE_PLAYER();
 void PLAY_SOUND(int);
 
+#ifndef PLATFORM_MODULE_BASED_AUDIO
 extern uint8_t* PATTERN_TEMP;
 extern uint8_t DATA_LINE_TEMP;
 extern uint8_t TEMPO_TEMP;
@@ -356,6 +357,7 @@ extern uint8_t TEMPO_TEMP;
 extern uint8_t* SOUND_LIBRARY[];
 
 void MUSIC_ROUTINE();
+#endif
 void STOP_SONG();
 void BACKGROUND_TASKS();
 
