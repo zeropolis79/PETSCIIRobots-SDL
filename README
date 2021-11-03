@@ -15,18 +15,18 @@ petrobots
 
 Amiga memory requirements
 -------------------------
-32000  CHIP always: main screen
+32000  CHIP always: main screen (AllocMem())
 98304  CHIP always: tiles
 24576  CHIP always: sprites
 4      CHIP always: generic tile mask
-6144   CHIP always: masks for tiles with transparency
+6144   CHIP always: masks for tiles with transparency (AllocMem())
 24576  CHIP always: masks for sprites
 120    CHIP always: cursor sprite left
 120    CHIP always: cursor sprite right
 576    CHIP always: faces
 4608   CHIP always: item graphics
 8064   CHIP always: health graphics
-103754 CHIP always: module
+103754 CHIP always: module (AllocMem())
 2108   CHIP always: sound fx module
 11228  CHIP always: sounds_dsbarexp.raw
 18184  CHIP always: sounds_dsdoropn.raw
@@ -45,7 +45,7 @@ Amiga memory requirements
 1024   FAST always: C64 font
 14351  FAST always: intro screen
 1333   FAST always: game screen
-57248  FAST on-demand: mod.get psyched.gz
+57248  FAST on-demand: mod.get psyched.gz (new[])
 
 Amiga TODO
 ----------
