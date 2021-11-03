@@ -48,6 +48,8 @@ struct SampleData {
 __far extern Custom custom;
 __far extern uint8_t introScreen[];
 __far extern uint8_t gameScreen[];
+__far extern uint8_t moduleWin[];
+__far extern uint8_t moduleLose[];
 __far extern uint8_t c64Font[];
 __chip extern uint8_t facesPlanes[];
 __chip extern uint8_t tilesPlanes[];
@@ -55,7 +57,7 @@ __chip extern uint8_t spritesPlanes[];
 __chip extern uint8_t spritesMask[];
 __chip extern uint8_t itemsPlanes[];
 __chip extern uint8_t healthPlanes[];
-__chip extern uint8_t soundFXModule[];
+__chip extern uint8_t moduleSoundFX[];
 __chip extern int8_t soundExplosion[];
 __chip extern int8_t soundMedkit[];
 __chip extern int8_t soundPlasma[];
@@ -158,8 +160,6 @@ static int8_t tileSpriteMap[256] = {
 static uint16_t blackPalette[16] = { 0 };
 static const char* moduleFilenames[] = {
     "mod.metal heads.gz",
-    "mod.win.gz",
-    "mod.lose.gz",
     "mod.metallic bop amiga.gz",
     "mod.get psyched.gz",
     "mod.robot attack.gz",
@@ -307,7 +307,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
         *((uint16_t*)soundDoor) = 0;
         *((uint16_t*)soundMenuBeep) = 0;
 
-        setSampleData(soundFXModule);
+        setSampleData(moduleSoundFX);
 
         SetCIAInt();
     } else {
@@ -411,6 +411,25 @@ void PlatformAmiga::runVerticalBlankInterrupt()
 {
     if (interrupt) {
         interrupt();
+    }
+}
+
+void PlatformAmiga::undeltaSamples(uint8_t* module, uint32_t moduleSize)
+{
+    uint8_t numPatterns = 0;
+    for (int i = 0; i < module[950]; i++) {
+        numPatterns = MAX(numPatterns, module[952 + i]);
+    }
+    numPatterns++;
+
+    int8_t* samplesStart = (int8_t*)(module + 1084 + (numPatterns << 10));
+    int8_t* samplesEnd = (int8_t*)(module + moduleSize);
+
+    int8_t sample = 0;
+    for (int8_t* sampleData = samplesStart; sampleData < samplesEnd; sampleData++) {
+        int8_t delta = *sampleData;
+        sample += delta;
+        *sampleData = sample;
     }
 }
 
@@ -968,49 +987,47 @@ void PlatformAmiga::playModule(Module module)
     stopModule();
     stopSample();
 
-    if (module == ModuleSoundFX) {
-        mt_init(soundFXModule);
-    } else {
+    switch (module) {
+    case ModuleSoundFX:
+        mt_init(moduleSoundFX);
+        mt_SampleStarts[15 + 15] = soundMenuBeep;
+        break;
+    case ModuleWin:
+        ungzip(moduleWin, moduleData);
+        undeltaSamples(moduleData, 33792);
+        mt_init(moduleData);
+        break;
+    case ModuleLose:
+        ungzip(moduleLose, moduleData);
+        undeltaSamples(moduleData, 17182);
+        mt_init(moduleData);
+        break;
+    default:
         if (loadedModule != module) {
-            uint32_t moduleSize = load(moduleFilenames[module - 1], moduleData, LARGEST_MODULE_SIZE, 0);
+            uint32_t moduleSize = load(moduleFilenames[module - 3], moduleData, LARGEST_MODULE_SIZE, 0);
+            undeltaSamples(moduleData, moduleSize);
             setSampleData(moduleData);
-
-            uint8_t numPatterns = 0;
-            for (int i = 0; i < moduleData[950]; i++) {
-                numPatterns = MAX(numPatterns, moduleData[952 + i]);
-            }
-            numPatterns++;
-
-            int8_t* samplesStart = (int8_t*)(moduleData + 1084 + (numPatterns << 10));
-            int8_t* samplesEnd = (int8_t*)(moduleData + moduleSize);
-
-            int8_t sample = 0;
-            for (int8_t* sampleData = samplesStart; sampleData < samplesEnd; sampleData++) {
-                int8_t delta = *sampleData;
-                sample += delta;
-                *sampleData = sample;
-            }
-
             loadedModule = module;
         }
         mt_init(moduleData);
+        mt_SampleStarts[15 + 0] = soundExplosion;
+        mt_SampleStarts[15 + 1] = 0; // TODO
+        mt_SampleStarts[15 + 2] = soundMedkit;
+        mt_SampleStarts[15 + 3] = 0; // TODO
+        mt_SampleStarts[15 + 4] = 0; // TODO
+        mt_SampleStarts[15 + 5] = 0; // TODO
+        mt_SampleStarts[15 + 6] = 0; // TODO
+        mt_SampleStarts[15 + 7] = 0; // TODO
+        mt_SampleStarts[15 + 8] = soundPlasma;
+        mt_SampleStarts[15 + 9] = soundPistol;
+        mt_SampleStarts[15 + 10] = soundError;
+        mt_SampleStarts[15 + 11] = 0; // TODO
+        mt_SampleStarts[15 + 12] = soundCycleWeapon;
+        mt_SampleStarts[15 + 13] = soundCycleItem;
+        mt_SampleStarts[15 + 14] = soundDoor;
+        mt_SampleStarts[15 + 15] = soundMenuBeep;
+        break;
     }
-    mt_SampleStarts[15 + 0] = soundExplosion;
-    mt_SampleStarts[15 + 1] = 0; // TODO
-    mt_SampleStarts[15 + 2] = soundMedkit;
-    mt_SampleStarts[15 + 3] = 0; // TODO
-    mt_SampleStarts[15 + 4] = 0; // TODO
-    mt_SampleStarts[15 + 5] = 0; // TODO
-    mt_SampleStarts[15 + 6] = 0; // TODO
-    mt_SampleStarts[15 + 7] = 0; // TODO
-    mt_SampleStarts[15 + 8] = soundPlasma;
-    mt_SampleStarts[15 + 9] = soundPistol;
-    mt_SampleStarts[15 + 10] = soundError;
-    mt_SampleStarts[15 + 11] = 0; // TODO
-    mt_SampleStarts[15 + 12] = soundCycleWeapon;
-    mt_SampleStarts[15 + 13] = soundCycleItem;
-    mt_SampleStarts[15 + 14] = soundDoor;
-    mt_SampleStarts[15 + 15] = soundMenuBeep;
     mt_Enable = true;
 }
 

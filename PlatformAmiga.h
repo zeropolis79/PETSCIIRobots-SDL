@@ -63,6 +63,7 @@ private:
     __asm static void verticalBlankInterruptServer();
     __asm static int32_t ungzip(register __a0 void* input, register __a1 void* output);
     void (*interrupt)(void);
+    void undeltaSamples(uint8_t* module, uint32_t moduleSize);
     void setSampleData(uint8_t* module);
     int framesPerSecond_;
     BitMap* screenBitmap;
