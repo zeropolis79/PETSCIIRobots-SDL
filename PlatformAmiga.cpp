@@ -26,6 +26,7 @@
 #define SCREEN_SIZE (SCREEN_WIDTH_IN_BYTES * SCREEN_HEIGHT)
 #define PLANES 4
 #define TILES_WITH_MASK 16
+#define LARGEST_MODULE_SIZE 103754
 
 static const char version[] = "$VER:Attack of the PETSCII robots (2021-11-01) (C)2021 David Murray, Vesa Halttunen";
 
@@ -215,7 +216,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     }
 
     if (moduleBasedAudio) {
-        moduleData = (uint8_t*)AllocMem(103754, MEMF_CHIP | MEMF_CLEAR);
+        moduleData = (uint8_t*)AllocMem(LARGEST_MODULE_SIZE, MEMF_CHIP | MEMF_CLEAR);
         if (!moduleData) {
             Write(Output(), unableToAllocateMemoryError, 26);
             return;
@@ -382,7 +383,7 @@ PlatformAmiga::~PlatformAmiga()
     }
 
     if (moduleData) {
-        FreeMem(moduleData, 103754);
+        FreeMem(moduleData, LARGEST_MODULE_SIZE);
     }
 
     if (tilesMask) {
@@ -970,7 +971,7 @@ void PlatformAmiga::playModule(Module module)
         mt_init(soundFXModule);
     } else {
         if (loadedModule != module) {
-            uint32_t moduleSize = load(moduleFilenames[module - 1], moduleData, 103754, 0);
+            uint32_t moduleSize = load(moduleFilenames[module - 1], moduleData, LARGEST_MODULE_SIZE, 0);
             setSampleData(moduleData);
 
             uint8_t numPatterns = 0;
