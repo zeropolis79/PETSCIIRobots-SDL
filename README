@@ -61,3 +61,6 @@ Amiga TODO
 - Fix mismatched tiles
 - Add live map view
 - Evilbot direction based on movement
+- Load intro and game screens from disk on demand
+- Fix sound effects cutting off on game over
+- Set a custom pointer
