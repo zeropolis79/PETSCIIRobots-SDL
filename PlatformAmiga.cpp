@@ -414,6 +414,25 @@ void PlatformAmiga::runVerticalBlankInterrupt()
     }
 }
 
+void PlatformAmiga::undeltaSamples(uint8_t* module, uint32_t moduleSize)
+{
+    uint8_t numPatterns = 0;
+    for (int i = 0; i < module[950]; i++) {
+        numPatterns = MAX(numPatterns, module[952 + i]);
+    }
+    numPatterns++;
+
+    int8_t* samplesStart = (int8_t*)(module + 1084 + (numPatterns << 10));
+    int8_t* samplesEnd = (int8_t*)(module + moduleSize);
+
+    int8_t sample = 0;
+    for (int8_t* sampleData = samplesStart; sampleData < samplesEnd; sampleData++) {
+        int8_t delta = *sampleData;
+        sample += delta;
+        *sampleData = sample;
+    }
+}
+
 void PlatformAmiga::setSampleData(uint8_t* module)
 {
     SampleData* sampleData = (SampleData*)(module + 20);
@@ -973,24 +992,8 @@ void PlatformAmiga::playModule(Module module)
     } else {
         if (loadedModule != module) {
             uint32_t moduleSize = load(moduleFilenames[module - 1], moduleData, LARGEST_MODULE_SIZE, 0);
+            undeltaSamples(moduleData, moduleSize);
             setSampleData(moduleData);
-
-            uint8_t numPatterns = 0;
-            for (int i = 0; i < moduleData[950]; i++) {
-                numPatterns = MAX(numPatterns, moduleData[952 + i]);
-            }
-            numPatterns++;
-
-            int8_t* samplesStart = (int8_t*)(moduleData + 1084 + (numPatterns << 10));
-            int8_t* samplesEnd = (int8_t*)(moduleData + moduleSize);
-
-            int8_t sample = 0;
-            for (int8_t* sampleData = samplesStart; sampleData < samplesEnd; sampleData++) {
-                int8_t delta = *sampleData;
-                sample += delta;
-                *sampleData = sample;
-            }
-
             loadedModule = module;
         }
         mt_init(moduleData);
