@@ -2022,15 +2022,15 @@ void GAME_OVER()
         writeToScreenMemory(0x1C3 + X, GAMEOVER3[X]);
     }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
+    platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     platform->stopModule();
     platform->loadModule(UNIT_TYPE[0] != 0 ? Platform::ModuleWin : Platform::ModuleLose);
-    KEYTIMER = 1;
 #else
     KEYTIMER = 100;
-#endif
     while (KEYTIMER != 0) {
         platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     }
+#endif
     while (platform->getin() == 0);
     GOM4();
 }
