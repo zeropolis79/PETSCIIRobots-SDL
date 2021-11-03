@@ -36,9 +36,9 @@ public:
 
     enum Module {
         ModuleSoundFX,
+        ModuleIntro,
         ModuleWin,
         ModuleLose,
-        ModuleIntro,
         ModuleInGame1,
         ModuleInGame2,
         ModuleInGame3,
