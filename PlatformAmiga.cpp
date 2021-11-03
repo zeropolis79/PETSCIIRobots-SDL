@@ -275,7 +275,7 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     ExtNewWindow newWindow = {0};
     newWindow.Width = SCREEN_WIDTH;
     newWindow.Height = SCREEN_HEIGHT;
-    newWindow.Flags = WFLG_SIMPLE_REFRESH | WFLG_BACKDROP | WFLG_BORDERLESS | WFLG_ACTIVATE | WFLG_RMBTRAP;
+    newWindow.Flags = WFLG_SIMPLE_REFRESH | WFLG_BACKDROP | WFLG_BORDERLESS | WFLG_RMBTRAP;
     newWindow.IDCMPFlags = IDCMP_RAWKEY;
     newWindow.Screen = screen;
     newWindow.Type = CUSTOMSCREEN;
@@ -448,6 +448,7 @@ void PlatformAmiga::show()
     renderFrame();
 
     ScreenToFront(screen);
+    ActivateWindow(window);
 
     uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
     for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
