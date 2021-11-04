@@ -25,7 +25,11 @@
 #define SCREEN_WIDTH_IN_BYTES (SCREEN_WIDTH >> 3)
 #define SCREEN_SIZE (SCREEN_WIDTH_IN_BYTES * SCREEN_HEIGHT)
 #define PLANES 4
-#define TILES_WITH_MASK 16
+#ifdef PLATFORM_IMAGE_BASED_TILES
+#define TILES_WITH_MASK 12
+#else
+#define TILES_WITH_MASK 30
+#endif
 #define LARGEST_MODULE_SIZE 103754
 
 static const char version[] = "$VER:Attack of the PETSCII robots (2021-11-01) (C)2021 David Murray, Vesa Halttunen";
@@ -135,6 +139,7 @@ __chip static SpriteData cursorData2 = {
 };
 uint16_t addressMap[40 * 25];
 static uint8_t tileMaskMap[256];
+#ifdef PLATFORM_SPRITE_SUPPORT
 static int8_t tileSpriteMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -153,6 +158,7 @@ static int8_t tileSpriteMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
+#endif
 static uint16_t blackPalette[16] = { 0 };
 static const char* imageFilenames[] = {
     "IntroScreen.raw.gz",
@@ -608,6 +614,34 @@ void PlatformAmiga::displayImage(Image image)
 
 void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
 {
+    uint8_t* tiles = tilesPlanes;
+    uint8_t* mask = tilesMask;
+
+#ifdef PLATFORM_IMAGE_BASED_TILES
+    for (int tile = 0, tileMask = 0; tile < 256; tile++) {
+        if (tile == 130 ||                  // BOMB
+            tile == 134 ||                  // MAGNET
+            (tile >= 240 && tile <= 241) || // VERT/HORIZ PLASMA
+            (tile >= 244 && tile <= 245) || // VERT/HORIZ PISTOL
+            tile == 246 ||                  // BIG EXPLOSION
+            (tile >= 248 && tile <= 252)) { // SMALL EXPLOSION
+            uint32_t* tilesLong = (uint32_t*)tiles;
+            uint32_t* maskLong = (uint32_t*)mask;
+            for (int y = 0; y < 24; y++) {
+                uint32_t allPlanes = *tilesLong++ | *tilesLong++ | *tilesLong++ | *tilesLong++;
+                *maskLong++ = allPlanes;
+                *maskLong++ = allPlanes;
+                *maskLong++ = allPlanes;
+                *maskLong++ = allPlanes;
+            }
+            tiles += 4 * 24 * PLANES;
+            mask += 4 * 24 * PLANES;
+            tileMaskMap[tile] = tileMask++;
+        } else {
+            tiles += 4 * 24 * PLANES;
+        }
+    }
+#else
     uint8_t* topLeft = tileData;
     uint8_t* topMiddle = topLeft + 256;
     uint8_t* topRight = topMiddle + 256;
@@ -617,86 +651,114 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
     uint8_t* bottomLeft = middleRight + 256;
     uint8_t* bottomMiddle = bottomLeft + 256;
     uint8_t* bottomRight = bottomMiddle + 256;
-    uint8_t* tiles = tilesPlanes;
-    uint8_t* mask = tilesMask;
 
     for (int tile = 0, tileMask = 0; tile < 256; tile++) {
-    /*
         uint8_t characters[3][3] = {
             { topLeft[tile], topMiddle[tile], topRight[tile] },
             { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
             { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
         };
 
-        for (int y = 0; y < 3; y++, tiles += 7 * 4 + 1, mask += 7 * 4 + 1) {
-            for (int x = 0; x < 3; x++, tiles++, mask++) {
-                uint8_t* font = c64Font + (characters[y][x] << 3);
-                for (int offset = 0; offset < 8 * 4; offset += 4, font++) {
-                    tiles[offset] = *font;
-                    mask[offset] = ((tileAttributes[tile] & 0x80) == 0 || characters[y][x] != 0x3a) ? 0xff : 0;
-                }
-            }
-        }
-    */
-        if ((tile >= 100 && tile <= 103) || // EVILBOT
+        if ((tile >= 96 && tile <= 103) ||  // PLAYER, HOVERBOT, EVILBOT
+            tile == 111 ||                  // DEAD PLAYER
+            tile == 115 ||                  // DEAD ROBOT
             tile == 130 ||                  // BOMB
             tile == 134 ||                  // MAGNET
+            (tile >= 140 && tile <= 142) || // WATER DROID
+            (tile == 160 && tile <= 162) || // DEMATERIALIZE
+            (tile >= 164 && tile <= 165) || // ROLLERBOT
             (tile >= 240 && tile <= 241) || // VERT/HORIZ PLASMA
-            (tile >= 244 && tile <= 245) || // VERT/HORIZ PISTOL
-            tile == 246 ||                  // BIG EXPLOSION
+            (tile >= 244 && tile <= 246) || // VERT/HORIZ PISTOL, BIG EXPLOSION
             (tile >= 248 && tile <= 252)) { // SMALL EXPLOSION
-            if (tiles[4 * 12 * PLANES + 1] == 0 && tiles[4 * 12 * PLANES + 4 + 1] == 0 && tiles[4 * 12 * PLANES + 8 + 1] == 0 && tiles[4 * 12 * PLANES + 12 + 1] == 0) {
-                uint8_t characters[3][3] = {
-                    { topLeft[tile], topMiddle[tile], topRight[tile] },
-                    { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
-                    { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
-                };
-
-                for (int y = 0; y < 3; y++, tiles += 8 * 4 * PLANES - 3, mask += 8 * 4 * PLANES - 3) {
-                    for (int x = 0; x < 3; x++, tiles++, mask++) {
-                        uint8_t character = characters[y][x];
-                        bool reverse = character > 127;
-                        uint8_t* font = c64Font + ((character & 127) << 3);
-                        for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
-                            uint8_t byte = reverse ? ~*font : *font;
-                            tiles[offset] = byte;
-                            tiles[offset + 4] = 0;
-                            tiles[offset + 8] = 0;
-                            tiles[offset + 12] = 0;
-                            mask[offset] = character != 0x3a ? byte : 0;
-                            mask[offset + 4] = mask[offset];
-                            mask[offset + 8] = mask[offset];
-                            mask[offset + 12] = mask[offset];
-                        }
+            for (int y = 0; y < 3; y++, tiles += 8 * 4 * PLANES - 3, mask += 8 * 4 * PLANES - 3) {
+                for (int x = 0; x < 3; x++, tiles++, mask++) {
+                    uint8_t character = characters[y][x];
+                    bool reverse = character > 127;
+                    uint8_t* font = c64Font + ((character & 127) << 3);
+                    for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
+                        uint8_t byte = reverse ? ~*font : *font;
+                        tiles[offset] = 0;
+                        tiles[offset + 4] = byte;
+                        tiles[offset + 8] = 0;
+                        tiles[offset + 12] = byte;
+                        mask[offset] = character != 0x3a ? 0xff : 0;
+                        mask[offset + 4] = mask[offset];
+                        mask[offset + 8] = mask[offset];
+                        mask[offset + 12] = mask[offset];
                     }
                 }
-            } else {
-                uint32_t* tilesLong = (uint32_t*)tiles;
-                uint32_t* maskLong = (uint32_t*)mask;
-                for (int y = 0; y < 24; y++) {
-                    uint32_t allPlanes = *tilesLong++ | *tilesLong++ | *tilesLong++ | *tilesLong++;
-                    *maskLong++ = allPlanes;
-                    *maskLong++ = allPlanes;
-                    *maskLong++ = allPlanes;
-                    *maskLong++ = allPlanes;
-                }
-                tiles += 4 * 24 * PLANES;
-                mask += 4 * 24 * PLANES;
             }
             tileMaskMap[tile] = tileMask++;
         } else {
-            tiles += 4 * 24 * PLANES;
+            for (int y = 0; y < 3; y++, tiles += 8 * 4 * PLANES - 3) {
+                for (int x = 0; x < 3; x++, tiles++) {
+                    uint8_t character = characters[y][x];
+                    bool reverse = character > 127;
+                    uint8_t* font = c64Font + ((character & 127) << 3);
+                    for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
+                        uint8_t byte = reverse ? ~*font : *font;
+                        tiles[offset] = 0;
+                        tiles[offset + 4] = byte;
+                        tiles[offset + 8] = 0;
+                        tiles[offset + 12] = byte;
+                    }
+                }
+            }
+        }
+    }
+#endif
+}
+
+#ifndef PLATFORM_IMAGE_BASED_TILES
+void PlatformAmiga::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles)
+{
+    uint8_t* topLeft = tileData;
+    uint8_t* topMiddle = topLeft + 256;
+    uint8_t* topRight = topMiddle + 256;
+    uint8_t* middleLeft = topRight + 256;
+    uint8_t* middleMiddle = middleLeft + 256;
+    uint8_t* middleRight = middleMiddle + 256;
+    uint8_t* bottomLeft = middleRight + 256;
+    uint8_t* bottomMiddle = bottomLeft + 256;
+    uint8_t* bottomRight = bottomMiddle + 256;
+
+    for (int i = 0; i < numTiles; i++) {
+        uint8_t tile = tiles[i];
+        uint8_t characters[3][3] = {
+            { topLeft[tile], topMiddle[tile], topRight[tile] },
+            { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
+            { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
+        };
+
+        uint32_t thirdOfTileOffset = tile << 7;
+        uint8_t* destination = tilesPlanes + thirdOfTileOffset + thirdOfTileOffset + thirdOfTileOffset;
+        for (int y = 0; y < 3; y++, destination += 8 * 4 * PLANES - 3) {
+            for (int x = 0; x < 3; x++, destination++) {
+                uint8_t character = characters[y][x];
+                bool reverse = character > 127;
+                uint8_t* font = c64Font + ((character & 127) << 3);
+                for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
+                    uint8_t byte = reverse ? ~*font : *font;
+                    destination[offset] = 0;
+                    destination[offset + 4] = byte;
+                    destination[offset + 8] = 0;
+                    destination[offset + 12] = byte;
+                }
+            }
         }
     }
 }
+#endif
 
 void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent)
 {
     if (transparent) {
+#ifdef PLATFORM_SPRITE_SUPPORT
         if (tileSpriteMap[tile] >= 0) {
             renderSprite(tileSpriteMap[tile] + variant, x, y);
             return;
         }
+#endif
 
 //        BltMaskBitMapRastPort(tilesBitMap, 0, tile * 24, &screen->RastPort, x, y, 24, 24, (ABC|ABNC|ANBC), tilesMask);
 

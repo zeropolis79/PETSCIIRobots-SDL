@@ -1492,6 +1492,7 @@ void TILE_LOAD_ROUTINE()
 {
 #ifdef PLATFORM_SPRITE_SUPPORT
     platform->load(TILENAME, DESTRUCT_PATH, 512, 2);
+    platform->generateTiles(0, TILE_ATTRIB);
 #else
     platform->load(TILENAME, DESTRUCT_PATH, 2816, 2);
     platform->generateTiles(TILE_DATA_TL, TILE_ATTRIB);
@@ -2431,7 +2432,7 @@ void ANIMATE_WATER()
         return;
     }
     WATER_TIMER = 0;
-#ifndef PLATFORM_IMAGE_SUPPORT
+#ifndef PLATFORM_IMAGE_BASED_TILES
     WATER_TEMP1 = TILE_DATA_BR[204];
     TILE_DATA_BR[204] = TILE_DATA_MM[204];
     TILE_DATA_BR[221] = TILE_DATA_MM[204];
@@ -2753,7 +2754,7 @@ void DEMATERIALIZE()
 
 void ANIMATE_PLAYER()
 {
-#ifdef PLATFORM_IMAGE_SUPPORT
+#ifdef PLATFORM_SPRITE_SUPPORT
     UNIT_TILE[0] = 96;
     WALK_FRAME++;
     WALK_FRAME &= 3;
@@ -4700,7 +4701,7 @@ uint8_t SCR_CUSTOM_KEYS[] = {
     0x4A, 0x60, 0x40, 0x25, 0x4B
 };
 
-#ifndef PLATFORM_IMAGE_SUPPORT
+#ifndef PLATFORM_IMAGE_BASED_TILES
 uint8_t CINEMA_MESSAGE[] = {
     "coming soon: space balls 2 - the search for more money, "
     "attack of the paperclips: clippy's revenge, "

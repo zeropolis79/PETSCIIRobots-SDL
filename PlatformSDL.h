@@ -19,7 +19,9 @@ public:
     virtual void clearKeyBuffer();
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
+#ifndef PLATFORM_IMAGE_BASED_TILES
     virtual void updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles);
+#endif
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent);
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
@@ -38,7 +40,11 @@ private:
     SDL_Window* window;
     SDL_Surface* windowSurface;
     SDL_Surface* fontSurface;
+#ifdef PLATFORM_IMAGE_BASED_TILES
     SDL_Surface* tileSurface;
+#else
+    SDL_Surface* tileSurfaces[256];
+#endif
     int framesPerSecond_;
     float audioAngle;
     float audioFrequency;

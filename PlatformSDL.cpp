@@ -41,7 +41,13 @@ PlatformSDL::PlatformSDL() :
     window = SDL_CreateWindow("Attack of the PETSCII robots", 0, 0, 320, 200, 0);
     windowSurface = SDL_GetWindowSurface(window);
     fontSurface = IMG_Load("petfont.png");
+#ifdef PLATFORM_IMAGE_BASED_TILES
     tileSurface = IMG_Load("tiles.png");
+#else
+    for (int i = 0; i < 256; i++) {
+        tileSurfaces[i] = SDL_CreateRGBSurface(0, 24, 24, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+    }
+#endif
     SDL_SetSurfaceBlendMode(fontSurface, SDL_BLENDMODE_NONE);
 
     platform = this;
@@ -49,7 +55,13 @@ PlatformSDL::PlatformSDL() :
 
 PlatformSDL::~PlatformSDL()
 {
+#ifdef PLATFORM_IMAGE_BASED_TILES
     SDL_FreeSurface(tileSurface);
+#else
+    for (int i = 0; i < 256; i++) {
+        SDL_FreeSurface(tileSurfaces[i]);
+    }
+#endif
     SDL_FreeSurface(fontSurface);
     SDL_DestroyWindow(window);     
     SDL_CloseAudioDevice(audioDeviceID);
@@ -223,24 +235,7 @@ void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
     destinationRect.w = 8;
     destinationRect.h = 8;
     for (int tile = 0; tile < 256; tile++) {
-    /*
-        uint8_t characters[3][3] = {
-            { topLeft[tile], topMiddle[tile], topRight[tile] },
-            { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
-            { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
-        };
-
-        for (int y = 0; y < 3; y++) {
-            for (int x = 0; x < 3; x++) {
-                sourceRect.x = characters[y][x] << 3;
-                sourceRect.y = 0;
-                destinationRect.x = x << 3;
-                destinationRect.y = y << 3;
-                SDL_SetSurfaceAlphaMod(fontSurface, ((tileAttributes[tile] & 0x80) == 0 || characters[y][x] != 0x3A) ? 255 : 0);
-                SDL_BlitSurface(fontSurface, &sourceRect, tileSurfaces[tile], &destinationRect);
-            }
-        }
-    */
+#ifdef PLATFORM_IMAGE_BASED_TILES
         if ((tile >= 96 && tile <= 103) ||
             tile == 111 ||
             tile == 115 ||
@@ -267,12 +262,30 @@ void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                 }
             }
         }
+#else
+        uint8_t characters[3][3] = {
+            { topLeft[tile], topMiddle[tile], topRight[tile] },
+            { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
+            { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
+        };
+
+        for (int y = 0; y < 3; y++) {
+            for (int x = 0; x < 3; x++) {
+                sourceRect.x = characters[y][x] << 3;
+                sourceRect.y = 0;
+                destinationRect.x = x << 3;
+                destinationRect.y = y << 3;
+                SDL_SetSurfaceAlphaMod(fontSurface, ((tileAttributes[tile] & 0x80) == 0 || characters[y][x] != 0x3A) ? 255 : 0);
+                SDL_BlitSurface(fontSurface, &sourceRect, tileSurfaces[tile], &destinationRect);
+            }
+        }
+#endif
     }
 }
 
+#ifndef PLATFORM_IMAGE_BASED_TILES
 void PlatformSDL::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles)
 {
-    /*
     uint8_t* topLeft = tileData;
     uint8_t* topMiddle = topLeft + 256;
     uint8_t* topRight = topMiddle + 256;
@@ -306,11 +319,12 @@ void PlatformSDL::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTile
             }
         }
     }
-    */
 }
+#endif
 
 void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent)
 {
+#ifdef PLATFORM_IMAGE_BASED_TILES
     SDL_Rect sourceRect, destinationRect;
     sourceRect.x = 0;
     sourceRect.y = tile * 24;
@@ -320,8 +334,20 @@ void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t varia
     destinationRect.y = y;
     destinationRect.w = 24;
     destinationRect.h = 24;
-//    SDL_SetSurfaceBlendMode(tileSurface, tr ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
     SDL_BlitSurface(tileSurface, &sourceRect, windowSurface, &destinationRect);
+#else
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.x = 0;
+    sourceRect.y = 0;
+    sourceRect.w = 24;
+    sourceRect.h = 24;
+    destinationRect.x = x;
+    destinationRect.y = y;
+    destinationRect.w = 24;
+    destinationRect.h = 24;
+    SDL_SetSurfaceBlendMode(tileSurfaces[tile], transparent ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
+    SDL_BlitSurface(tileSurfaces[tile], &sourceRect, windowSurface, &destinationRect);
+#endif
 }
 
 void PlatformSDL::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)

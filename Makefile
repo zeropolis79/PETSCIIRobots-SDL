@@ -1,4 +1,4 @@
-CXXFLAGS :=-g -std=c++11
+CXXFLAGS :=-g -std=c++11 -DPLATFORM_IMAGE_BASED_TILES
 LDFLAGS :=
 
 CXXFLAGS += `pkg-config --cflags sdl2`
