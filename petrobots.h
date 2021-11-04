@@ -90,7 +90,11 @@ extern bool quit;
 void INIT_GAME();
 
 extern const char* TILENAME;
+#ifdef PLATFORM_GZIP_SUPPORT
 extern char MAPNAME[11];
+#else
+extern char MAPNAME[8];
+#endif
 extern const char* SNDNAME;
 extern const char* LOADMSG;
 extern const char* LOADMSG;

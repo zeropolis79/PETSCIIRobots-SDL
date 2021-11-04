@@ -108,7 +108,11 @@ int main(int argc, char *argv[])
 
     int i;
     for (i = 0; i < sizeof(MAPNAME); i++) {
+#ifdef PLATFORM_GZIP_SUPPORT
         MAPNAME[i] = "level-a.gz"[i];
+#else
+        MAPNAME[i] = "level-a"[i];
+#endif
     }
     for (i = 0; i < sizeof(LOAD_MSG2); i++) {
         LOAD_MSG2[i] = "loading map:"[i];
@@ -150,7 +154,11 @@ void INIT_GAME()
 }
 
 const char* TILENAME = "tileset.pet";
+#ifdef PLATFORM_GZIP_SUPPORT
 char MAPNAME[11];
+#else
+char MAPNAME[8];
+#endif
 const char* SNDNAME = "pdrv-pet";
 const char* LOADMSG1 = "loading tiles...\x0d";
 const char* LOADMSG2 = "\x93loading map...\x0d";
