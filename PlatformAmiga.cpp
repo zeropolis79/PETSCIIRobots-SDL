@@ -971,6 +971,30 @@ void PlatformAmiga::stopFadeScreen()
     LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
 }
 
+void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
+{
+    bool reverse = value > 127;
+    uint8_t* source = c64Font + ((value & 127) << 3);
+    uint8_t* destination = screenPlanes + addressMap[address];
+    if (reverse) {
+        for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
+            uint8_t font = ~*source++;
+            *destination = font;
+            destination[1 * SCREEN_WIDTH_IN_BYTES] = font;
+            destination[2 * SCREEN_WIDTH_IN_BYTES] = font;
+            destination[3 * SCREEN_WIDTH_IN_BYTES] = font;
+        }
+    } else {
+        for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
+            uint8_t font = *source++;
+            *destination = font;
+            destination[1 * SCREEN_WIDTH_IN_BYTES] = font;
+            destination[2 * SCREEN_WIDTH_IN_BYTES] = font;
+            destination[3 * SCREEN_WIDTH_IN_BYTES] = font;
+        }
+    }
+}
+
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
     bool reverse = value > 127;

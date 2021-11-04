@@ -2317,7 +2317,7 @@ void REVERSE_MENU_OPTION(bool reverse)
 }
 
 uint8_t MENUY = 0; // CURRENT MENU SELECTION
-#ifdef PLATFORM_COLOR_SUPPORT
+#ifdef PLATFORM_IMAGE_SUPPORT
 uint8_t MENU_CHART_L[] = { 0x2C, 0x54, 0x7C, 0xA4 };
 #else
 uint8_t MENU_CHART_L[] = { 0x54, 0x7C, 0xA4, 0xCC };
