@@ -46,8 +46,6 @@ struct SampleData {
 };
 
 __far extern Custom custom;
-__far extern uint8_t introScreen[];
-__far extern uint8_t gameScreen[];
 __far extern uint8_t c64Font[];
 __chip extern uint8_t facesPlanes[];
 __chip extern uint8_t tilesPlanes[];
@@ -156,6 +154,10 @@ static int8_t tileSpriteMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
 static uint16_t blackPalette[16] = { 0 };
+static const char* imageFilenames[] = {
+    "IntroScreen.raw.gz",
+    "GameScreen.raw.gz"
+};
 static const char* moduleFilenames[] = {
     "mod.metal heads.gz",
     "mod.win.gz",
@@ -599,9 +601,7 @@ uint32_t PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_
 
 void PlatformAmiga::displayImage(Image image)
 {
-    uint32_t* source = (uint32_t*)(image == ImageIntro ? introScreen : gameScreen);
-    uint32_t* destination = (uint32_t*)screenPlanes;
-    ungzip(source, destination);
+    load(imageFilenames[image], screenPlanes, SCREEN_SIZE * PLANES + (2 << PLANES), 0);
 
     palette->setPalette((uint16_t*)(screenPlanes + SCREEN_SIZE * PLANES), (1 << PLANES));
 }

@@ -1,4 +1,4 @@
-OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o PT2.3F_replay_cia.o IntroScreen.o GameScreen.o C64Font.o Faces.o Tiles.o Sprites.o SpritesMask.o Items.o Health.o SoundFXModule.o SoundExplosion.o SoundMedkit.o SoundPlasma.o SoundPistol.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SquareWave.o
+OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o PT2.3F_replay_cia.o C64Font.o Faces.o Tiles.o Sprites.o SpritesMask.o Items.o Health.o SoundFXModule.o SoundExplosion.o SoundMedkit.o SoundPlasma.o SoundPistol.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SquareWave.o
 
 all: petrobots 
 
@@ -13,10 +13,6 @@ PlatformAmiga.o: PlatformAmiga.cpp
 PlatformAmigaAssembler.o: PlatformAmigaAssembler.s
 Palette.o: Palette.cpp
 PT2.3F_replay_cia.o: PT2.3F_replay_cia.s
-IntroScreen.o: IntroScreen.raw.gz
-    Bin2Hunk IntroScreen.raw.gz IntroScreen.o NAME _introScreen HUNK data
-GameScreen.o: GameScreen.raw.gz
-    Bin2Hunk GameScreen.raw.gz GameScreen.o NAME _gameScreen HUNK data
 C64Font.o: C64Font.raw
     Bin2Hunk C64Font.raw C64Font.o NAME _c64Font HUNK data
 Faces.o: Faces.raw
