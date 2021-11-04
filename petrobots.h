@@ -1,11 +1,7 @@
 #ifndef _PETROBOTS_H
 #define _PETROBOTS_H
 
-#ifdef _AMIGA
-#include "PlatformAmiga.h"
-#else
-#include "PlatformSDL.h"
-#endif
+#include "Platform.h"
 
 extern uint8_t DESTRUCT_PATH[256]; // Destruct path array (256 bytes)
 extern uint8_t TILE_ATTRIB[256];   // Tile attrib array (256 bytes)

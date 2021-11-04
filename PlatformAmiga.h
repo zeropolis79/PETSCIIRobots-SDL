@@ -1,11 +1,6 @@
 #ifndef _PLATFORMAMIGA_H
 #define _PLATFORMAMIGA_H
 
-#define PLATFORM_MODULE_BASED_AUDIO
-#define PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
-#define PLATFORM_IMAGE_SUPPORT
-#define PLATFORM_COLOR_SUPPORT
-#define PLATFORM_CURSOR_SUPPORT
 #define PlatformClass PlatformAmiga
 
 #include "Platform.h"

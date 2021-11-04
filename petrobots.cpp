@@ -6,6 +6,11 @@
  * vesuri@jormas.com
  */
 
+#ifdef _AMIGA
+#include "PlatformAmiga.h"
+#else
+#include "PlatformSDL.h"
+#endif
 #include "petrobots.h"
 
 uint8_t DESTRUCT_PATH[256]; // Destruct path array (256 bytes)
