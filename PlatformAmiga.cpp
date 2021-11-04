@@ -57,6 +57,7 @@ __chip extern uint8_t spritesPlanes[];
 __chip extern uint8_t spritesMask[];
 __chip extern uint8_t itemsPlanes[];
 __chip extern uint8_t healthPlanes[];
+#ifdef PLATFORM_MODULE_BASED_AUDIO
 __chip extern uint8_t soundFXModule[];
 __chip extern int8_t soundExplosion[];
 __chip extern int8_t soundMedkit[];
@@ -67,6 +68,7 @@ __chip extern int8_t soundCycleWeapon[];
 __chip extern int8_t soundCycleItem[];
 __chip extern int8_t soundDoor[];
 __chip extern int8_t soundMenuBeep[];
+#endif
 __chip extern int8_t squareWave[];
 __chip static int32_t simpleTileMask = 0xffffff00;
 __chip static SpriteData cursorData1 = {
@@ -178,15 +180,20 @@ static char* unableToInitializeDisplayError = "Unable to initialize display\n";
 static char* unableToInitializeAudioError = "Unable to initialize audio\n";
 static char* unableToLoadDataError = "Unable to load data\n";
 
-PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
+PlatformAmiga::PlatformAmiga() :
     interrupt(0),
     framesPerSecond_(50),
     screenBitmap(new BitMap),
     screen(0),
     window(0),
     verticalBlankInterrupt(new Interrupt),
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    moduleData(0),
+    loadedModule(ModuleSoundFX),
+#else
     ioAudio(0),
     messagePort(0),
+#endif
     clock(3546895),
     screenPlanes(0),
     tilesMask(0),
@@ -198,10 +205,8 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     cursorSprite1(new SimpleSprite),
     cursorSprite2(new SimpleSprite),
     palette(new Palette(blackPalette, (1 << PLANES))),
-    moduleData(0),
     bplcon1DefaultValue(0),
-    shakeStep(0),
-    loadedModule(ModuleSoundFX)
+    shakeStep(0)
 {
     Palette::initialize();
 
@@ -223,13 +228,13 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
         return;
     }
 
-    if (moduleBasedAudio) {
-        moduleData = (uint8_t*)AllocMem(LARGEST_MODULE_SIZE, MEMF_CHIP | MEMF_CLEAR);
-        if (!moduleData) {
-            Write(Output(), unableToAllocateMemoryError, 26);
-            return;
-        }
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    moduleData = (uint8_t*)AllocMem(LARGEST_MODULE_SIZE, MEMF_CHIP | MEMF_CLEAR);
+    if (!moduleData) {
+        Write(Output(), unableToAllocateMemoryError, 26);
+        return;
     }
+#endif
 
     InitBitMap(screenBitmap, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
     InitBitMap(facesBitMap, PLANES, 16, 24 * 3);
@@ -303,64 +308,65 @@ PlatformAmiga::PlatformAmiga(bool moduleBasedAudio) :
     verticalBlankInterrupt->is_Code = (__stdargs void(*)())&verticalBlankInterruptServer;
     AddIntServer(INTB_VERTB, verticalBlankInterrupt);
 
-    if (moduleBasedAudio) {
-        // Clear the first two bytes of effect samples to enable the 2-byte no-loop loop
-        *((uint16_t*)soundExplosion) = 0;
-        *((uint16_t*)soundMedkit) = 0;
-        *((uint16_t*)soundPlasma) = 0;
-        *((uint16_t*)soundPistol) = 0;
-        *((uint16_t*)soundError) = 0;
-        *((uint16_t*)soundCycleWeapon) = 0;
-        *((uint16_t*)soundCycleItem) = 0;
-        *((uint16_t*)soundDoor) = 0;
-        *((uint16_t*)soundMenuBeep) = 0;
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    // Clear the first two bytes of effect samples to enable the 2-byte no-loop loop
+    *((uint16_t*)soundExplosion) = 0;
+    *((uint16_t*)soundMedkit) = 0;
+    *((uint16_t*)soundPlasma) = 0;
+    *((uint16_t*)soundPistol) = 0;
+    *((uint16_t*)soundError) = 0;
+    *((uint16_t*)soundCycleWeapon) = 0;
+    *((uint16_t*)soundCycleItem) = 0;
+    *((uint16_t*)soundDoor) = 0;
+    *((uint16_t*)soundMenuBeep) = 0;
 
-        setSampleData(soundFXModule);
+    setSampleData(soundFXModule);
 
-        SetCIAInt();
-    } else {
-        messagePort = CreatePort(NULL, 0);
-        if (!messagePort) {
-            Write(Output(), unableToInitializeAudioError, 27);
-            return;
-        }
-
-        // Don't care which channel gets allocated
-        uint8_t requestChannels[4] = { 1, 8, 2, 4 };
-        ioAudio = new IOAudio;
-        ioAudio->ioa_Request.io_Message.mn_ReplyPort = messagePort;
-        ioAudio->ioa_Request.io_Message.mn_Node.ln_Pri = -50;
-        ioAudio->ioa_Request.io_Command = ADCMD_ALLOCATE;
-        ioAudio->ioa_Request.io_Flags = ADIOF_NOWAIT;
-        ioAudio->ioa_Data = requestChannels;
-        ioAudio->ioa_Length = 4;
-
-        if (OpenDevice((UBYTE*)AUDIONAME, 0, (IORequest*)ioAudio, 0)) {
-            Write(Output(), unableToInitializeAudioError, 27);
-            return;
-        }
-
-        ioAudio->ioa_Request.io_Command = CMD_WRITE;
-        ioAudio->ioa_Request.io_Flags = ADIOF_PERVOL | IOF_QUICK;
-        ioAudio->ioa_Volume = 64;
-        ioAudio->ioa_Cycles = 0;
-        ioAudio->ioa_Data = (uint8_t*)squareWave;
-        ioAudio->ioa_Length = 2;
-        ioAudio->ioa_Period = (uint16_t)(clock / 440 / 2);
-        BeginIO((IORequest*)ioAudio);
-
-        ioAudio->ioa_Request.io_Command = ADCMD_PERVOL;
+    SetCIAInt();
+#else
+    messagePort = CreatePort(NULL, 0);
+    if (!messagePort) {
+        Write(Output(), unableToInitializeAudioError, 27);
+        return;
     }
+
+    // Don't care which channel gets allocated
+    uint8_t requestChannels[4] = { 1, 8, 2, 4 };
+    ioAudio = new IOAudio;
+    ioAudio->ioa_Request.io_Message.mn_ReplyPort = messagePort;
+    ioAudio->ioa_Request.io_Message.mn_Node.ln_Pri = -50;
+    ioAudio->ioa_Request.io_Command = ADCMD_ALLOCATE;
+    ioAudio->ioa_Request.io_Flags = ADIOF_NOWAIT;
+    ioAudio->ioa_Data = requestChannels;
+    ioAudio->ioa_Length = 4;
+
+    if (OpenDevice((UBYTE*)AUDIONAME, 0, (IORequest*)ioAudio, 0)) {
+        Write(Output(), unableToInitializeAudioError, 27);
+        return;
+    }
+
+    ioAudio->ioa_Request.io_Command = CMD_WRITE;
+    ioAudio->ioa_Request.io_Flags = ADIOF_PERVOL | IOF_QUICK;
+    ioAudio->ioa_Volume = 64;
+    ioAudio->ioa_Cycles = 0;
+    ioAudio->ioa_Data = (uint8_t*)squareWave;
+    ioAudio->ioa_Length = 2;
+    ioAudio->ioa_Period = (uint16_t)(clock / 440 / 2);
+    BeginIO((IORequest*)ioAudio);
+
+    ioAudio->ioa_Request.io_Command = ADCMD_PERVOL;
+#endif
 
     platform = this;
 }
 
 PlatformAmiga::~PlatformAmiga()
 {
+#ifdef PLATFORM_MODULE_BASED_AUDIO
     stopModule();
 
     ResetCIAInt();
-
+#else
     if (ioAudio && ioAudio->ioa_Request.io_Device) {
         AbortIO((IORequest*)ioAudio);
         CloseDevice((IORequest*)ioAudio);
@@ -369,6 +375,7 @@ PlatformAmiga::~PlatformAmiga()
     if (messagePort) {
         DeletePort(messagePort);
     }
+#endif
 
     if (verticalBlankInterrupt->is_Data == this) {
         RemIntServer(INTB_VERTB, verticalBlankInterrupt);
@@ -390,9 +397,11 @@ PlatformAmiga::~PlatformAmiga()
         CloseScreen(screen);
     }
 
+#ifdef PLATFORM_MODULE_BASED_AUDIO
     if (moduleData) {
         FreeMem(moduleData, LARGEST_MODULE_SIZE);
     }
+#endif
 
     if (tilesMask) {
         FreeMem(tilesMask, 32 / 8 * 24 * PLANES * TILES_WITH_MASK);
@@ -410,7 +419,9 @@ PlatformAmiga::~PlatformAmiga()
     delete spritesBitMap;
     delete tilesBitMap;
     delete facesBitMap;
+#ifndef PLATFORM_MODULE_BASED_AUDIO
     delete ioAudio;
+#endif
     delete verticalBlankInterrupt;
     delete screenBitmap;
 }
@@ -422,6 +433,7 @@ void PlatformAmiga::runVerticalBlankInterrupt()
     }
 }
 
+#ifdef PLATFORM_MODULE_BASED_AUDIO
 void PlatformAmiga::undeltaSamples(uint8_t* module, uint32_t moduleSize)
 {
     uint8_t numPatterns = 0;
@@ -464,6 +476,7 @@ void PlatformAmiga::setSampleData(uint8_t* module)
         sampleData[15 + i].volume = 64;
     }
 }
+#endif
 
 void PlatformAmiga::setInterrupt(void (*interrupt)(void))
 {
@@ -983,67 +996,7 @@ void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t
     }
 }
 
-static const uint16_t noteToFrequency[] = {
-    0,
-    247,
-    262,
-    277,
-    294,
-    311,
-    330,
-    349,
-    370,
-    392,
-    415,
-    440,
-    466,
-    494,
-    523,
-    554,
-    587,
-    622,
-    659,
-    698,
-    740,
-    784,
-    831,
-    880,
-    932,
-    988,
-    1047,
-    1109,
-    1175,
-    1245,
-    1319,
-    1397,
-    1480,
-    1568,
-    1661,
-    1760,
-    1865,
-    1976,
-    0
-};
-
-void PlatformAmiga::playNote(uint8_t note)
-{
-    if (ioAudio) {
-        ioAudio->ioa_Volume = noteToFrequency[note] ? 64 : 0;
-        if (noteToFrequency[note]) {
-            ioAudio->ioa_Period = (uint16_t)(clock / noteToFrequency[note] / 2);
-        }
-        BeginIO((IORequest*)ioAudio);
-    }
-}
-
-void PlatformAmiga::stopNote()
-{
-    if (ioAudio) {
-        ioAudio->ioa_Volume = 0;
-        BeginIO((IORequest*)ioAudio);
-    }
-}
-
+#ifdef PLATFORM_MODULE_BASED_AUDIO
 void PlatformAmiga::loadModule(Module module)
 {
     if (loadedModule != module) {
@@ -1109,6 +1062,68 @@ void PlatformAmiga::stopSample()
     mt_chan4data[0] = 0;
     mt_chan4data[1] = 0;
 }
+#else
+static const uint16_t noteToFrequency[] = {
+    0,
+    247,
+    262,
+    277,
+    294,
+    311,
+    330,
+    349,
+    370,
+    392,
+    415,
+    440,
+    466,
+    494,
+    523,
+    554,
+    587,
+    622,
+    659,
+    698,
+    740,
+    784,
+    831,
+    880,
+    932,
+    988,
+    1047,
+    1109,
+    1175,
+    1245,
+    1319,
+    1397,
+    1480,
+    1568,
+    1661,
+    1760,
+    1865,
+    1976,
+    0
+};
+
+void PlatformAmiga::playNote(uint8_t note)
+{
+    if (ioAudio) {
+        ioAudio->ioa_Volume = noteToFrequency[note] ? 64 : 0;
+        if (noteToFrequency[note]) {
+            ioAudio->ioa_Period = (uint16_t)(clock / noteToFrequency[note] / 2);
+        }
+        BeginIO((IORequest*)ioAudio);
+    }
+}
+
+void PlatformAmiga::stopNote()
+{
+    if (ioAudio) {
+        ioAudio->ioa_Volume = 0;
+        BeginIO((IORequest*)ioAudio);
+    }
+}
+#endif
 
 void PlatformAmiga::renderFrame()
 {

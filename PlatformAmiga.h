@@ -17,7 +17,7 @@ class Palette;
 
 class PlatformAmiga : public Platform {
 public:
-    PlatformAmiga(bool moduleBasedAudio = true);
+    PlatformAmiga();
     ~PlatformAmiga();
 
     virtual void setInterrupt(void (*interrupt)(void));
@@ -47,14 +47,17 @@ public:
     virtual void stopFadeScreen();
     virtual void writeToScreenMemory(uint16_t address, uint8_t value);
     virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset);
-	virtual void playNote(uint8_t note);
-    virtual void stopNote();
+#ifdef PLATFORM_MODULE_BASED_AUDIO
     virtual void loadModule(Module module);
     virtual void playModule(Module module);
     virtual void setSongPosition(uint8_t songPosition);
     virtual void stopModule();
     virtual void playSample(uint8_t sample);
     virtual void stopSample();
+#else
+    virtual void playNote(uint8_t note);
+    virtual void stopNote();
+#endif
     virtual void renderFrame();
 
 private:
@@ -62,15 +65,22 @@ private:
     __asm static void verticalBlankInterruptServer();
     __asm static int32_t ungzip(register __a0 void* input, register __a1 void* output);
     void (*interrupt)(void);
+#ifdef PLATFORM_MODULE_BASED_AUDIO
     void undeltaSamples(uint8_t* module, uint32_t moduleSize);
     void setSampleData(uint8_t* module);
+#endif
     int framesPerSecond_;
     BitMap* screenBitmap;
     Screen* screen;
     Window* window;
     Interrupt* verticalBlankInterrupt;
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    uint8_t* moduleData;
+    Module loadedModule;
+#else
     IOAudio* ioAudio;
     MsgPort* messagePort;
+#endif
     uint32_t clock;
     uint8_t* screenPlanes;
     uint8_t* tilesMask;
@@ -82,10 +92,8 @@ private:
     SimpleSprite* cursorSprite1;
     SimpleSprite* cursorSprite2;
     Palette* palette;
-    uint8_t* moduleData;
     uint16_t bplcon1DefaultValue;
     uint16_t shakeStep;
-    Module loadedModule;
 };
 
 #endif

@@ -65,6 +65,14 @@ void Platform::stopFadeScreen()
 {
 }
 
+void Platform::playNote(uint8_t)
+{
+}
+
+void Platform::stopNote()
+{
+}
+
 void Platform::loadModule(Module)
 {
 }
