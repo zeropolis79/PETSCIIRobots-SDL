@@ -161,7 +161,11 @@ static int8_t tileSpriteMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
 #endif
+#ifdef PLATFORM_IMAGE_SUPPORT
 static uint16_t blackPalette[16] = { 0 };
+#else
+static uint16_t blackPalette[16] = { 0x000, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0 };
+#endif
 static const char* imageFilenames[] = {
     "IntroScreen.raw.gz",
     "GameScreen.raw.gz"
