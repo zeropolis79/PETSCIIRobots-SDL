@@ -1,6 +1,14 @@
 Attack of the PETSCII Robots C++
 ================================
+Ported by Vesa Halttunen <vesuri@jormas.com>
 Work in progress
+
+About
+-----
+- petrobots.cpp is the main game logic ported line by line from the 6502 files PETROBOTS.ASM and BACKGROUND_TASKS.ASM
+- Platform.h is essentially an interface with platform specific implementation classes
+- Various #defines starting with PLATFORM_ can be used to build a variant with different features using the same platform implementation
+- To port to a new platform, create a new PlatformXYZ.cpp/h implementation based on the existing ones and instantiate it in main() (petrobots.cpp)
 
 SDL version
 -----------
@@ -12,40 +20,6 @@ Amiga version
 -------------
 smake
 petrobots
-
-Amiga memory requirements
--------------------------
-32000  CHIP always: main screen (AllocMem())
-98304  CHIP always: tiles
-24576  CHIP always: sprites
-4      CHIP always: generic tile mask
-6144   CHIP always: masks for tiles with transparency (AllocMem())
-24576  CHIP always: masks for sprites
-120    CHIP always: cursor sprite left
-120    CHIP always: cursor sprite right
-576    CHIP always: faces
-4608   CHIP always: item graphics
-8064   CHIP always: health graphics
-103754 CHIP always: module (AllocMem())
-2108   CHIP always: sound fx module
-11228  CHIP always: sounds_dsbarexp.raw
-18184  CHIP always: sounds_dsdoropn.raw
-4512   CHIP always: sounds_dsgetpow.raw
-2204   CHIP always: sounds_dsitemup.raw
-4264   CHIP always: sounds_dsoof.raw
-5512   CHIP always: sounds_dspistol.raw
-14284  CHIP always: sounds_dsplasma.raw
-8928   CHIP always: sounds_dsplpain.raw
-4264   CHIP always: sounds_dsswtchx.raw
-5732   CHIP always: sounds_dswpnup.raw
-2      CHIP always: SquareWave.raw
-2000   FAST always: PET screen memory address -> Amiga bitplane address mapping
-256    FAST always: offsets to masks for tiles with transparency
-256    FAST always: offsets to sprites for sprite tiles
-1024   FAST always: C64 font
-14351  FAST always: intro screen
-1333   FAST always: game screen
-57248  FAST on-demand: mod.get psyched.gz (new[])
 
 Amiga TODO
 ----------
