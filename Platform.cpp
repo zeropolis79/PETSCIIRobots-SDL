@@ -49,6 +49,10 @@ void Platform::startShakeScreen()
 {
 }
 
+void Platform::shakeScreen()
+{
+}
+
 void Platform::stopShakeScreen()
 {
 }

@@ -903,6 +903,7 @@ void PlatformAmiga::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t h
     BltBitMap(screenBitmap, x, y, screenBitmap, x, y, width, height, 0, 0xff, 0);
 }
 
+#ifdef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
 void PlatformAmiga::shakeScreen()
 {
     shakeStep++;
@@ -945,6 +946,7 @@ void PlatformAmiga::stopShakeScreen()
         }
     }
 }
+#endif
 
 void PlatformAmiga::startFadeScreen(uint16_t color, uint16_t intensity)
 {

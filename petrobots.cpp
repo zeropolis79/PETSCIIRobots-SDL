@@ -287,9 +287,11 @@ void RUNIRQ()
         BORDER--;
         platform->fadeScreen(15 - BORDER);
     }
+#ifdef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
     if (SCREEN_SHAKE != 0) {
         platform->shakeScreen();
     }
+#endif
     // Back to usual IRQ routine
 }
 uint8_t BGTIMER1 = 0;
@@ -3325,7 +3327,9 @@ void BIG_EXP_PHASE1()
     }
     BIG_EXP_ACT = 1; // Set flag so no other explosions can begin until this one ends.
     SCREEN_SHAKE = 1;
+#ifdef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
     platform->startShakeScreen();
+#endif
     PLAY_SOUND(0); // explosion-sound SOUND PLAY
     BEX_PART1(); // check center piece for unit
     BEXCEN(); // check center piece for unit
@@ -3626,7 +3630,9 @@ void BIG_EXP_PHASE2()
     UNIT_TYPE[UNIT] = 0; // Deactivate this AI
     BIG_EXP_ACT = 0;
     SCREEN_SHAKE = 0;
+#ifdef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
     platform->stopShakeScreen();
+#endif
 }
 
 void RESTORE_TILE()

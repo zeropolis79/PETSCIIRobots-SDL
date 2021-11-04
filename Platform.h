@@ -65,7 +65,7 @@ public:
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height) = 0;
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) = 0;
     virtual void startShakeScreen();
-    virtual void shakeScreen() = 0;
+    virtual void shakeScreen();
     virtual void stopShakeScreen();
     virtual void startFadeScreen(uint16_t color, uint16_t intensity);
     virtual void fadeScreen(uint16_t intensity);

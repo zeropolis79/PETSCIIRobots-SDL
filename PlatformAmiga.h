@@ -40,8 +40,10 @@ public:
     virtual void hideCursor();
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
+#ifdef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
     virtual void shakeScreen();
     virtual void stopShakeScreen();
+#endif
     virtual void startFadeScreen(uint16_t color, uint16_t intensity);
     virtual void fadeScreen(uint16_t intensity);
     virtual void stopFadeScreen();
