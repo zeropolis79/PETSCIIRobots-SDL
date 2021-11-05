@@ -1288,6 +1288,26 @@ void DRAW_MAP_WINDOW()
             MAP_SOURCE = MAP + (((MAP_WINDOW_Y + TEMP_Y) << 7) + TEMP_X + MAP_WINDOW_X);
             TILE = MAP_SOURCE[0];
             // NOW FIGURE OUT WHERE TO PLACE IT ON SCREEN.
+#ifdef PLATFORM_SPRITE_SUPPORT
+            if (MAP_PRECALC[PRECALC_COUNT] != 0) {
+                uint8_t FG_TILE = MAP_PRECALC[PRECALC_COUNT];
+                DIRECTION = MAP_PRECALC_DIRECTION[PRECALC_COUNT];
+                uint8_t variant = 0;
+                if (FG_TILE == 96) {
+                    if (DIRECTION == 0) {
+                        variant = 8;
+                    } else if (DIRECTION == 2) {
+                        variant = 12;
+                    } else if (DIRECTION == 3) {
+                        variant = 4;
+                    }
+                    variant += WALK_FRAME + (SELECTED_WEAPON << 4);
+                }
+                platform->renderTiles(TILE, FG_TILE, TEMP_X * 24, TEMP_Y * 24, variant);
+            } else {
+                platform->renderTile(TILE, TEMP_X * 24, TEMP_Y * 24);
+            }
+#else
 #ifdef PLATFORM_TILE_BASED_RENDERING
             PLOT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X, TEMP_X, TEMP_Y);
 #else
@@ -1303,6 +1323,7 @@ void DRAW_MAP_WINDOW()
                 PLOT_TRANSPARENT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X);
 #endif
             }
+#endif
             PRECALC_COUNT++;
         }
 #ifndef PLATFORM_CURSOR_SUPPORT

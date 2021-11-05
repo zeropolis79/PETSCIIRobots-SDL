@@ -32,7 +32,7 @@ public:
     virtual void updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles);
 #endif
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent);
-    virtual void renderSprite(uint8_t sprite, uint16_t x, uint16_t y);
+    virtual void renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t foregroundVariant);
     virtual void renderItem(uint8_t item, uint16_t x, uint16_t y);
     virtual void renderHealth(uint8_t health, uint16_t x, uint16_t y);
     virtual void renderFace(uint8_t face, uint16_t x, uint16_t y);
@@ -71,6 +71,7 @@ private:
     void undeltaSamples(uint8_t* module, uint32_t moduleSize);
     void setSampleData(uint8_t* module);
 #endif
+    void renderSprite(uint8_t sprite, uint16_t x, uint16_t y);
     int framesPerSecond_;
     BitMap* screenBitmap;
     Screen* screen;
@@ -86,6 +87,7 @@ private:
     uint32_t clock;
     uint8_t* screenPlanes;
     uint8_t* tilesMask;
+    uint8_t* combinedTilePlanes;
     BitMap* facesBitMap;
     BitMap* tilesBitMap;
     BitMap* spritesBitMap;

@@ -21,7 +21,7 @@ void Platform::updateTiles(uint8_t*, uint8_t*, uint8_t)
 {
 }
 
-void Platform::renderSprite(uint8_t, uint16_t, uint16_t)
+void Platform::renderTiles(uint8_t, uint8_t, uint16_t, uint16_t, uint8_t)
 {
 }
 

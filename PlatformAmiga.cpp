@@ -203,6 +203,7 @@ PlatformAmiga::PlatformAmiga() :
     clock(3546895),
     screenPlanes(0),
     tilesMask(0),
+    combinedTilePlanes(0),
     facesBitMap(new BitMap),
     tilesBitMap(new BitMap),
     spritesBitMap(new BitMap),
@@ -228,11 +229,12 @@ PlatformAmiga::PlatformAmiga() :
         return;
     }
 
-    tilesMask = (uint8_t*)AllocMem(32 / 8 * 24 * PLANES * TILES_WITH_MASK, MEMF_CHIP | MEMF_CLEAR);
+    tilesMask = (uint8_t*)AllocMem(32 / 8 * 24 * PLANES * (TILES_WITH_MASK + 1), MEMF_CHIP | MEMF_CLEAR);
     if (!tilesMask) {
         Write(Output(), unableToAllocateMemoryError, 26);
         return;
     }
+    combinedTilePlanes = tilesMask + 32 / 8 * 24 * PLANES * TILES_WITH_MASK;
 
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     moduleData = (uint8_t*)AllocMem(LARGEST_MODULE_SIZE, MEMF_CHIP | MEMF_CLEAR);
@@ -411,7 +413,7 @@ PlatformAmiga::~PlatformAmiga()
 #endif
 
     if (tilesMask) {
-        FreeMem(tilesMask, 32 / 8 * 24 * PLANES * TILES_WITH_MASK);
+        FreeMem(tilesMask, 32 / 8 * 24 * PLANES * (TILES_WITH_MASK + 1));
     }
 
     if (screenPlanes) {
@@ -780,16 +782,13 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t var
         }
 #endif
 
-//        BltMaskBitMapRastPort(tilesBitMap, 0, tile * 24, &screen->RastPort, x, y, 24, 24, (ABC|ABNC|ANBC), tilesMask);
-
-        OwnBlitter();
-        WaitBlit();
-
         bool shifted = x & 8;
         uint32_t thirdOfTileOffset = tile << 7;
         uint32_t thirdOfTileMaskOffset = tileMaskMap[tile] << 7;
         uint32_t screenOffsetXInWords = x >> 4;
         uint32_t screenOffset = y * SCREEN_WIDTH_IN_BYTES * PLANES + screenOffsetXInWords + screenOffsetXInWords;
+        OwnBlitter();
+        WaitBlit();
         custom.bltafwm = 0xffff;
         custom.bltalwm = 0xff00;
         custom.bltcon1 = (uint16_t)(shifted ? (8 << 12) : 0);
@@ -806,15 +805,12 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t var
 
         DisownBlitter();
     } else {
-//        BltBitMap(tilesBitMap, 0, tile * 24, screen->RastPort.BitMap, x, y, 24, 24, 0xc0, 0xff, 0);
-
-        OwnBlitter();
-        WaitBlit();
-
         bool shifted = x & 8;
         uint32_t thirdOfTileOffset = tile << 7;
         uint32_t screenOffsetXInWords = x >> 4;
         uint32_t screenOffset = y * SCREEN_WIDTH_IN_BYTES * PLANES + screenOffsetXInWords + screenOffsetXInWords;
+        OwnBlitter();
+        WaitBlit();
         custom.bltafwm = 0xffff;
         custom.bltalwm = 0xff00;
         custom.bltcon1 = (uint16_t)(shifted ? (8 << 12) : 0);
@@ -833,15 +829,77 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t var
     }
 }
 
+void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t foregroundVariant)
+{
+#ifdef PLATFORM_SPRITE_SUPPORT
+        bool shifted = x & 8;
+        uint32_t thirdOfBackgroundTileOffset = backgroundTile << 7;
+        uint32_t screenOffsetXInWords = x >> 4;
+        uint32_t screenOffset = y * SCREEN_WIDTH_IN_BYTES * PLANES + screenOffsetXInWords + screenOffsetXInWords;
+        OwnBlitter();
+        if (tileSpriteMap[foregroundTile] >= 0) {
+            uint8_t sprite = tileSpriteMap[foregroundTile] + foregroundVariant;
+            uint32_t thirdOfSpriteOffset = sprite << 7;
+            WaitBlit();
+            custom.bltafwm = 0xffff;
+            custom.bltalwm = 0xff00;
+            custom.bltcon1 = 0;
+            custom.bltcon0 = (uint16_t)(BC0F_SRCA | BC0F_SRCB | BC0F_SRCC | BC0F_DEST | ABC | ABNC | NANBC | ANBC);
+            custom.bltamod = 0;
+            custom.bltbmod = 0;
+            custom.bltcmod = 0;
+            custom.bltdmod = 0;
+            custom.bltapt = spritesPlanes + thirdOfSpriteOffset + thirdOfSpriteOffset + thirdOfSpriteOffset;
+            custom.bltbpt = spritesMask + thirdOfSpriteOffset + thirdOfSpriteOffset + thirdOfSpriteOffset;
+            custom.bltcpt = tilesPlanes + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset;
+            custom.bltdpt = combinedTilePlanes;
+            custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
+        } else {
+            uint32_t thirdOfForegroundTileOffset = foregroundTile << 7;
+            uint32_t thirdOfForegroundTileMaskOffset = tileMaskMap[foregroundTile] << 7;
+            WaitBlit();
+            custom.bltafwm = 0xffff;
+            custom.bltalwm = 0xff00;
+            custom.bltcon1 = 0;
+            custom.bltcon0 = (uint16_t)(BC0F_SRCA | BC0F_SRCB | BC0F_SRCC | BC0F_DEST | ABC | ABNC | NANBC | ANBC);
+            custom.bltamod = 0;
+            custom.bltbmod = 0;
+            custom.bltcmod = 0;
+            custom.bltdmod = 0;
+            custom.bltapt = tilesPlanes + thirdOfForegroundTileOffset + thirdOfForegroundTileOffset + thirdOfForegroundTileOffset;
+            custom.bltbpt = tilesMask + thirdOfForegroundTileMaskOffset + thirdOfForegroundTileMaskOffset + thirdOfForegroundTileMaskOffset;
+            custom.bltcpt = tilesPlanes + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset;
+            custom.bltdpt = combinedTilePlanes;
+            custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
+        }
+
+        WaitBlit();
+        custom.bltafwm = 0xffff;
+        custom.bltalwm = 0xff00;
+        custom.bltcon1 = (uint16_t)(shifted ? (8 << 12) : 0);
+        custom.bltcon0 = (uint16_t)(BC0F_SRCA | BC0F_SRCB | BC0F_SRCC | BC0F_DEST | ABC | ABNC | NANBC | ANBC | (shifted ? (8 << 12) : 0));
+        custom.bltamod = 0;
+        custom.bltbmod = -4;
+        custom.bltcmod = SCREEN_WIDTH_IN_BYTES - (32 >> 3);
+        custom.bltdmod = SCREEN_WIDTH_IN_BYTES - (32 >> 3);
+        custom.bltapt = combinedTilePlanes;
+        custom.bltbpt = &simpleTileMask;
+        custom.bltcpt = screenPlanes + screenOffset;
+        custom.bltdpt = screenPlanes + screenOffset;
+        custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
+
+        DisownBlitter();
+#endif
+}
+
 void PlatformAmiga::renderSprite(uint8_t sprite, uint16_t x, uint16_t y)
 {
-    OwnBlitter();
-    WaitBlit();
-
     bool shifted = x & 8;
     uint32_t thirdOfSpriteOffset = sprite << 7;
     uint32_t screenOffsetXInWords = x >> 4;
     uint32_t screenOffset = y * SCREEN_WIDTH_IN_BYTES * PLANES + screenOffsetXInWords + screenOffsetXInWords;
+    OwnBlitter();
+    WaitBlit();
     custom.bltafwm = 0xffff;
     custom.bltalwm = 0xff00;
     custom.bltcon1 = (uint16_t)(shifted ? (8 << 12) : 0);

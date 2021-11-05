@@ -24,7 +24,7 @@ petrobots
 Amiga TODO
 ----------
 - Joystick support
-- Avoid flicker when rendering sprites
+- Render only changed tiles
 - Proper sound effects
 - Key graphics
 - Death animation frames
