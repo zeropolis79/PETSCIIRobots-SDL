@@ -460,8 +460,8 @@ void CHECK_FOR_HIDDEN_UNIT();
 #ifndef PLATFORM_IMAGE_SUPPORT
 extern uint8_t INTRO_TEXT[];
 extern uint8_t SCR_TEXT[];
-#endif
 extern uint8_t SCR_ENDGAME[];
+#endif
 extern uint8_t SCR_CUSTOM_KEYS[];
 #ifndef PLATFORM_IMAGE_BASED_TILES
 extern uint8_t CINEMA_MESSAGE[];

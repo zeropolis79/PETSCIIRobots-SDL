@@ -31,7 +31,8 @@ public:
 
     enum Image {
         ImageIntro,
-        ImageGame
+        ImageGame,
+        ImageGameOver
     };
 
     enum Module {

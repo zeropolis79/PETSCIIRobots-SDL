@@ -169,7 +169,8 @@ static uint16_t blackPalette[16] = { 0x000, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0
 #endif
 static const char* imageFilenames[] = {
     "IntroScreen.raw.gz",
-    "GameScreen.raw.gz"
+    "GameScreen.raw.gz",
+    "GameOver.raw.gz"
 };
 static const char* moduleFilenames[] = {
     "mod.metal heads.gz",
