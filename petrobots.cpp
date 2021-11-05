@@ -1288,14 +1288,20 @@ void DRAW_MAP_WINDOW()
             MAP_SOURCE = MAP + (((MAP_WINDOW_Y + TEMP_Y) << 7) + TEMP_X + MAP_WINDOW_X);
             TILE = MAP_SOURCE[0];
             // NOW FIGURE OUT WHERE TO PLACE IT ON SCREEN.
-//            PLOT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X);
+#ifdef PLATFORM_TILE_BASED_RENDERING
             PLOT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X, TEMP_X, TEMP_Y);
+#else
+            PLOT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X);
+#endif
             // now check for sprites in this location
             if (MAP_PRECALC[PRECALC_COUNT] != 0) {
                 TILE = MAP_PRECALC[PRECALC_COUNT];
                 DIRECTION = MAP_PRECALC_DIRECTION[PRECALC_COUNT];
-//                PLOT_TRANSPARENT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X);
+#ifdef PLATFORM_TILE_BASED_RENDERING
                 PLOT_TRANSPARENT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X, TEMP_X, TEMP_Y);
+#else
+                PLOT_TRANSPARENT_TILE(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X);
+#endif
             }
             PRECALC_COUNT++;
         }
@@ -1310,30 +1316,11 @@ void DRAW_MAP_WINDOW()
     }
 }
 
+#ifdef PLATFORM_TILE_BASED_RENDERING
 // This routine plots a 3x3 tile from the tile database anywhere
 // on screen.  But first you must define the tile number in the
 // TILE variable, as well as the starting screen address must
 // be defined in $FB.
-/*
-void PLOT_TILE(uint16_t destination)
-{
-    // DRAW THE TOP 3 CHARACTERS
-    writeToScreenMemory(destination + 0, TILE_DATA_TL[TILE]);
-    writeToScreenMemory(destination + 1, TILE_DATA_TM[TILE]);
-    writeToScreenMemory(destination + 2, TILE_DATA_TR[TILE]);
-    // MOVE DOWN TO NEXT LINE
-    // DRAW THE MIDDLE 3 CHARACTERS
-    writeToScreenMemory(destination + 40, TILE_DATA_ML[TILE]);
-    writeToScreenMemory(destination + 41, TILE_DATA_MM[TILE]);
-    writeToScreenMemory(destination + 42, TILE_DATA_MR[TILE]);
-    // MOVE DOWN TO NEXT LINE
-    // DRAW THE BOTTOM 3 CHARACTERS
-    writeToScreenMemory(destination + 80, TILE_DATA_BL[TILE]);
-    writeToScreenMemory(destination + 81, TILE_DATA_BM[TILE]);
-    writeToScreenMemory(destination + 82, TILE_DATA_BR[TILE]);
-}
-*/
-
 void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y)
 {
 #ifndef PLATFORM_SPRITE_SUPPORT
@@ -1361,44 +1348,6 @@ void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y)
 // be defined in $FB.  Also, this routine is slower than the usual
 // tile routine, so is only used for sprites.  The ":" character ($3A)
 // is not drawn.
-/*
-void PLOT_TRANSPARENT_TILE(uint16_t destination)
-{
-    // DRAW THE TOP 3 CHARACTERS
-    if (TILE_DATA_TL[TILE] != 0x3A) {
-        writeToScreenMemory(destination + 0, TILE_DATA_TL[TILE]);
-    }
-    if (TILE_DATA_TM[TILE] != 0x3A) {
-        writeToScreenMemory(destination + 1, TILE_DATA_TM[TILE]);
-    }
-    if (TILE_DATA_TR[TILE] != 0x3A) {
-        writeToScreenMemory(destination + 2, TILE_DATA_TR[TILE]);
-    }
-    // MOVE DOWN TO NEXT LINE
-    // DRAW THE MIDDLE 3 CHARACTERS
-    if (TILE_DATA_ML[TILE] != 0x3A) {
-        writeToScreenMemory(destination + 40, TILE_DATA_ML[TILE]);
-    }
-    if (TILE_DATA_MM[TILE] != 0x3A) {
-        writeToScreenMemory(destination + 41, TILE_DATA_MM[TILE]);
-    }
-    if (TILE_DATA_MR[TILE] != 0x3A) {
-        writeToScreenMemory(destination + 42, TILE_DATA_MR[TILE]);
-    }
-    // MOVE DOWN TO NEXT LINE
-    // DRAW THE BOTTOM 3 CHARACTERS
-    if (TILE_DATA_BL[TILE] != 0x3A) {
-        writeToScreenMemory(destination + 80, TILE_DATA_BL[TILE]);
-    }
-    if (TILE_DATA_BM[TILE] != 0x3A) {
-        writeToScreenMemory(destination + 81, TILE_DATA_BM[TILE]);
-    }
-    if (TILE_DATA_BR[TILE] != 0x3A) {
-        writeToScreenMemory(destination + 82, TILE_DATA_BR[TILE]);
-    }
-}
-*/
-
 void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y)
 {
 #ifndef PLATFORM_SPRITE_SUPPORT
@@ -1448,6 +1397,61 @@ void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y)
     }
     platform->renderTile(TILE, x * 24, y * 24, variant, true);
 }
+#else
+void PLOT_TILE(uint16_t destination)
+{
+    // DRAW THE TOP 3 CHARACTERS
+    writeToScreenMemory(destination + 0, TILE_DATA_TL[TILE]);
+    writeToScreenMemory(destination + 1, TILE_DATA_TM[TILE]);
+    writeToScreenMemory(destination + 2, TILE_DATA_TR[TILE]);
+    // MOVE DOWN TO NEXT LINE
+    // DRAW THE MIDDLE 3 CHARACTERS
+    writeToScreenMemory(destination + 40, TILE_DATA_ML[TILE]);
+    writeToScreenMemory(destination + 41, TILE_DATA_MM[TILE]);
+    writeToScreenMemory(destination + 42, TILE_DATA_MR[TILE]);
+    // MOVE DOWN TO NEXT LINE
+    // DRAW THE BOTTOM 3 CHARACTERS
+    writeToScreenMemory(destination + 80, TILE_DATA_BL[TILE]);
+    writeToScreenMemory(destination + 81, TILE_DATA_BM[TILE]);
+    writeToScreenMemory(destination + 82, TILE_DATA_BR[TILE]);
+}
+
+void PLOT_TRANSPARENT_TILE(uint16_t destination)
+{
+    // DRAW THE TOP 3 CHARACTERS
+    if (TILE_DATA_TL[TILE] != 0x3A) {
+        writeToScreenMemory(destination + 0, TILE_DATA_TL[TILE]);
+    }
+    if (TILE_DATA_TM[TILE] != 0x3A) {
+        writeToScreenMemory(destination + 1, TILE_DATA_TM[TILE]);
+    }
+    if (TILE_DATA_TR[TILE] != 0x3A) {
+        writeToScreenMemory(destination + 2, TILE_DATA_TR[TILE]);
+    }
+    // MOVE DOWN TO NEXT LINE
+    // DRAW THE MIDDLE 3 CHARACTERS
+    if (TILE_DATA_ML[TILE] != 0x3A) {
+        writeToScreenMemory(destination + 40, TILE_DATA_ML[TILE]);
+    }
+    if (TILE_DATA_MM[TILE] != 0x3A) {
+        writeToScreenMemory(destination + 41, TILE_DATA_MM[TILE]);
+    }
+    if (TILE_DATA_MR[TILE] != 0x3A) {
+        writeToScreenMemory(destination + 42, TILE_DATA_MR[TILE]);
+    }
+    // MOVE DOWN TO NEXT LINE
+    // DRAW THE BOTTOM 3 CHARACTERS
+    if (TILE_DATA_BL[TILE] != 0x3A) {
+        writeToScreenMemory(destination + 80, TILE_DATA_BL[TILE]);
+    }
+    if (TILE_DATA_BM[TILE] != 0x3A) {
+        writeToScreenMemory(destination + 81, TILE_DATA_BM[TILE]);
+    }
+    if (TILE_DATA_BR[TILE] != 0x3A) {
+        writeToScreenMemory(destination + 82, TILE_DATA_BR[TILE]);
+    }
+}
+#endif
 
 void REVERSE_TILE()
 {
@@ -4719,7 +4723,9 @@ uint8_t CINEMA_MESSAGE[] = {
     "rocky 5000, all my circuits the movie, "
     "conan the librarian, and more! " 
 };
+#endif
 
+#ifndef PLATFORM_IMAGE_SUPPORT
 uint8_t WEAPON1A[] = {
     0x2c, 0x20, 0x20, 0x20, 0x20, 0x2c
 };

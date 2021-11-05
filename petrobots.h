@@ -230,10 +230,13 @@ void MAP_PRE_CALCULATE();
 extern uint8_t PRECALC_ROWS[];
 
 void DRAW_MAP_WINDOW();
-//void PLOT_TILE(uint16_t destination);
+#ifdef PLATFORM_TILE_BASED_RENDERING
 void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y);
-//void PLOT_TRANSPARENT_TILE(uint16_t destination);
 void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y);
+#else
+void PLOT_TILE(uint16_t destination);
+void PLOT_TRANSPARENT_TILE(uint16_t destination);
+#endif
 void REVERSE_TILE();
 void CHECK_FOR_WINDOW_REDRAW();
 void DECWRITE(uint16_t destination, uint8_t color = 10);
@@ -465,6 +468,8 @@ extern uint8_t SCR_ENDGAME[];
 extern uint8_t SCR_CUSTOM_KEYS[];
 #ifndef PLATFORM_IMAGE_BASED_TILES
 extern uint8_t CINEMA_MESSAGE[];
+#endif
+#ifndef PLATFORM_IMAGE_SUPPORT
 extern uint8_t WEAPON1A[];
 extern uint8_t WEAPON1B[];
 extern uint8_t WEAPON1C[];
