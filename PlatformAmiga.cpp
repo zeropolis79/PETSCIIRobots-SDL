@@ -139,6 +139,7 @@ __chip static SpriteData cursorData2 = {
     },
     { 0, 0 }
 };
+__chip static uint16_t pointer[4];
 uint16_t addressMap[40 * 25];
 static uint8_t tileMaskMap[256];
 #ifdef PLATFORM_SPRITE_SUPPORT
@@ -302,6 +303,7 @@ PlatformAmiga::PlatformAmiga() :
         return;
     }
 
+    SetPointer(window, pointer, 0, 0, 0, 0);
     GetSprite(cursorSprite1, 2);
     GetSprite(cursorSprite2, 3);
 
