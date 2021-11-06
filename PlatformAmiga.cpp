@@ -32,7 +32,7 @@
 #endif
 #define LARGEST_MODULE_SIZE 103754
 
-static const char version[] = "$VER:Attack of the PETSCII robots (2021-11-04) (C)2021 David Murray, Vesa Halttunen";
+static const char version[] = "$VER:Attack of the PETSCII robots (2021-11-06) (C)2021 David Murray, Vesa Halttunen";
 
 struct SpriteData {
     uint16_t posctl[2];
