@@ -4300,13 +4300,13 @@ void DOOR_CHECK_PROXIMITY()
 {
     // First check horizontal proximity to door
     int A = ABS(UNIT_LOC_X[UNIT] - UNIT_LOC_X[0]); // DOOR UNIT, PLAYER UNIT
-    if (A > 2) { // 2 HORIZONTAL TILES FROM PLAYER
+    if (A >= 2) { // 2 HORIZONTAL TILES FROM PLAYER
         PROX_DETECT = 0; // player not detected
         return;
     }
     // Now check vertical proximity
     A = ABS(UNIT_LOC_Y[UNIT] - UNIT_LOC_Y[0]); // DOOR UNIT, PLAYER UNIT
-    if (A > 2) { // 2 VERTICAL TILES FROM PLAYER
+    if (A >= 2) { // 2 VERTICAL TILES FROM PLAYER
         PROX_DETECT = 0; // player not detected
         return;
     }
