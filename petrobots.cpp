@@ -4589,6 +4589,7 @@ void HOVERBOT_ANIMATE(uint8_t X)
 // separate routine for hovering robots.
 void REQUEST_WALK_RIGHT()
 {
+    UNIT_DIRECTION[UNIT] = 3;
     if (UNIT_LOC_X[UNIT] != 122) {
         MAP_X = UNIT_LOC_X[UNIT];
         MAP_X++;
@@ -4598,7 +4599,6 @@ void REQUEST_WALK_RIGHT()
             CHECK_FOR_UNIT();
             if (UNIT_FIND == 255) {
                 UNIT_LOC_X[UNIT]++;
-                UNIT_DIRECTION[UNIT] = 3;
                 MOVE_RESULT = 1; // Move success
                 return;
             }
@@ -4609,6 +4609,7 @@ void REQUEST_WALK_RIGHT()
 
 void REQUEST_WALK_LEFT()
 {
+    UNIT_DIRECTION[UNIT] = 2;
     if (UNIT_LOC_X[UNIT] != 5) {
         MAP_X = UNIT_LOC_X[UNIT];
         MAP_X--;
@@ -4618,7 +4619,6 @@ void REQUEST_WALK_LEFT()
             CHECK_FOR_UNIT();
             if (UNIT_FIND == 255) {
                 UNIT_LOC_X[UNIT]--;
-                UNIT_DIRECTION[UNIT] = 2;
                 MOVE_RESULT = 1; // Move success
                 return;
             }
@@ -4629,6 +4629,7 @@ void REQUEST_WALK_LEFT()
 
 void REQUEST_WALK_DOWN()
 {
+    UNIT_DIRECTION[UNIT] = 1;
     if (UNIT_LOC_Y[UNIT] != 60) {
         MAP_Y = UNIT_LOC_Y[UNIT];
         MAP_Y++;
@@ -4638,7 +4639,6 @@ void REQUEST_WALK_DOWN()
             CHECK_FOR_UNIT();
             if (UNIT_FIND == 255) {
                 UNIT_LOC_Y[UNIT]++;
-                UNIT_DIRECTION[UNIT] = 1;
                 MOVE_RESULT = 1; // Move success
                 return;
             }
@@ -4649,6 +4649,7 @@ void REQUEST_WALK_DOWN()
 
 void REQUEST_WALK_UP()
 {
+    UNIT_DIRECTION[UNIT] = 0;
     if (UNIT_LOC_Y[UNIT] != 3) {
         MAP_Y = UNIT_LOC_Y[UNIT];
         MAP_Y--;
@@ -4658,7 +4659,6 @@ void REQUEST_WALK_UP()
             CHECK_FOR_UNIT();
             if (UNIT_FIND == 255) {
                 UNIT_LOC_Y[UNIT]--;
-                UNIT_DIRECTION[UNIT] = 0;
                 MOVE_RESULT = 1; // Move success
                 return;
             }
