@@ -14,13 +14,13 @@ void Palette::initialize()
 Palette::Palette(const uint16_t* palette, uint16_t colorCount, uint16_t fade, uint16_t fadeBaseColor) :
     sourcePalette(0),
     currentPalette(0),
-    fade(fade),
+    fade_(fade),
     fadeBaseColor(fadeBaseColor)
 {
     if (palette) {
         setPalette(palette, colorCount);
 
-        if (fade != 15) {
+        if (fade_ != 15) {
             update();
         }
     }
@@ -54,8 +54,13 @@ uint16_t Palette::colorCount() const
 
 void Palette::setFade(uint16_t fade)
 {
-    this->fade = fade;
+    fade_ = fade;
     update();
+}
+
+uint16_t Palette::fade() const
+{
+    return fade_;
 }
 
 void Palette::setFadeBaseColor(uint16_t fadeBaseColor)
@@ -81,9 +86,9 @@ void Palette::update()
         int16_t rDelta = r - baseR;
         int16_t gDelta = g - baseG;
         int16_t bDelta = b - baseB;
-        uint16_t fadedR = baseR + (rDelta >= 0 ? fadeTable[fade][rDelta] : -fadeTable[fade][-rDelta]);
-        uint16_t fadedG = baseG + (gDelta >= 0 ? fadeTable[fade][gDelta] : -fadeTable[fade][-gDelta]);
-        uint16_t fadedB = baseB + (bDelta >= 0 ? fadeTable[fade][bDelta] : -fadeTable[fade][-bDelta]);
+        uint16_t fadedR = baseR + (rDelta >= 0 ? fadeTable[fade_][rDelta] : -fadeTable[fade_][-rDelta]);
+        uint16_t fadedG = baseG + (gDelta >= 0 ? fadeTable[fade_][gDelta] : -fadeTable[fade_][-gDelta]);
+        uint16_t fadedB = baseB + (bDelta >= 0 ? fadeTable[fade_][bDelta] : -fadeTable[fade_][-bDelta]);
         currentPalette[i] = (uint16_t)((fadedR << 8) | (fadedG << 4) | fadedB);
     }
 }

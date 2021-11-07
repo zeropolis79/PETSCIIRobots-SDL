@@ -61,7 +61,7 @@ void Platform::startFadeScreen(uint16_t, uint16_t)
 {
 }
 
-void Platform::fadeScreen(uint16_t)
+void Platform::fadeScreen(uint16_t, bool)
 {
 }
 

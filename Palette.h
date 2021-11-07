@@ -13,6 +13,7 @@ public:
     void setPalette(const uint16_t* palette, uint16_t colorCount);
     __inline uint16_t colorCount() const;
     void setFade(uint16_t fade);
+    __inline uint16_t fade() const;
     void setFadeBaseColor(uint16_t fadeBaseColor);
     __inline uint16_t* palette() const;
 
@@ -25,7 +26,7 @@ private:
     uint16_t* sourcePalette;
     uint16_t* currentPalette;
     uint16_t colorCount_;
-    uint16_t fade;
+    uint16_t fade_;
     uint16_t fadeBaseColor;
 };
 

@@ -211,7 +211,7 @@ PlatformAmiga::PlatformAmiga() :
     healthBitMap(new BitMap),
     cursorSprite1(new SimpleSprite),
     cursorSprite2(new SimpleSprite),
-    palette(new Palette(blackPalette, (1 << PLANES))),
+    palette(new Palette(blackPalette, (1 << PLANES), 0)),
     bplcon1DefaultValue(0),
     shakeStep(0)
 {
@@ -1018,10 +1018,23 @@ void PlatformAmiga::startFadeScreen(uint16_t color, uint16_t intensity)
     LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
 }
 
-void PlatformAmiga::fadeScreen(uint16_t intensity)
+void PlatformAmiga::fadeScreen(uint16_t intensity, bool immediate)
 {
-    palette->setFade(intensity);
-    LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
+    uint16_t fade = palette->fade();
+    if (fade != intensity) {
+        if (immediate) {
+            palette->setFade(intensity);
+            LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
+        } else {
+            int16_t fadeDelta = intensity > fade ? 1 : -1;
+            do {
+                fade += fadeDelta;
+                palette->setFade(fade);
+                LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
+                WaitTOF();
+            } while (fade != intensity);
+        }
+    }
 }
 
 void PlatformAmiga::stopFadeScreen()

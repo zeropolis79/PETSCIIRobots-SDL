@@ -69,7 +69,7 @@ public:
     virtual void shakeScreen();
     virtual void stopShakeScreen();
     virtual void startFadeScreen(uint16_t color, uint16_t intensity);
-    virtual void fadeScreen(uint16_t intensity);
+    virtual void fadeScreen(uint16_t intensity, bool immediate = true);
     virtual void stopFadeScreen();
     virtual void writeToScreenMemory(uint16_t address, uint8_t value) = 0;
     virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset) = 0;
