@@ -135,8 +135,10 @@ void INIT_GAME()
 {
     SCREEN_SHAKE = 0;
     RESET_KEYS_AMMO();
+    platform->fadeScreen(0, false);
     DISPLAY_GAME_SCREEN();
     DISPLAY_LOAD_MESSAGE2();
+    platform->fadeScreen(15, false);
     MAP_LOAD_ROUTINE();
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     START_IN_GAME_MUSIC();
@@ -1592,7 +1594,6 @@ void MAP_LOAD_ROUTINE()
 void DISPLAY_GAME_SCREEN()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->fadeScreen(0, false);
     platform->displayImage(Platform::ImageGame);
 
     writeToScreenMemory(0x3E2, 0x71, 15);
@@ -1601,7 +1602,6 @@ void DISPLAY_GAME_SCREEN()
     writeToScreenMemory(0x3E5, 0x71, 12);
     writeToScreenMemory(0x3E6, 0x71, 9);
     writeToScreenMemory(0x3E7, 0x71, 9);
-    platform->fadeScreen(15, false);
 #else
     DECOMPRESS_SCREEN(SCR_TEXT);
 #endif
