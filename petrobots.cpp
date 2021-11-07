@@ -1303,7 +1303,7 @@ void DRAW_MAP_WINDOW()
             uint8_t FG_VARIANT = 0;
             if (FG_TILE != 0) {
                 DIRECTION = MAP_PRECALC_DIRECTION[PRECALC_COUNT];
-                if (FG_TILE == 96) {
+                if (FG_TILE == 96 || (FG_TILE >= 100 && FG_TILE <= 103)) {
                     if (DIRECTION == 0) {
                         FG_VARIANT = 8;
                     } else if (DIRECTION == 2) {
@@ -1311,7 +1311,9 @@ void DRAW_MAP_WINDOW()
                     } else if (DIRECTION == 3) {
                         FG_VARIANT = 4;
                     }
-                    FG_VARIANT += WALK_FRAME + (SELECTED_WEAPON << 4);
+                    if (FG_TILE == 96) {
+                        FG_VARIANT += WALK_FRAME + (SELECTED_WEAPON << 4);
+                    }
                 }
                 if (TILE != PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] ||
                     FG_TILE != PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] ||
@@ -1351,7 +1353,7 @@ void DRAW_MAP_WINDOW()
                 uint8_t FG_TILE = MAP_PRECALC[PRECALC_COUNT];
                 DIRECTION = MAP_PRECALC_DIRECTION[PRECALC_COUNT];
                 uint8_t variant = 0;
-                if (FG_TILE == 96) {
+                if (FG_TILE == 96 || (FG_TILE >= 100 && FG_TILE <= 103)) {
                     if (DIRECTION == 0) {
                         variant = 8;
                     } else if (DIRECTION == 2) {
@@ -1359,7 +1361,9 @@ void DRAW_MAP_WINDOW()
                     } else if (DIRECTION == 3) {
                         variant = 4;
                     }
-                    variant += WALK_FRAME + (SELECTED_WEAPON << 4);
+                    if (FG_TILE == 96) {
+                        variant += WALK_FRAME + (SELECTED_WEAPON << 4);
+                    }
                 }
                 platform->renderTiles(TILE, FG_TILE, TEMP_X * 24, TEMP_Y * 24, variant);
             } else {
@@ -1465,7 +1469,7 @@ void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y)
     }
 #endif
     uint8_t variant = 0;
-    if (TILE == 96) {
+    if (TILE == 96 || (TILE >= 100 && TILE <= 103)) {
         if (DIRECTION == 0) {
             variant = 8;
         } else if (DIRECTION == 2) {
@@ -1473,7 +1477,9 @@ void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y)
         } else if (DIRECTION == 3) {
             variant = 4;
         }
-        variant += WALK_FRAME + (SELECTED_WEAPON << 4);
+        if (TILE == 96) {
+            variant += WALK_FRAME + (SELECTED_WEAPON << 4);
+        }
     }
     platform->renderTile(TILE, x * 24, y * 24, variant, true);
 }
