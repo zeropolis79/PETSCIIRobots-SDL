@@ -1098,24 +1098,28 @@ void USER_SELECT_OBJECT()
         if (CONTROL != 2) {
             uint8_t A = platform->getin();
             if (A == 0x1D || A == *KEY_MOVE_RIGHT) { // CURSOR RIGHT
+                UNIT_DIRECTION[0] = 3;
                 CURSOR_X++;
 #ifdef PLATFORM_CURSOR_SUPPORT
                 platform->showCursor(CURSOR_X, CURSOR_Y);
 #endif
                 return;
             } else if (A == 0x9D || A == *KEY_MOVE_LEFT) { // CURSOR LEFT
+                UNIT_DIRECTION[0] = 2;
                 CURSOR_X--;
 #ifdef PLATFORM_CURSOR_SUPPORT
                 platform->showCursor(CURSOR_X, CURSOR_Y);
 #endif
                 return;
             } else if (A == 0x11 || A == *KEY_MOVE_DOWN) { // CURSOR DOWN
+                UNIT_DIRECTION[0] = 1;
                 CURSOR_Y++;
 #ifdef PLATFORM_CURSOR_SUPPORT
                 platform->showCursor(CURSOR_X, CURSOR_Y);
 #endif
                 return;
             } else if (A == 0x91 || A == *KEY_MOVE_UP) { // CURSOR UP
+                UNIT_DIRECTION[0] = 0;
                 CURSOR_Y--;
 #ifdef PLATFORM_CURSOR_SUPPORT
                 platform->showCursor(CURSOR_X, CURSOR_Y);
