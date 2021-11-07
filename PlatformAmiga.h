@@ -60,7 +60,6 @@ public:
     virtual void playNote(uint8_t note);
     virtual void stopNote();
 #endif
-    virtual void renderFrame();
 
 private:
     __saveds void runVerticalBlankInterrupt();

@@ -494,8 +494,6 @@ void PlatformAmiga::setInterrupt(void (*interrupt)(void))
 
 void PlatformAmiga::show()
 {
-    renderFrame();
-
     ScreenToFront(screen);
     ActivateWindow(window);
 
@@ -1215,8 +1213,3 @@ void PlatformAmiga::stopNote()
     }
 }
 #endif
-
-void PlatformAmiga::renderFrame()
-{
-    WaitTOF();
-}
