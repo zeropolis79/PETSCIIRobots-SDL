@@ -81,7 +81,7 @@ public:
     virtual void stopModule();
     virtual void playSample(uint8_t sample);
     virtual void stopSample();
-    virtual void renderFrame();
+    virtual void renderFrame(bool waitForNextFrame = false);
     bool quit;
 };
 

@@ -101,7 +101,7 @@ void Platform::stopSample()
 {
 }
 
-void Platform::renderFrame()
+void Platform::renderFrame(bool)
 {
 }
 

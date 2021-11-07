@@ -518,7 +518,6 @@ bool PAUSE_GAME()
             SCROLL_INFO();
             SCROLL_INFO();
             SCROLL_INFO();
-            platform->renderFrame();
             CLEAR_KEY_BUFFER();
             CLOCK_ACTIVE = 1;
             PLAY_SOUND(15);
@@ -2236,6 +2235,7 @@ void SCROLL_INFO()
     platform->copyRect(0, 184, 0, 176, 264, 16);
     // NOW CLEAR BOTTOM ROW
     platform->clearRect(0, 192, 264, 8);
+    platform->renderFrame(true);
 }
 
 void RESET_KEYS_AMMO()

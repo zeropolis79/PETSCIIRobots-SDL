@@ -1226,3 +1226,10 @@ void PlatformAmiga::stopNote()
     }
 }
 #endif
+
+void PlatformAmiga::renderFrame(bool waitForNextFrame)
+{
+    if (waitForNextFrame) {
+        WaitTOF();
+    }
+}

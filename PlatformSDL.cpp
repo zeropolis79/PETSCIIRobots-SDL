@@ -452,7 +452,7 @@ void PlatformSDL::stopNote()
     audioVolume = 0;
 }
 
-void PlatformSDL::renderFrame()
+void PlatformSDL::renderFrame(bool)
 {
     SDL_UpdateWindowSurface(window);
 }

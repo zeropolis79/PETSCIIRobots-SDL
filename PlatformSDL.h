@@ -30,7 +30,7 @@ public:
     virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset);
 	virtual void playNote(uint8_t note);
     virtual void stopNote();
-    virtual void renderFrame();
+    virtual void renderFrame(bool waitForNextFrame);
 
 private:
     static void audioCallback(void* data, uint8_t* stream, int bytes);
