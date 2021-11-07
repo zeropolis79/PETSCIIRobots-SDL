@@ -35,6 +35,11 @@ uint8_t UNIT_DIRECTION[32]; // Movement direction of unit (32 bytes)
 uint8_t EXP_BUFFER[16];     // Explosion Buffer (16 bytes)
 uint8_t MAP_PRECALC[77];    // Stores pre-calculated objects for map window (77 bytes)
 uint8_t MAP_PRECALC_DIRECTION[77];    // Stores pre-calculated object directions for map window (77 bytes)
+#ifdef OPTIMIZED_MAP_RENDERING
+uint8_t PREVIOUS_MAP_BACKGROUND[77];
+uint8_t PREVIOUS_MAP_FOREGROUND[77];
+uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[77];
+#endif
 
 // The following are the locations where the current
 // key controls are stored.  These must be set before
@@ -70,8 +75,6 @@ uint8_t MAP[8 * 1024];      // Location of MAP (8K)
 uint8_t TILE;           // The tile number to be plotted
 uint8_t DIRECTION;      // The direction of the tile to be plotted
 uint8_t WALK_FRAME;     // Player walking animation frame
-uint8_t TEMP_X;         // Temporarily used for loops
-uint8_t TEMP_Y;         // Temporarily used for loops
 uint8_t MAP_X;          // Current X location on map
 uint8_t MAP_Y;          // Current Y location on map
 uint8_t MAP_WINDOW_X;   // Top left location of what is displayed in map window
@@ -90,7 +93,6 @@ uint8_t REDRAW_WINDOW;  // 1=yes 0=no
 uint8_t MOVE_RESULT;    // 1=Move request success, 0=fail.
 uint8_t UNIT_FIND;      // 255=no unit present.
 uint8_t MOVE_TYPE;      // %00000001=WALK %00000010=HOVER
-uint8_t PRECALC_COUNT;  // part of screen draw routine
 uint8_t* CUR_PATTERN;   // stores the memory location of the current musical pattern being played.
 
 void (*CINV)(void);     // $90-$91 Vector: Hardware Interrupt
@@ -142,6 +144,9 @@ void INIT_GAME()
     SET_DIFF_LEVEL();
     ANIMATE_PLAYER();
     CACULATE_AND_REDRAW();
+#ifdef OPTIMIZED_MAP_RENDERING
+    INVALIDATE_PREVIOUS_MAP();
+#endif
     DRAW_MAP_WINDOW();
     DISPLAY_PLAYER_HEALTH();
     DISPLAY_KEYS();
@@ -1276,14 +1281,66 @@ void MAP_PRE_CALCULATE()
 uint8_t PRECALC_ROWS[] = { 0,11,22,33,44,55,66 };
 
 // This routine is where the MAP is displayed on the screen
+#ifdef OPTIMIZED_MAP_RENDERING
+void INVALIDATE_PREVIOUS_MAP()
+{
+    for (int i = 0; i < 77; i++) {
+        PREVIOUS_MAP_BACKGROUND[i] = 255;
+    }
+}
+
+void DRAW_MAP_WINDOW()
+{
+    MAP_PRE_CALCULATE();
+    REDRAW_WINDOW = 0;
+    MAP_SOURCE = MAP + ((MAP_WINDOW_Y << 7) + MAP_WINDOW_X);
+    for (uint8_t TEMP_Y = 0, PRECALC_COUNT = 0; TEMP_Y != 7; TEMP_Y++, MAP_SOURCE += 117) {
+        for (uint8_t TEMP_X = 0; TEMP_X != 11; TEMP_X++, MAP_SOURCE++, PRECALC_COUNT++) {
+            // NOW FIGURE OUT WHERE TO PLACE IT ON SCREEN.
+            TILE = MAP_SOURCE[0];
+            uint8_t FG_TILE = MAP_PRECALC[PRECALC_COUNT];
+            uint8_t FG_VARIANT = 0;
+            if (FG_TILE != 0) {
+                DIRECTION = MAP_PRECALC_DIRECTION[PRECALC_COUNT];
+                if (FG_TILE == 96) {
+                    if (DIRECTION == 0) {
+                        FG_VARIANT = 8;
+                    } else if (DIRECTION == 2) {
+                        FG_VARIANT = 12;
+                    } else if (DIRECTION == 3) {
+                        FG_VARIANT = 4;
+                    }
+                    FG_VARIANT += WALK_FRAME + (SELECTED_WEAPON << 4);
+                }
+                if (TILE != PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] ||
+                    FG_TILE != PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] ||
+                    FG_VARIANT != PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT]) {
+                    platform->renderTiles(*MAP_SOURCE, FG_TILE, TEMP_X * 24, TEMP_Y * 24, FG_VARIANT);
+                    PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] = TILE;
+                    PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] = FG_TILE;
+                    PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT] = FG_VARIANT;
+                }
+            } else {
+                if (TILE != PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] ||
+                    FG_TILE != PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] ||
+                    FG_VARIANT != PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT]) {
+                    platform->renderTile(*MAP_SOURCE, TEMP_X * 24, TEMP_Y * 24);
+                    PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] = TILE;
+                    PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] = FG_TILE;
+                    PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT] = FG_VARIANT;
+                }
+            }
+        }
+    }
+}
+#else
 // This is a temporary routine, taken from the map editor.
 void DRAW_MAP_WINDOW()
 {
     MAP_PRE_CALCULATE();
     REDRAW_WINDOW = 0;
-    PRECALC_COUNT = 0;
-    for (TEMP_Y = 0; TEMP_Y != 7; TEMP_Y++) {
-        for (TEMP_X = 0; TEMP_X != 11; TEMP_X++) {
+    for (uint8_t TEMP_Y = 0, PRECALC_COUNT = 0; TEMP_Y != 7; TEMP_Y++) {
+        for (uint8_t TEMP_X = 0; TEMP_X != 11; TEMP_X++) {
             // FIRST CALCULATE WHERE THE BYTE IS STORED IN THE MAP
             MAP_SOURCE = MAP + (((MAP_WINDOW_Y + TEMP_Y) << 7) + TEMP_X + MAP_WINDOW_X);
             TILE = MAP_SOURCE[0];
@@ -1336,6 +1393,7 @@ void DRAW_MAP_WINDOW()
 #endif
     }
 }
+#endif
 
 #ifdef PLATFORM_TILE_BASED_RENDERING
 // This routine plots a 3x3 tile from the tile database anywhere

@@ -24,6 +24,11 @@ extern uint8_t UNIT_TILE[32];      // Current tile assigned to unit (32 bytes)
 extern uint8_t EXP_BUFFER[16];     // Explosion Buffer (16 bytes)
 extern uint8_t MAP_PRECALC[77];    // Stores pre-calculated objects for map window (77 bytes)
 extern uint8_t MAP_PRECALC_DIRECTION[77];    // Stores pre-calculated object directions for map window (77 bytes)
+#ifdef OPTIMIZED_MAP_RENDERING
+extern uint8_t PREVIOUS_MAP_BACKGROUND[77];
+extern uint8_t PREVIOUS_MAP_FOREGROUND[77];
+extern uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[77];
+#endif
 
 // The following are the locations where the current
 // key controls are stored.  These must be set before
@@ -58,8 +63,6 @@ extern uint8_t MAP[8 * 1024];      // Location of MAP (8K)
 extern uint8_t TILE;           // The tile number to be plotted
 extern uint8_t DIRECTION;      // The direction of the tile to be plotted
 extern uint8_t WALK_FRAME;     // Player walking animation frame
-extern uint8_t TEMP_X;         // Temporarily used for loops
-extern uint8_t TEMP_Y;         // Temporarily used for loops
 extern uint8_t MAP_X;          // Current X location on map
 extern uint8_t MAP_Y;          // Current Y location on map
 extern uint8_t MAP_WINDOW_X;   // Top left location of what is displayed in map window
@@ -78,7 +81,6 @@ extern uint8_t REDRAW_WINDOW;  // 1=yes 0=no
 extern uint8_t MOVE_RESULT;    // 1=Move request success, 0=fail.
 extern uint8_t UNIT_FIND;      // 255=no unit present.
 extern uint8_t MOVE_TYPE;      // %00000001=WALK %00000010=HOVER
-extern uint8_t PRECALC_COUNT;  // part of screen draw routine
 extern uint8_t* CUR_PATTERN;   // stores the memory location of the current musical pattern being played.
 
 extern uint8_t LSTX;           // $97 Current Key Pressed: 255 = No Key
@@ -229,6 +231,9 @@ void MAP_PRE_CALCULATE();
 
 extern uint8_t PRECALC_ROWS[];
 
+#ifdef OPTIMIZED_MAP_RENDERING
+void INVALIDATE_PREVIOUS_MAP();
+#endif
 void DRAW_MAP_WINDOW();
 #ifdef PLATFORM_TILE_BASED_RENDERING
 void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y);
