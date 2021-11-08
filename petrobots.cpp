@@ -2742,12 +2742,14 @@ void SET_CUSTOM_KEYS()
     if (KEYS_DEFINED != 0) {
         return;
     }
+    platform->fadeScreen(0, false);
 #ifdef PLATFORM_IMAGE_SUPPORT
     DECOMPRESS_SCREEN(SCR_CUSTOM_KEYS, 15);
 #else
     DECOMPRESS_SCREEN(SCR_CUSTOM_KEYS);
 #endif
     platform->renderFrame();
+    platform->fadeScreen(15, false);
     uint16_t destination = 0x151;
     for (TEMP_A = 0; TEMP_A != 13;) {
         uint8_t A = platform->getin();
