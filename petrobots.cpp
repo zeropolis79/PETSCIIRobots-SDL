@@ -954,8 +954,8 @@ void AFTER_MOVE()
 {
     if (MOVE_RESULT == 1) {
         ANIMATE_PLAYER();
-        CACULATE_AND_REDRAW();
     }
+    CACULATE_AND_REDRAW();
     // now reset key-repeat rate
     if (KEY_FAST == 0) {
         // FIRST REPEAT
