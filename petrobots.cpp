@@ -527,7 +527,7 @@ bool PAUSE_GAME()
 //    for (BGTIMER1 = 0; BGTIMER1 != 1;); // to prevent double-tap of run/stop
     CLEAR_KEY_BUFFER();
     platform->renderFrame();
-    while (true) {
+    while (!platform->quit) {
         uint8_t A = platform->getin();
         if (A == KEY_CONFIG[KEY_PAUSE] || // RUN/STOP
             A == KEY_CONFIG[KEY_NO]) { // N-KEY
@@ -545,6 +545,7 @@ bool PAUSE_GAME()
             return true;
         }
     }
+    return false;
 }
 
 void CLEAR_KEY_BUFFER()
@@ -1175,7 +1176,7 @@ void MOVE_OBJECT()
     REVERSE_TILE();
 #endif
     // NOW ASK THE USER WHICH DIRECTION TO MOVE IT TO
-    while (true) {
+    while (!platform->quit) {
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
         if (UNIT_TYPE[0] == 0) { // Did player die wile moving something?
@@ -1707,7 +1708,7 @@ void DECOMPRESS_SCREEN(uint8_t* source, uint8_t color)
 {
     uint16_t destination = 0;
 
-    while (true) {
+    while (!platform->quit) {
         if (*source != 96) { // REPEAT FLAG
             writeToScreenMemory(destination, *source, color);
         } else {
@@ -1947,7 +1948,7 @@ void CYCLE_WEAPON()
 
 void DISPLAY_WEAPON()
 {
-    while (true) {
+    while (!platform->quit) {
         PRESELECT_WEAPON();
         if (SELECTED_WEAPON == 0) { // no weapon to show
             // add routine to draw blank space
@@ -2155,7 +2156,7 @@ void GAME_OVER()
         platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     }
 #endif
-    while (platform->getin() == 0);
+    while (platform->getin() == 0 && !platform->quit);
     GOM4();
 }
 
@@ -2173,7 +2174,7 @@ void GOM4()
     DISPLAY_WIN_LOSE();
     platform->renderFrame();
     platform->fadeScreen(15, false);
-    while (platform->getin() == 0);
+    while (platform->getin() == 0 && !platform->quit);
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->stopModule();
