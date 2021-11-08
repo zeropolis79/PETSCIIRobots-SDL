@@ -528,7 +528,7 @@ const uint8_t rawKeyMap[] = {
     'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}',   0,   0,   0,   0,
     'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '*',   0,   0,   0,   0,   0,
       0, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?',   0,   0,   0,   0,   0,
-    ' '
+    ' ', '\b','\t','\r','\n'
 };
 
 uint8_t PlatformAmiga::getin()
@@ -560,7 +560,7 @@ uint8_t PlatformAmiga::getin()
             case 0x44: // Return
                 return 0x0d;
             default:
-                if (messageCode <= 0x40) {
+                if (messageCode <= 0x44) {
                     return rawKeyMap[messageCode] + ((messageQualifier & IEQUALIFIER_LSHIFT) ? 128 : 0);
                 }
                 break;
