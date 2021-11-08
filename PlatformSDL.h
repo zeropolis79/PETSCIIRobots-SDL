@@ -12,6 +12,7 @@ public:
     PlatformSDL();
     ~PlatformSDL();
 
+    virtual uint8_t* standardControls() const;
     virtual void setInterrupt(void (*interrupt)(void));
     virtual int framesPerSecond();
     virtual void chrout(uint8_t);

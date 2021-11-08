@@ -44,20 +44,34 @@ uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[77];
 // The following are the locations where the current
 // key controls are stored.  These must be set before
 // the game can start.
-uint8_t KEY_CONFIG[13];
-uint8_t* KEY_MOVE_UP = KEY_CONFIG;
-uint8_t* KEY_MOVE_DOWN = KEY_CONFIG + 1;
-uint8_t* KEY_MOVE_LEFT = KEY_CONFIG + 2;
-uint8_t* KEY_MOVE_RIGHT = KEY_CONFIG + 3;
-uint8_t* KEY_FIRE_UP = KEY_CONFIG + 4;
-uint8_t* KEY_FIRE_DOWN = KEY_CONFIG + 5;
-uint8_t* KEY_FIRE_LEFT = KEY_CONFIG + 6;
-uint8_t* KEY_FIRE_RIGHT = KEY_CONFIG + 7;
-uint8_t* KEY_CYCLE_WEAPONS = KEY_CONFIG + 8;
-uint8_t* KEY_CYCLE_ITEMS = KEY_CONFIG + 9;
-uint8_t* KEY_USE = KEY_CONFIG + 10;
-uint8_t* KEY_SEARCH = KEY_CONFIG + 11;
-uint8_t* KEY_MOVE = KEY_CONFIG + 12;
+uint8_t KEY_CONFIG[25];
+enum KEYS {
+    KEY_MOVE_UP,
+    KEY_MOVE_DOWN,
+    KEY_MOVE_LEFT,
+    KEY_MOVE_RIGHT,
+    KEY_FIRE_UP,
+    KEY_FIRE_DOWN,
+    KEY_FIRE_LEFT,
+    KEY_FIRE_RIGHT,
+    KEY_CYCLE_WEAPONS,
+    KEY_CYCLE_ITEMS,
+    KEY_USE,
+    KEY_SEARCH,
+    KEY_MOVE,
+    KEY_MAP,
+    KEY_PAUSE,
+    KEY_MUSIC,
+    KEY_CHEAT,
+    KEY_CURSOR_UP,
+    KEY_CURSOR_DOWN,
+    KEY_CURSOR_LEFT,
+    KEY_CURSOR_RIGHT,
+    KEY_SPACE,
+    KEY_RETURN,
+    KEY_YES,
+    KEY_NO
+};
 
 // MAP FILES CONSIST OF EVERYTHING FROM THIS POINT ON
 uint8_t UNIT_TYPE[64];  // Unit type 0=none (64 bytes)	
@@ -365,58 +379,58 @@ void MAIN_GAME_LOOP()
             uint8_t A = platform->getin();
             if (A != 0) {
                 KEYTIMER = 5;
-                if (A == 0x1D || A == *KEY_MOVE_RIGHT) { // CURSOR RIGHT
+                if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
                     UNIT = 0;
                     MOVE_TYPE = 1; // %00000001
                     REQUEST_WALK_RIGHT();
                     AFTER_MOVE();
-                } else if (A == 0x9D || A == *KEY_MOVE_LEFT) { // CURSOR LEFT
+                } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
                     UNIT = 0;
                     MOVE_TYPE = 1;  // %00000001
                     REQUEST_WALK_LEFT();
                     AFTER_MOVE();
-                } else if (A == 0x11 || A == *KEY_MOVE_DOWN) { // CURSOR DOWN
+                } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
                     UNIT = 0;
                     MOVE_TYPE = 1;  // %00000001
                     REQUEST_WALK_DOWN();
                     AFTER_MOVE();
-                } else if (A == 0x91 || A == *KEY_MOVE_UP) { // CURSOR UP
+                } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
                     UNIT = 0;
                     MOVE_TYPE = 1;  // %00000001
                     REQUEST_WALK_UP();
                     AFTER_MOVE();
-                } else if (A == *KEY_CYCLE_WEAPONS) {
+                } else if (A == KEY_CONFIG[KEY_CYCLE_WEAPONS]) {
                     CYCLE_WEAPON();
                     CLEAR_KEY_BUFFER();
-                } else if (A == *KEY_CYCLE_ITEMS) {
+                } else if (A == KEY_CONFIG[KEY_CYCLE_ITEMS]) {
                     CYCLE_ITEM();
                     CLEAR_KEY_BUFFER();
-                } else if (A == *KEY_MOVE) {
+                } else if (A == KEY_CONFIG[KEY_MOVE]) {
                     MOVE_OBJECT();
                     CLEAR_KEY_BUFFER();
-                } else if (A == *KEY_SEARCH) {
+                } else if (A == KEY_CONFIG[KEY_SEARCH]) {
                     SEARCH_OBJECT();
                     CLEAR_KEY_BUFFER();
-                } else if (A == *KEY_USE) {
+                } else if (A == KEY_CONFIG[KEY_USE]) {
                     USE_ITEM();
                     CLEAR_KEY_BUFFER();
-                } else if (A == *KEY_FIRE_UP) {
+                } else if (A == KEY_CONFIG[KEY_FIRE_UP]) {
                     FIRE_UP();
                     KEYTIMER = 20;
-                } else if (A == *KEY_FIRE_LEFT) {
+                } else if (A == KEY_CONFIG[KEY_FIRE_LEFT]) {
                     FIRE_LEFT();
                     KEYTIMER = 20;
-                } else if (A == *KEY_FIRE_DOWN) {
+                } else if (A == KEY_CONFIG[KEY_FIRE_DOWN]) {
                     FIRE_DOWN();
                     KEYTIMER = 20;
-                } else if (A == *KEY_FIRE_RIGHT) {
+                } else if (A == KEY_CONFIG[KEY_FIRE_RIGHT]) {
                     FIRE_RIGHT();
                     KEYTIMER = 20;
-                } else if (A == 0x03) { // RUN/STOP
+                } else if (A == KEY_CONFIG[KEY_PAUSE]) { // RUN/STOP
                     done = PAUSE_GAME();
-                } else if (A == 195) { // SHIFT-C
+                } else if (A == KEY_CONFIG[KEY_CHEAT]) { // SHIFT-C
                     CHEATER();
-                } else if (A == 205) { // SHIFT-M
+                } else if (A == KEY_CONFIG[KEY_MUSIC]) { // SHIFT-M
                     TOGGLE_MUSIC();
                     CLEAR_KEY_BUFFER();
                 }
@@ -514,9 +528,9 @@ bool PAUSE_GAME()
     CLEAR_KEY_BUFFER();
     platform->renderFrame();
     while (true) {
-        switch (platform->getin()) {
-        case 03: // RUN/STOP
-        case 78: // N-KEY
+        uint8_t A = platform->getin();
+        if (A == KEY_CONFIG[KEY_PAUSE] || // RUN/STOP
+            A == KEY_CONFIG[KEY_NO]) { // N-KEY
             SCROLL_INFO();
             SCROLL_INFO();
             SCROLL_INFO();
@@ -524,13 +538,11 @@ bool PAUSE_GAME()
             CLOCK_ACTIVE = 1;
             PLAY_SOUND(15);
             return false;
-        case 89: // Y-KEY
+        } else if (A == KEY_CONFIG[KEY_YES]) { // Y-KEY
             UNIT_TYPE[0] = 0; // make player dead
             PLAY_SOUND(15);
             GOM4();
             return true;
-        default:
-            break;
         }
     }
 }
@@ -1097,28 +1109,28 @@ void USER_SELECT_OBJECT()
         }
         if (CONTROL != 2) {
             uint8_t A = platform->getin();
-            if (A == 0x1D || A == *KEY_MOVE_RIGHT) { // CURSOR RIGHT
+            if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
                 UNIT_DIRECTION[0] = 3;
                 CURSOR_X++;
 #ifdef PLATFORM_CURSOR_SUPPORT
                 platform->showCursor(CURSOR_X, CURSOR_Y);
 #endif
                 return;
-            } else if (A == 0x9D || A == *KEY_MOVE_LEFT) { // CURSOR LEFT
+            } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
                 UNIT_DIRECTION[0] = 2;
                 CURSOR_X--;
 #ifdef PLATFORM_CURSOR_SUPPORT
                 platform->showCursor(CURSOR_X, CURSOR_Y);
 #endif
                 return;
-            } else if (A == 0x11 || A == *KEY_MOVE_DOWN) { // CURSOR DOWN
+            } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
                 UNIT_DIRECTION[0] = 1;
                 CURSOR_Y++;
 #ifdef PLATFORM_CURSOR_SUPPORT
                 platform->showCursor(CURSOR_X, CURSOR_Y);
 #endif
                 return;
-            } else if (A == 0x91 || A == *KEY_MOVE_UP) { // CURSOR UP
+            } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
                 UNIT_DIRECTION[0] = 0;
                 CURSOR_Y--;
 #ifdef PLATFORM_CURSOR_SUPPORT
@@ -1179,13 +1191,13 @@ void MOVE_OBJECT()
             uint8_t A = platform->getin();
             if (A == 0) {
                 continue;
-            } else if (A == 0x1D || A == *KEY_MOVE_RIGHT) { // CURSOR RIGHT
+            } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
                 CURSOR_X++;
-            } else if (A == 0x9D || A == *KEY_MOVE_LEFT) { // CURSOR LEFT
+            } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
                 CURSOR_X--;
-            } else if (A == 0x11 || A == *KEY_MOVE_DOWN) { // CURSOR DOWN
+            } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
                 CURSOR_Y++;
-            } else if (A == 0x91 || A == *KEY_MOVE_UP) { // CURSOR UP
+            } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
                 CURSOR_Y--;
             }
         } else {
@@ -2284,23 +2296,23 @@ void INTRO_SCREEN()
     while (!done && !platform->quit) {
         uint8_t A = platform->getin();
         if (A != 0) {
-            if (A == 0x11 || A == *KEY_MOVE_DOWN) { // CURSOR DOWN
+            if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
                 if (MENUY != 3) {
                     REVERSE_MENU_OPTION(false);
                     MENUY++;
                     REVERSE_MENU_OPTION(true);
                     PLAY_SOUND(15); // menu beep
                 }
-            } else if (A == 0x91 || A == *KEY_MOVE_UP) { // CURSOR UP
+            } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
                 if (MENUY != 0) {
                     REVERSE_MENU_OPTION(false);
                     MENUY--;
                     REVERSE_MENU_OPTION(true);
                     PLAY_SOUND(15); // menu beep
                 }
-            } else if (A == 32) { // SPACE
+            } else if (A == KEY_CONFIG[KEY_SPACE]) { // SPACE
                 done = EXEC_COMMAND();
-            } else if (A == 13) { // RETURN
+            } else if (A == KEY_CONFIG[KEY_RETURN]) { // RETURN
                 PLAY_SOUND(15); // menu beep, SOUND PLAY
                 done = EXEC_COMMAND();
             }
@@ -2643,11 +2655,11 @@ void ELEVATOR_SELECT()
         while (!platform->quit) {
             uint8_t A = platform->getin();
             if (A != 0) {
-                if (A == 0x9D || A == *KEY_MOVE_LEFT) { // CURSOR LEFT
+                if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
                     ELEVATOR_DEC();
-                } else if (A == 0x1D || A == *KEY_MOVE_RIGHT) { // CURSOR RIGHT
+                } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
                     ELEVATOR_INC();
-                } else if (A == 0x11 || A == *KEY_MOVE_DOWN) { // CURSOR DOWN
+                } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
                     SCROLL_INFO();
                     SCROLL_INFO();
                     SCROLL_INFO();
@@ -2715,27 +2727,12 @@ void SET_CONTROLS()
         SET_CUSTOM_KEYS();
     } else {
         // load standard values for key controls
-        for (int Y = 0; Y != 13; Y++) {
-            KEY_MOVE_UP[Y] = STANDARD_CONTROLS[Y];
+        uint8_t* STANDARD_CONTROLS = platform->standardControls();
+        for (int Y = 0; Y != sizeof(KEY_CONFIG); Y++) {
+            KEY_CONFIG[Y] = STANDARD_CONTROLS[Y];
         }
     }
 }
-
-uint8_t STANDARD_CONTROLS[] = {
-    73, // MOVE UP orig: 56 (8)
-    75, // MOVE DOWN orig: 50 (2)
-    74, // MOVE LEFT orig: 52 (4)
-    76, // MOVE RIGHT orig: 54 (6)
-    87, // FIRE UP
-    83, // FIRE DOWN
-    65, // FIRE LEFT
-    68, // FIRE RIGHT
-    60, // CYCLE WEAPONS
-    62, // CYCLE ITEMS
-    32, // USE ITEM
-    90, // SEARCH OBEJCT
-    77  // MOVE OBJECT
-};
 
 void SET_CUSTOM_KEYS()
 {
@@ -2754,7 +2751,7 @@ void SET_CUSTOM_KEYS()
     for (TEMP_A = 0; TEMP_A != 13;) {
         uint8_t A = platform->getin();
         if (A != 0) {
-            KEY_MOVE_UP[TEMP_A] = A;
+            KEY_CONFIG[TEMP_A] = A;
             DECNUM = A;
 #ifdef PLATFORM_IMAGE_SUPPORT
             DECWRITE(destination, 15);

@@ -1,5 +1,33 @@
 #include "PlatformSDL.h"
 
+static uint8_t standardControls[] = {
+    SDL_SCANCODE_I, // MOVE UP orig: 56 (8)
+    SDL_SCANCODE_K, // MOVE DOWN orig: 50 (2)
+    SDL_SCANCODE_J, // MOVE LEFT orig: 52 (4)
+    SDL_SCANCODE_L, // MOVE RIGHT orig: 54 (6)
+    SDL_SCANCODE_W, // FIRE UP
+    SDL_SCANCODE_S, // FIRE DOWN
+    SDL_SCANCODE_A, // FIRE LEFT
+    SDL_SCANCODE_F, // FIRE RIGHT
+    SDL_SCANCODE_COMMA, // CYCLE WEAPONS
+    SDL_SCANCODE_PERIOD, // CYCLE ITEMS
+    SDL_SCANCODE_SPACE, // USE ITEM
+    SDL_SCANCODE_Z, // SEARCH OBEJCT
+    SDL_SCANCODE_M, // MOVE OBJECT
+    SDL_SCANCODE_TAB, // MAP
+    SDL_SCANCODE_ESCAPE, // PAUSE
+    SDL_SCANCODE_F1, // MUSIC
+    SDL_SCANCODE_F12, // CHEAT
+    SDL_SCANCODE_UP, // CURSOR UP
+    SDL_SCANCODE_DOWN, // CURSOR DOWN
+    SDL_SCANCODE_LEFT, // CURSOR LEFT
+    SDL_SCANCODE_RIGHT, // CURSOR RIGHT
+    SDL_SCANCODE_SPACE, // SPACE
+    SDL_SCANCODE_RETURN, // RETURN
+    SDL_SCANCODE_Y, // YES
+    SDL_SCANCODE_N // NO
+};
+
 PlatformSDL::PlatformSDL() :
     interrupt(0),
     audioSpec({0}),
@@ -85,6 +113,11 @@ void PlatformSDL::audioCallback(void* data, uint8_t* stream, int bytes) {
     }
 }
 
+uint8_t* PlatformSDL::standardControls() const
+{
+    return ::standardControls;
+}
+
 void PlatformSDL::setInterrupt(void (*interrupt)(void))
 {
     this->interrupt = interrupt;
@@ -109,82 +142,7 @@ uint8_t PlatformSDL::getin()
             quit = true;
             break;
         case SDL_KEYDOWN:
-            // test keycode
-            switch (event.key.keysym.sym) {
-            case SDLK_LEFT:
-                return 0x9D;
-            case SDLK_RIGHT:
-                return 0x1D;
-            case SDLK_UP: 
-                return 0x91;
-            case SDLK_DOWN:
-                return 0x11;
-            case SDLK_RETURN:
-                return 13;
-            case SDLK_SPACE:
-                return 32;
-            case SDLK_ESCAPE:
-                return 0x03;
-            case SDLK_a:
-                return 'A';
-            case SDLK_b:
-                return 'B';
-            case SDLK_c:
-                return 'C' + (event.key.keysym.mod == KMOD_LSHIFT ? 128 : 0);
-            case SDLK_d:
-                return 'D';
-            case SDLK_e:
-                return 'E';
-            case SDLK_f:
-                return 'F';
-            case SDLK_g:
-                return 'G';
-            case SDLK_h:
-                return 'H';
-            case SDLK_i:
-                return 'I';
-            case SDLK_j:
-                return 'J';
-            case SDLK_k:
-                return 'K';
-            case SDLK_l:
-                return 'L';
-            case SDLK_m:
-                return 'M';
-            case SDLK_n:
-                return 'N';
-            case SDLK_o:
-                return 'O';
-            case SDLK_p:
-                return 'P';
-            case SDLK_q:
-                return 'Q';
-            case SDLK_r:
-                return 'R';
-            case SDLK_s:
-                return 'S';
-            case SDLK_t:
-                return 'T';
-            case SDLK_u:
-                return 'U';
-            case SDLK_v:
-                return 'V';
-            case SDLK_w:
-                return 'W';
-            case SDLK_x:
-                return 'X';
-            case SDLK_y:
-                return 'Y';
-            case SDLK_z:
-                return 'Z';
-            case SDLK_COMMA:
-                return '<';
-            case SDLK_PERIOD:
-                return '>';
-            default:
-                break;
-            }
-            break;
+            return event.key.keysym.scancode;
         default:
             break;
         }

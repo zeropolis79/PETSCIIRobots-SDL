@@ -46,6 +46,7 @@ public:
         ModuleInGame4
     };
 
+    virtual uint8_t* standardControls() const = 0;
     virtual void setInterrupt(void (*interrupt)(void)) = 0;
     virtual void show();
     virtual int framesPerSecond() = 0;

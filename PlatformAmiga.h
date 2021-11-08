@@ -20,6 +20,7 @@ public:
     PlatformAmiga();
     ~PlatformAmiga();
 
+    virtual uint8_t* standardControls() const;
     virtual void setInterrupt(void (*interrupt)(void));
     virtual void show();
     virtual int framesPerSecond();

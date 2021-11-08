@@ -186,6 +186,34 @@ static char* unableToInitializeDisplayError = "Unable to initialize display\n";
 static char* unableToInitializeAudioError = "Unable to initialize audio\n";
 static char* unableToLoadDataError = "Unable to load data\n";
 
+static uint8_t standardControls[] = {
+    0x17, // MOVE UP orig: 56 (8)
+    0x27, // MOVE DOWN orig: 50 (2)
+    0x26, // MOVE LEFT orig: 52 (4)
+    0x28, // MOVE RIGHT orig: 54 (6)
+    0x11, // FIRE UP
+    0x21, // FIRE DOWN
+    0x20, // FIRE LEFT
+    0x22, // FIRE RIGHT
+    0x38, // CYCLE WEAPONS
+    0x39, // CYCLE ITEMS
+    0x40, // USE ITEM
+    0x31, // SEARCH OBEJCT
+    0x37, // MOVE OBJECT
+    0x42, // MAP
+    0x45, // PAUSE
+    0x50, // MUSIC
+    0x58, // CHEAT (TODO make this 5f)
+    0x4c, // CURSOR UP
+    0x4d, // CURSOR DOWN
+    0x4f, // CURSOR LEFT
+    0x4e, // CURSOR RIGHT
+    0x40, // SPACE
+    0x44, // RETURN
+    0x15, // YES
+    0x36 // NO
+};
+
 PlatformAmiga::PlatformAmiga() :
     interrupt(0),
     framesPerSecond_(50),
@@ -487,6 +515,11 @@ void PlatformAmiga::setSampleData(uint8_t* module)
 }
 #endif
 
+uint8_t* PlatformAmiga::standardControls() const
+{
+    return ::standardControls;
+}
+
 void PlatformAmiga::setInterrupt(void (*interrupt)(void))
 {
     this->interrupt = interrupt;
@@ -523,47 +556,21 @@ int PlatformAmiga::framesPerSecond()
     return framesPerSecond_;
 }
 
-const uint8_t rawKeyMap[] = {
-    '~', '1', '2', '3', '4', '5', '6', '7', '8', '9', '0', '-', '+', '|',   0,   0,
-    'Q', 'W', 'E', 'R', 'T', 'Y', 'U', 'I', 'O', 'P', '{', '}',   0,   0,   0,   0,
-    'A', 'S', 'D', 'F', 'G', 'H', 'J', 'K', 'L', ':', '*',   0,   0,   0,   0,   0,
-      0, 'Z', 'X', 'C', 'V', 'B', 'N', 'M', '<', '>', '?',   0,   0,   0,   0,   0,
-    ' ', '\b','\t','\r','\n'
-};
-
 uint8_t PlatformAmiga::getin()
 {
     IntuiMessage* message;
     while ((message = (IntuiMessage*)GetMsg(window->UserPort))) {
         uint32_t messageClass = message->Class;
         uint16_t messageCode = message->Code;
-        uint16_t messageQualifier = message->Qualifier;
 
         ReplyMsg((Message*)message);
 
         switch (messageClass) {
         case IDCMP_RAWKEY:
-            switch (messageCode) {
-            case 0x59: // F10
+            if (messageCode == 0x59) { // F10
                 quit = true;
-                break;
-            case 0x4f: // Cursor left
-                return 0x9D;
-            case 0x4e: // Cursor right
-                return 0x1D;
-            case 0x4c: // Cursor down
-                return 0x91;
-            case 0x4d: // Cursor up
-                return 0x11;
-            case 0x45: // Esc
-                return 0x03;
-            case 0x44: // Return
-                return 0x0d;
-            default:
-                if (messageCode <= 0x44) {
-                    return rawKeyMap[messageCode] + ((messageQualifier & IEQUALIFIER_LSHIFT) ? 128 : 0);
-                }
-                break;
+            } else if (messageCode < 0x80) {
+                return messageCode;
             }
             break;
         default:

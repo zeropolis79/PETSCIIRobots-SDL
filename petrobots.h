@@ -33,20 +33,7 @@ extern uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[77];
 // The following are the locations where the current
 // key controls are stored.  These must be set before
 // the game can start.
-extern uint8_t KEY_CONFIG[13];
-extern uint8_t* KEY_MOVE_UP;
-extern uint8_t* KEY_MOVE_DOWN;
-extern uint8_t* KEY_MOVE_LEFT;
-extern uint8_t* KEY_MOVE_RIGHT;
-extern uint8_t* KEY_FIRE_UP;
-extern uint8_t* KEY_FIRE_DOWN;
-extern uint8_t* KEY_FIRE_LEFT;
-extern uint8_t* KEY_FIRE_RIGHT;
-extern uint8_t* KEY_CYCLE_WEAPONS;
-extern uint8_t* KEY_CYCLE_ITEMS;
-extern uint8_t* KEY_USE;
-extern uint8_t* KEY_SEARCH;
-extern uint8_t* KEY_MOVE;
+extern uint8_t KEY_CONFIG[25];
 
 // MAP FILES CONSIST OF EVERYTHING FROM THIS POINT ON
 extern uint8_t UNIT_TYPE[64];  // Unit type 0=none (64 bytes)  
