@@ -259,7 +259,7 @@ void DISPLAY_ENDGAME_SCREEN();
 
 extern const char* DIFF_LEVEL_WORDS[];
 
-void DECOMPRESS_SCREEN(uint8_t* source);
+void DECOMPRESS_SCREEN(uint8_t* source, uint8_t color = 10);
 
 extern uint8_t RPT; // repeat value
 

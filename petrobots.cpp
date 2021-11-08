@@ -1691,20 +1691,20 @@ const char* DIFF_LEVEL_WORDS[] = {
     "hard"
 };
 
-void DECOMPRESS_SCREEN(uint8_t* source)
+void DECOMPRESS_SCREEN(uint8_t* source, uint8_t color)
 {
     uint16_t destination = 0;
 
     while (true) {
         if (*source != 96) { // REPEAT FLAG
-            writeToScreenMemory(destination, *source);
+            writeToScreenMemory(destination, *source, color);
         } else {
             // REPEAT CODE
             source++;
             RPT = *source;
             source++;
             for (int X = *source; X >= 0; X--) {
-                writeToScreenMemory(destination++, RPT);
+                writeToScreenMemory(destination++, RPT, color);
             }
             destination--;
         }
@@ -2742,7 +2742,11 @@ void SET_CUSTOM_KEYS()
     if (KEYS_DEFINED != 0) {
         return;
     }
+#ifdef PLATFORM_IMAGE_SUPPORT
+    DECOMPRESS_SCREEN(SCR_CUSTOM_KEYS, 15);
+#else
     DECOMPRESS_SCREEN(SCR_CUSTOM_KEYS);
+#endif
     platform->renderFrame();
     uint16_t destination = 0x151;
     for (TEMP_A = 0; TEMP_A != 13;) {
@@ -2750,7 +2754,11 @@ void SET_CUSTOM_KEYS()
         if (A != 0) {
             KEY_MOVE_UP[TEMP_A] = A;
             DECNUM = A;
+#ifdef PLATFORM_IMAGE_SUPPORT
+            DECWRITE(destination, 15);
+#else
             DECWRITE(destination);
+#endif
             destination += 40;
             TEMP_A++;
             platform->renderFrame();
