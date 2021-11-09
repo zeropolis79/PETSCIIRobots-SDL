@@ -222,6 +222,12 @@ extern uint8_t PRECALC_ROWS[];
 void INVALIDATE_PREVIOUS_MAP();
 #endif
 void DRAW_MAP_WINDOW();
+
+void TOGGLE_LIVE_MAP();
+void DRAW_LIVE_MAP();
+
+extern uint8_t LIVE_MAP_ON;
+
 #ifdef PLATFORM_TILE_BASED_RENDERING
 void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y);
 void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y);

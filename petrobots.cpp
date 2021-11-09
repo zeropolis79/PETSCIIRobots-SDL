@@ -59,7 +59,7 @@ enum KEYS {
     KEY_USE,
     KEY_SEARCH,
     KEY_MOVE,
-    KEY_MAP,
+    KEY_LIVE_MAP,
     KEY_PAUSE,
     KEY_MUSIC,
     KEY_CHEAT,
@@ -148,6 +148,7 @@ int main(int argc, char *argv[])
 void INIT_GAME()
 {
     SCREEN_SHAKE = 0;
+    LIVE_MAP_ON = 0;
     RESET_KEYS_AMMO();
     platform->fadeScreen(0, false);
     DISPLAY_GAME_SCREEN();
@@ -379,60 +380,65 @@ void MAIN_GAME_LOOP()
             uint8_t A = platform->getin();
             if (A != 0) {
                 KEYTIMER = 5;
-                if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
-                    UNIT = 0;
-                    MOVE_TYPE = 1; // %00000001
-                    REQUEST_WALK_RIGHT();
-                    AFTER_MOVE();
-                } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
-                    UNIT = 0;
-                    MOVE_TYPE = 1;  // %00000001
-                    REQUEST_WALK_LEFT();
-                    AFTER_MOVE();
-                } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
-                    UNIT = 0;
-                    MOVE_TYPE = 1;  // %00000001
-                    REQUEST_WALK_DOWN();
-                    AFTER_MOVE();
-                } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
-                    UNIT = 0;
-                    MOVE_TYPE = 1;  // %00000001
-                    REQUEST_WALK_UP();
-                    AFTER_MOVE();
-                } else if (A == KEY_CONFIG[KEY_CYCLE_WEAPONS]) {
-                    CYCLE_WEAPON();
-                    CLEAR_KEY_BUFFER();
-                } else if (A == KEY_CONFIG[KEY_CYCLE_ITEMS]) {
-                    CYCLE_ITEM();
-                    CLEAR_KEY_BUFFER();
-                } else if (A == KEY_CONFIG[KEY_MOVE]) {
-                    MOVE_OBJECT();
-                    CLEAR_KEY_BUFFER();
-                } else if (A == KEY_CONFIG[KEY_SEARCH]) {
-                    SEARCH_OBJECT();
-                    CLEAR_KEY_BUFFER();
-                } else if (A == KEY_CONFIG[KEY_USE]) {
-                    USE_ITEM();
-                    CLEAR_KEY_BUFFER();
-                } else if (A == KEY_CONFIG[KEY_FIRE_UP]) {
-                    FIRE_UP();
-                    KEYTIMER = 20;
-                } else if (A == KEY_CONFIG[KEY_FIRE_LEFT]) {
-                    FIRE_LEFT();
-                    KEYTIMER = 20;
-                } else if (A == KEY_CONFIG[KEY_FIRE_DOWN]) {
-                    FIRE_DOWN();
-                    KEYTIMER = 20;
-                } else if (A == KEY_CONFIG[KEY_FIRE_RIGHT]) {
-                    FIRE_RIGHT();
-                    KEYTIMER = 20;
-                } else if (A == KEY_CONFIG[KEY_PAUSE]) { // RUN/STOP
+                if (LIVE_MAP_ON == 0) {
+                    if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
+                        UNIT = 0;
+                        MOVE_TYPE = 1; // %00000001
+                        REQUEST_WALK_RIGHT();
+                        AFTER_MOVE();
+                    } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
+                        UNIT = 0;
+                        MOVE_TYPE = 1;  // %00000001
+                        REQUEST_WALK_LEFT();
+                        AFTER_MOVE();
+                    } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
+                        UNIT = 0;
+                        MOVE_TYPE = 1;  // %00000001
+                        REQUEST_WALK_DOWN();
+                        AFTER_MOVE();
+                    } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
+                        UNIT = 0;
+                        MOVE_TYPE = 1;  // %00000001
+                        REQUEST_WALK_UP();
+                        AFTER_MOVE();
+                    } else if (A == KEY_CONFIG[KEY_CYCLE_WEAPONS]) {
+                        CYCLE_WEAPON();
+                        CLEAR_KEY_BUFFER();
+                    } else if (A == KEY_CONFIG[KEY_CYCLE_ITEMS]) {
+                        CYCLE_ITEM();
+                        CLEAR_KEY_BUFFER();
+                    } else if (A == KEY_CONFIG[KEY_MOVE]) {
+                        MOVE_OBJECT();
+                        CLEAR_KEY_BUFFER();
+                    } else if (A == KEY_CONFIG[KEY_SEARCH]) {
+                        SEARCH_OBJECT();
+                        CLEAR_KEY_BUFFER();
+                    } else if (A == KEY_CONFIG[KEY_USE]) {
+                        USE_ITEM();
+                        CLEAR_KEY_BUFFER();
+                    } else if (A == KEY_CONFIG[KEY_FIRE_UP]) {
+                        FIRE_UP();
+                        KEYTIMER = 20;
+                    } else if (A == KEY_CONFIG[KEY_FIRE_LEFT]) {
+                        FIRE_LEFT();
+                        KEYTIMER = 20;
+                    } else if (A == KEY_CONFIG[KEY_FIRE_DOWN]) {
+                        FIRE_DOWN();
+                        KEYTIMER = 20;
+                    } else if (A == KEY_CONFIG[KEY_FIRE_RIGHT]) {
+                        FIRE_RIGHT();
+                        KEYTIMER = 20;
+                    }
+                }
+                if (A == KEY_CONFIG[KEY_PAUSE]) { // RUN/STOP
                     done = PAUSE_GAME();
                 } else if (A == KEY_CONFIG[KEY_CHEAT]) { // SHIFT-C
                     CHEATER();
                 } else if (A == KEY_CONFIG[KEY_MUSIC]) { // SHIFT-M
                     TOGGLE_MUSIC();
                     CLEAR_KEY_BUFFER();
+                } else if (A == KEY_CONFIG[KEY_LIVE_MAP]) {
+                    TOGGLE_LIVE_MAP();
                 }
             }
         } else {
@@ -1416,6 +1422,33 @@ void DRAW_MAP_WINDOW()
     }
 }
 #endif
+
+void TOGGLE_LIVE_MAP()
+{
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    if (LIVE_MAP_ON != 1) {
+        LIVE_MAP_ON = 1;
+
+        platform->clearRect(0, 0, 264, 168);
+    } else {
+        LIVE_MAP_ON = 0;
+
+#ifdef OPTIMIZED_MAP_RENDERING
+        INVALIDATE_PREVIOUS_MAP();
+#endif
+    }
+    REDRAW_WINDOW = 1;
+#endif
+}
+
+void DRAW_LIVE_MAP()
+{
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    platform->renderLiveMap(MAP, UNIT_TYPE, UNIT_LOC_X, UNIT_LOC_Y);
+#endif
+}
+
+uint8_t LIVE_MAP_ON = 0;
 
 #ifdef PLATFORM_TILE_BASED_RENDERING
 // This routine plots a 3x3 tile from the tile database anywhere
@@ -3005,9 +3038,13 @@ void STOP_SONG()
 
 void BACKGROUND_TASKS()
 {
-    if (REDRAW_WINDOW == 1 && BGTIMER1 == 1) {
-        REDRAW_WINDOW = 0;
-        DRAW_MAP_WINDOW();
+    if (BGTIMER1 == 1) {
+        if (LIVE_MAP_ON) {
+            DRAW_LIVE_MAP();
+        } else if (REDRAW_WINDOW == 1) {
+            REDRAW_WINDOW = 0;
+            DRAW_MAP_WINDOW();
+        }
         platform->renderFrame();
     }
     // Now check to see if it is time to run background tasks

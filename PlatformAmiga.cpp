@@ -25,12 +25,20 @@
 #define SCREEN_WIDTH_IN_BYTES (SCREEN_WIDTH >> 3)
 #define SCREEN_SIZE (SCREEN_WIDTH_IN_BYTES * SCREEN_HEIGHT)
 #define PLANES 4
+#define SCREEN_PLANES_SIZE (SCREEN_SIZE * PLANES + 16 * 2)
 #ifdef PLATFORM_IMAGE_BASED_TILES
 #define TILES_WITH_MASK 12
 #else
 #define TILES_WITH_MASK 30
 #endif
+#define TILES_MASK_SIZE (32 / 8 * 24 * PLANES * TILES_WITH_MASK)
+#define COMBINED_TILE_PLANES_SIZE (32 / 8 * 24 * PLANES)
+#ifdef PLATFORM_MODULE_BASED_AUDIO
 #define LARGEST_MODULE_SIZE 103754
+#else
+#define LARGEST_MODULE_SIZE 0
+#endif
+#define CHIP_MEMORY_SIZE (SCREEN_PLANES_SIZE + TILES_MASK_SIZE + COMBINED_TILE_PLANES_SIZE + LARGEST_MODULE_SIZE)
 
 static const char version[] = "$VER:Attack of the PETSCII robots (2021-11-08) (C)2021 David Murray, Vesa Halttunen";
 
@@ -185,7 +193,6 @@ static char* unableToAllocateMemoryError = "Unable to allocate memory\n";
 static char* unableToInitializeDisplayError = "Unable to initialize display\n";
 static char* unableToInitializeAudioError = "Unable to initialize audio\n";
 static char* unableToLoadDataError = "Unable to load data\n";
-
 static uint8_t standardControls[] = {
     0x17, // MOVE UP orig: 56 (8)
     0x27, // MOVE DOWN orig: 50 (2)
@@ -200,7 +207,7 @@ static uint8_t standardControls[] = {
     0x40, // USE ITEM
     0x31, // SEARCH OBEJCT
     0x37, // MOVE OBJECT
-    0x42, // MAP
+    0x42, // LIVE MAP
     0x45, // PAUSE
     0x50, // MUSIC
     0x58, // CHEAT (TODO make this 5f)
@@ -213,14 +220,53 @@ static uint8_t standardControls[] = {
     0x15, // YES
     0x36 // NO
 };
+static uint8_t tileLiveMap[] = {
+    13,13,13,13, 1, 1, 1, 1,
+     1, 5, 1, 1, 1, 1,13, 1,
+     1, 1, 1, 1, 1, 1, 1, 1,
+     8, 1, 1, 1, 1, 6, 0, 0,
+     7,10, 0, 7, 7, 8, 5, 7,
+     3,10,12, 3, 3,10,12, 3,
+     1, 1, 1, 3, 1, 8, 8, 3,
+     1, 8, 7, 3, 7, 7, 1, 1,
+     1, 1, 7,10, 4, 4, 4, 4,
+     4, 4, 4, 4, 4, 4, 4, 4,
+     4, 4, 4, 4, 4, 4, 4, 4,
+     4, 4, 4, 4, 4, 4, 4, 4,
+    13,13,13,13,13,13,13,13,
+     1, 1, 1,10, 4, 4, 4, 0,
+     1, 1, 4,13, 4, 4, 4, 1,
+     1, 1, 2, 2, 2, 2, 2, 2,
+     1, 1,13,10, 1, 1,13, 9,
+     1, 1, 4, 5,13,13,13, 4,
+     1, 1, 1, 1, 0, 0, 0, 0,
+     1, 1, 3, 3, 0, 0, 3, 5,
+    13,13,13, 5,13,13, 1, 2,
+     5, 3, 1, 2, 4, 4, 4,13,
+     1, 1, 1, 1, 1, 4, 4,13,
+     3, 3, 3, 1, 3, 2, 3, 3,
+     3, 3, 1, 1, 4, 4, 9, 9,
+     4, 4, 2, 2, 5,11,12,12,
+     8, 8, 8, 9, 3, 3, 2,10,
+     1, 1, 1, 9, 1, 1, 1,10,
+     1, 1, 1,10, 3, 3,10,10,
+     3, 3,10,10, 3, 3,13,13,
+    13,13, 1,13,13,13,13,13,
+    13,13,13,13,13,13,13,13
+};
 
 PlatformAmiga::PlatformAmiga() :
-    interrupt(0),
     framesPerSecond_(50),
+    clock(3546895),
     screenBitmap(new BitMap),
     screen(0),
     window(0),
+    interrupt(0),
     verticalBlankInterrupt(new Interrupt),
+    chipMemory(0),
+    screenPlanes(0),
+    tilesMask(0),
+    combinedTilePlanes(0),
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     moduleData(0),
     loadedModule(ModuleSoundFX),
@@ -228,10 +274,6 @@ PlatformAmiga::PlatformAmiga() :
     ioAudio(0),
     messagePort(0),
 #endif
-    clock(3546895),
-    screenPlanes(0),
-    tilesMask(0),
-    combinedTilePlanes(0),
     facesBitMap(new BitMap),
     tilesBitMap(new BitMap),
     spritesBitMap(new BitMap),
@@ -241,7 +283,8 @@ PlatformAmiga::PlatformAmiga() :
     cursorSprite2(new SimpleSprite),
     palette(new Palette(blackPalette, (1 << PLANES), 0)),
     bplcon1DefaultValue(0),
-    shakeStep(0)
+    shakeStep(0),
+    liveMapBlinkingStep(0)
 {
     Palette::initialize();
 
@@ -251,25 +294,24 @@ PlatformAmiga::PlatformAmiga() :
         }
     }
 
-    screenPlanes = (uint8_t*)AllocMem(SCREEN_SIZE * PLANES + 16 * 2, MEMF_CHIP | MEMF_CLEAR);
-    if (!screenPlanes) {
+    chipMemory = (uint8_t*)AllocMem(CHIP_MEMORY_SIZE, MEMF_CHIP | MEMF_CLEAR);
+    if (!chipMemory) {
         Write(Output(), unableToAllocateMemoryError, 26);
         return;
     }
+    uint8_t* address = chipMemory;
 
-    tilesMask = (uint8_t*)AllocMem(32 / 8 * 24 * PLANES * (TILES_WITH_MASK + 1), MEMF_CHIP | MEMF_CLEAR);
-    if (!tilesMask) {
-        Write(Output(), unableToAllocateMemoryError, 26);
-        return;
-    }
-    combinedTilePlanes = tilesMask + 32 / 8 * 24 * PLANES * TILES_WITH_MASK;
+    screenPlanes = address;
+    address += SCREEN_PLANES_SIZE;
+
+    tilesMask = address;
+    address += TILES_MASK_SIZE;
+
+    combinedTilePlanes = address;
+    address += COMBINED_TILE_PLANES_SIZE;
 
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    moduleData = (uint8_t*)AllocMem(LARGEST_MODULE_SIZE, MEMF_CHIP | MEMF_CLEAR);
-    if (!moduleData) {
-        Write(Output(), unableToAllocateMemoryError, 26);
-        return;
-    }
+    moduleData = address;
 #endif
 
     InitBitMap(screenBitmap, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -434,18 +476,8 @@ PlatformAmiga::~PlatformAmiga()
         CloseScreen(screen);
     }
 
-#ifdef PLATFORM_MODULE_BASED_AUDIO
-    if (moduleData) {
-        FreeMem(moduleData, LARGEST_MODULE_SIZE);
-    }
-#endif
-
-    if (tilesMask) {
-        FreeMem(tilesMask, 32 / 8 * 24 * PLANES * (TILES_WITH_MASK + 1));
-    }
-
-    if (screenPlanes) {
-        FreeMem(screenPlanes, SCREEN_SIZE * PLANES + 16 * 2);
+    if (chipMemory) {
+        FreeMem(chipMemory, CHIP_MEMORY_SIZE);
     }
 
     delete palette;
@@ -935,6 +967,82 @@ void PlatformAmiga::renderHealth(uint8_t health, uint16_t x, uint16_t y)
 void PlatformAmiga::renderFace(uint8_t face, uint16_t x, uint16_t y)
 {
     BltBitMap(facesBitMap, 0, face * 24, screen->RastPort.BitMap, x, y, 16, 24, 0xc0, 0xff, 0);
+}
+
+void PlatformAmiga::renderLiveMap(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY)
+{
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    OwnBlitter();
+    WaitBlit();
+    DisownBlitter();
+
+    uint32_t* dest = (uint32_t*)(screenPlanes + PLANES * 20 * SCREEN_WIDTH_IN_BYTES);
+    uint8_t color;
+    for (int y = 0; y < 64; y++, dest += (2 * PLANES * SCREEN_WIDTH_IN_BYTES - 32) >> 2) {
+        for (int x = 0; x < 8; x++, dest++) {
+            uint32_t plane1 = 0;
+            uint32_t plane2 = 0;
+            uint32_t plane3 = 0;
+            uint32_t plane4 = 0;
+            for (int z = 0; z < 16; z++) {
+                plane1 += plane1;
+                plane1 += plane1;
+                plane2 += plane2;
+                plane2 += plane2;
+                plane3 += plane3;
+                plane3 += plane3;
+                plane4 += plane4;
+                plane4 += plane4;
+                color = tileLiveMap[*map++];
+                if (color & 1) {
+                    plane1 |= 3;
+                }
+                if (color & 2) {
+                    plane2 |= 3;
+                }
+                if (color & 4) {
+                    plane3 |= 3;
+                }
+                if (color & 8) {
+                    plane4 |= 3;
+                }
+            }
+            dest[0 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane1;
+            dest[1 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane2;
+            dest[2 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane3;
+            dest[3 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane4;
+            dest[4 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane1;
+            dest[5 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane2;
+            dest[6 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane3;
+            dest[7 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane4;
+        }
+    }
+
+    for (int i = 0; i < 28; i++) {
+        if (unitTypes[i] == 1 ||
+            (liveMapBlinkingStep < 16 && ((unitTypes[i] >= 2 && unitTypes[i] <= 5) ||
+                      (unitTypes[i] >= 17 && unitTypes[i] <= 18) ||
+                      unitTypes[i] == 9))) {
+            int x = unitX[i];
+            int y = unitY[i];
+            int shift = (x & 3);
+            shift += shift;
+            uint8_t* dest = screenPlanes + (20 + y * 2) * PLANES * SCREEN_WIDTH_IN_BYTES + (x >> 2);
+            uint8_t plane1 = 0xc0 >> shift;
+            uint16_t plane234Mask = 0xff3f >> shift;
+            dest[0 * SCREEN_WIDTH_IN_BYTES] |= plane1;
+            dest[1 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+            dest[2 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+            dest[3 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+            dest[4 * SCREEN_WIDTH_IN_BYTES] |= plane1;
+            dest[5 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+            dest[6 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+            dest[7 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+        }
+    }
+
+    liveMapBlinkingStep = (liveMapBlinkingStep + 1) & 31;
+#endif
 }
 
 void PlatformAmiga::showCursor(uint16_t x, uint16_t y)

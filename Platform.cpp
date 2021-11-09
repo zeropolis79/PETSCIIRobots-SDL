@@ -37,6 +37,10 @@ void Platform::renderFace(uint8_t, uint16_t, uint16_t)
 {
 }
 
+void Platform::renderLiveMap(uint8_t*, uint8_t*, uint8_t*, uint8_t*)
+{
+}
+
 void Platform::showCursor(uint16_t, uint16_t)
 {
 }

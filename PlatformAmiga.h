@@ -37,6 +37,7 @@ public:
     virtual void renderItem(uint8_t item, uint16_t x, uint16_t y);
     virtual void renderHealth(uint8_t health, uint16_t x, uint16_t y);
     virtual void renderFace(uint8_t face, uint16_t x, uint16_t y);
+    virtual void renderLiveMap(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY);
     virtual void showCursor(uint16_t x, uint16_t y);
     virtual void hideCursor();
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
@@ -74,10 +75,15 @@ private:
 #endif
     void renderSprite(uint8_t sprite, uint16_t x, uint16_t y);
     int framesPerSecond_;
+    uint32_t clock;
     BitMap* screenBitmap;
     Screen* screen;
     Window* window;
     Interrupt* verticalBlankInterrupt;
+    uint8_t* chipMemory;
+    uint8_t* screenPlanes;
+    uint8_t* tilesMask;
+    uint8_t* combinedTilePlanes;
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     uint8_t* moduleData;
     Module loadedModule;
@@ -85,10 +91,6 @@ private:
     IOAudio* ioAudio;
     MsgPort* messagePort;
 #endif
-    uint32_t clock;
-    uint8_t* screenPlanes;
-    uint8_t* tilesMask;
-    uint8_t* combinedTilePlanes;
     BitMap* facesBitMap;
     BitMap* tilesBitMap;
     BitMap* spritesBitMap;
@@ -98,7 +100,8 @@ private:
     SimpleSprite* cursorSprite2;
     Palette* palette;
     uint16_t bplcon1DefaultValue;
-    uint16_t shakeStep;
+    uint8_t shakeStep;
+    uint8_t liveMapBlinkingStep;
 };
 
 #endif
