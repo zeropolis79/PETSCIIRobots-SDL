@@ -309,7 +309,7 @@ void RUNIRQ()
         platform->fadeScreen(15 - BORDER);
     }
 #ifdef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
-    if (SCREEN_SHAKE != 0) {
+    if (CLOCK_ACTIVE != 0 && SCREEN_SHAKE != 0) {
         platform->shakeScreen();
     }
 #endif
