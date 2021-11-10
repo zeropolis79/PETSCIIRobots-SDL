@@ -31,6 +31,7 @@ Amiga TODO
 - Fix evilbot graphics
 - Animate water, servers, trash compactor, and air conditioners
 - Fix mismatched tiles
-- Add live map view
+- Live map performance
+- Live map robot view toggle key
 - Fix sound effects cutting off on game over
 - Custom controls
