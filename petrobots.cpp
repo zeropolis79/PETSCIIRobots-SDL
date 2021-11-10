@@ -4357,20 +4357,27 @@ uint8_t DOORPIECE3 = 0;
 
 void ROBOT_ATTACK_RANGE()
 {
+    /*
+    // This is the original code that does not quite work as intended
     // First check horizontal proximity to door
     int A = ABS(UNIT_LOC_X[UNIT] - UNIT_LOC_X[0]); // ROBOT UNIT, PLAYER UNIT
-    if (A > 1) { // 1 HORIZONTAL TILE FROM PLAYER
+    if (A >= 1) { // 1 HORIZONTAL TILE FROM PLAYER
         PROX_DETECT = 0; // player not detected
         return;
     }
     // Now check vertical proximity
     A = ABS(UNIT_LOC_Y[UNIT] - UNIT_LOC_Y[0]); // DOOR UNIT, PLAYER UNIT
-    if (A > 1) { // 1 VERTICAL TILE FROM PLAYER
+    if (A >= 1) { // 1 VERTICAL TILE FROM PLAYER
         PROX_DETECT = 0; // player not detected
         return;
     }
     // PLAYER DETECTED, CHANGE DOOR MODE.
     PROX_DETECT = 1;
+    */
+
+    int X = ABS(UNIT_LOC_X[UNIT] - UNIT_LOC_X[0]);
+    int Y = ABS(UNIT_LOC_Y[UNIT] - UNIT_LOC_Y[0]);
+    PROX_DETECT = (X == 1 && Y == 0) || (X == 0 && Y == 1) ? 1 : 0;
 }
 
 void DOOR_CHECK_PROXIMITY()
