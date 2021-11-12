@@ -223,10 +223,14 @@ void INVALIDATE_PREVIOUS_MAP();
 #endif
 void DRAW_MAP_WINDOW();
 
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
 void TOGGLE_LIVE_MAP();
 void DRAW_LIVE_MAP();
 
 extern uint8_t LIVE_MAP_ON;
+extern uint8_t LIVE_MAP_ROBOTS_ON;
+extern uint8_t LIVE_MAP_ROBOTS_BLINK;
+#endif
 
 #ifdef PLATFORM_TILE_BASED_RENDERING
 void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y);

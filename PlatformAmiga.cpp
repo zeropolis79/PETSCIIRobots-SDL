@@ -283,8 +283,7 @@ PlatformAmiga::PlatformAmiga() :
     cursorSprite2(new SimpleSprite),
     palette(new Palette(blackPalette, (1 << PLANES), 0)),
     bplcon1DefaultValue(0),
-    shakeStep(0),
-    liveMapBlinkingStep(0)
+    shakeStep(0)
 {
     Palette::initialize();
 
@@ -969,7 +968,7 @@ void PlatformAmiga::renderFace(uint8_t face, uint16_t x, uint16_t y)
     BltBitMap(facesBitMap, 0, face * 24, screen->RastPort.BitMap, x, y, 16, 24, 0xc0, 0xff, 0);
 }
 
-void PlatformAmiga::renderLiveMap(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY)
+void PlatformAmiga::renderLiveMap(uint8_t* map)
 {
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
     OwnBlitter();
@@ -1017,12 +1016,17 @@ void PlatformAmiga::renderLiveMap(uint8_t* map, uint8_t* unitTypes, uint8_t* uni
             dest[7 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane4;
         }
     }
+#endif
+}
 
-    for (int i = 0; i < 28; i++) {
+void PlatformAmiga::renderLiveMapUnits(uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, bool showRobots)
+{
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    for (int i = 0; i < (showRobots ? 28 : 1); i++) {
         if (unitTypes[i] == 1 ||
-            (liveMapBlinkingStep < 16 && ((unitTypes[i] >= 2 && unitTypes[i] <= 5) ||
-                      (unitTypes[i] >= 17 && unitTypes[i] <= 18) ||
-                      unitTypes[i] == 9))) {
+            (unitTypes[i] >= 2 && unitTypes[i] <= 5) ||
+            (unitTypes[i] >= 17 && unitTypes[i] <= 18) ||
+             unitTypes[i] == 9) {
             int x = unitX[i];
             int y = unitY[i];
             int shift = (x & 3);
@@ -1040,8 +1044,6 @@ void PlatformAmiga::renderLiveMap(uint8_t* map, uint8_t* unitTypes, uint8_t* uni
             dest[7 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
         }
     }
-
-    liveMapBlinkingStep = (liveMapBlinkingStep + 1) & 31;
 #endif
 }
 
