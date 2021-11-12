@@ -44,7 +44,7 @@ uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[77];
 // The following are the locations where the current
 // key controls are stored.  These must be set before
 // the game can start.
-uint8_t KEY_CONFIG[25];
+uint8_t KEY_CONFIG[26];
 enum KEYS {
     KEY_MOVE_UP,
     KEY_MOVE_DOWN,
@@ -60,6 +60,7 @@ enum KEYS {
     KEY_SEARCH,
     KEY_MOVE,
     KEY_LIVE_MAP,
+    KEY_LIVE_MAP_ROBOTS,
     KEY_PAUSE,
     KEY_MUSIC,
     KEY_CHEAT,
@@ -434,11 +435,14 @@ void MAIN_GAME_LOOP()
                 } else if (A == KEY_CONFIG[KEY_MUSIC]) { // SHIFT-M
                     TOGGLE_MUSIC();
                     CLEAR_KEY_BUFFER();
-                } else if (A == KEY_CONFIG[KEY_LIVE_MAP]) {
-#ifdef PLATFORM_LIVE_MAP_SUPPORT
-                    TOGGLE_LIVE_MAP();
-#endif
                 }
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+                else if (A == KEY_CONFIG[KEY_LIVE_MAP]) {
+                    TOGGLE_LIVE_MAP();
+                } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS]) {
+                    TOGGLE_LIVE_MAP_ROBOTS();
+                }
+#endif
             }
         } else {
             // SNES CONTROLLER starts here
@@ -1439,6 +1443,12 @@ void TOGGLE_LIVE_MAP()
     REDRAW_WINDOW = 1;
 }
 
+void TOGGLE_LIVE_MAP_ROBOTS()
+{
+    LIVE_MAP_ROBOTS_ON = LIVE_MAP_ROBOTS_ON == 1 ? 0 : 1;
+    LIVE_MAP_ROBOTS_BLINK = 0;
+}
+
 void DRAW_LIVE_MAP()
 {
     if (LIVE_MAP_ROBOTS_ON == 1) {
@@ -1450,7 +1460,7 @@ void DRAW_LIVE_MAP()
 }
 
 uint8_t LIVE_MAP_ON = 0;
-uint8_t LIVE_MAP_ROBOTS_ON = 1;
+uint8_t LIVE_MAP_ROBOTS_ON = 0;
 uint8_t LIVE_MAP_ROBOTS_BLINK = 0;
 #endif
 

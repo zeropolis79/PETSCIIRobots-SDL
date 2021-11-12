@@ -102,6 +102,7 @@ private:
     Palette* palette;
     uint16_t bplcon1DefaultValue;
     uint8_t shakeStep;
+    uint8_t shift;
 };
 
 #endif

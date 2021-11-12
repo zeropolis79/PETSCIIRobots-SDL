@@ -208,9 +208,10 @@ static uint8_t standardControls[] = {
     0x31, // SEARCH OBEJCT
     0x37, // MOVE OBJECT
     0x42, // LIVE MAP
+    0xc2, // LIVE MAP ROBOTS
     0x45, // PAUSE
     0x50, // MUSIC
-    0x58, // CHEAT (TODO make this 5f)
+    0xb3, // CHEAT (TODO make this 5f)
     0x4c, // CURSOR UP
     0x4d, // CURSOR DOWN
     0x4f, // CURSOR LEFT
@@ -283,7 +284,8 @@ PlatformAmiga::PlatformAmiga() :
     cursorSprite2(new SimpleSprite),
     palette(new Palette(blackPalette, (1 << PLANES), 0)),
     bplcon1DefaultValue(0),
-    shakeStep(0)
+    shakeStep(0),
+    shift(0)
 {
     Palette::initialize();
 
@@ -597,13 +599,19 @@ uint8_t PlatformAmiga::getin()
         ReplyMsg((Message*)message);
 
         switch (messageClass) {
-        case IDCMP_RAWKEY:
-            if (messageCode == 0x59) { // F10
+        case IDCMP_RAWKEY: {
+            bool keyDown = messageCode < 0x80 ? true : false;
+            uint8_t keyCode = messageCode & 0x7f;
+
+            if (keyCode == 0x59) { // F10
                 quit = true;
-            } else if (messageCode < 0x80) {
-                return messageCode;
+            } else if (keyCode == 0x60 || keyCode == 0x61) {
+                shift = keyDown ? 0x80 : 0x00;
+            } else if (keyDown) {
+                return keyCode | shift;
             }
             break;
+        }
         default:
             break;
         }

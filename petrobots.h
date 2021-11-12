@@ -33,7 +33,7 @@ extern uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[77];
 // The following are the locations where the current
 // key controls are stored.  These must be set before
 // the game can start.
-extern uint8_t KEY_CONFIG[25];
+extern uint8_t KEY_CONFIG[26];
 
 // MAP FILES CONSIST OF EVERYTHING FROM THIS POINT ON
 extern uint8_t UNIT_TYPE[64];  // Unit type 0=none (64 bytes)  
@@ -225,6 +225,7 @@ void DRAW_MAP_WINDOW();
 
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
 void TOGGLE_LIVE_MAP();
+void TOGGLE_LIVE_MAP_ROBOTS();
 void DRAW_LIVE_MAP();
 
 extern uint8_t LIVE_MAP_ON;
