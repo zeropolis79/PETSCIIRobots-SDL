@@ -37,7 +37,8 @@ public:
     virtual void renderItem(uint8_t item, uint16_t x, uint16_t y);
     virtual void renderHealth(uint8_t health, uint16_t x, uint16_t y);
     virtual void renderFace(uint8_t face, uint16_t x, uint16_t y);
-    virtual void renderLiveMap(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, bool showRobots);
+    virtual void renderLiveMap(uint8_t* map);
+    virtual void renderLiveMapUnits(uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, bool showRobots);
     virtual void showCursor(uint16_t x, uint16_t y);
     virtual void hideCursor();
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
@@ -76,7 +77,7 @@ private:
     void renderSprite(uint8_t sprite, uint16_t x, uint16_t y);
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
     __asm void renderLiveMapTiles(register __a1 uint8_t* map);
-    void renderLiveMapUnits(uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, bool showRobots);
+//    void renderLiveMapTiles(uint8_t* map);
 #endif
     int framesPerSecond_;
     uint32_t clock;

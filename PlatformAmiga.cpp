@@ -1015,7 +1015,7 @@ void PlatformAmiga::renderFace(uint8_t face, uint16_t x, uint16_t y)
     BltBitMap(facesBitMap, 0, face * 24, screen->RastPort.BitMap, x, y, 16, 24, 0xc0, 0xff, 0);
 }
 
-void PlatformAmiga::renderLiveMap(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, bool showRobots)
+void PlatformAmiga::renderLiveMap(uint8_t* map)
 {
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
     OwnBlitter();
@@ -1023,7 +1023,6 @@ void PlatformAmiga::renderLiveMap(uint8_t* map, uint8_t* unitTypes, uint8_t* uni
     DisownBlitter();
 
     renderLiveMapTiles(map);
-    renderLiveMapUnits(unitTypes, unitX, unitY, showRobots);
 #endif
 }
 
