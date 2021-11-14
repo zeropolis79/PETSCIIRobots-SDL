@@ -75,6 +75,10 @@ private:
     void setSampleData(uint8_t* module);
 #endif
     void renderSprite(uint8_t sprite, uint16_t x, uint16_t y);
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    __asm void renderLiveMapTiles(register __a1 uint8_t* map);
+//    void renderLiveMapTiles(uint8_t* map);
+#endif
     int framesPerSecond_;
     uint32_t clock;
     BitMap* screenBitmap;

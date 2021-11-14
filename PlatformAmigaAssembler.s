@@ -1,8 +1,14 @@
+	xdef	_renderLiveMapTiles__13PlatformAmigaFPUc
 	xdef	_verticalBlankInterruptServer__13PlatformAmigaFv
 	xdef	_ungzip__13PlatformAmigaFPvPv
+	xref	_tileLiveMap
+	xref	_liveMapToPlane1
 	xref	@runVerticalBlankInterrupt__13PlatformAmigaFv
 	xref	_addressMap
 	xref	_c64Font
+
+SCREEN_WIDTH_IN_BYTES	equ	40
+PLANES	equ	4
 
 GZIP_MAGIC	equ	$1f8b
 DEFLATED	equ	8
@@ -41,6 +47,142 @@ codes_dists	equ	codes_lext+29*2
 codes_dext	equ	codes_dists+30*2
 
 	section	code
+
+_renderLiveMapTiles__13PlatformAmigaFPUc:
+	movem.l	d2-d7/a2-a3/a5-a6,-(sp)
+
+	move.l	$26(a0),a2		; screenPlanes
+	lea	PLANES*20*SCREEN_WIDTH_IN_BYTES(a2),a2
+	lea	_tileLiveMap,a3	; tileLiveMap
+	lea	_liveMapToPlane1,a5	; liveMapToPlane1
+	moveq   #0,d0
+	moveq   #0,d5
+	moveq   #64-1,d7
+.yLoop:
+	moveq   #8-1,d6
+.xLoop:
+	move.b  (a1)+,d5
+	move.b  (a3,d5.w),d0
+	lsl.w   #4,d0
+	move.b  (a1)+,d5
+	or.b    (a3,d5.w),d0
+	move.b  (a5,d0.w),d1
+	move.b  256(a5,d0.w),d2
+	move.b  512(a5,d0.w),d3
+	move.b  768(a5,d0.w),d4
+
+	lsl.w   #4,d1
+	lsl.w   #4,d2
+	lsl.w   #4,d3
+	lsl.w   #4,d4
+	move.b  (a1)+,d5
+	move.b  (a3,d5.w),d0
+	lsl.w   #4,d0
+	move.b  (a1)+,d5
+	or.b    (a3,d5.w),d0
+	or.b  (a5,d0.w),d1
+	or.b  256(a5,d0.w),d2
+	or.b  512(a5,d0.w),d3
+	or.b  768(a5,d0.w),d4
+
+	lsl.w   #4,d1
+	lsl.w   #4,d2
+	lsl.w   #4,d3
+	lsl.w   #4,d4
+	move.b  (a1)+,d5
+	move.b  (a3,d5.w),d0
+	lsl.w   #4,d0
+	move.b  (a1)+,d5
+	or.b    (a3,d5.w),d0
+	or.b  (a5,d0.w),d1
+	or.b  256(a5,d0.w),d2
+	or.b  512(a5,d0.w),d3
+	or.b  768(a5,d0.w),d4
+
+	lsl.w   #4,d1
+	lsl.w   #4,d2
+	lsl.w   #4,d3
+	lsl.w   #4,d4
+	move.b  (a1)+,d5
+	move.b  (a3,d5.w),d0
+	lsl.w   #4,d0
+	move.b  (a1)+,d5
+	or.b    (a3,d5.w),d0
+	or.b  (a5,d0.w),d1
+	or.b  256(a5,d0.w),d2
+	or.b  512(a5,d0.w),d3
+	or.b  768(a5,d0.w),d4
+
+	lsl.l   #4,d1
+	lsl.l   #4,d2
+	lsl.l   #4,d3
+	lsl.l   #4,d4
+	move.b  (a1)+,d5
+	move.b  (a3,d5.w),d0
+	lsl.w   #4,d0
+	move.b  (a1)+,d5
+	or.b    (a3,d5.w),d0
+	or.b  (a5,d0.w),d1
+	or.b  256(a5,d0.w),d2
+	or.b  512(a5,d0.w),d3
+	or.b  768(a5,d0.w),d4
+
+	lsl.l   #4,d1
+	lsl.l   #4,d2
+	lsl.l   #4,d3
+	lsl.l   #4,d4
+	move.b  (a1)+,d5
+	move.b  (a3,d5.w),d0
+	lsl.w   #4,d0
+	move.b  (a1)+,d5
+	or.b    (a3,d5.w),d0
+	or.b  (a5,d0.w),d1
+	or.b  256(a5,d0.w),d2
+	or.b  512(a5,d0.w),d3
+	or.b  768(a5,d0.w),d4
+
+	lsl.l   #4,d1
+	lsl.l   #4,d2
+	lsl.l   #4,d3
+	lsl.l   #4,d4
+	move.b  (a1)+,d5
+	move.b  (a3,d5.w),d0
+	lsl.w   #4,d0
+	move.b  (a1)+,d5
+	or.b    (a3,d5.w),d0
+	or.b  (a5,d0.w),d1
+	or.b  256(a5,d0.w),d2
+	or.b  512(a5,d0.w),d3
+	or.b  768(a5,d0.w),d4
+
+	lsl.l   #4,d1
+	lsl.l   #4,d2
+	lsl.l   #4,d3
+	lsl.l   #4,d4
+	move.b  (a1)+,d5
+	move.b  (a3,d5.w),d0
+	lsl.w   #4,d0
+	move.b  (a1)+,d5
+	or.b    (a3,d5.w),d0
+	or.b  (a5,d0.w),d1
+	or.b  256(a5,d0.w),d2
+	or.b  512(a5,d0.w),d3
+	or.b  768(a5,d0.w),d4
+
+	move.l d1,(a2)+
+	move.l d2,(1*SCREEN_WIDTH_IN_BYTES-4)(a2)
+	move.l d3,(2*SCREEN_WIDTH_IN_BYTES-4)(a2)
+	move.l d4,(3*SCREEN_WIDTH_IN_BYTES-4)(a2)
+	move.l d1,(4*SCREEN_WIDTH_IN_BYTES-4)(a2)
+	move.l d2,(5*SCREEN_WIDTH_IN_BYTES-4)(a2)
+	move.l d3,(6*SCREEN_WIDTH_IN_BYTES-4)(a2)
+	move.l d4,(7*SCREEN_WIDTH_IN_BYTES-4)(a2)
+	dbra    d6,.xLoop
+	lea (2*PLANES*SCREEN_WIDTH_IN_BYTES-32)(a2),a2
+	dbra    d7,.yLoop
+
+	movem.l	(sp)+,d2-d7/a2-a3/a5-a6
+	rts
 
 _verticalBlankInterruptServer__13PlatformAmigaFv:
 	movem.l d2-d7/a2-a4,-(sp)

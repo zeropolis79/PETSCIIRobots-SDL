@@ -221,7 +221,7 @@ static uint8_t standardControls[] = {
     0x15, // YES
     0x36 // NO
 };
-static uint8_t tileLiveMap[] = {
+uint8_t tileLiveMap[] = {
     13,13,13,13, 1, 1, 1, 1,
      1, 5, 1, 1, 1, 1,13, 1,
      1, 1, 1, 1, 1, 1, 1, 1,
@@ -255,6 +255,10 @@ static uint8_t tileLiveMap[] = {
     13,13, 1,13,13,13,13,13,
     13,13,13,13,13,13,13,13
 };
+uint8_t liveMapToPlane1[256];
+uint8_t liveMapToPlane2[256];
+uint8_t liveMapToPlane3[256];
+uint8_t liveMapToPlane4[256];
 
 PlatformAmiga::PlatformAmiga() :
     framesPerSecond_(50),
@@ -293,6 +297,41 @@ PlatformAmiga::PlatformAmiga() :
         for (int x = 0; x < 40; x++, i++) {
             addressMap[i] = y * SCREEN_WIDTH_IN_BYTES * PLANES * 8 + x;
         }
+    }
+
+    for (i = 0; i < 256; i++) {
+        uint8_t plane1 = 0;
+        uint8_t plane2 = 0;
+        uint8_t plane3 = 0;
+        uint8_t plane4 = 0;
+        if (i & 1) {
+            plane1 |= 0x03;
+        }
+        if (i & 2) {
+            plane2 |= 0x03;
+        }
+        if (i & 4) {
+            plane3 |= 0x03;
+        }
+        if (i & 8) {
+            plane4 |= 0x03;
+        }
+        if (i & 16) {
+            plane1 |= 0x0c;
+        }
+        if (i & 32) {
+            plane2 |= 0x0c;
+        }
+        if (i & 64) {
+            plane3 |= 0x0c;
+        }
+        if (i & 128) {
+            plane4 |= 0x0c;
+        }
+        liveMapToPlane1[i] = plane1;
+        liveMapToPlane2[i] = plane2;
+        liveMapToPlane3[i] = plane3;
+        liveMapToPlane4[i] = plane4;
     }
 
     chipMemory = (uint8_t*)AllocMem(CHIP_MEMORY_SIZE, MEMF_CHIP | MEMF_CLEAR);
@@ -983,37 +1022,58 @@ void PlatformAmiga::renderLiveMap(uint8_t* map)
     WaitBlit();
     DisownBlitter();
 
+    renderLiveMapTiles(map);
+#endif
+}
+
+/*
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+void PlatformAmiga::renderLiveMapTiles(uint8_t* map)
+{
     uint32_t* dest = (uint32_t*)(screenPlanes + PLANES * 20 * SCREEN_WIDTH_IN_BYTES);
     uint8_t color;
     for (int y = 0; y < 64; y++, dest += (2 * PLANES * SCREEN_WIDTH_IN_BYTES - 32) >> 2) {
         for (int x = 0; x < 8; x++, dest++) {
-            uint32_t plane1 = 0;
-            uint32_t plane2 = 0;
-            uint32_t plane3 = 0;
-            uint32_t plane4 = 0;
-            for (int z = 0; z < 16; z++) {
-                plane1 += plane1;
-                plane1 += plane1;
-                plane2 += plane2;
-                plane2 += plane2;
-                plane3 += plane3;
-                plane3 += plane3;
-                plane4 += plane4;
-                plane4 += plane4;
-                color = tileLiveMap[*map++];
-                if (color & 1) {
-                    plane1 |= 3;
-                }
-                if (color & 2) {
-                    plane2 |= 3;
-                }
-                if (color & 4) {
-                    plane3 |= 3;
-                }
-                if (color & 8) {
-                    plane4 |= 3;
-                }
-            }
+            color = (tileLiveMap[*map++] << 4) | tileLiveMap[*map++];
+            uint32_t plane1 = liveMapToPlane1[color] << 28;
+            uint32_t plane2 = liveMapToPlane2[color] << 28;
+            uint32_t plane3 = liveMapToPlane3[color] << 28;
+            uint32_t plane4 = liveMapToPlane4[color] << 28;
+            color = (tileLiveMap[*map++] << 4) | tileLiveMap[*map++];
+            plane1 |= liveMapToPlane1[color] << 24;
+            plane2 |= liveMapToPlane2[color] << 24;
+            plane3 |= liveMapToPlane3[color] << 24;
+            plane4 |= liveMapToPlane4[color] << 24;
+            color = (tileLiveMap[*map++] << 4) | tileLiveMap[*map++];
+            plane1 |= liveMapToPlane1[color] << 20;
+            plane2 |= liveMapToPlane2[color] << 20;
+            plane3 |= liveMapToPlane3[color] << 20;
+            plane4 |= liveMapToPlane4[color] << 20;
+            color = (tileLiveMap[*map++] << 4) | tileLiveMap[*map++];
+            plane1 |= liveMapToPlane1[color] << 16;
+            plane2 |= liveMapToPlane2[color] << 16;
+            plane3 |= liveMapToPlane3[color] << 16;
+            plane4 |= liveMapToPlane4[color] << 16;
+            color = (tileLiveMap[*map++] << 4) | tileLiveMap[*map++];
+            plane1 |= liveMapToPlane1[color] << 12;
+            plane2 |= liveMapToPlane2[color] << 12;
+            plane3 |= liveMapToPlane3[color] << 12;
+            plane4 |= liveMapToPlane4[color] << 12;
+            color = (tileLiveMap[*map++] << 4) | tileLiveMap[*map++];
+            plane1 |= liveMapToPlane1[color] << 8;
+            plane2 |= liveMapToPlane2[color] << 8;
+            plane3 |= liveMapToPlane3[color] << 8;
+            plane4 |= liveMapToPlane4[color] << 8;
+            color = (tileLiveMap[*map++] << 4) | tileLiveMap[*map++];
+            plane1 |= liveMapToPlane1[color] << 4;
+            plane2 |= liveMapToPlane2[color] << 4;
+            plane3 |= liveMapToPlane3[color] << 4;
+            plane4 |= liveMapToPlane4[color] << 4;
+            color = (tileLiveMap[*map++] << 4) | tileLiveMap[*map++];
+            plane1 |= liveMapToPlane1[color];
+            plane2 |= liveMapToPlane2[color];
+            plane3 |= liveMapToPlane3[color];
+            plane4 |= liveMapToPlane4[color];
             dest[0 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane1;
             dest[1 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane2;
             dest[2 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane3;
@@ -1024,8 +1084,9 @@ void PlatformAmiga::renderLiveMap(uint8_t* map)
             dest[7 * (SCREEN_WIDTH_IN_BYTES >> 2)] = plane4;
         }
     }
-#endif
 }
+#endif
+*/
 
 void PlatformAmiga::renderLiveMapUnits(uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, bool showRobots)
 {
