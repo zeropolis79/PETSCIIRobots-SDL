@@ -1100,7 +1100,9 @@ void USER_SELECT_OBJECT()
     CURSOR_X = 5;
     CURSOR_Y = 3;
 #ifdef PLATFORM_CURSOR_SUPPORT
-    platform->showCursor(CURSOR_X, CURSOR_Y);
+    if (LIVE_MAP_ON == 0) {
+        platform->showCursor(CURSOR_X, CURSOR_Y);
+    }
 #else
     CURSOR_ON = 1;
     REVERSE_TILE();
@@ -1123,28 +1125,36 @@ void USER_SELECT_OBJECT()
                 UNIT_DIRECTION[0] = 3;
                 CURSOR_X++;
 #ifdef PLATFORM_CURSOR_SUPPORT
-                platform->showCursor(CURSOR_X, CURSOR_Y);
+                if (LIVE_MAP_ON == 0) {
+                    platform->showCursor(CURSOR_X, CURSOR_Y);
+                }
 #endif
                 return;
             } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
                 UNIT_DIRECTION[0] = 2;
                 CURSOR_X--;
 #ifdef PLATFORM_CURSOR_SUPPORT
-                platform->showCursor(CURSOR_X, CURSOR_Y);
+                if (LIVE_MAP_ON == 0) {
+                    platform->showCursor(CURSOR_X, CURSOR_Y);
+                }
 #endif
                 return;
             } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
                 UNIT_DIRECTION[0] = 1;
                 CURSOR_Y++;
 #ifdef PLATFORM_CURSOR_SUPPORT
-                platform->showCursor(CURSOR_X, CURSOR_Y);
+                if (LIVE_MAP_ON == 0) {
+                    platform->showCursor(CURSOR_X, CURSOR_Y);
+                }
 #endif
                 return;
             } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
                 UNIT_DIRECTION[0] = 0;
                 CURSOR_Y--;
 #ifdef PLATFORM_CURSOR_SUPPORT
-                platform->showCursor(CURSOR_X, CURSOR_Y);
+                if (LIVE_MAP_ON == 0) {
+                    platform->showCursor(CURSOR_X, CURSOR_Y);
+                }
 #endif
                 return;
             }
@@ -1179,7 +1189,9 @@ void MOVE_OBJECT()
     MOVTEMP_X = MAP_X; // Store original location of object
     MOVTEMP_Y = MAP_Y;
 #ifdef PLATFORM_CURSOR_SUPPORT
-    platform->showCursor(CURSOR_X, CURSOR_Y);
+    if (LIVE_MAP_ON == 0) {
+        platform->showCursor(CURSOR_X, CURSOR_Y);
+    }
 #else
     CURSOR_ON = 1;
     REVERSE_TILE();
