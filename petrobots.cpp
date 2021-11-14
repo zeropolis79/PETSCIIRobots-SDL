@@ -1455,8 +1455,7 @@ void DRAW_LIVE_MAP()
         LIVE_MAP_ROBOTS_BLINK++;
         LIVE_MAP_ROBOTS_BLINK &= 31;
     }
-    platform->renderLiveMap(MAP);
-    platform->renderLiveMapUnits(UNIT_TYPE, UNIT_LOC_X, UNIT_LOC_Y, (LIVE_MAP_ROBOTS_ON == 1 && LIVE_MAP_ROBOTS_BLINK < 16) ? true : false);
+    platform->renderLiveMap(MAP, UNIT_TYPE, UNIT_LOC_X, UNIT_LOC_Y, (LIVE_MAP_ROBOTS_ON == 1 && LIVE_MAP_ROBOTS_BLINK < 16) ? true : false);
 }
 
 uint8_t LIVE_MAP_ON = 0;
