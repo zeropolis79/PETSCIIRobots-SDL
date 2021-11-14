@@ -3,6 +3,7 @@
 	xdef	_ungzip__13PlatformAmigaFPvPv
 	xref	_tileLiveMap
 	xref	_liveMapToPlane1
+	xref	_liveMapToPlane3
 	xref	@runVerticalBlankInterrupt__13PlatformAmigaFv
 	xref	_addressMap
 	xref	_c64Font
@@ -53,24 +54,27 @@ _renderLiveMapTiles__13PlatformAmigaFPUc:
 
 	move.l	$26(a0),a2		; screenPlanes
 	lea	PLANES*20*SCREEN_WIDTH_IN_BYTES(a2),a2
-	lea	_tileLiveMap,a3	; tileLiveMap
-	lea	_liveMapToPlane1,a5	; liveMapToPlane1
-	moveq   #0,d0
+	lea	_tileLiveMap,a3
+	lea	_liveMapToPlane1,a5
+	lea	_liveMapToPlane3,a6
 	moveq   #0,d5
 	moveq   #64-1,d7
 .yLoop:
 	moveq   #8-1,d6
 .xLoop:
+	moveq   #0,d0
 	move.b  (a1)+,d5
 	move.b  (a3,d5.w),d0
 	lsl.w   #4,d0
 	move.b  (a1)+,d5
 	or.b    (a3,d5.w),d0
 	move.b  (a5,d0.w),d1
-	move.b  256(a5,d0.w),d2
-	move.b  512(a5,d0.w),d3
-	move.b  768(a5,d0.w),d4
+	move.b  (a6,d0.w),d3
+	add.w	#256,d0
+	move.b  (a5,d0.w),d2
+	move.b  (a6,d0.w),d4
 
+	moveq   #0,d0
 	lsl.w   #4,d1
 	lsl.w   #4,d2
 	lsl.w   #4,d3
@@ -81,10 +85,12 @@ _renderLiveMapTiles__13PlatformAmigaFPUc:
 	move.b  (a1)+,d5
 	or.b    (a3,d5.w),d0
 	or.b  (a5,d0.w),d1
-	or.b  256(a5,d0.w),d2
-	or.b  512(a5,d0.w),d3
-	or.b  768(a5,d0.w),d4
+	or.b  (a6,d0.w),d3
+	add.w	#256,d0
+	or.b  (a5,d0.w),d2
+	or.b  (a6,d0.w),d4
 
+	moveq   #0,d0
 	lsl.w   #4,d1
 	lsl.w   #4,d2
 	lsl.w   #4,d3
@@ -95,10 +101,12 @@ _renderLiveMapTiles__13PlatformAmigaFPUc:
 	move.b  (a1)+,d5
 	or.b    (a3,d5.w),d0
 	or.b  (a5,d0.w),d1
-	or.b  256(a5,d0.w),d2
-	or.b  512(a5,d0.w),d3
-	or.b  768(a5,d0.w),d4
+	or.b  (a6,d0.w),d3
+	add.w	#256,d0
+	or.b  (a5,d0.w),d2
+	or.b  (a6,d0.w),d4
 
+	moveq   #0,d0
 	lsl.w   #4,d1
 	lsl.w   #4,d2
 	lsl.w   #4,d3
@@ -109,10 +117,12 @@ _renderLiveMapTiles__13PlatformAmigaFPUc:
 	move.b  (a1)+,d5
 	or.b    (a3,d5.w),d0
 	or.b  (a5,d0.w),d1
-	or.b  256(a5,d0.w),d2
-	or.b  512(a5,d0.w),d3
-	or.b  768(a5,d0.w),d4
+	or.b  (a6,d0.w),d3
+	add.w	#256,d0
+	or.b  (a5,d0.w),d2
+	or.b  (a6,d0.w),d4
 
+	moveq   #0,d0
 	lsl.l   #4,d1
 	lsl.l   #4,d2
 	lsl.l   #4,d3
@@ -123,10 +133,12 @@ _renderLiveMapTiles__13PlatformAmigaFPUc:
 	move.b  (a1)+,d5
 	or.b    (a3,d5.w),d0
 	or.b  (a5,d0.w),d1
-	or.b  256(a5,d0.w),d2
-	or.b  512(a5,d0.w),d3
-	or.b  768(a5,d0.w),d4
+	or.b  (a6,d0.w),d3
+	add.w	#256,d0
+	or.b  (a5,d0.w),d2
+	or.b  (a6,d0.w),d4
 
+	moveq   #0,d0
 	lsl.l   #4,d1
 	lsl.l   #4,d2
 	lsl.l   #4,d3
@@ -137,10 +149,12 @@ _renderLiveMapTiles__13PlatformAmigaFPUc:
 	move.b  (a1)+,d5
 	or.b    (a3,d5.w),d0
 	or.b  (a5,d0.w),d1
-	or.b  256(a5,d0.w),d2
-	or.b  512(a5,d0.w),d3
-	or.b  768(a5,d0.w),d4
+	or.b  (a6,d0.w),d3
+	add.w	#256,d0
+	or.b  (a5,d0.w),d2
+	or.b  (a6,d0.w),d4
 
+	moveq   #0,d0
 	lsl.l   #4,d1
 	lsl.l   #4,d2
 	lsl.l   #4,d3
@@ -151,10 +165,12 @@ _renderLiveMapTiles__13PlatformAmigaFPUc:
 	move.b  (a1)+,d5
 	or.b    (a3,d5.w),d0
 	or.b  (a5,d0.w),d1
-	or.b  256(a5,d0.w),d2
-	or.b  512(a5,d0.w),d3
-	or.b  768(a5,d0.w),d4
+	or.b  (a6,d0.w),d3
+	add.w	#256,d0
+	or.b  (a5,d0.w),d2
+	or.b  (a6,d0.w),d4
 
+	moveq   #0,d0
 	lsl.l   #4,d1
 	lsl.l   #4,d2
 	lsl.l   #4,d3
@@ -165,9 +181,10 @@ _renderLiveMapTiles__13PlatformAmigaFPUc:
 	move.b  (a1)+,d5
 	or.b    (a3,d5.w),d0
 	or.b  (a5,d0.w),d1
-	or.b  256(a5,d0.w),d2
-	or.b  512(a5,d0.w),d3
-	or.b  768(a5,d0.w),d4
+	or.b  (a6,d0.w),d3
+	add.w	#256,d0
+	or.b  (a5,d0.w),d2
+	or.b  (a6,d0.w),d4
 
 	move.l d1,(a2)+
 	move.l d2,(1*SCREEN_WIDTH_IN_BYTES-4)(a2)
