@@ -259,6 +259,9 @@ uint8_t liveMapToPlane1[256];
 uint8_t liveMapToPlane2[256];
 uint8_t liveMapToPlane3[256];
 uint8_t liveMapToPlane4[256];
+uint8_t unitTypes[28];
+uint8_t unitX[28];
+uint8_t unitY[28];
 
 PlatformAmiga::PlatformAmiga() :
     framesPerSecond_(50),
@@ -1088,29 +1091,66 @@ void PlatformAmiga::renderLiveMapTiles(uint8_t* map)
 #endif
 */
 
-void PlatformAmiga::renderLiveMapUnits(uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, bool showRobots)
+void PlatformAmiga::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, bool showRobots)
 {
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
-    for (int i = 0; i < (showRobots ? 28 : 1); i++) {
-        if (unitTypes[i] == 1 ||
-            (unitTypes[i] >= 2 && unitTypes[i] <= 5) ||
-            (unitTypes[i] >= 17 && unitTypes[i] <= 18) ||
-             unitTypes[i] == 9) {
-            int x = unitX[i];
-            int y = unitY[i];
-            int shift = (x & 3);
-            shift += shift;
-            uint8_t* dest = screenPlanes + (20 + y * 2) * PLANES * SCREEN_WIDTH_IN_BYTES + (x >> 2);
-            uint8_t plane1 = 0xc0 >> shift;
-            uint16_t plane234Mask = 0xff3f >> shift;
-            dest[0 * SCREEN_WIDTH_IN_BYTES] |= plane1;
-            dest[1 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
-            dest[2 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
-            dest[3 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
-            dest[4 * SCREEN_WIDTH_IN_BYTES] |= plane1;
-            dest[5 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
-            dest[6 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
-            dest[7 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+    for (int i = 0; i < 28; i++) {
+        if (unitTypes[i] != ::unitTypes[i] || unitX[i] != ::unitX[i] || unitY[i] != ::unitY[i] || (!showRobots && i > 0)) {
+            // Remove old dot if any
+            if (::unitTypes[i] != 255) {
+                int x = ::unitX[i];
+                int y = ::unitY[i];
+                int maskShift = (x & 3);
+                maskShift += maskShift;
+                int planeShift = 6 - maskShift;
+                uint8_t* dest = screenPlanes + (20 + y * 2) * PLANES * SCREEN_WIDTH_IN_BYTES + (x >> 2);
+                uint8_t color = tileLiveMap[map[(y << 7) + x]];
+                uint8_t plane1 = liveMapToPlane1[color] << planeShift;
+                uint8_t plane2 = liveMapToPlane2[color] << planeShift;
+                uint8_t plane3 = liveMapToPlane3[color] << planeShift;
+                uint8_t plane4 = liveMapToPlane4[color] << planeShift;
+                uint16_t mask = 0xff3f >> maskShift;
+                dest[0 * SCREEN_WIDTH_IN_BYTES] = (dest[0 * SCREEN_WIDTH_IN_BYTES] & mask) | plane1;
+                dest[1 * SCREEN_WIDTH_IN_BYTES] = (dest[1 * SCREEN_WIDTH_IN_BYTES] & mask) | plane2;
+                dest[2 * SCREEN_WIDTH_IN_BYTES] = (dest[2 * SCREEN_WIDTH_IN_BYTES] & mask) | plane3;
+                dest[3 * SCREEN_WIDTH_IN_BYTES] = (dest[3 * SCREEN_WIDTH_IN_BYTES] & mask) | plane4;
+                dest[4 * SCREEN_WIDTH_IN_BYTES] = (dest[4 * SCREEN_WIDTH_IN_BYTES] & mask) | plane1;
+                dest[5 * SCREEN_WIDTH_IN_BYTES] = (dest[5 * SCREEN_WIDTH_IN_BYTES] & mask) | plane2;
+                dest[6 * SCREEN_WIDTH_IN_BYTES] = (dest[6 * SCREEN_WIDTH_IN_BYTES] & mask) | plane3;
+                dest[7 * SCREEN_WIDTH_IN_BYTES] = (dest[7 * SCREEN_WIDTH_IN_BYTES] & mask) | plane4;
+
+                if (i > 0 && !showRobots) {
+                    ::unitTypes[i] = 255;
+                }
+            }
+
+            if (i == 0 ||
+                (showRobots &&
+                 (unitTypes[i] == 1 ||
+                 (unitTypes[i] >= 2 && unitTypes[i] <= 5) ||
+                 (unitTypes[i] >= 17 && unitTypes[i] <= 18) ||
+                 unitTypes[i] == 9))) {
+                // Render new dot
+                int x = unitX[i];
+                int y = unitY[i];
+                int shift = (x & 3);
+                shift += shift;
+                uint8_t* dest = screenPlanes + (20 + y * 2) * PLANES * SCREEN_WIDTH_IN_BYTES + (x >> 2);
+                uint8_t plane1 = 0xc0 >> shift;
+                uint16_t plane234Mask = 0xff3f >> shift;
+                dest[0 * SCREEN_WIDTH_IN_BYTES] |= plane1;
+                dest[1 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+                dest[2 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+                dest[3 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+                dest[4 * SCREEN_WIDTH_IN_BYTES] |= plane1;
+                dest[5 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+                dest[6 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+                dest[7 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+
+                ::unitTypes[i] = unitTypes[i];
+                ::unitX[i] = unitX[i];
+                ::unitY[i] = unitY[i];
+            }
         }
     }
 #endif
