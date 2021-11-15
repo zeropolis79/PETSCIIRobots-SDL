@@ -13,6 +13,7 @@
 #include <intuition/intuition.h>
 #include <hardware/intbits.h>
 #include <hardware/custom.h>
+#include <hardware/cia.h>
 #include <devices/audio.h>
 #include "PT2.3F_replay_cia.h"
 #include "Palette.h"
@@ -58,6 +59,7 @@ struct SampleData {
 };
 
 __far extern Custom custom;
+__far extern CIA ciaa;
 __far extern uint8_t c64Font[];
 __chip extern uint8_t facesPlanes[];
 __chip extern uint8_t tilesPlanes[];
@@ -673,6 +675,7 @@ void PlatformAmiga::clearKeyBuffer()
 uint16_t PlatformAmiga::readJoystick()
 {
     uint16_t output = 0;
+
     uint16_t joystickData = custom.joy1dat;
     bool Y0 = (joystickData & 0x0100) == 0x0100 ? true : false;
     bool Y1 = (joystickData & 0x0200) == 0x0200 ? true : false;
@@ -684,6 +687,19 @@ uint16_t PlatformAmiga::readJoystick()
     if (X0) {
         output |= (X1 ? JoystickRight : JoystickDown);
     }
+
+    uint8_t peripheralData = ciaa.ciapra;
+    bool FIR1 = (peripheralData & CIAF_GAMEPORT1) ? false : true;
+    if (FIR1) {
+        output |= JoystickRed;
+    }
+
+    uint16_t potData = custom.potinp;
+    bool DATRY = (potData & 0x4000) ? true : false;
+    if (DATRY) {
+        output |= JoystickBlue;
+    }
+
     return output;
 }
 
