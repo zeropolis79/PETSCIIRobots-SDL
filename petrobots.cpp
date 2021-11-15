@@ -378,7 +378,7 @@ void MAIN_GAME_LOOP()
         if (CONTROL != 2) {
             // Keyboard controls here.
             KEY_REPEAT();
-            uint8_t A = platform->getin();
+            uint8_t A = platform->readKeyboard();
             if (A != 0) {
                 KEYTIMER = 5;
                 if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
@@ -537,7 +537,7 @@ bool PAUSE_GAME()
     CLEAR_KEY_BUFFER();
     platform->renderFrame();
     while (!platform->quit) {
-        uint8_t A = platform->getin();
+        uint8_t A = platform->readKeyboard();
         if (A == KEY_CONFIG[KEY_PAUSE] || // RUN/STOP
             A == KEY_CONFIG[KEY_NO]) { // N-KEY
             SCROLL_INFO();
@@ -1120,7 +1120,7 @@ void USER_SELECT_OBJECT()
             return;
         }
         if (CONTROL != 2) {
-            uint8_t A = platform->getin();
+            uint8_t A = platform->readKeyboard();
             if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
                 UNIT_DIRECTION[0] = 3;
                 CURSOR_X++;
@@ -1210,7 +1210,7 @@ void MOVE_OBJECT()
         }
         if (CONTROL != 2) { // which controller are we using?
             // keyboard control
-            uint8_t A = platform->getin();
+            uint8_t A = platform->readKeyboard();
             if (A == 0) {
                 continue;
             } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
@@ -2212,7 +2212,7 @@ void GAME_OVER()
         platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     }
 #endif
-    while (platform->getin() == 0 && !platform->quit);
+    while (platform->readKeyboard() == 0 && !platform->quit);
     GOM4();
 }
 
@@ -2230,7 +2230,7 @@ void GOM4()
     DISPLAY_WIN_LOSE();
     platform->renderFrame();
     platform->fadeScreen(15, false);
-    while (platform->getin() == 0 && !platform->quit);
+    while (platform->readKeyboard() == 0 && !platform->quit);
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->stopModule();
@@ -2351,7 +2351,7 @@ void INTRO_SCREEN()
     platform->renderFrame();
     bool done = false;
     while (!done && !platform->quit) {
-        uint8_t A = platform->getin();
+        uint8_t A = platform->readKeyboard();
         if (A != 0) {
             if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
                 if (MENUY != 3) {
@@ -2710,7 +2710,7 @@ void ELEVATOR_SELECT()
     if (CONTROL != 2) {
         // KEYBOARD INPUT
         while (!platform->quit) {
-            uint8_t A = platform->getin();
+            uint8_t A = platform->readKeyboard();
             if (A != 0) {
                 if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
                     ELEVATOR_DEC();
@@ -2806,7 +2806,7 @@ void SET_CUSTOM_KEYS()
     platform->fadeScreen(15, false);
     uint16_t destination = 0x151;
     for (TEMP_A = 0; TEMP_A != 13;) {
-        uint8_t A = platform->getin();
+        uint8_t A = platform->readKeyboard();
         if (A != 0) {
             KEY_CONFIG[TEMP_A] = A;
             DECNUM = A;

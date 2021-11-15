@@ -134,7 +134,7 @@ void PlatformSDL::chrout(uint8_t character)
     putchar(character == 0x0d ? 0x0a : character);
 }
 
-uint8_t PlatformSDL::getin()
+uint8_t PlatformSDL::readKeyboard()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event)) {

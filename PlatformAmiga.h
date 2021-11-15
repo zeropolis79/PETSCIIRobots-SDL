@@ -24,7 +24,7 @@ public:
     virtual void setInterrupt(void (*interrupt)(void));
     virtual void show();
     virtual int framesPerSecond();
-    virtual uint8_t getin();
+    virtual uint8_t readKeyboard();
     virtual void clearKeyBuffer();
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
     virtual void displayImage(Image image);

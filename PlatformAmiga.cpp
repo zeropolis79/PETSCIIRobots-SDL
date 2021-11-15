@@ -631,7 +631,7 @@ int PlatformAmiga::framesPerSecond()
     return framesPerSecond_;
 }
 
-uint8_t PlatformAmiga::getin()
+uint8_t PlatformAmiga::readKeyboard()
 {
     IntuiMessage* message;
     while ((message = (IntuiMessage*)GetMsg(window->UserPort))) {

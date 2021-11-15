@@ -16,7 +16,7 @@ public:
     virtual void setInterrupt(void (*interrupt)(void));
     virtual int framesPerSecond();
     virtual void chrout(uint8_t);
-    virtual uint8_t getin();
+    virtual uint8_t readKeyboard();
     virtual void clearKeyBuffer();
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
