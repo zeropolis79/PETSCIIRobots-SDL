@@ -174,6 +174,7 @@ void INIT_GAME()
     SET_INITIAL_TIMERS();
     PRINT_INTRO_MESSAGE();
     KEYTIMER = 30;
+    KEY_FAST = 0;
     MAIN_GAME_LOOP();
 }
 
@@ -376,18 +377,9 @@ void MAIN_GAME_LOOP()
             GAME_OVER();
             return;
         }
-//        KEY_REPEAT();
         uint8_t A = platform->readKeyboard();
         uint16_t B = platform->readJoystick();
-        // check keytimer for repeat time.
-        if (KEYTIMER != 0) {
-            if ((A == 0xff || A != PREVIOUS_KEY) && (B == 0 || B != PREVIOUS_JOY)) {
-                KEYTIMER = 0;
-                KEY_FAST = 0;
-            }
-        }
-        PREVIOUS_KEY = A;
-        PREVIOUS_JOY = B;
+        KEY_REPEAT(A, B);
         if (KEYTIMER == 0) {
             // Keyboard controls here.
             if (A != 0xff) {
@@ -1088,6 +1080,18 @@ void KEY_REPEAT()
     }
 }
 */
+
+void KEY_REPEAT(uint8_t key, uint16_t joy)
+{
+    if (KEYTIMER != 0) {
+        if ((key == 0xff || key != PREVIOUS_KEY) && (joy == 0 || joy != PREVIOUS_JOY)) {
+            KEYTIMER = 0;
+            KEY_FAST = 0;
+        }
+    }
+    PREVIOUS_KEY = key;
+    PREVIOUS_JOY = joy;
+}
 
 // This routine handles things that are in common to
 // all 4 directions of movement.
@@ -2466,6 +2470,7 @@ void INTRO_SCREEN()
     while (!done && !platform->quit) {
         uint8_t A = platform->readKeyboard();
         uint16_t B = platform->readJoystick();
+        KEY_REPEAT(A, B);
         if (KEYTIMER == 0 && (A != 0xff || B != 0)) {
             if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
                 if (MENUY != 3) {
@@ -2494,8 +2499,6 @@ void INTRO_SCREEN()
                 KEYTIMER = 6;
             }
             platform->renderFrame();
-        } else if (KEYTIMER == 0 && A == 0xff && B == 0) {
-            KEY_FAST = 0;
         }
     }
 }
@@ -2829,28 +2832,27 @@ void ELEVATOR_SELECT()
     ELEVATOR_INVERT();
     platform->renderFrame();
     // Now get user input
-    if (CONTROL != 2) {
-        // KEYBOARD INPUT
-        while (!platform->quit) {
-            uint8_t A = platform->readKeyboard();
-            if (A != 0xff) {
-                if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
-                    ELEVATOR_DEC();
-                } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
-                    ELEVATOR_INC();
-                } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
-                    SCROLL_INFO();
-                    SCROLL_INFO();
-                    SCROLL_INFO();
-                    CLEAR_KEY_BUFFER();
-                    return;
-                }
+    // KEYBOARD INPUT
+    while (!platform->quit) {
+        uint8_t A = platform->readKeyboard();
+        KEY_REPEAT(A, 0);
+        if (KEYTIMER == 0 && A != 0xff) {
+            KEYTIMER = 20;
+            if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
+                ELEVATOR_DEC();
+            } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
+                ELEVATOR_INC();
+            } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
+                SCROLL_INFO();
+                SCROLL_INFO();
+                SCROLL_INFO();
+                CLEAR_KEY_BUFFER();
+                return;
             }
         }
-    } else {
-        // SNES INPUT
-        // TODO
     }
+    // SNES INPUT
+    // TODO
 }
 
 uint8_t ELEVATOR_MAX_FLOOR = 0;
@@ -2925,11 +2927,14 @@ void SET_CUSTOM_KEYS()
     DECOMPRESS_SCREEN(SCR_CUSTOM_KEYS);
 #endif
     platform->renderFrame();
+    platform->clearKeyBuffer();
     platform->fadeScreen(15, false);
     uint16_t destination = 0x151;
     for (TEMP_A = 0; TEMP_A != 13;) {
         uint8_t A = platform->readKeyboard();
-        if (A != 0xff) {
+        KEY_REPEAT(A, 0);
+        if (KEYTIMER == 0 && A != 0xff) {
+            KEYTIMER = 255;
             KEY_CONFIG[TEMP_A] = A;
             DECNUM = A;
 #ifdef PLATFORM_IMAGE_SUPPORT
