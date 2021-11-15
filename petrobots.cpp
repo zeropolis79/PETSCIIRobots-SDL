@@ -110,9 +110,11 @@ uint8_t UNIT_FIND;      // 255=no unit present.
 uint8_t MOVE_TYPE;      // %00000001=WALK %00000010=HOVER
 uint8_t* CUR_PATTERN;   // stores the memory location of the current musical pattern being played.
 
-uint8_t LSTX;           // $97 Current Key Pressed: 255 = No Key
+//uint8_t LSTX;           // $97 Current Key Pressed: 255 = No Key
 uint8_t* MAP_SOURCE;    // $FD
 uint8_t SCREEN_MEMORY[40 * 25]; // $8000
+uint16_t PREVIOUS_JOY = 0;
+uint8_t PREVIOUS_KEY = 0xff;
 
 int main(int argc, char *argv[])
 {
@@ -374,11 +376,21 @@ void MAIN_GAME_LOOP()
             GAME_OVER();
             return;
         }
-        if (CONTROL != 2) {
+//        KEY_REPEAT();
+        uint8_t A = platform->readKeyboard();
+        uint16_t B = platform->readJoystick();
+        // check keytimer for repeat time.
+        if (KEYTIMER != 0) {
+            if ((A == 0xff || A != PREVIOUS_KEY) && (B == 0 || B != PREVIOUS_JOY)) {
+                KEYTIMER = 0;
+                KEY_FAST = 0;
+            }
+        }
+        PREVIOUS_KEY = A;
+        PREVIOUS_JOY = B;
+        if (KEYTIMER == 0) {
             // Keyboard controls here.
-            KEY_REPEAT();
-            uint8_t A = platform->readKeyboard();
-            if (A != 0) {
+            if (A != 0xff) {
                 KEYTIMER = 5;
                 if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
                     UNIT = 0;
@@ -435,18 +447,124 @@ void MAIN_GAME_LOOP()
                     TOGGLE_MUSIC();
                     CLEAR_KEY_BUFFER();
                 }
-#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    #ifdef PLATFORM_LIVE_MAP_SUPPORT
                 else if (A == KEY_CONFIG[KEY_LIVE_MAP]) {
                     TOGGLE_LIVE_MAP();
                 } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS]) {
                     TOGGLE_LIVE_MAP_ROBOTS();
                 }
-#endif
+    #endif
             }
-        } else {
             // SNES CONTROLLER starts here
-            // TODO implement SC01
+            if (B != 0) {
+                // first we start with the 4 directional buttons.
+                if (B & Platform::JoystickLeft) {
+                    if (CONTROL != 2 && B & Platform::JoystickRed) {
+                        FIRE_LEFT();
+                        KEYTIMER = 20;
+                    } else {
+                        UNIT = 0;
+                        MOVE_TYPE = 1; // %00000001
+                        REQUEST_WALK_LEFT();
+                        AFTER_MOVE_SNES();
+                    }
+                } else if (B & Platform::JoystickRight) {
+                    if (CONTROL != 2 && B & Platform::JoystickRed) {
+                        FIRE_RIGHT();
+                        KEYTIMER = 20;
+                    } else {
+                        UNIT = 0;
+                        MOVE_TYPE = 1; // %00000001
+                        REQUEST_WALK_RIGHT();
+                        AFTER_MOVE_SNES();
+                    }
+                } else if (B & Platform::JoystickUp) {
+                    if (CONTROL != 2 && B & Platform::JoystickRed) {
+                        FIRE_UP();
+                        KEYTIMER = 20;
+                    } else {
+                        UNIT = 0;
+                        MOVE_TYPE = 1; // %00000001
+                        REQUEST_WALK_UP();
+                        AFTER_MOVE_SNES();
+                    }
+                } else if (B & Platform::JoystickDown) {
+                    if (CONTROL != 2 && B & Platform::JoystickRed) {
+                        FIRE_DOWN();
+                        KEYTIMER = 20;
+                    } else {
+                        UNIT = 0;
+                        MOVE_TYPE = 1; // %00000001
+                        REQUEST_WALK_DOWN();
+                        AFTER_MOVE_SNES();
+                    }
+                }
+                // Now check for non-repeating buttons
+                if (CONTROL != 2) {
+                    if (B & Platform::JoystickBlue) {
+                        USE_ITEM();
+                        KEYTIMER = 15;
+                    }
+                } else {
+                    if (B & Platform::JoystickGreen) {
+                        FIRE_LEFT();
+                        KEYTIMER = 20;
+                    }
+                    if (B & Platform::JoystickBlue) {
+                        FIRE_RIGHT();
+                        KEYTIMER = 20;
+                    }
+                    if (B & Platform::JoystickYellow) {
+                        FIRE_UP();
+                        KEYTIMER = 20;
+                    }
+                    if (B & Platform::JoystickRed) {
+                        if (B & Platform::JoystickPlay) {
+                            USE_ITEM();
+                            KEYTIMER = 15;
+                        } else {
+                            FIRE_DOWN();
+                            KEYTIMER = 20;
+                        }
+                    }
+                    if (B & Platform::JoystickReverse) {
+                        if (B & Platform::JoystickPlay) {
+                            CYCLE_ITEM();
+                        } else {
+                            SEARCH_OBJECT();
+                        }
+                        KEYTIMER = 15;
+                    }
+                    if (B & Platform::JoystickForward) {
+                        if (B & Platform::JoystickPlay) {
+                            CYCLE_WEAPON();
+                        } else {
+                            MOVE_OBJECT();
+                        }
+                        KEYTIMER = 15;
+                    }
+                }
+            }
+            if (A == 0xff && B == 0) {
+                KEY_FAST = 0;
+            }
         }
+    }
+}
+
+// This routine handles things that are in common to
+// all 4 directions of movement.
+void AFTER_MOVE_SNES()
+{
+    if (MOVE_RESULT == 1) {
+        ANIMATE_PLAYER();
+    }
+    CACULATE_AND_REDRAW();
+    if (KEY_FAST == 0) {
+        KEYTIMER = 15;
+        KEY_FAST = 1;
+    } else {
+        KEYTIMER = 6;
     }
 }
 
@@ -950,6 +1068,7 @@ void AFTER_FIRE(int X)
     }
 }
 
+/*
 // This routine checks KEYTIMER to see if it has
 // reached zero yet.  If so, it clears the LSTX
 // variable used by the kernal, so that it will
@@ -968,6 +1087,7 @@ void KEY_REPEAT()
         KEYTIMER = 6;
     }
 }
+*/
 
 // This routine handles things that are in common to
 // all 4 directions of movement.
@@ -1118,49 +1238,46 @@ void USER_SELECT_OBJECT()
 #endif
             return;
         }
-        if (CONTROL != 2) {
-            uint8_t A = platform->readKeyboard();
-            if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
-                UNIT_DIRECTION[0] = 3;
-                CURSOR_X++;
+        uint8_t A = platform->readKeyboard();
+        if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
+            UNIT_DIRECTION[0] = 3;
+            CURSOR_X++;
 #ifdef PLATFORM_CURSOR_SUPPORT
-                if (LIVE_MAP_ON == 0) {
-                    platform->showCursor(CURSOR_X, CURSOR_Y);
-                }
-#endif
-                return;
-            } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
-                UNIT_DIRECTION[0] = 2;
-                CURSOR_X--;
-#ifdef PLATFORM_CURSOR_SUPPORT
-                if (LIVE_MAP_ON == 0) {
-                    platform->showCursor(CURSOR_X, CURSOR_Y);
-                }
-#endif
-                return;
-            } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
-                UNIT_DIRECTION[0] = 1;
-                CURSOR_Y++;
-#ifdef PLATFORM_CURSOR_SUPPORT
-                if (LIVE_MAP_ON == 0) {
-                    platform->showCursor(CURSOR_X, CURSOR_Y);
-                }
-#endif
-                return;
-            } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
-                UNIT_DIRECTION[0] = 0;
-                CURSOR_Y--;
-#ifdef PLATFORM_CURSOR_SUPPORT
-                if (LIVE_MAP_ON == 0) {
-                    platform->showCursor(CURSOR_X, CURSOR_Y);
-                }
-#endif
-                return;
+            if (LIVE_MAP_ON == 0) {
+                platform->showCursor(CURSOR_X, CURSOR_Y);
             }
-        } else {
-            // SNES controls for this routine
-            // TODO implement MVSNES
+#endif
+            return;
+        } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
+            UNIT_DIRECTION[0] = 2;
+            CURSOR_X--;
+#ifdef PLATFORM_CURSOR_SUPPORT
+            if (LIVE_MAP_ON == 0) {
+                platform->showCursor(CURSOR_X, CURSOR_Y);
+            }
+#endif
+            return;
+        } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
+            UNIT_DIRECTION[0] = 1;
+            CURSOR_Y++;
+#ifdef PLATFORM_CURSOR_SUPPORT
+            if (LIVE_MAP_ON == 0) {
+                platform->showCursor(CURSOR_X, CURSOR_Y);
+            }
+#endif
+            return;
+        } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
+            UNIT_DIRECTION[0] = 0;
+            CURSOR_Y--;
+#ifdef PLATFORM_CURSOR_SUPPORT
+            if (LIVE_MAP_ON == 0) {
+                platform->showCursor(CURSOR_X, CURSOR_Y);
+            }
+#endif
+            return;
         }
+        // SNES controls for this routine
+        // TODO implement MVSNES
     }
 }
 
@@ -1207,24 +1324,21 @@ void MOVE_OBJECT()
 #endif
             return;
         }
-        if (CONTROL != 2) { // which controller are we using?
-            // keyboard control
-            uint8_t A = platform->readKeyboard();
-            if (A == 0) {
-                continue;
-            } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
-                CURSOR_X++;
-            } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
-                CURSOR_X--;
-            } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
-                CURSOR_Y++;
-            } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
-                CURSOR_Y--;
-            }
-        } else {
-            // SNES controls
-            // TODO
+        // keyboard control
+        uint8_t A = platform->readKeyboard();
+        if (A == 0xff) {
+            continue;
+        } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
+            CURSOR_X++;
+        } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
+            CURSOR_X--;
+        } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
+            CURSOR_Y++;
+        } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
+            CURSOR_Y--;
         }
+        // SNES controls
+        // TODO
         // NOW TEST TO SEE IF THAT SPOT IS OPEN
 #ifdef PLATFORM_CURSOR_SUPPORT
         platform->hideCursor();
@@ -2211,7 +2325,7 @@ void GAME_OVER()
         platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     }
 #endif
-    while (platform->readKeyboard() == 0 && !platform->quit);
+    while (platform->readKeyboard() == 0xff && !platform->quit);
     GOM4();
 }
 
@@ -2229,7 +2343,7 @@ void GOM4()
     DISPLAY_WIN_LOSE();
     platform->renderFrame();
     platform->fadeScreen(15, false);
-    while (platform->readKeyboard() == 0 && !platform->quit);
+    while (platform->readKeyboard() == 0xff && !platform->quit);
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->stopModule();
@@ -2352,7 +2466,7 @@ void INTRO_SCREEN()
     while (!done && !platform->quit) {
         uint8_t A = platform->readKeyboard();
         uint16_t B = platform->readJoystick();
-        if (A != 0 || (KEYTIMER == 0 && B != 0)) {
+        if (KEYTIMER == 0 && (A != 0xff || B != 0)) {
             if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
                 if (MENUY != 3) {
                     REVERSE_MENU_OPTION(false);
@@ -2373,10 +2487,15 @@ void INTRO_SCREEN()
                 PLAY_SOUND(15); // menu beep, SOUND PLAY
                 done = EXEC_COMMAND();
             }
-            if (B != 0) {
+            if (KEY_FAST == 0) {
+                KEYTIMER = 15;
+                KEY_FAST = 1;
+            } else {
                 KEYTIMER = 6;
             }
             platform->renderFrame();
+        } else if (KEYTIMER == 0 && A == 0xff && B == 0) {
+            KEY_FAST = 0;
         }
     }
 }
@@ -2441,7 +2560,7 @@ void CYCLE_CONTROLS()
 
 const char* CONTROLTEXT = "keyboard  "
                           "custom key"
-                          "snes pad  ";
+                          "cd32 pad  ";
 uint8_t CONTROLSTART[] = { 0, 10, 20 };
 
 void CYCLE_MAP()
@@ -2714,7 +2833,7 @@ void ELEVATOR_SELECT()
         // KEYBOARD INPUT
         while (!platform->quit) {
             uint8_t A = platform->readKeyboard();
-            if (A != 0) {
+            if (A != 0xff) {
                 if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
                     ELEVATOR_DEC();
                 } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
@@ -2810,7 +2929,7 @@ void SET_CUSTOM_KEYS()
     uint16_t destination = 0x151;
     for (TEMP_A = 0; TEMP_A != 13;) {
         uint8_t A = platform->readKeyboard();
-        if (A != 0) {
+        if (A != 0xff) {
             KEY_CONFIG[TEMP_A] = A;
             DECNUM = A;
 #ifdef PLATFORM_IMAGE_SUPPORT

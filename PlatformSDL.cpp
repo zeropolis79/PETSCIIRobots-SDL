@@ -143,7 +143,7 @@ uint8_t PlatformSDL::readKeyboard()
             quit = true;
             break;
         case SDL_KEYDOWN:
-            return event.key.keysym.scancode;
+            return event.key.keysym.scancode > 0 ? event.key.keysym.scancode : 0xff;
         default:
             break;
         }

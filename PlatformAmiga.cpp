@@ -294,6 +294,8 @@ PlatformAmiga::PlatformAmiga() :
     palette(new Palette(blackPalette, (1 << PLANES), 0)),
     bplcon1DefaultValue(0),
     shakeStep(0),
+    keyToReturn(0xff),
+    downKey(0xff),
     shift(0)
 {
     Palette::initialize();
@@ -652,7 +654,10 @@ uint8_t PlatformAmiga::readKeyboard()
             } else if (keyCode == 0x60 || keyCode == 0x61) {
                 shift = keyDown ? 0x80 : 0x00;
             } else if (keyDown) {
-                return keyCode | shift;
+                downKey = keyCode | shift;
+                keyToReturn = downKey;
+            } else if (downKey == keyCode | shift) {
+                downKey = 0xff;
             }
             break;
         }
@@ -661,7 +666,9 @@ uint8_t PlatformAmiga::readKeyboard()
         }
     }
 
-    return 0;
+    uint8_t result = keyToReturn;
+    keyToReturn = downKey;
+    return result;
 }
 
 void PlatformAmiga::clearKeyBuffer()
@@ -670,6 +677,8 @@ void PlatformAmiga::clearKeyBuffer()
     while ((message = (IntuiMessage*)GetMsg(window->UserPort))) {
         ReplyMsg((Message*)message);
     }
+    keyToReturn = 0xff;
+    downKey = 0xff;
 }
 
 uint16_t PlatformAmiga::readJoystick()

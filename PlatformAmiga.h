@@ -107,6 +107,8 @@ private:
     Palette* palette;
     uint16_t bplcon1DefaultValue;
     uint8_t shakeStep;
+    uint8_t keyToReturn;
+    uint8_t downKey;
     uint8_t shift;
 };
 
