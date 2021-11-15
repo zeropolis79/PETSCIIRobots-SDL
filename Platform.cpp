@@ -41,7 +41,7 @@ void Platform::renderLiveMap(uint8_t*)
 {
 }
 
-void Platform::renderLiveMapUnits(uint8_t*, uint8_t*, uint8_t*, uint8_t*, bool)
+void Platform::renderLiveMapUnits(uint8_t*, uint8_t*, uint8_t*, uint8_t*, uint8_t, bool)
 {
 }
 

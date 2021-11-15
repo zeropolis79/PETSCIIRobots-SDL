@@ -230,7 +230,7 @@ void DRAW_LIVE_MAP();
 
 extern uint8_t LIVE_MAP_ON;
 extern uint8_t LIVE_MAP_ROBOTS_ON;
-extern uint8_t LIVE_MAP_ROBOTS_BLINK;
+extern uint8_t LIVE_MAP_PLAYER_BLINK;
 #endif
 
 #ifdef PLATFORM_TILE_BASED_RENDERING

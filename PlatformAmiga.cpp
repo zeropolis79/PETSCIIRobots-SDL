@@ -1091,11 +1091,11 @@ void PlatformAmiga::renderLiveMapTiles(uint8_t* map)
 #endif
 */
 
-void PlatformAmiga::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, bool showRobots)
+void PlatformAmiga::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots)
 {
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
     for (int i = 0; i < 28; i++) {
-        if (unitTypes[i] != ::unitTypes[i] || unitX[i] != ::unitX[i] || unitY[i] != ::unitY[i] || (!showRobots && i > 0)) {
+        if (unitX[i] != ::unitX[i] || unitY[i] != ::unitY[i] || (i > 0 && (!showRobots || unitTypes[i] != ::unitTypes[i])) || (i == 0 && playerColor != ::unitTypes[i])) {
             // Remove old dot if any
             if (::unitTypes[i] != 255) {
                 int x = ::unitX[i];
@@ -1136,18 +1136,23 @@ void PlatformAmiga::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t
                 int shift = (x & 3);
                 shift += shift;
                 uint8_t* dest = screenPlanes + (20 + y * 2) * PLANES * SCREEN_WIDTH_IN_BYTES + (x >> 2);
-                uint8_t plane1 = 0xc0 >> shift;
-                uint16_t plane234Mask = 0xff3f >> shift;
-                dest[0 * SCREEN_WIDTH_IN_BYTES] |= plane1;
-                dest[1 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
-                dest[2 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
-                dest[3 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
-                dest[4 * SCREEN_WIDTH_IN_BYTES] |= plane1;
-                dest[5 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
-                dest[6 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
-                dest[7 * SCREEN_WIDTH_IN_BYTES] &= plane234Mask;
+                uint16_t mask = 0xff3f >> shift;
+                if (i > 0 || playerColor == 1) {
+                    uint8_t plane1 = 0xc0 >> shift;
+                    dest[0 * SCREEN_WIDTH_IN_BYTES] |= plane1;
+                    dest[4 * SCREEN_WIDTH_IN_BYTES] |= plane1;
+                } else {
+                    dest[0 * SCREEN_WIDTH_IN_BYTES] &= mask;
+                    dest[4 * SCREEN_WIDTH_IN_BYTES] &= mask;
+                }
+                dest[1 * SCREEN_WIDTH_IN_BYTES] &= mask;
+                dest[2 * SCREEN_WIDTH_IN_BYTES] &= mask;
+                dest[3 * SCREEN_WIDTH_IN_BYTES] &= mask;
+                dest[5 * SCREEN_WIDTH_IN_BYTES] &= mask;
+                dest[6 * SCREEN_WIDTH_IN_BYTES] &= mask;
+                dest[7 * SCREEN_WIDTH_IN_BYTES] &= mask;
 
-                ::unitTypes[i] = unitTypes[i];
+                ::unitTypes[i] = i == 0 ? playerColor : unitTypes[i];
                 ::unitX[i] = unitX[i];
                 ::unitY[i] = unitY[i];
             }
