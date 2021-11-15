@@ -1463,10 +1463,9 @@ void TOGGLE_LIVE_MAP_ROBOTS()
 
 void DRAW_LIVE_MAP()
 {
-    platform->renderLiveMapUnits(MAP, UNIT_TYPE, UNIT_LOC_X, UNIT_LOC_Y, LIVE_MAP_PLAYER_BLINK < 16 ? 1 : 0, LIVE_MAP_ROBOTS_ON == 1 ? true : false);
+    platform->renderLiveMapUnits(MAP, UNIT_TYPE, UNIT_LOC_X, UNIT_LOC_Y, LIVE_MAP_PLAYER_BLINK < 128 ? 1 : 0, LIVE_MAP_ROBOTS_ON == 1 ? true : false);
 
-    LIVE_MAP_PLAYER_BLINK++;
-    LIVE_MAP_PLAYER_BLINK &= 31;
+    LIVE_MAP_PLAYER_BLINK += 10;
 }
 
 uint8_t LIVE_MAP_ON = 0;
