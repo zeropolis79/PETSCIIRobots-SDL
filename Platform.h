@@ -46,6 +46,34 @@ public:
         ModuleInGame4
     };
 
+    enum JoystickBits {
+        JoystickBitRight,
+        JoystickBitLeft,
+        JoystickBitDown,
+        JoystickBitUp,
+        JoystickBitRed,
+        JoystickBitBlue,
+        JoystickBitGreen,
+        JoystickBitYellow,
+        JoystickBitPlay,
+        JoystickBitReverse,
+        JoystickBitForward
+    };
+
+    enum JoystickMask {
+        JoystickRight = (1 << JoystickBitRight),
+        JoystickLeft = (1 << JoystickBitLeft),
+        JoystickDown = (1 << JoystickBitDown),
+        JoystickUp = (1 << JoystickBitUp),
+        JoystickRed = (1 << JoystickBitRed),
+        JoystickBlue = (1 << JoystickBitBlue),
+        JoystickGreen = (1 << JoystickBitGreen),
+        JoystickYellow = (1 << JoystickBitYellow),
+        JoystickPlay = (1 << JoystickBitPlay),
+        JoystickReverse = (1 << JoystickBitReverse),
+        JoystickForward = (1 << JoystickBitForward)
+    };
+
     virtual uint8_t* standardControls() const = 0;
     virtual void setInterrupt(void (*interrupt)(void)) = 0;
     virtual void show();
@@ -53,6 +81,7 @@ public:
     virtual void chrout(uint8_t);
     virtual uint8_t readKeyboard() = 0;
     virtual void clearKeyBuffer() = 0;
+    virtual uint16_t readJoystick();
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset = 0) = 0;
     virtual void displayImage(Image image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes) = 0;

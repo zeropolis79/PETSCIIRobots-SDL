@@ -13,6 +13,11 @@ void Platform::chrout(uint8_t)
 {
 }
 
+uint16_t Platform::readJoystick()
+{
+    return 0;
+}
+
 void Platform::displayImage(Image)
 {
 }

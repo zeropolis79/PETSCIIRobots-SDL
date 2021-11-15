@@ -110,7 +110,6 @@ uint8_t UNIT_FIND;      // 255=no unit present.
 uint8_t MOVE_TYPE;      // %00000001=WALK %00000010=HOVER
 uint8_t* CUR_PATTERN;   // stores the memory location of the current musical pattern being played.
 
-void (*CINV)(void);     // $90-$91 Vector: Hardware Interrupt
 uint8_t LSTX;           // $97 Current Key Pressed: 255 = No Key
 uint8_t* MAP_SOURCE;    // $FD
 uint8_t SCREEN_MEMORY[40 * 25]; // $8000
@@ -2352,15 +2351,16 @@ void INTRO_SCREEN()
     bool done = false;
     while (!done && !platform->quit) {
         uint8_t A = platform->readKeyboard();
-        if (A != 0) {
-            if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
+        uint16_t B = platform->readJoystick();
+        if (A != 0 || (KEYTIMER == 0 && B != 0)) {
+            if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
                 if (MENUY != 3) {
                     REVERSE_MENU_OPTION(false);
                     MENUY++;
                     REVERSE_MENU_OPTION(true);
                     PLAY_SOUND(15); // menu beep
                 }
-            } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
+            } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP] || (B & Platform::JoystickUp)) { // CURSOR UP
                 if (MENUY != 0) {
                     REVERSE_MENU_OPTION(false);
                     MENUY--;
@@ -2369,9 +2369,12 @@ void INTRO_SCREEN()
                 }
             } else if (A == KEY_CONFIG[KEY_SPACE]) { // SPACE
                 done = EXEC_COMMAND();
-            } else if (A == KEY_CONFIG[KEY_RETURN]) { // RETURN
+            } else if (A == KEY_CONFIG[KEY_RETURN] || (B & Platform::JoystickRed)) { // RETURN
                 PLAY_SOUND(15); // menu beep, SOUND PLAY
                 done = EXEC_COMMAND();
+            }
+            if (B != 0) {
+                KEYTIMER = 6;
             }
             platform->renderFrame();
         }

@@ -26,6 +26,7 @@ public:
     virtual int framesPerSecond();
     virtual uint8_t readKeyboard();
     virtual void clearKeyBuffer();
+    virtual uint16_t readJoystick();
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
     virtual void displayImage(Image image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);

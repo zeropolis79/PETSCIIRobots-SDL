@@ -670,6 +670,23 @@ void PlatformAmiga::clearKeyBuffer()
     }
 }
 
+uint16_t PlatformAmiga::readJoystick()
+{
+    uint16_t output = 0;
+    uint16_t joystickData = custom.joy1dat;
+    bool Y0 = (joystickData & 0x0100) == 0x0100 ? true : false;
+    bool Y1 = (joystickData & 0x0200) == 0x0200 ? true : false;
+    bool X0 = (joystickData & 0x0001) == 0x0001 ? true : false;
+    bool X1 = (joystickData & 0x0002) == 0x0002 ? true : false;
+    if (Y0) {
+        output |= (Y1 ? JoystickLeft : JoystickUp);
+    }
+    if (X0) {
+        output |= (X1 ? JoystickRight : JoystickDown);
+    }
+    return output;
+}
+
 uint32_t PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)
 {
     uint32_t bytesRead = 0;
