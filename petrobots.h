@@ -196,7 +196,6 @@ void FIRE_RIGHT_PISTOL();
 void FIRE_RIGHT_PLASMA();
 void AFTER_FIRE(int X);
 //void KEY_REPEAT();
-void KEY_REPEAT(uint8_t key, uint16_t joy = 0);
 void AFTER_MOVE();
 
 extern uint8_t KEY_FAST; // 0=DEFAULT STATE
