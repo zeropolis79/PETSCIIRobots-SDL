@@ -643,6 +643,7 @@ uint8_t PlatformAmiga::readKeyboard()
     while ((message = (IntuiMessage*)GetMsg(window->UserPort))) {
         uint32_t messageClass = message->Class;
         uint16_t messageCode = message->Code;
+        uint16_t messageQualifier = message->Qualifier;
 
         ReplyMsg((Message*)message);
 
@@ -657,7 +658,7 @@ uint8_t PlatformAmiga::readKeyboard()
             } else if (keyCode == 0x60 || keyCode == 0x61) {
                 shift = keyDown ? 0x80 : 0x00;
             } else if (keyDown) {
-                if (downKey != keyCodeWithShift) {
+                if (downKey != keyCodeWithShift && (messageQualifier & IEQUALIFIER_REPEAT) != IEQUALIFIER_REPEAT) {
                     downKey = keyCodeWithShift;
                     keyToReturn = downKey;
                 }
