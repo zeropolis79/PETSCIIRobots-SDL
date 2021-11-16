@@ -1,4 +1,5 @@
 	xdef	_renderLiveMapTiles__13PlatformAmigaFPUc
+	xdef	_readCD32Pad__13PlatformAmigaFv
 	xdef	_verticalBlankInterruptServer__13PlatformAmigaFv
 	xdef	_ungzip__13PlatformAmigaFPvPv
 	xref	_tileLiveMap
@@ -199,6 +200,45 @@ _renderLiveMapTiles__13PlatformAmigaFPUc:
 	dbra    d7,.yLoop
 
 	movem.l	(sp)+,d2-d7/a2-a3/a5-a6
+	rts
+
+_readCD32Pad__13PlatformAmigaFv:
+	movem.l	d2-d5,-(sp)
+
+	lea	$bfe001,a0
+	lea $dff000,a1
+	moveq	#0,d0
+	moveq	#7,d3	; CIAB_GAMEPORT1 (red)
+	moveq	#14,d4	; 2nd button (blue)
+	bset	d3,$200(a0)	; set direction of the fire button pin
+	bclr	d3,(a0)
+	move.w	#$6f00,$34(a1)	; potgo
+
+	moveq	#10-1,d5
+	bra.s	.timingSkip
+.buttonLoop:
+	tst.b	(a0)
+	tst.b	(a0)
+.timingSkip:
+	tst.b	(a0)
+	tst.b	(a0)
+	tst.b	(a0)
+	tst.b	(a0)
+	tst.b	(a0)
+	tst.b	(a0)
+	move.w	$16(a1),d2
+	bset	d3,(a0)
+	bclr	d3,(a0)
+	btst	d4,d2
+	bne.s	.noButton
+	bset	d5,d0
+.noButton:
+	dbra	d5,.buttonLoop
+
+	bclr	d3,$200(a0)	; reset fire button pin direction
+	move.w	#$ff00,$34(a0)	; potgo
+
+	movem.l	(sp)+,d2-d5
 	rts
 
 _verticalBlankInterruptServer__13PlatformAmigaFv:

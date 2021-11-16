@@ -28,7 +28,7 @@ public:
     virtual void keyRepeat();
     virtual void clearKeyBuffer();
     virtual bool isKeyOrJoystickPressed();
-    virtual uint16_t readJoystick();
+    virtual uint16_t readJoystick(bool gamepad);
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
     virtual void displayImage(Image image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
@@ -82,6 +82,7 @@ private:
     __asm void renderLiveMapTiles(register __a1 uint8_t* map);
 //    void renderLiveMapTiles(uint8_t* map);
 #endif
+    __asm static uint16_t readCD32Pad();
     int framesPerSecond_;
     uint32_t clock;
     BitMap* screenBitmap;

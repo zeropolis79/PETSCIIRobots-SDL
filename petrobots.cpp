@@ -150,6 +150,12 @@ void INIT_GAME()
     LIVE_MAP_ON = 0;
     RESET_KEYS_AMMO();
     platform->fadeScreen(0, false);
+    if (CONTROL == 2) {
+        for (int i = 0; i < 50; i++) {
+            platform->readJoystick(true);
+            platform->renderFrame(true);
+        }
+    }
     DISPLAY_GAME_SCREEN();
     DISPLAY_LOAD_MESSAGE2();
     platform->fadeScreen(15, false);
@@ -375,7 +381,7 @@ void MAIN_GAME_LOOP()
         }
         KEY_REPEAT(platform->isKeyOrJoystickPressed());
         uint8_t A = platform->readKeyboard();
-        uint16_t B = platform->readJoystick();
+        uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
         // Keyboard controls here.
         if (A != 0xff) {
             KEYTIMER = 5;
@@ -2466,7 +2472,7 @@ void INTRO_SCREEN()
     bool done = false;
     while (!done && !platform->quit) {
         uint8_t A = platform->readKeyboard();
-        uint16_t B = platform->readJoystick();
+        uint16_t B = platform->readJoystick(false);
         if (A != 0xff || B != 0) {
             if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
                 if (MENUY != 3) {

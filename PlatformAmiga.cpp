@@ -700,7 +700,7 @@ bool PlatformAmiga::isKeyOrJoystickPressed()
     return downKey != 0xff || joystickState != 0;
 }
 
-uint16_t PlatformAmiga::readJoystick()
+uint16_t PlatformAmiga::readJoystick(bool gamepad)
 {
     uint16_t state = 0;
 
@@ -716,16 +716,50 @@ uint16_t PlatformAmiga::readJoystick()
         state |= (X1 ? JoystickRight : JoystickDown);
     }
 
-    uint8_t peripheralData = ciaa.ciapra;
-    bool FIR1 = (peripheralData & CIAF_GAMEPORT1) ? false : true;
-    if (FIR1) {
-        state |= JoystickRed;
-    }
+    if (gamepad) {
+        uint16_t cd32State = readCD32Pad();
+        if (cd32State != 0x3ff) {
+            bool RED = (cd32State & 0x0100) == 0x0100 ? true : false;
+            bool BLUE = (cd32State & 0x0200) == 0x0200 ? true : false;
+            bool GREEN = (cd32State & 0x0400) == 0x0400 ? true : false;
+            bool YELLOW = (cd32State & 0x0800) == 0x0800 ? true : false;
+            bool PLAY = (cd32State & 0x0008) == 0x0008 ? true : false;
+            bool REVERSE = (cd32State & 0x0010) == 0x0010 ? true : false;
+            bool FORWARD = (cd32State & 0x0020) == 0x0020 ? true : false;
+            if (RED) {
+                state |= JoystickRed;
+            }
+            if (BLUE) {
+                state |= JoystickBlue;
+            }
+            if (GREEN) {
+                state |= JoystickGreen;
+            }
+            if (YELLOW) {
+                state |= JoystickYellow;
+            }
+            if (PLAY) {
+                state |= JoystickPlay;
+            }
+            if (REVERSE) {
+                state |= JoystickReverse;
+            }
+            if (FORWARD) {
+                state |= JoystickForward;
+            }
+        }
+    } else {
+        uint8_t peripheralData = ciaa.ciapra;
+        bool FIR1 = (peripheralData & CIAF_GAMEPORT1) ? false : true;
+        if (FIR1) {
+            state |= JoystickRed;
+        }
 
-    uint16_t potData = custom.potinp;
-    bool DATRY = (potData & 0x4000) ? true : false;
-    if (DATRY) {
-        state |= JoystickBlue;
+        uint16_t potData = custom.potinp;
+        bool DATRY = (potData & 0x4000) ? true : false;
+        if (DATRY) {
+            state |= JoystickBlue;
+        }
     }
 
     if (joystickState != state) {

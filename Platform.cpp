@@ -22,7 +22,7 @@ bool Platform::isKeyOrJoystickPressed()
     return false;
 }
 
-uint16_t Platform::readJoystick()
+uint16_t Platform::readJoystick(bool)
 {
     return 0;
 }
