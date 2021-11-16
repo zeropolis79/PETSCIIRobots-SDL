@@ -151,7 +151,7 @@ void INIT_GAME()
     RESET_KEYS_AMMO();
     platform->fadeScreen(0, false);
     if (CONTROL == 2) {
-        for (int i = 0; i < 50; i++) {
+        for (int i = 0; i < 5; i++) {
             platform->readJoystick(true);
             platform->renderFrame(true);
         }
@@ -664,8 +664,10 @@ bool PAUSE_GAME()
     platform->renderFrame();
     while (!platform->quit) {
         uint8_t A = platform->readKeyboard();
+        uint16_t B = platform->readJoystick(false);
         if (A == KEY_CONFIG[KEY_PAUSE] || // RUN/STOP
-            A == KEY_CONFIG[KEY_NO]) { // N-KEY
+            A == KEY_CONFIG[KEY_NO] ||
+            (B & Platform::JoystickBlue)) { // N-KEY
             SCROLL_INFO();
             SCROLL_INFO();
             SCROLL_INFO();
@@ -673,7 +675,7 @@ bool PAUSE_GAME()
             CLOCK_ACTIVE = 1;
             PLAY_SOUND(15);
             return false;
-        } else if (A == KEY_CONFIG[KEY_YES]) { // Y-KEY
+        } else if (A == KEY_CONFIG[KEY_YES] || (B & Platform::JoystickRed)) { // Y-KEY
             UNIT_TYPE[0] = 0; // make player dead
             PLAY_SOUND(15);
             GOM4();
@@ -1246,7 +1248,8 @@ void USER_SELECT_OBJECT()
             return;
         }
         uint8_t A = platform->readKeyboard();
-        if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
+        uint16_t B = platform->readJoystick(false);
+        if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
             UNIT_DIRECTION[0] = 3;
             CURSOR_X++;
 #ifdef PLATFORM_CURSOR_SUPPORT
@@ -1255,7 +1258,7 @@ void USER_SELECT_OBJECT()
             }
 #endif
             return;
-        } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
+        } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT] || (B & Platform::JoystickLeft)) { // CURSOR LEFT
             UNIT_DIRECTION[0] = 2;
             CURSOR_X--;
 #ifdef PLATFORM_CURSOR_SUPPORT
@@ -1264,7 +1267,7 @@ void USER_SELECT_OBJECT()
             }
 #endif
             return;
-        } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
+        } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
             UNIT_DIRECTION[0] = 1;
             CURSOR_Y++;
 #ifdef PLATFORM_CURSOR_SUPPORT
@@ -1273,7 +1276,7 @@ void USER_SELECT_OBJECT()
             }
 #endif
             return;
-        } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
+        } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP] || (B & Platform::JoystickUp)) { // CURSOR UP
             UNIT_DIRECTION[0] = 0;
             CURSOR_Y--;
 #ifdef PLATFORM_CURSOR_SUPPORT
@@ -1333,15 +1336,16 @@ void MOVE_OBJECT()
         }
         // keyboard control
         uint8_t A = platform->readKeyboard();
-        if (A == 0xff) {
+        uint16_t B = platform->readJoystick(false);
+        if (A == 0xff && B == 0) {
             continue;
-        } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
+        } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
             CURSOR_X++;
-        } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
+        } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT] || (B & Platform::JoystickLeft)) { // CURSOR LEFT
             CURSOR_X--;
-        } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
+        } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
             CURSOR_Y++;
-        } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
+        } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP] || (B & Platform::JoystickUp)) { // CURSOR UP
             CURSOR_Y--;
         }
         // SNES controls
@@ -2332,7 +2336,7 @@ void GAME_OVER()
         platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     }
 #endif
-    while (platform->readKeyboard() == 0xff && !platform->quit);
+    while (platform->readKeyboard() == 0xff && platform->readJoystick(false) == 0 && !platform->quit);
     GOM4();
 }
 
@@ -2350,7 +2354,7 @@ void GOM4()
     DISPLAY_WIN_LOSE();
     platform->renderFrame();
     platform->fadeScreen(15, false);
-    while (platform->readKeyboard() == 0xff && !platform->quit);
+    while (platform->readKeyboard() == 0xff && platform->readJoystick(false) == 0 && !platform->quit);
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->stopModule();
@@ -2832,12 +2836,13 @@ void ELEVATOR_SELECT()
         // KEYBOARD INPUT
         while (!platform->quit) {
             uint8_t A = platform->readKeyboard();
-            if (A != 0xff) {
-                if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
+            uint16_t B = platform->readJoystick(false);
+            if (A != 0xff || B != 0) {
+                if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT] || (B & Platform::JoystickLeft)) { // CURSOR LEFT
                     ELEVATOR_DEC();
-                } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
+                } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
                     ELEVATOR_INC();
-                } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
+                } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
                     SCROLL_INFO();
                     SCROLL_INFO();
                     SCROLL_INFO();
