@@ -150,12 +150,6 @@ void INIT_GAME()
     LIVE_MAP_ON = 0;
     RESET_KEYS_AMMO();
     platform->fadeScreen(0, false);
-    if (CONTROL == 2) {
-        for (int i = 0; i < 5; i++) {
-            platform->readJoystick(true);
-            platform->renderFrame(true);
-        }
-    }
     DISPLAY_GAME_SCREEN();
     DISPLAY_LOAD_MESSAGE2();
     platform->fadeScreen(15, false);
