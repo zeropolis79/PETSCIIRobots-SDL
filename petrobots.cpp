@@ -2551,8 +2551,8 @@ void CYCLE_CONTROLS()
     }
 }
 
-const char* CONTROLTEXT = "keyboard  "
-                          "custom key"
+const char* CONTROLTEXT = "standard  "
+                          "custom    "
                           "cd32 pad  ";
 uint8_t CONTROLSTART[] = { 0, 10, 20 };
 
