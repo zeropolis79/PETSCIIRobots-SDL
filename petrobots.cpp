@@ -110,11 +110,8 @@ uint8_t UNIT_FIND;      // 255=no unit present.
 uint8_t MOVE_TYPE;      // %00000001=WALK %00000010=HOVER
 uint8_t* CUR_PATTERN;   // stores the memory location of the current musical pattern being played.
 
-//uint8_t LSTX;           // $97 Current Key Pressed: 255 = No Key
 uint8_t* MAP_SOURCE;    // $FD
 uint8_t SCREEN_MEMORY[40 * 25]; // $8000
-uint16_t PREVIOUS_JOY = 0;
-uint8_t PREVIOUS_KEY = 0xff;
 
 int main(int argc, char *argv[])
 {
@@ -376,177 +373,183 @@ void MAIN_GAME_LOOP()
             GAME_OVER();
             return;
         }
-//        KEY_REPEAT();
+        KEY_REPEAT(platform->isKeyOrJoystickPressed());
         uint8_t A = platform->readKeyboard();
         uint16_t B = platform->readJoystick();
-        // check keytimer for repeat time.
-        if (KEYTIMER != 0) {
-            if ((A == 0xff || A != PREVIOUS_KEY) && (B == 0 || B != PREVIOUS_JOY)) {
-                KEYTIMER = 0;
-                KEY_FAST = 0;
+        // Keyboard controls here.
+        if (A != 0xff) {
+            KEYTIMER = 5;
+            if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
+                UNIT = 0;
+                MOVE_TYPE = 1; // %00000001
+                REQUEST_WALK_RIGHT();
+                AFTER_MOVE();
+            } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
+                UNIT = 0;
+                MOVE_TYPE = 1;  // %00000001
+                REQUEST_WALK_LEFT();
+                AFTER_MOVE();
+            } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
+                UNIT = 0;
+                MOVE_TYPE = 1;  // %00000001
+                REQUEST_WALK_DOWN();
+                AFTER_MOVE();
+            } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
+                UNIT = 0;
+                MOVE_TYPE = 1;  // %00000001
+                REQUEST_WALK_UP();
+                AFTER_MOVE();
+            } else if (A == KEY_CONFIG[KEY_CYCLE_WEAPONS]) {
+                CYCLE_WEAPON();
+                CLEAR_KEY_BUFFER();
+            } else if (A == KEY_CONFIG[KEY_CYCLE_ITEMS]) {
+                CYCLE_ITEM();
+                CLEAR_KEY_BUFFER();
+            } else if (A == KEY_CONFIG[KEY_MOVE]) {
+                MOVE_OBJECT();
+                CLEAR_KEY_BUFFER();
+            } else if (A == KEY_CONFIG[KEY_SEARCH]) {
+                SEARCH_OBJECT();
+                CLEAR_KEY_BUFFER();
+            } else if (A == KEY_CONFIG[KEY_USE]) {
+                USE_ITEM();
+                CLEAR_KEY_BUFFER();
+            } else if (A == KEY_CONFIG[KEY_FIRE_UP]) {
+                FIRE_UP();
+                KEYTIMER = 20;
+            } else if (A == KEY_CONFIG[KEY_FIRE_LEFT]) {
+                FIRE_LEFT();
+                KEYTIMER = 20;
+            } else if (A == KEY_CONFIG[KEY_FIRE_DOWN]) {
+                FIRE_DOWN();
+                KEYTIMER = 20;
+            } else if (A == KEY_CONFIG[KEY_FIRE_RIGHT]) {
+                FIRE_RIGHT();
+                KEYTIMER = 20;
+            } else if (A == KEY_CONFIG[KEY_PAUSE]) { // RUN/STOP
+                done = PAUSE_GAME();
+            } else if (A == KEY_CONFIG[KEY_CHEAT]) { // SHIFT-C
+                CHEATER();
+            } else if (A == KEY_CONFIG[KEY_MUSIC]) { // SHIFT-M
+                TOGGLE_MUSIC();
+                CLEAR_KEY_BUFFER();
             }
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+            else if (A == KEY_CONFIG[KEY_LIVE_MAP]) {
+                TOGGLE_LIVE_MAP();
+                CLEAR_KEY_BUFFER();
+            } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS]) {
+                TOGGLE_LIVE_MAP_ROBOTS();
+                CLEAR_KEY_BUFFER();
+            }
+#endif
         }
-        PREVIOUS_KEY = A;
-        PREVIOUS_JOY = B;
-        if (KEYTIMER == 0) {
-            // Keyboard controls here.
-            if (A != 0xff) {
-                KEYTIMER = 5;
-                if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
+        // SNES CONTROLLER starts here
+        if (B != 0) {
+            // first we start with the 4 directional buttons.
+            if (B & Platform::JoystickLeft) {
+                if (CONTROL != 2 && B & Platform::JoystickRed) {
+                    FIRE_LEFT();
+                    KEYTIMER = 20;
+                } else {
+                    UNIT = 0;
+                    MOVE_TYPE = 1; // %00000001
+                    REQUEST_WALK_LEFT();
+                    AFTER_MOVE_SNES();
+                }
+            } else if (B & Platform::JoystickRight) {
+                if (CONTROL != 2 && B & Platform::JoystickRed) {
+                    FIRE_RIGHT();
+                    KEYTIMER = 20;
+                } else {
                     UNIT = 0;
                     MOVE_TYPE = 1; // %00000001
                     REQUEST_WALK_RIGHT();
-                    AFTER_MOVE();
-                } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT]) { // CURSOR LEFT
-                    UNIT = 0;
-                    MOVE_TYPE = 1;  // %00000001
-                    REQUEST_WALK_LEFT();
-                    AFTER_MOVE();
-                } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN]) { // CURSOR DOWN
-                    UNIT = 0;
-                    MOVE_TYPE = 1;  // %00000001
-                    REQUEST_WALK_DOWN();
-                    AFTER_MOVE();
-                } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP]) { // CURSOR UP
-                    UNIT = 0;
-                    MOVE_TYPE = 1;  // %00000001
-                    REQUEST_WALK_UP();
-                    AFTER_MOVE();
-                } else if (A == KEY_CONFIG[KEY_CYCLE_WEAPONS]) {
-                    CYCLE_WEAPON();
-                    CLEAR_KEY_BUFFER();
-                } else if (A == KEY_CONFIG[KEY_CYCLE_ITEMS]) {
-                    CYCLE_ITEM();
-                    CLEAR_KEY_BUFFER();
-                } else if (A == KEY_CONFIG[KEY_MOVE]) {
-                    MOVE_OBJECT();
-                    CLEAR_KEY_BUFFER();
-                } else if (A == KEY_CONFIG[KEY_SEARCH]) {
-                    SEARCH_OBJECT();
-                    CLEAR_KEY_BUFFER();
-                } else if (A == KEY_CONFIG[KEY_USE]) {
-                    USE_ITEM();
-                    CLEAR_KEY_BUFFER();
-                } else if (A == KEY_CONFIG[KEY_FIRE_UP]) {
+                    AFTER_MOVE_SNES();
+                }
+            } else if (B & Platform::JoystickUp) {
+                if (CONTROL != 2 && B & Platform::JoystickRed) {
                     FIRE_UP();
                     KEYTIMER = 20;
-                } else if (A == KEY_CONFIG[KEY_FIRE_LEFT]) {
-                    FIRE_LEFT();
-                    KEYTIMER = 20;
-                } else if (A == KEY_CONFIG[KEY_FIRE_DOWN]) {
+                } else {
+                    UNIT = 0;
+                    MOVE_TYPE = 1; // %00000001
+                    REQUEST_WALK_UP();
+                    AFTER_MOVE_SNES();
+                }
+            } else if (B & Platform::JoystickDown) {
+                if (CONTROL != 2 && B & Platform::JoystickRed) {
                     FIRE_DOWN();
                     KEYTIMER = 20;
-                } else if (A == KEY_CONFIG[KEY_FIRE_RIGHT]) {
-                    FIRE_RIGHT();
-                    KEYTIMER = 20;
-                } else if (A == KEY_CONFIG[KEY_PAUSE]) { // RUN/STOP
-                    done = PAUSE_GAME();
-                } else if (A == KEY_CONFIG[KEY_CHEAT]) { // SHIFT-C
-                    CHEATER();
-                } else if (A == KEY_CONFIG[KEY_MUSIC]) { // SHIFT-M
-                    TOGGLE_MUSIC();
-                    CLEAR_KEY_BUFFER();
+                } else {
+                    UNIT = 0;
+                    MOVE_TYPE = 1; // %00000001
+                    REQUEST_WALK_DOWN();
+                    AFTER_MOVE_SNES();
                 }
-    #ifdef PLATFORM_LIVE_MAP_SUPPORT
-                else if (A == KEY_CONFIG[KEY_LIVE_MAP]) {
-                    TOGGLE_LIVE_MAP();
-                } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS]) {
-                    TOGGLE_LIVE_MAP_ROBOTS();
-                }
-    #endif
             }
-            // SNES CONTROLLER starts here
-            if (B != 0) {
-                // first we start with the 4 directional buttons.
-                if (B & Platform::JoystickLeft) {
-                    if (CONTROL != 2 && B & Platform::JoystickRed) {
-                        FIRE_LEFT();
-                        KEYTIMER = 20;
+            // Now check for non-repeating buttons
+            if (CONTROL != 2) {
+                if (B & Platform::JoystickBlue) {
+                    USE_ITEM();
+                    KEYTIMER = 15;
+                }
+            } else {
+                if (B & Platform::JoystickGreen) {
+                    FIRE_LEFT();
+                    KEYTIMER = 20;
+                }
+                if (B & Platform::JoystickBlue) {
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+                    if (B & Platform::JoystickPlay) {
+                        TOGGLE_LIVE_MAP_ROBOTS();
+                        CLEAR_KEY_BUFFER();
                     } else {
-                        UNIT = 0;
-                        MOVE_TYPE = 1; // %00000001
-                        REQUEST_WALK_LEFT();
-                        AFTER_MOVE_SNES();
-                    }
-                } else if (B & Platform::JoystickRight) {
-                    if (CONTROL != 2 && B & Platform::JoystickRed) {
+#endif
                         FIRE_RIGHT();
                         KEYTIMER = 20;
-                    } else {
-                        UNIT = 0;
-                        MOVE_TYPE = 1; // %00000001
-                        REQUEST_WALK_RIGHT();
-                        AFTER_MOVE_SNES();
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
                     }
-                } else if (B & Platform::JoystickUp) {
-                    if (CONTROL != 2 && B & Platform::JoystickRed) {
+#endif
+                }
+                if (B & Platform::JoystickYellow) {
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+                    if (B & Platform::JoystickPlay) {
+                        TOGGLE_LIVE_MAP();
+                        CLEAR_KEY_BUFFER();
+                    } else {
+#endif
                         FIRE_UP();
                         KEYTIMER = 20;
-                    } else {
-                        UNIT = 0;
-                        MOVE_TYPE = 1; // %00000001
-                        REQUEST_WALK_UP();
-                        AFTER_MOVE_SNES();
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
                     }
-                } else if (B & Platform::JoystickDown) {
-                    if (CONTROL != 2 && B & Platform::JoystickRed) {
-                        FIRE_DOWN();
-                        KEYTIMER = 20;
-                    } else {
-                        UNIT = 0;
-                        MOVE_TYPE = 1; // %00000001
-                        REQUEST_WALK_DOWN();
-                        AFTER_MOVE_SNES();
-                    }
+#endif
                 }
-                // Now check for non-repeating buttons
-                if (CONTROL != 2) {
-                    if (B & Platform::JoystickBlue) {
+                if (B & Platform::JoystickRed) {
+                    if (B & Platform::JoystickPlay) {
                         USE_ITEM();
                         KEYTIMER = 15;
-                    }
-                } else {
-                    if (B & Platform::JoystickGreen) {
-                        FIRE_LEFT();
+                    } else {
+                        FIRE_DOWN();
                         KEYTIMER = 20;
-                    }
-                    if (B & Platform::JoystickBlue) {
-                        FIRE_RIGHT();
-                        KEYTIMER = 20;
-                    }
-                    if (B & Platform::JoystickYellow) {
-                        FIRE_UP();
-                        KEYTIMER = 20;
-                    }
-                    if (B & Platform::JoystickRed) {
-                        if (B & Platform::JoystickPlay) {
-                            USE_ITEM();
-                            KEYTIMER = 15;
-                        } else {
-                            FIRE_DOWN();
-                            KEYTIMER = 20;
-                        }
-                    }
-                    if (B & Platform::JoystickReverse) {
-                        if (B & Platform::JoystickPlay) {
-                            CYCLE_ITEM();
-                        } else {
-                            SEARCH_OBJECT();
-                        }
-                        KEYTIMER = 15;
-                    }
-                    if (B & Platform::JoystickForward) {
-                        if (B & Platform::JoystickPlay) {
-                            CYCLE_WEAPON();
-                        } else {
-                            MOVE_OBJECT();
-                        }
-                        KEYTIMER = 15;
                     }
                 }
-            }
-            if (A == 0xff && B == 0) {
-                KEY_FAST = 0;
+                if (B & Platform::JoystickReverse) {
+                    if (B & Platform::JoystickPlay) {
+                        CYCLE_ITEM();
+                    } else {
+                        SEARCH_OBJECT();
+                    }
+                    KEYTIMER = 15;
+                }
+                if (B & Platform::JoystickForward) {
+                    if (B & Platform::JoystickPlay) {
+                        CYCLE_WEAPON();
+                    } else {
+                        MOVE_OBJECT();
+                    }
+                    KEYTIMER = 15;
+                }
             }
         }
     }
@@ -1068,18 +1071,17 @@ void AFTER_FIRE(int X)
     }
 }
 
-/*
 // This routine checks KEYTIMER to see if it has
 // reached zero yet.  If so, it clears the LSTX
 // variable used by the kernal, so that it will
 // register a new keypress.
-void KEY_REPEAT()
+void KEY_REPEAT(bool keyDown)
 {
     if (KEYTIMER != 0) {
         return;
     }
-    if (LSTX != 255) { // no key pressed
-        LSTX = 255; // clear LSTX register
+    if (keyDown) { // no key pressed
+        platform->keyRepeat(); // clear LSTX register
         KEYTIMER = 6;
     } else {
         // No key pressed, reset all to defaults
@@ -1087,7 +1089,6 @@ void KEY_REPEAT()
         KEYTIMER = 6;
     }
 }
-*/
 
 // This routine handles things that are in common to
 // all 4 directions of movement.
@@ -2466,7 +2467,7 @@ void INTRO_SCREEN()
     while (!done && !platform->quit) {
         uint8_t A = platform->readKeyboard();
         uint16_t B = platform->readJoystick();
-        if (KEYTIMER == 0 && (A != 0xff || B != 0)) {
+        if (A != 0xff || B != 0) {
             if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
                 if (MENUY != 3) {
                     REVERSE_MENU_OPTION(false);
@@ -2487,15 +2488,7 @@ void INTRO_SCREEN()
                 PLAY_SOUND(15); // menu beep, SOUND PLAY
                 done = EXEC_COMMAND();
             }
-            if (KEY_FAST == 0) {
-                KEYTIMER = 15;
-                KEY_FAST = 1;
-            } else {
-                KEYTIMER = 6;
-            }
             platform->renderFrame();
-        } else if (KEYTIMER == 0 && A == 0xff && B == 0) {
-            KEY_FAST = 0;
         }
     }
 }

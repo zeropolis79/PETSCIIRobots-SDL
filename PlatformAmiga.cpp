@@ -296,7 +296,9 @@ PlatformAmiga::PlatformAmiga() :
     shakeStep(0),
     keyToReturn(0xff),
     downKey(0xff),
-    shift(0)
+    shift(0),
+    joystickStateToReturn(0),
+    joystickState(0)
 {
     Palette::initialize();
 
@@ -648,15 +650,18 @@ uint8_t PlatformAmiga::readKeyboard()
         case IDCMP_RAWKEY: {
             bool keyDown = messageCode < 0x80 ? true : false;
             uint8_t keyCode = messageCode & 0x7f;
+            uint8_t keyCodeWithShift = keyCode | shift;
 
             if (keyCode == 0x59) { // F10
                 quit = true;
             } else if (keyCode == 0x60 || keyCode == 0x61) {
                 shift = keyDown ? 0x80 : 0x00;
             } else if (keyDown) {
-                downKey = keyCode | shift;
-                keyToReturn = downKey;
-            } else if (downKey == keyCode | shift) {
+                if (downKey != keyCodeWithShift) {
+                    downKey = keyCodeWithShift;
+                    keyToReturn = downKey;
+                }
+            } else if (downKey == keyCodeWithShift) {
                 downKey = 0xff;
             }
             break;
@@ -667,8 +672,14 @@ uint8_t PlatformAmiga::readKeyboard()
     }
 
     uint8_t result = keyToReturn;
-    keyToReturn = downKey;
+    keyToReturn = 0xff;
     return result;
+}
+
+void PlatformAmiga::keyRepeat()
+{
+    keyToReturn = downKey;
+    joystickStateToReturn = joystickState;
 }
 
 void PlatformAmiga::clearKeyBuffer()
@@ -679,11 +690,18 @@ void PlatformAmiga::clearKeyBuffer()
     }
     keyToReturn = 0xff;
     downKey = 0xff;
+    joystickStateToReturn = 0;
+    joystickState = 0;
+}
+
+bool PlatformAmiga::isKeyOrJoystickPressed()
+{
+    return downKey != 0xff || joystickState != 0;
 }
 
 uint16_t PlatformAmiga::readJoystick()
 {
-    uint16_t output = 0;
+    uint16_t state = 0;
 
     uint16_t joystickData = custom.joy1dat;
     bool Y0 = (joystickData & 0x0100) == 0x0100 ? true : false;
@@ -691,25 +709,32 @@ uint16_t PlatformAmiga::readJoystick()
     bool X0 = (joystickData & 0x0001) == 0x0001 ? true : false;
     bool X1 = (joystickData & 0x0002) == 0x0002 ? true : false;
     if (Y0) {
-        output |= (Y1 ? JoystickLeft : JoystickUp);
+        state |= (Y1 ? JoystickLeft : JoystickUp);
     }
     if (X0) {
-        output |= (X1 ? JoystickRight : JoystickDown);
+        state |= (X1 ? JoystickRight : JoystickDown);
     }
 
     uint8_t peripheralData = ciaa.ciapra;
     bool FIR1 = (peripheralData & CIAF_GAMEPORT1) ? false : true;
     if (FIR1) {
-        output |= JoystickRed;
+        state |= JoystickRed;
     }
 
     uint16_t potData = custom.potinp;
     bool DATRY = (potData & 0x4000) ? true : false;
     if (DATRY) {
-        output |= JoystickBlue;
+        state |= JoystickBlue;
     }
 
-    return output;
+    if (joystickState != state) {
+        joystickState = state;
+        joystickStateToReturn = state;
+    }
+
+    uint16_t result = joystickStateToReturn;
+    joystickStateToReturn = 0;
+    return result;
 }
 
 uint32_t PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)

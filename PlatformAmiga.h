@@ -25,7 +25,9 @@ public:
     virtual void show();
     virtual int framesPerSecond();
     virtual uint8_t readKeyboard();
+    virtual void keyRepeat();
     virtual void clearKeyBuffer();
+    virtual bool isKeyOrJoystickPressed();
     virtual uint16_t readJoystick();
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
     virtual void displayImage(Image image);
@@ -110,6 +112,8 @@ private:
     uint8_t keyToReturn;
     uint8_t downKey;
     uint8_t shift;
+    uint16_t joystickStateToReturn;
+    uint16_t joystickState;
 };
 
 #endif

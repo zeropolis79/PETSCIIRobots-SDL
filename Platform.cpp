@@ -13,6 +13,15 @@ void Platform::chrout(uint8_t)
 {
 }
 
+void Platform::keyRepeat()
+{
+}
+
+bool Platform::isKeyOrJoystickPressed()
+{
+    return false;
+}
+
 uint16_t Platform::readJoystick()
 {
     return 0;

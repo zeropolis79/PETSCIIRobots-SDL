@@ -74,8 +74,6 @@ extern uint8_t* CUR_PATTERN;   // stores the memory location of the current musi
 extern uint8_t NDX;            // $9E No. of Chars. in Keyboard Buffer (Queue)
 extern uint8_t* MAP_SOURCE;    // $FD
 extern uint8_t SCREEN_MEMORY[40 * 25]; // $8000
-extern uint16_t PREVIOUS_JOY;
-extern uint8_t PREVIOUS_KEY;
 extern bool quit;
 
 void INIT_GAME();
@@ -195,7 +193,7 @@ void FIRE_RIGHT();
 void FIRE_RIGHT_PISTOL();
 void FIRE_RIGHT_PLASMA();
 void AFTER_FIRE(int X);
-//void KEY_REPEAT();
+void KEY_REPEAT(bool keyDown);
 void AFTER_MOVE();
 
 extern uint8_t KEY_FAST; // 0=DEFAULT STATE
