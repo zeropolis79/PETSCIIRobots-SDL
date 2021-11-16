@@ -690,6 +690,7 @@ void PlatformAmiga::clearKeyBuffer()
         ReplyMsg((Message*)message);
     }
     keyToReturn = 0xff;
+    downKey = 0xff;
     joystickStateToReturn = 0;
 }
 
