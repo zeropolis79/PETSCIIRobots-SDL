@@ -715,7 +715,9 @@ uint16_t PlatformAmiga::readJoystick(bool gamepad)
     }
 
     if (gamepad) {
+        Disable();
         uint16_t cd32State = readCD32Pad();
+        Enable();
         if ((cd32State & 0x0003) == 0x0003 && (cd32State & 0x03f8) != 0x03f8) {
             bool RED = (cd32State & 0x0100) == 0x0100 ? true : false;
             bool BLUE = (cd32State & 0x0200) == 0x0200 ? true : false;
