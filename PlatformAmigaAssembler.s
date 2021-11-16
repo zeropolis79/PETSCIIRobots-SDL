@@ -207,13 +207,17 @@ _readCD32Pad__13PlatformAmigaFv:
 
 	lea	$bfe001,a0
 	lea $dff000,a1
-	moveq	#0,d0
+	move.w	$16(a1),d2	; potgor
 	moveq	#7,d3	; CIAB_GAMEPORT1 (red)
 	moveq	#14,d4	; 2nd button (blue)
 	bset	d3,$200(a0)	; set direction of the fire button pin
 	bclr	d3,(a0)		; clear current value of the fire button pin
-	move.w	#$6f00,$34(a1)	; potgo
+	move.w	d2,d1
+	and.w	#$cfff,d1	; mask bits 12 and 13 out
+	or.w	#$2000,d1	; output enable for port 2 fire button pin
+	move.w	d1,$34(a1)	; potgo
 
+	moveq	#0,d0
 	moveq	#10-1,d5
 	bra.s	.timingSkip
 .buttonLoop:
@@ -226,17 +230,17 @@ _readCD32Pad__13PlatformAmigaFv:
 	tst.b	(a0)
 	tst.b	(a0)
 	tst.b	(a0)
-	move.w	$16(a1),d2
+	move.w	$16(a1),d1	; potgor
 	bset	d3,(a0)	; set and clear current value of the fire button pin
 	bclr	d3,(a0)
-	btst	d4,d2
+	btst	d4,d1
 	bne.s	.noButton
 	bset	d5,d0
 .noButton:
 	dbra	d5,.buttonLoop
 
 	bclr	d3,$200(a0)	; reset fire button pin direction
-	move.w	#$ff00,$34(a1)	; potgo
+	move.w	d2,$34(a1)	; potgo
 
 	movem.l	(sp)+,d2-d5
 	rts
