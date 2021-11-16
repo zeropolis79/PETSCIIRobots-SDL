@@ -658,7 +658,7 @@ bool PAUSE_GAME()
     platform->renderFrame();
     while (!platform->quit) {
         uint8_t A = platform->readKeyboard();
-        uint16_t B = platform->readJoystick(false);
+        uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
         if (A == KEY_CONFIG[KEY_PAUSE] || // RUN/STOP
             A == KEY_CONFIG[KEY_NO] ||
             (B & Platform::JoystickBlue)) { // N-KEY
@@ -1242,7 +1242,8 @@ void USER_SELECT_OBJECT()
             return;
         }
         uint8_t A = platform->readKeyboard();
-        uint16_t B = platform->readJoystick(false);
+        // SNES controls for this routine
+        uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
         if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
             UNIT_DIRECTION[0] = 3;
             CURSOR_X++;
@@ -1280,8 +1281,6 @@ void USER_SELECT_OBJECT()
 #endif
             return;
         }
-        // SNES controls for this routine
-        // TODO implement MVSNES
     }
 }
 
@@ -1330,7 +1329,8 @@ void MOVE_OBJECT()
         }
         // keyboard control
         uint8_t A = platform->readKeyboard();
-        uint16_t B = platform->readJoystick(false);
+        // SNES controls
+        uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
         if (A == 0xff && B == 0) {
             continue;
         } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
@@ -1342,8 +1342,6 @@ void MOVE_OBJECT()
         } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP] || (B & Platform::JoystickUp)) { // CURSOR UP
             CURSOR_Y--;
         }
-        // SNES controls
-        // TODO
         // NOW TEST TO SEE IF THAT SPOT IS OPEN
 #ifdef PLATFORM_CURSOR_SUPPORT
         platform->hideCursor();
@@ -2330,7 +2328,7 @@ void GAME_OVER()
         platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     }
 #endif
-    while (platform->readKeyboard() == 0xff && platform->readJoystick(false) == 0 && !platform->quit);
+    while (platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit);
     GOM4();
 }
 
@@ -2348,7 +2346,7 @@ void GOM4()
     DISPLAY_WIN_LOSE();
     platform->renderFrame();
     platform->fadeScreen(15, false);
-    while (platform->readKeyboard() == 0xff && platform->readJoystick(false) == 0 && !platform->quit);
+    while (platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit);
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->stopModule();
@@ -2826,28 +2824,24 @@ void ELEVATOR_SELECT()
     ELEVATOR_INVERT();
     platform->renderFrame();
     // Now get user input
-    if (CONTROL != 2) {
+    while (!platform->quit) {
         // KEYBOARD INPUT
-        while (!platform->quit) {
-            uint8_t A = platform->readKeyboard();
-            uint16_t B = platform->readJoystick(false);
-            if (A != 0xff || B != 0) {
-                if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT] || (B & Platform::JoystickLeft)) { // CURSOR LEFT
-                    ELEVATOR_DEC();
-                } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
-                    ELEVATOR_INC();
-                } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
-                    SCROLL_INFO();
-                    SCROLL_INFO();
-                    SCROLL_INFO();
-                    CLEAR_KEY_BUFFER();
-                    return;
-                }
+        uint8_t A = platform->readKeyboard();
+        // SNES INPUT
+        uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
+        if (A != 0xff || B != 0) {
+            if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT] || (B & Platform::JoystickLeft)) { // CURSOR LEFT
+                ELEVATOR_DEC();
+            } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
+                ELEVATOR_INC();
+            } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
+                SCROLL_INFO();
+                SCROLL_INFO();
+                SCROLL_INFO();
+                CLEAR_KEY_BUFFER();
+                return;
             }
         }
-    } else {
-        // SNES INPUT
-        // TODO
     }
 }
 
