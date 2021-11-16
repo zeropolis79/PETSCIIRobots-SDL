@@ -211,7 +211,7 @@ _readCD32Pad__13PlatformAmigaFv:
 	moveq	#7,d3	; CIAB_GAMEPORT1 (red)
 	moveq	#14,d4	; 2nd button (blue)
 	bset	d3,$200(a0)	; set direction of the fire button pin
-	bclr	d3,(a0)
+	bclr	d3,(a0)		; clear current value of the fire button pin
 	move.w	#$6f00,$34(a1)	; potgo
 
 	moveq	#10-1,d5
@@ -227,7 +227,7 @@ _readCD32Pad__13PlatformAmigaFv:
 	tst.b	(a0)
 	tst.b	(a0)
 	move.w	$16(a1),d2
-	bset	d3,(a0)
+	bset	d3,(a0)	; set and clear current value of the fire button pin
 	bclr	d3,(a0)
 	btst	d4,d2
 	bne.s	.noButton
@@ -236,7 +236,7 @@ _readCD32Pad__13PlatformAmigaFv:
 	dbra	d5,.buttonLoop
 
 	bclr	d3,$200(a0)	; reset fire button pin direction
-	move.w	#$ff00,$34(a0)	; potgo
+	move.w	#$ff00,$34(a1)	; potgo
 
 	movem.l	(sp)+,d2-d5
 	rts
