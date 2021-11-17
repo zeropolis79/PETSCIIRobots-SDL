@@ -485,6 +485,8 @@ PlatformAmiga::PlatformAmiga() :
     ioAudio->ioa_Request.io_Command = ADCMD_PERVOL;
 #endif
 
+    custom.potgo = ((custom.potinp & 0x3fff) | 0xc000);
+
     platform = this;
 }
 
@@ -757,7 +759,7 @@ uint16_t PlatformAmiga::readJoystick(bool gamepad)
         }
 
         uint16_t potData = custom.potinp;
-        bool DATRY = (potData & 0x4000) ? true : false;
+        bool DATRY = (potData & 0x4000) ? false : true;
         if (DATRY) {
             state |= JoystickBlue;
         }
