@@ -575,6 +575,23 @@ void PlatformAmiga::undeltaSamples(uint8_t* module, uint32_t moduleSize)
 
 void PlatformAmiga::setSampleData(uint8_t* module)
 {
+    mt_SampleStarts[15 + 0] = soundExplosion;
+    mt_SampleStarts[15 + 1] = 0; // TODO
+    mt_SampleStarts[15 + 2] = soundMedkit;
+    mt_SampleStarts[15 + 3] = 0; // TODO
+    mt_SampleStarts[15 + 4] = 0; // TODO
+    mt_SampleStarts[15 + 5] = 0; // TODO
+    mt_SampleStarts[15 + 6] = 0; // TODO
+    mt_SampleStarts[15 + 7] = 0; // TODO
+    mt_SampleStarts[15 + 8] = soundPlasma;
+    mt_SampleStarts[15 + 9] = soundPistol;
+    mt_SampleStarts[15 + 10] = soundError;
+    mt_SampleStarts[15 + 11] = 0; // TODO
+    mt_SampleStarts[15 + 12] = soundCycleWeapon;
+    mt_SampleStarts[15 + 13] = soundCycleItem;
+    mt_SampleStarts[15 + 14] = soundDoor;
+    mt_SampleStarts[15 + 15] = soundMenuBeep;
+
     SampleData* sampleData = (SampleData*)(module + 20);
     sampleData[15 + 0].length = (uint16_t)(soundMedkit - soundExplosion) >> 1;
     sampleData[15 + 1].length = 0; // TODO
@@ -1456,22 +1473,6 @@ void PlatformAmiga::playModule(Module module)
         loadModule(module);
         mt_init(moduleData);
     }
-    mt_SampleStarts[15 + 0] = soundExplosion;
-    mt_SampleStarts[15 + 1] = 0; // TODO
-    mt_SampleStarts[15 + 2] = soundMedkit;
-    mt_SampleStarts[15 + 3] = 0; // TODO
-    mt_SampleStarts[15 + 4] = 0; // TODO
-    mt_SampleStarts[15 + 5] = 0; // TODO
-    mt_SampleStarts[15 + 6] = 0; // TODO
-    mt_SampleStarts[15 + 7] = 0; // TODO
-    mt_SampleStarts[15 + 8] = soundPlasma;
-    mt_SampleStarts[15 + 9] = soundPistol;
-    mt_SampleStarts[15 + 10] = soundError;
-    mt_SampleStarts[15 + 11] = 0; // TODO
-    mt_SampleStarts[15 + 12] = soundCycleWeapon;
-    mt_SampleStarts[15 + 13] = soundCycleItem;
-    mt_SampleStarts[15 + 14] = soundDoor;
-    mt_SampleStarts[15 + 15] = soundMenuBeep;
     mt_Enable = true;
 }
 

@@ -270,7 +270,7 @@ mtloop2	MOVE.B	(A1)+,D1
 	ADD.L	#1084,D2
 	ADD.L	A0,D2
 	MOVE.L	D2,A2		; A2 is now the address of first sample's data
-	MOVEQ	#31-1,D0	; handle 31 samples
+	MOVEQ	#15-1,D0	; handle 15 samples
 mtloop3
 	MOVE.W  28(A0),D3	; get replen
 	TST.W   D3		; replen is zero?
