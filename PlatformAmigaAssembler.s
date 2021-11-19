@@ -1,5 +1,7 @@
 	xdef	_renderLiveMapTiles__13PlatformAmigaFPUc
 	xdef	_readCD32Pad__13PlatformAmigaFv
+	xdef	_enableLowpassFilter__13PlatformAmigaFv
+	xdef	_disableLowpassFilter__13PlatformAmigaFv
 	xdef	_verticalBlankInterruptServer__13PlatformAmigaFv
 	xdef	_ungzip__13PlatformAmigaFPvPv
 	xref	_tileLiveMap
@@ -243,6 +245,14 @@ _readCD32Pad__13PlatformAmigaFv:
 	move.w	d2,$34(a1)	; potgo
 
 	movem.l	(sp)+,d2-d5
+	rts
+
+_enableLowpassFilter__13PlatformAmigaFv:
+	bclr	#1,$bfe001
+	rts
+
+_disableLowpassFilter__13PlatformAmigaFv:
+	bset	#1,$bfe001
 	rts
 
 _verticalBlankInterruptServer__13PlatformAmigaFv:

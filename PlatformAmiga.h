@@ -83,6 +83,8 @@ private:
 //    void renderLiveMapTiles(uint8_t* map);
 #endif
     __asm static uint16_t readCD32Pad();
+    __asm static void enableLowpassFilter();
+    __asm static void disableLowpassFilter();
     int framesPerSecond_;
     uint32_t clock;
     BitMap* screenBitmap;
@@ -115,6 +117,7 @@ private:
     uint8_t shift;
     uint16_t joystickStateToReturn;
     uint16_t joystickState;
+    bool filterState;
 };
 
 #endif

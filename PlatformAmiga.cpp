@@ -298,7 +298,8 @@ PlatformAmiga::PlatformAmiga() :
     downKey(0xff),
     shift(0),
     joystickStateToReturn(0),
-    joystickState(0)
+    joystickState(0),
+    filterState(ciaa.ciapra & CIAF_LED ? true : false)
 {
     Palette::initialize();
 
@@ -451,6 +452,8 @@ PlatformAmiga::PlatformAmiga() :
     setSampleData(soundFXModule);
 
     SetCIAInt();
+
+    disableLowpassFilter();
 #else
     messagePort = CreatePort(NULL, 0);
     if (!messagePort) {
@@ -496,6 +499,10 @@ PlatformAmiga::~PlatformAmiga()
     stopModule();
 
     ResetCIAInt();
+
+    if (filterState) {
+        enableLowpassFilter();
+    }
 #else
     if (ioAudio && ioAudio->ioa_Request.io_Device) {
         AbortIO((IORequest*)ioAudio);
