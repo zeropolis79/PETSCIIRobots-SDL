@@ -290,7 +290,7 @@ mtskip2
 	DBRA	D0,mtloop3
 
 	; initialize stuff
-	OR.B	#2,$BFE001
+	;OR.B	#2,$BFE001
 	MOVE.B	#6,mt_speed
 	CLR.B	mt_counter
 	CLR.B	mt_SongPos
