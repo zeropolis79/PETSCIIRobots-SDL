@@ -31,22 +31,22 @@ SoundFXModule.o: mod.soundfx
     Bin2Hunk mod.soundfx SoundFXModule.o NAME _soundFXModule CHIP
 SoundExplosion.o: sounds_dsbarexp.raw
     Bin2Hunk sounds_dsbarexp.raw SoundExplosion.o NAME _soundExplosion CHIP
-SoundMedkit.o: sounds_dsoof.raw
-    Bin2Hunk sounds_dsoof.raw SoundMedkit.o NAME _soundMedkit CHIP
-SoundPlasma.o: sounds_dsplasma.raw
-    Bin2Hunk sounds_dsplasma.raw SoundPlasma.o NAME _soundPlasma CHIP
+SoundMedkit.o: SOUND_MEDKIT.raw
+    Bin2Hunk SOUND_MEDKIT.raw SoundMedkit.o NAME _soundMedkit CHIP
+SoundPlasma.o: SOUND_PLASMA.raw
+    Bin2Hunk SOUND_PLASMA.raw SoundPlasma.o NAME _soundPlasma CHIP
 SoundPistol.o: sounds_dspistol.raw
     Bin2Hunk sounds_dspistol.raw SoundPistol.o NAME _soundPistol CHIP
-SoundError.o: sounds_dsgetpow.raw
-    Bin2Hunk sounds_dsgetpow.raw SoundError.o NAME _soundError CHIP
-SoundCycleWeapon.o: sounds_dswpnup.raw
-    Bin2Hunk sounds_dswpnup.raw SoundCycleWeapon.o NAME _soundCycleWeapon CHIP
-SoundCycleItem.o: sounds_dsitemup.raw
-    Bin2Hunk sounds_dsitemup.raw SoundCycleItem.o NAME _soundCycleItem CHIP
-SoundDoor.o: sounds_dsdoropn.raw
-    Bin2Hunk sounds_dsdoropn.raw SoundDoor.o NAME _soundDoor CHIP
-SoundMenuBeep.o: sounds_dsswtchx.raw
-    Bin2Hunk sounds_dsswtchx.raw SoundMenuBeep.o NAME _soundMenuBeep CHIP
+SoundError.o: SOUND_ERROR.raw
+    Bin2Hunk SOUND_ERROR.raw SoundError.o NAME _soundError CHIP
+SoundCycleWeapon.o: SOUND_CYCLE_WEAPON.raw
+    Bin2Hunk SOUND_CYCLE_WEAPON.raw SoundCycleWeapon.o NAME _soundCycleWeapon CHIP
+SoundCycleItem.o: SOUND_CYCLE_ITEM.raw
+    Bin2Hunk SOUND_CYCLE_ITEM.raw SoundCycleItem.o NAME _soundCycleItem CHIP
+SoundDoor.o: SOUND_DOOR.raw
+    Bin2Hunk SOUND_DOOR.raw SoundDoor.o NAME _soundDoor CHIP
+SoundMenuBeep.o: SOUND_BEEP.raw
+    Bin2Hunk SOUND_BEEP.raw SoundMenuBeep.o NAME _soundMenuBeep CHIP
 SquareWave.o: SquareWave.raw
     Bin2Hunk SquareWave.raw SquareWave.o NAME _squareWave CHIP
 
