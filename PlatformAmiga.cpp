@@ -76,11 +76,13 @@ __chip extern int8_t soundShock[];
 __chip extern int8_t soundMove[];
 __chip extern int8_t soundPlasma[];
 __chip extern int8_t soundPistol[];
+__chip extern int8_t soundItemFound[];
 __chip extern int8_t soundError[];
 __chip extern int8_t soundCycleWeapon[];
 __chip extern int8_t soundCycleItem[];
 __chip extern int8_t soundDoor[];
 __chip extern int8_t soundMenuBeep[];
+__chip extern int8_t soundShortBeep[];
 #endif
 __chip extern int8_t squareWave[];
 __chip static int32_t simpleTileMask = 0xffffff00;
@@ -449,11 +451,13 @@ PlatformAmiga::PlatformAmiga() :
     *((uint16_t*)soundMove) = 0;
     *((uint16_t*)soundPlasma) = 0;
     *((uint16_t*)soundPistol) = 0;
+    *((uint16_t*)soundItemFound) = 0;
     *((uint16_t*)soundError) = 0;
     *((uint16_t*)soundCycleWeapon) = 0;
     *((uint16_t*)soundCycleItem) = 0;
     *((uint16_t*)soundDoor) = 0;
     *((uint16_t*)soundMenuBeep) = 0;
+    *((uint16_t*)soundShortBeep) = 0;
 
     setSampleData(soundFXModule);
 
@@ -598,8 +602,8 @@ void PlatformAmiga::setSampleData(uint8_t* module)
     mt_SampleStarts[15 + 7] = soundShock;
     mt_SampleStarts[15 + 8] = soundPlasma;
     mt_SampleStarts[15 + 9] = soundPistol;
-    mt_SampleStarts[15 + 10] = soundError;
-    mt_SampleStarts[15 + 11] = 0; // TODO
+    mt_SampleStarts[15 + 10] = soundItemFound;
+    mt_SampleStarts[15 + 11] = soundError;
     mt_SampleStarts[15 + 12] = soundCycleWeapon;
     mt_SampleStarts[15 + 13] = soundCycleItem;
     mt_SampleStarts[15 + 14] = soundDoor;
@@ -615,13 +619,13 @@ void PlatformAmiga::setSampleData(uint8_t* module)
     sampleData[15 + 6].length = (uint16_t)(soundPlasma - soundMove) >> 1;
     sampleData[15 + 7].length = (uint16_t)(soundMove - soundShock) >> 1;
     sampleData[15 + 8].length = (uint16_t)(soundPistol - soundPlasma) >> 1;
-    sampleData[15 + 9].length = (uint16_t)(soundError - soundPistol) >> 1;
-    sampleData[15 + 10].length = (uint16_t)(soundCycleWeapon - soundError) >> 1;
-    sampleData[15 + 11].length = 0; // TODO
+    sampleData[15 + 9].length = (uint16_t)(soundItemFound - soundPistol) >> 1;
+    sampleData[15 + 10].length = (uint16_t)(soundError - soundItemFound) >> 1;
+    sampleData[15 + 11].length = (uint16_t)(soundCycleWeapon - soundError) >> 1;
     sampleData[15 + 12].length = (uint16_t)(soundCycleItem - soundCycleWeapon) >> 1;
     sampleData[15 + 13].length = (uint16_t)(soundDoor - soundCycleItem) >> 1;
     sampleData[15 + 14].length = (uint16_t)(soundMenuBeep - soundDoor) >> 1;
-    sampleData[15 + 15].length = (uint16_t)(squareWave - soundMenuBeep) >> 1;
+    sampleData[15 + 15].length = (uint16_t)(soundShortBeep - soundMenuBeep) >> 1;
     for (int i = 0; i < 16; i++) {
         sampleData[15 + i].volume = 64;
     }
