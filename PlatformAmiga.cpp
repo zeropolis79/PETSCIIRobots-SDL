@@ -71,6 +71,9 @@ __chip extern uint8_t healthPlanes[];
 __chip extern uint8_t soundFXModule[];
 __chip extern int8_t soundExplosion[];
 __chip extern int8_t soundMedkit[];
+__chip extern int8_t soundMagnet[];
+__chip extern int8_t soundShock[];
+__chip extern int8_t soundMove[];
 __chip extern int8_t soundPlasma[];
 __chip extern int8_t soundPistol[];
 __chip extern int8_t soundError[];
@@ -441,6 +444,9 @@ PlatformAmiga::PlatformAmiga() :
     // Clear the first two bytes of effect samples to enable the 2-byte no-loop loop
     *((uint16_t*)soundExplosion) = 0;
     *((uint16_t*)soundMedkit) = 0;
+    *((uint16_t*)soundMagnet) = 0;
+    *((uint16_t*)soundShock) = 0;
+    *((uint16_t*)soundMove) = 0;
     *((uint16_t*)soundPlasma) = 0;
     *((uint16_t*)soundPistol) = 0;
     *((uint16_t*)soundError) = 0;
@@ -586,10 +592,10 @@ void PlatformAmiga::setSampleData(uint8_t* module)
     mt_SampleStarts[15 + 1] = 0; // TODO
     mt_SampleStarts[15 + 2] = soundMedkit;
     mt_SampleStarts[15 + 3] = 0; // TODO
-    mt_SampleStarts[15 + 4] = 0; // TODO
-    mt_SampleStarts[15 + 5] = 0; // TODO
-    mt_SampleStarts[15 + 6] = 0; // TODO
-    mt_SampleStarts[15 + 7] = 0; // TODO
+    mt_SampleStarts[15 + 4] = soundMagnet;
+    mt_SampleStarts[15 + 5] = soundShock;
+    mt_SampleStarts[15 + 6] = soundMove;
+    mt_SampleStarts[15 + 7] = soundShock;
     mt_SampleStarts[15 + 8] = soundPlasma;
     mt_SampleStarts[15 + 9] = soundPistol;
     mt_SampleStarts[15 + 10] = soundError;
@@ -602,12 +608,12 @@ void PlatformAmiga::setSampleData(uint8_t* module)
     SampleData* sampleData = (SampleData*)(module + 20);
     sampleData[15 + 0].length = (uint16_t)(soundMedkit - soundExplosion) >> 1;
     sampleData[15 + 1].length = 0; // TODO
-    sampleData[15 + 2].length = (uint16_t)(soundPlasma - soundMedkit) >> 1;
+    sampleData[15 + 2].length = (uint16_t)(soundMagnet - soundMedkit) >> 1;
     sampleData[15 + 3].length = 0; // TODO
-    sampleData[15 + 4].length = 0; // TODO
-    sampleData[15 + 5].length = 0; // TODO
-    sampleData[15 + 6].length = 0; // TODO
-    sampleData[15 + 7].length = 0; // TODO
+    sampleData[15 + 4].length = (uint16_t)(soundShock - soundMagnet) >> 1;
+    sampleData[15 + 5].length = (uint16_t)(soundMove - soundShock) >> 1;
+    sampleData[15 + 6].length = (uint16_t)(soundPlasma - soundMove) >> 1;
+    sampleData[15 + 7].length = (uint16_t)(soundMove - soundShock) >> 1;
     sampleData[15 + 8].length = (uint16_t)(soundPistol - soundPlasma) >> 1;
     sampleData[15 + 9].length = (uint16_t)(soundError - soundPistol) >> 1;
     sampleData[15 + 10].length = (uint16_t)(soundCycleWeapon - soundError) >> 1;

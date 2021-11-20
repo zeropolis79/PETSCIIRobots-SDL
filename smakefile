@@ -1,4 +1,4 @@
-OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o PT2.3F_replay_cia.o C64Font.o Faces.o Tiles.o Sprites.o SpritesMask.o Items.o Health.o SoundFXModule.o SoundExplosion.o SoundMedkit.o SoundPlasma.o SoundPistol.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SquareWave.o
+OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o PT2.3F_replay_cia.o C64Font.o Faces.o Tiles.o Sprites.o SpritesMask.o Items.o Health.o SoundFXModule.o SoundExplosion.o SoundMedkit.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SquareWave.o
 
 all: petrobots 
 
@@ -33,6 +33,12 @@ SoundExplosion.o: sounds_dsbarexp.raw
     Bin2Hunk sounds_dsbarexp.raw SoundExplosion.o NAME _soundExplosion CHIP
 SoundMedkit.o: SOUND_MEDKIT.raw
     Bin2Hunk SOUND_MEDKIT.raw SoundMedkit.o NAME _soundMedkit CHIP
+SoundMagnet.o: SOUND_MAGNET.raw
+    Bin2Hunk SOUND_MAGNET.raw SoundMagnet.o NAME _soundMagnet CHIP
+SoundShock.o: SOUND_SHOCK.raw
+    Bin2Hunk SOUND_SHOCK.raw SoundShock.o NAME _soundShock CHIP
+SoundMove.o: SOUND_MOVE.raw
+    Bin2Hunk SOUND_MOVE.raw SoundMove.o NAME _soundMove CHIP
 SoundPlasma.o: SOUND_PLASMA.raw
     Bin2Hunk SOUND_PLASMA.raw SoundPlasma.o NAME _soundPlasma CHIP
 SoundPistol.o: sounds_dspistol.raw
