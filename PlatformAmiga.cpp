@@ -593,9 +593,9 @@ void PlatformAmiga::undeltaSamples(uint8_t* module, uint32_t moduleSize)
 void PlatformAmiga::setSampleData(uint8_t* module)
 {
     mt_SampleStarts[15 + 0] = soundExplosion;
-    mt_SampleStarts[15 + 1] = 0; // TODO
+    mt_SampleStarts[15 + 1] = soundShortBeep;
     mt_SampleStarts[15 + 2] = soundMedkit;
-    mt_SampleStarts[15 + 3] = 0; // TODO
+    mt_SampleStarts[15 + 3] = soundShock;
     mt_SampleStarts[15 + 4] = soundMagnet;
     mt_SampleStarts[15 + 5] = soundShock;
     mt_SampleStarts[15 + 6] = soundMove;
@@ -611,9 +611,9 @@ void PlatformAmiga::setSampleData(uint8_t* module)
 
     SampleData* sampleData = (SampleData*)(module + 20);
     sampleData[15 + 0].length = (uint16_t)(soundMedkit - soundExplosion) >> 1;
-    sampleData[15 + 1].length = 0; // TODO
+    sampleData[15 + 1].length = (uint16_t)(squareWave - soundShortBeep) >> 1;
     sampleData[15 + 2].length = (uint16_t)(soundMagnet - soundMedkit) >> 1;
-    sampleData[15 + 3].length = 0; // TODO
+    sampleData[15 + 3].length = (uint16_t)(soundMove - soundShock) >> 1;
     sampleData[15 + 4].length = (uint16_t)(soundShock - soundMagnet) >> 1;
     sampleData[15 + 5].length = (uint16_t)(soundMove - soundShock) >> 1;
     sampleData[15 + 6].length = (uint16_t)(soundPlasma - soundMove) >> 1;
@@ -1510,7 +1510,13 @@ void PlatformAmiga::stopModule()
 void PlatformAmiga::playSample(uint8_t sample)
 {
     mt_chan4data[0] = 0x1000 + 320;
-    mt_chan4data[1] = (sample < 16 ? sample : 15) << 12;
+    if (sample < 16) {
+        mt_chan4data[1] = sample << 12;
+    } else if (sample == 16) {
+        mt_chan4data[1] = 1 << 12;
+    } else {
+        mt_chan4data[1] = 15 << 12;
+    }
 }
 
 void PlatformAmiga::stopSample()
