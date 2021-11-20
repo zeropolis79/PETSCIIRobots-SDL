@@ -41,7 +41,7 @@
 #endif
 #define CHIP_MEMORY_SIZE (SCREEN_PLANES_SIZE + TILES_MASK_SIZE + COMBINED_TILE_PLANES_SIZE + LARGEST_MODULE_SIZE)
 
-static const char version[] = "$VER:Attack of the PETSCII robots (2021-11-18) (C)2021 David Murray, Vesa Halttunen";
+static const char version[] = "$VER:Attack of the PETSCII robots (2021-11-20) (C)2021 David Murray, Vesa Halttunen";
 
 struct SpriteData {
     uint16_t posctl[2];
