@@ -1505,7 +1505,6 @@ void PlatformAmiga::stopModule()
 {
     if (mt_Enable) {
         mt_end();
-        mt_Enable = false;
     }
 }
 
