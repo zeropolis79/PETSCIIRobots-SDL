@@ -111,7 +111,6 @@ public:
     virtual void stopNote();
     virtual void loadModule(Module module);
     virtual void playModule(Module module);
-    virtual void setSongPosition(uint8_t songPosition);
     virtual void stopModule();
     virtual void playSample(uint8_t sample);
     virtual void stopSample();

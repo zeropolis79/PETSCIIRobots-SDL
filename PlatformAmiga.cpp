@@ -1495,12 +1495,6 @@ void PlatformAmiga::playModule(Module module)
     mt_Enable = true;
 }
 
-void PlatformAmiga::setSongPosition(uint8_t songPosition)
-{
-    mt_SongPos = songPosition;
-    mt_PatternPos = 0;
-}
-
 void PlatformAmiga::stopModule()
 {
     if (mt_Enable) {

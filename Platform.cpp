@@ -107,10 +107,6 @@ void Platform::playModule(Module)
 {
 }
 
-void Platform::setSongPosition(uint8_t)
-{
-}
-
 void Platform::stopModule()
 {
 }
