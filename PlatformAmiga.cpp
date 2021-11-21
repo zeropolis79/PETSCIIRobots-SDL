@@ -1488,6 +1488,8 @@ void PlatformAmiga::playModule(Module module)
 
 void PlatformAmiga::pauseModule()
 {
+    mt_speed = 0;
+    mt_music();
     mt_Enable = false;
     if ((mt_chan1temp.note & 0x1000) == 0) {
         custom.aud[0].ac_vol = 0;

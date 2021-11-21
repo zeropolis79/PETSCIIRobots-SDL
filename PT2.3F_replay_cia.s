@@ -8,6 +8,7 @@
 	xdef	_mt_chan3temp
 	xdef	_mt_chan4temp
 	xdef	_mt_SampleStarts
+	xdef	_mt_speed
 	xdef	_mt_SongPos
 	xdef	_mt_Enable
 	xdef	_mt_PatternPos
@@ -1395,6 +1396,7 @@ mt_SampleStarts
 
 _mt_data:
 mt_SongDataPtr	dc.l 0
+_mt_speed:
 mt_speed	dc.b 6
 mt_counter	dc.b 0
 _mt_SongPos

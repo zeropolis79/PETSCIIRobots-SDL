@@ -23,13 +23,14 @@ petrobots
 
 Amiga TODO
 ----------
-- Proper sound effects
+- Pistol sound
+- Explosion sound
+- Door sound too quiet
 - Key graphics
 - Death animation frames
 - Teleport animation frames
 - Fix evilbot graphics
 - Animate water, servers, trash compactor, and air conditioners
 - Fix mismatched tiles
-- Fix sound effects cutting off on game over
 - Custom controls
 - Plasma cannoning a dead player tile causes glitchy tile to appear

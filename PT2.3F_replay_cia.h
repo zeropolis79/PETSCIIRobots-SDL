@@ -50,6 +50,7 @@ __far extern ChanTemp mt_chan2temp;
 __far extern ChanTemp mt_chan3temp;
 __far extern ChanTemp mt_chan4temp;
 __far extern int8_t* mt_SampleStarts[31];
+__far extern uint8_t mt_speed;
 __far extern uint8_t mt_SongPos;
 __far extern bool mt_Enable;
 __far extern uint16_t mt_PatternPos;
