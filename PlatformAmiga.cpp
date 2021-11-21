@@ -71,6 +71,7 @@ __chip extern uint8_t healthPlanes[];
 __chip extern uint8_t soundFXModule[];
 __chip extern int8_t soundExplosion[];
 __chip extern int8_t soundMedkit[];
+__chip extern int8_t soundEMP[];
 __chip extern int8_t soundMagnet[];
 __chip extern int8_t soundShock[];
 __chip extern int8_t soundMove[];
@@ -446,6 +447,7 @@ PlatformAmiga::PlatformAmiga() :
     // Clear the first two bytes of effect samples to enable the 2-byte no-loop loop
     *((uint16_t*)soundExplosion) = 0;
     *((uint16_t*)soundMedkit) = 0;
+    *((uint16_t*)soundEMP) = 0;
     *((uint16_t*)soundMagnet) = 0;
     *((uint16_t*)soundShock) = 0;
     *((uint16_t*)soundMove) = 0;
@@ -595,7 +597,7 @@ void PlatformAmiga::setSampleData(uint8_t* module)
     mt_SampleStarts[15 + 0] = soundExplosion;
     mt_SampleStarts[15 + 1] = soundShortBeep;
     mt_SampleStarts[15 + 2] = soundMedkit;
-    mt_SampleStarts[15 + 3] = soundShock;
+    mt_SampleStarts[15 + 3] = soundEMP;
     mt_SampleStarts[15 + 4] = soundMagnet;
     mt_SampleStarts[15 + 5] = soundShock;
     mt_SampleStarts[15 + 6] = soundMove;
@@ -612,8 +614,8 @@ void PlatformAmiga::setSampleData(uint8_t* module)
     SampleData* sampleData = (SampleData*)(module + 20);
     sampleData[15 + 0].length = (uint16_t)(soundMedkit - soundExplosion) >> 1;
     sampleData[15 + 1].length = (uint16_t)(squareWave - soundShortBeep) >> 1;
-    sampleData[15 + 2].length = (uint16_t)(soundMagnet - soundMedkit) >> 1;
-    sampleData[15 + 3].length = (uint16_t)(soundMove - soundShock) >> 1;
+    sampleData[15 + 2].length = (uint16_t)(soundEMP - soundMedkit) >> 1;
+    sampleData[15 + 3].length = (uint16_t)(soundMagnet - soundEMP) >> 1;
     sampleData[15 + 4].length = (uint16_t)(soundShock - soundMagnet) >> 1;
     sampleData[15 + 5].length = (uint16_t)(soundMove - soundShock) >> 1;
     sampleData[15 + 6].length = (uint16_t)(soundPlasma - soundMove) >> 1;
