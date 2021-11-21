@@ -39,8 +39,8 @@ SoundShock.o: SOUND_SHOCK.raw
     Bin2Hunk SOUND_SHOCK.raw SoundShock.o NAME _soundShock CHIP
 SoundMove.o: SOUND_MOVE.raw
     Bin2Hunk SOUND_MOVE.raw SoundMove.o NAME _soundMove CHIP
-SoundPlasma.o: SOUND_PLASMA.raw
-    Bin2Hunk SOUND_PLASMA.raw SoundPlasma.o NAME _soundPlasma CHIP
+SoundPlasma.o: SOUND_PLASMA_FASTER.raw
+    Bin2Hunk SOUND_PLASMA_FASTER.raw SoundPlasma.o NAME _soundPlasma CHIP
 SoundPistol.o: sounds_dspistol.raw
     Bin2Hunk sounds_dspistol.raw SoundPistol.o NAME _soundPistol CHIP
 SoundItemFound.o: SOUND_FOUND_ITEM.raw
@@ -51,8 +51,8 @@ SoundCycleWeapon.o: SOUND_CYCLE_WEAPON.raw
     Bin2Hunk SOUND_CYCLE_WEAPON.raw SoundCycleWeapon.o NAME _soundCycleWeapon CHIP
 SoundCycleItem.o: SOUND_CYCLE_ITEM.raw
     Bin2Hunk SOUND_CYCLE_ITEM.raw SoundCycleItem.o NAME _soundCycleItem CHIP
-SoundDoor.o: SOUND_DOOR.raw
-    Bin2Hunk SOUND_DOOR.raw SoundDoor.o NAME _soundDoor CHIP
+SoundDoor.o: SOUND_DOOR_FASTER.raw
+    Bin2Hunk SOUND_DOOR_FASTER.raw SoundDoor.o NAME _soundDoor CHIP
 SoundMenuBeep.o: SOUND_BEEP2.raw
     Bin2Hunk SOUND_BEEP2.raw SoundMenuBeep.o NAME _soundMenuBeep CHIP
 SoundShortBeep.o: SOUND_BEEP.raw
