@@ -2299,7 +2299,7 @@ void GAME_OVER()
     CLOCK_ACTIVE = 0;
     // disable music
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->playModule(Platform::ModuleSoundFX);
+    platform->pauseModule();
 #else
     MUSIC_ON = 0;
     platform->stopNote(); // turn off sound

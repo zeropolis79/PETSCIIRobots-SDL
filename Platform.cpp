@@ -107,6 +107,10 @@ void Platform::playModule(Module)
 {
 }
 
+void Platform::pauseModule()
+{
+}
+
 void Platform::stopModule()
 {
 }

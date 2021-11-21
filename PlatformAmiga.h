@@ -58,6 +58,7 @@ public:
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     virtual void loadModule(Module module);
     virtual void playModule(Module module);
+    virtual void pauseModule();
     virtual void stopModule();
     virtual void playSample(uint8_t sample);
     virtual void stopSample();

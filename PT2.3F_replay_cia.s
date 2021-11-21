@@ -3,11 +3,15 @@
 	xdef	_mt_init__FPUc
 	xdef	_mt_music__Fv
 	xdef	_mt_end__Fv
+	xdef	_mt_chan1temp
+	xdef	_mt_chan2temp
+	xdef	_mt_chan3temp
+	xdef	_mt_chan4temp
 	xdef	_mt_SampleStarts
 	xdef	_mt_SongPos
 	xdef	_mt_Enable
 	xdef	_mt_PatternPos
-	xdef	_mt_chan4data
+	xdef	_mt_chan4input
 
 	section	code
 
@@ -375,9 +379,9 @@ mt_GetNewNote
 	MOVE.B	n_volume(A6),D0
 	MOVE.W	D0,8(A5)
 	LEA	$DFF0D0,A5
-	tst.l	mt_chan4data
+	tst.l	mt_chan4input
 	beq.s	mt_PlayChannel4
-	lea	mt_chan4data,a0
+	lea	mt_chan4input,a0
 	moveq	#0,d1
 mt_PlayChannel4
 	LEA	mt_chan4temp(PC),A6
@@ -385,7 +389,7 @@ mt_PlayChannel4
 	MOVEQ	#0,D0
 	MOVE.B	n_volume(A6),D0
 	MOVE.W	D0,8(A5)
-	clr.l	mt_chan4data
+	clr.l	mt_chan4input
 	BRA	mt_SetDMA
 
 mt_PlayVoice
@@ -1371,12 +1375,16 @@ mt_PeriodTable
 	dc.w	431,407,384,363,342,323,305,288,272,256,242,228
 	dc.w	216,203,192,181,171,161,152,144,136,128,121,114,0
 
+_mt_chan1temp:
 mt_chan1temp	dc.l	0,0,0,0,0,$00010000,0,0,0,0
 		dc.w	0
+_mt_chan2temp:
 mt_chan2temp	dc.l	0,0,0,0,0,$00020000,0,0,0,0
 		dc.w	0
+_mt_chan3temp:
 mt_chan3temp	dc.l	0,0,0,0,0,$00040000,0,0,0,0
 		dc.w	0
+_mt_chan4temp:
 mt_chan4temp	dc.l	0,0,0,0,0,$00080000,0,0,0,0
 		dc.w	0
 				
@@ -1402,7 +1410,7 @@ mt_Enable	dc.b 0
 _mt_PatternPos:
 mt_PatternPos	dc.w 0
 mt_DMACONtemp	dc.w 0
-_mt_chan4data
-mt_chan4data:	dc.l 0
+_mt_chan4input:
+mt_chan4input:	dc.l 0
 
 	end

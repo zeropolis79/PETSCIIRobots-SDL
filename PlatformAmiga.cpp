@@ -49,15 +49,6 @@ struct SpriteData {
     uint16_t reserved[2];
 };
 
-struct SampleData {
-    char name[22];
-    uint16_t length;
-    int8_t finetune;
-    uint8_t volume;
-    uint16_t repeatPoint;
-    uint16_t repeatLength;
-};
-
 __far extern Custom custom;
 __far extern CIA ciaa;
 __far extern uint8_t c64Font[];
@@ -1495,29 +1486,44 @@ void PlatformAmiga::playModule(Module module)
     mt_Enable = true;
 }
 
+void PlatformAmiga::pauseModule()
+{
+    mt_Enable = false;
+    if ((mt_chan1temp.note & 0x1000) == 0) {
+        custom.aud[0].ac_vol = 0;
+    }
+    if ((mt_chan2temp.note & 0x1000) == 0) {
+        custom.aud[1].ac_vol = 0;
+    }
+    if ((mt_chan3temp.note & 0x1000) == 0) {
+        custom.aud[2].ac_vol = 0;
+    }
+    if ((mt_chan4temp.note & 0x1000) == 0) {
+        custom.aud[3].ac_vol = 0;
+    }
+}
+
 void PlatformAmiga::stopModule()
 {
-    if (mt_Enable) {
-        mt_end();
-    }
+    mt_end();
 }
 
 void PlatformAmiga::playSample(uint8_t sample)
 {
-    mt_chan4data[0] = 0x1000 + 320;
+    mt_chan4input.note = 0x1000 + 320;
     if (sample < 16) {
-        mt_chan4data[1] = sample << 12;
+        mt_chan4input.cmd = sample << 12;
     } else if (sample == 16) {
-        mt_chan4data[1] = 1 << 12;
+        mt_chan4input.cmd = 1 << 12;
     } else {
-        mt_chan4data[1] = 15 << 12;
+        mt_chan4input.cmd = 15 << 12;
     }
 }
 
 void PlatformAmiga::stopSample()
 {
-    mt_chan4data[0] = 0;
-    mt_chan4data[1] = 0;
+    mt_chan4input.note = 0;
+    mt_chan4input.cmd = 0;
 }
 #else
 static const uint16_t noteToFrequency[] = {
