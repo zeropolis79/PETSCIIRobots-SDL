@@ -23,14 +23,24 @@ petrobots
 
 Amiga TODO
 ----------
-- Pistol sound
-- Explosion sound
-- Door sound too quiet
+Code
+- Fit as many assets to memory as possible
+- Add map keys to custom controls screen
+
+Data
+- Plasma cannoning a dead player tile causes glitchy tile to appear
+
+Graphics
 - Key graphics
 - Death animation frames
 - Teleport animation frames
 - Fix evilbot graphics
 - Animate water, servers, trash compactor, and air conditioners
 - Fix mismatched tiles
-- Custom controls
-- Plasma cannoning a dead player tile causes glitchy tile to appear
+- Custom controls screen
+- Game over screen
+
+Audio
+- Pistol sound
+- Explosion sound
+- Door sound too quiet
