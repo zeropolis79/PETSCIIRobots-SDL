@@ -57,6 +57,7 @@ __chip extern uint8_t tilesPlanes[];
 __chip extern uint8_t spritesPlanes[];
 __chip extern uint8_t spritesMask[];
 __chip extern uint8_t itemsPlanes[];
+__far extern uint8_t keysPlanes[];
 __chip extern uint8_t healthPlanes[];
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 __chip extern uint8_t soundFXModule[];
@@ -1138,6 +1139,22 @@ void PlatformAmiga::renderSprite(uint8_t sprite, uint16_t x, uint16_t y)
 void PlatformAmiga::renderItem(uint8_t item, uint16_t x, uint16_t y)
 {
     BltBitMap(itemsBitMap, 0, item * 32, screen->RastPort.BitMap, x, y, 48, 32, 0xc0, 0xff, 0);
+}
+
+void PlatformAmiga::renderKey(uint8_t key, uint16_t x, uint16_t y)
+{
+    uint16_t* source = (uint16_t*)(keysPlanes + key * 2 * 14 * PLANES);
+    uint16_t* dest = (uint16_t*)(screenPlanes + y * SCREEN_WIDTH_IN_BYTES * PLANES + (x >> 3));
+    for (int i = 0; i < 14; i++) {
+        *dest++ = *source++;
+        dest += (SCREEN_WIDTH_IN_BYTES - 2) >> 1;
+        *dest++ = *source++;
+        dest += (SCREEN_WIDTH_IN_BYTES - 2) >> 1;
+        *dest++ = *source++;
+        dest += (SCREEN_WIDTH_IN_BYTES - 2) >> 1;
+        *dest++ = *source++;
+        dest += (SCREEN_WIDTH_IN_BYTES - 2) >> 1;
+    }
 }
 
 void PlatformAmiga::renderHealth(uint8_t health, uint16_t x, uint16_t y)

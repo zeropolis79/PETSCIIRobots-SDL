@@ -2223,38 +2223,15 @@ void DISPLAY_BLANK_WEAPON()
 void DISPLAY_KEYS()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->clearRect(272, 96, 48, 16); // ERASE ALL 3 SPOTS
-    /*
-    writeToScreenMemory(0x27A, 32); // ERASE ALL 3 SPOTS
-    writeToScreenMemory(0x27B, 32);
-    writeToScreenMemory(0x27C, 32);
-    writeToScreenMemory(0x27D, 32);
-    writeToScreenMemory(0x27E, 32);
-    writeToScreenMemory(0x27F, 32);
-    writeToScreenMemory(0x2A2, 32);
-    writeToScreenMemory(0x2A3, 32);
-    writeToScreenMemory(0x2A4, 32);
-    writeToScreenMemory(0x2A5, 32);
-    writeToScreenMemory(0x2A6, 32);
-    writeToScreenMemory(0x2A7, 32);
-    */
+    platform->clearRect(272, 106, 48, 14); // ERASE ALL 3 SPOTS
     if (KEYS & 0x01) { // %00000001 Spade key
-        writeToScreenMemory(0x22A, 0x63, 14);
-        writeToScreenMemory(0x22B, 0x4D, 14);
-        writeToScreenMemory(0x252, 0x41, 14);
-        writeToScreenMemory(0x253, 0x67, 14);
+        platform->renderKey(0, 272, 106);
     }
     if (KEYS & 0x02) { // %00000010 heart key
-        writeToScreenMemory(0x22C, 0x63, 10);
-        writeToScreenMemory(0x22D, 0x4D, 10);
-        writeToScreenMemory(0x254, 0x53, 10);
-        writeToScreenMemory(0x255, 0x67, 10);
+        platform->renderKey(1, 288, 106);
     }
     if (KEYS & 0x04) { // %00000100 star key
-        writeToScreenMemory(0x22E, 0x63, 7);
-        writeToScreenMemory(0x22F, 0x4D, 7);
-        writeToScreenMemory(0x256, 0x2A, 7);
-        writeToScreenMemory(0x257, 0x67, 7);
+        platform->renderKey(2, 304, 106);
     }
 #else
     platform->clearRect(272, 120, 48, 16); // ERASE ALL 3 SPOTS

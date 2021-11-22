@@ -1,4 +1,4 @@
-OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o PT2.3F_replay_cia.o C64Font.o Faces.o Tiles.o Sprites.o SpritesMask.o Items.o Health.o SoundFXModule.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o SquareWave.o
+OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o PT2.3F_replay_cia.o C64Font.o Faces.o Tiles.o Sprites.o SpritesMask.o Items.o Keys.o Health.o SoundFXModule.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o SquareWave.o
 
 all: petrobots 
 
@@ -25,6 +25,8 @@ SpritesMask.o: SpritesMask.raw
     Bin2Hunk SpritesMask.raw SpritesMask.o NAME _spritesMask CHIP
 Items.o: Items.raw
     Bin2Hunk Items.raw Items.o NAME _itemsPlanes CHIP
+Keys.o: Keys.raw
+    Bin2Hunk Keys.raw Keys.o NAME _keysPlanes HUNK data
 Health.o: Health.raw
     Bin2Hunk Health.raw Health.o NAME _healthPlanes CHIP
 SoundFXModule.o: mod.soundfx

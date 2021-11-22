@@ -91,6 +91,7 @@ public:
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant = 0, bool transparent = false) = 0;
     virtual void renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t foregroundVariant = 0);
     virtual void renderItem(uint8_t item, uint16_t x, uint16_t y);
+    virtual void renderKey(uint8_t key, uint16_t x, uint16_t y);
     virtual void renderHealth(uint8_t health, uint16_t x, uint16_t y);
     virtual void renderFace(uint8_t face, uint16_t x, uint16_t y);
     virtual void renderLiveMap(uint8_t* map);
