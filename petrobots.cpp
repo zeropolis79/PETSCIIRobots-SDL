@@ -1835,18 +1835,18 @@ void DISPLAY_ENDGAME_SCREEN()
     // display map name
     const char* name = CALC_MAP_NAME();
     for (int Y = 0; Y != 16; Y++) {
-        writeToScreenMemory(0x12E + Y, convertToPETSCII(name[Y]));
+        writeToScreenMemory(0x12E + Y, convertToPETSCII(name[Y]), 14);
     }
     // display elapsed time
     DECNUM = HOURS;
-    DECWRITE(0x17D);
+    DECWRITE(0x17D, 14);
     DECNUM = MINUTES;
-    DECWRITE(0x180);
+    DECWRITE(0x180, 14);
     DECNUM = SECONDS;
-    DECWRITE(0x183);
-    writeToScreenMemory(0x17D, 32); // SPACE
-    writeToScreenMemory(0x180, 58); // COLON
-    writeToScreenMemory(0x183, 58);
+    DECWRITE(0x183, 14);
+    writeToScreenMemory(0x17D, 32, 14); // SPACE
+    writeToScreenMemory(0x180, 58, 14); // COLON
+    writeToScreenMemory(0x183, 58, 14);
     // count robots remaining
     DECNUM = 0;
     for (X = 1; X != 28; X++) {
@@ -1854,7 +1854,7 @@ void DISPLAY_ENDGAME_SCREEN()
             DECNUM++;
         }
     }
-    DECWRITE(0x1CE);
+    DECWRITE(0x1CE, 14);
     // Count secrets remaining
     DECNUM = 0;
     for (X = 48; X != 64; X++) {
@@ -1862,11 +1862,11 @@ void DISPLAY_ENDGAME_SCREEN()
             DECNUM++;
         }
     }
-    DECWRITE(0x21E);
+    DECWRITE(0x21E, 14);
     // display difficulty level
     const char* WORD = DIFF_LEVEL_WORDS[DIFF_LEVEL];
     for (X = 0; WORD[X] != 0; X++) {
-        writeToScreenMemory(0x26E + X, convertToPETSCII(WORD[X]));
+        writeToScreenMemory(0x26E + X, convertToPETSCII(WORD[X]), 14);
     }
 }
 
@@ -2340,7 +2340,7 @@ void DISPLAY_WIN_LOSE()
     if (UNIT_TYPE[0] != 0) {
         // WIN MESSAGE
         for (int X = 0; X != 8; X++) {
-            writeToScreenMemory(0x088 + X, convertToPETSCII(WIN_MSG[X]));
+            writeToScreenMemory(0x088 + X, convertToPETSCII(WIN_MSG[X]), 14);
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
         platform->playModule(Platform::ModuleWin);
@@ -2350,7 +2350,7 @@ void DISPLAY_WIN_LOSE()
     } else {
         // LOSE MESSAGE
         for (int X = 0; X != 9; X++) {
-            writeToScreenMemory(0x088 + X, convertToPETSCII(LOS_MSG[X]));
+            writeToScreenMemory(0x088 + X, convertToPETSCII(LOS_MSG[X]), 14);
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
         platform->playModule(Platform::ModuleLose);
