@@ -36,7 +36,7 @@ public:
     virtual void updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles);
 #endif
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent);
-    virtual void renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t foregroundVariant);
+    virtual void renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t backgroundVariant, uint8_t foregroundVariant);
     virtual void renderItem(uint8_t item, uint16_t x, uint16_t y);
     virtual void renderKey(uint8_t key, uint16_t x, uint16_t y);
     virtual void renderHealth(uint8_t health, uint16_t x, uint16_t y);

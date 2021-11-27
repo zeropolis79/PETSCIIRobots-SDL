@@ -1064,9 +1064,14 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t var
     }
 }
 
-void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t foregroundVariant)
+void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t backgroundVariant, uint8_t foregroundVariant)
 {
 #ifdef PLATFORM_SPRITE_SUPPORT
+        uint8_t* backgroundPlanes = tilesPlanes;
+        if (animTileMap[backgroundTile] >= 0) {
+            backgroundTile = animTileMap[backgroundTile] + backgroundVariant;
+            backgroundPlanes = animTilesPlanes;
+        }
         bool shifted = x & 8;
         uint32_t thirdOfBackgroundTileOffset = backgroundTile << 7;
         uint32_t screenOffsetXInWords = x >> 4;
@@ -1086,7 +1091,7 @@ void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, 
             custom.bltdmod = 0;
             custom.bltapt = spritesPlanes + thirdOfSpriteOffset + thirdOfSpriteOffset + thirdOfSpriteOffset;
             custom.bltbpt = spritesMask + thirdOfSpriteOffset + thirdOfSpriteOffset + thirdOfSpriteOffset;
-            custom.bltcpt = tilesPlanes + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset;
+            custom.bltcpt = backgroundPlanes + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset;
             custom.bltdpt = combinedTilePlanes;
             custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
         } else {
@@ -1101,9 +1106,9 @@ void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, 
             custom.bltbmod = 0;
             custom.bltcmod = 0;
             custom.bltdmod = 0;
-            custom.bltapt = tilesPlanes + thirdOfForegroundTileOffset + thirdOfForegroundTileOffset + thirdOfForegroundTileOffset;
+            custom.bltapt = backgroundPlanes + thirdOfForegroundTileOffset + thirdOfForegroundTileOffset + thirdOfForegroundTileOffset;
             custom.bltbpt = tilesMask + thirdOfForegroundTileMaskOffset + thirdOfForegroundTileMaskOffset + thirdOfForegroundTileMaskOffset;
-            custom.bltcpt = tilesPlanes + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset;
+            custom.bltcpt = backgroundPlanes + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset;
             custom.bltdpt = combinedTilePlanes;
             custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
         }

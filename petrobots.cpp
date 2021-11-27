@@ -1475,7 +1475,7 @@ void DRAW_MAP_WINDOW()
                     VARIANT != PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] ||
                     FG_TILE != PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] ||
                     FG_VARIANT != PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT]) {
-                    platform->renderTiles(TILE, FG_TILE, TEMP_X * 24, TEMP_Y * 24, FG_VARIANT);
+                    platform->renderTiles(TILE, FG_TILE, TEMP_X * 24, TEMP_Y * 24, VARIANT, FG_VARIANT);
                     PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] = TILE;
                     PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] = VARIANT;
                     PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] = FG_TILE;
@@ -1525,7 +1525,7 @@ void DRAW_MAP_WINDOW()
                         variant += WALK_FRAME + (SELECTED_WEAPON << 4);
                     }
                 }
-                platform->renderTiles(TILE, FG_TILE, TEMP_X * 24, TEMP_Y * 24, variant);
+                platform->renderTiles(TILE, FG_TILE, TEMP_X * 24, TEMP_Y * 24, 0, variant);
             } else {
                 platform->renderTile(TILE, TEMP_X * 24, TEMP_Y * 24);
             }
