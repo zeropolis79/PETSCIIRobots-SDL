@@ -1458,6 +1458,7 @@ void DRAW_MAP_WINDOW()
             switch (TILE) {
             case 66:
             case 148:
+            case 143:
                 VARIANT = ANIM_STATE & 3;
                 break;
             case 196:
