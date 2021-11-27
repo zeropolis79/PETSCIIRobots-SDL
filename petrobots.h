@@ -329,9 +329,13 @@ void EMP_FLASH();
 void ANIMATE_WATER();
 
 extern uint8_t WATER_TIMER;
+#ifdef PLATFORM_IMAGE_BASED_TILES
+extern uint8_t ANIM_STATE;
+#else
 extern uint8_t WATER_TEMP1;
 extern uint8_t HVAC_STATE;
 extern uint8_t CINEMA_STATE;
+#endif
 
 void ELEVATOR_SELECT();
 

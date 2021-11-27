@@ -37,6 +37,7 @@ uint8_t MAP_PRECALC[77];    // Stores pre-calculated objects for map window (77 
 uint8_t MAP_PRECALC_DIRECTION[77];    // Stores pre-calculated object directions for map window (77 bytes)
 #ifdef OPTIMIZED_MAP_RENDERING
 uint8_t PREVIOUS_MAP_BACKGROUND[77];
+uint8_t PREVIOUS_MAP_BACKGROUND_VARIANT[77];
 uint8_t PREVIOUS_MAP_FOREGROUND[77];
 uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[77];
 #endif
@@ -1453,6 +1454,7 @@ void DRAW_MAP_WINDOW()
         for (uint8_t TEMP_X = 0; TEMP_X != 11; TEMP_X++, MAP_SOURCE++, PRECALC_COUNT++) {
             // NOW FIGURE OUT WHERE TO PLACE IT ON SCREEN.
             TILE = MAP_SOURCE[0];
+            uint8_t VARIANT = TILE == 66 ? (ANIM_STATE & 3) : 0;
             uint8_t FG_TILE = MAP_PRECALC[PRECALC_COUNT];
             uint8_t FG_VARIANT = 0;
             if (FG_TILE != 0) {
@@ -1470,19 +1472,23 @@ void DRAW_MAP_WINDOW()
                     }
                 }
                 if (TILE != PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] ||
+                    VARIANT != PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] ||
                     FG_TILE != PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] ||
                     FG_VARIANT != PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT]) {
-                    platform->renderTiles(*MAP_SOURCE, FG_TILE, TEMP_X * 24, TEMP_Y * 24, FG_VARIANT);
+                    platform->renderTiles(TILE, FG_TILE, TEMP_X * 24, TEMP_Y * 24, FG_VARIANT);
                     PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] = TILE;
+                    PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] = VARIANT;
                     PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] = FG_TILE;
                     PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT] = FG_VARIANT;
                 }
             } else {
                 if (TILE != PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] ||
+                    VARIANT != PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] ||
                     FG_TILE != PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] ||
                     FG_VARIANT != PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT]) {
-                    platform->renderTile(*MAP_SOURCE, TEMP_X * 24, TEMP_Y * 24);
+                    platform->renderTile(TILE, TEMP_X * 24, TEMP_Y * 24, VARIANT);
                     PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] = TILE;
+                    PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] = VARIANT;
                     PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] = FG_TILE;
                     PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT] = FG_VARIANT;
                 }
@@ -2695,7 +2701,9 @@ void ANIMATE_WATER()
         return;
     }
     WATER_TIMER = 0;
-#ifndef PLATFORM_IMAGE_BASED_TILES
+#ifdef PLATFORM_IMAGE_BASED_TILES
+    ANIM_STATE++;
+#else
     WATER_TEMP1 = TILE_DATA_BR[204];
     TILE_DATA_BR[204] = TILE_DATA_MM[204];
     TILE_DATA_BR[221] = TILE_DATA_MM[204];
@@ -2780,9 +2788,13 @@ void ANIMATE_WATER()
 }
 
 uint8_t WATER_TIMER = 0;
+#ifdef PLATFORM_IMAGE_BASED_TILES
+uint8_t ANIM_STATE = 0;
+#else
 uint8_t WATER_TEMP1 = 0;
 uint8_t HVAC_STATE = 0;
 uint8_t CINEMA_STATE = 0;
+#endif
 
 // This is the routine that allows a person to select
 // a level and highlights the selection in the information

@@ -79,6 +79,7 @@ private:
     void setSampleData(uint8_t* module);
 #endif
     void renderSprite(uint8_t sprite, uint16_t x, uint16_t y);
+    void renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y);
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
     __asm void renderLiveMapTiles(register __a1 uint8_t* map);
 //    void renderLiveMapTiles(uint8_t* map);
@@ -105,7 +106,6 @@ private:
 #endif
     BitMap* facesBitMap;
     BitMap* tilesBitMap;
-    BitMap* spritesBitMap;
     BitMap* itemsBitMap;
     BitMap* healthBitMap;
     SimpleSprite* cursorSprite1;
