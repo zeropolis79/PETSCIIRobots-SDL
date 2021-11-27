@@ -1454,7 +1454,21 @@ void DRAW_MAP_WINDOW()
         for (uint8_t TEMP_X = 0; TEMP_X != 11; TEMP_X++, MAP_SOURCE++, PRECALC_COUNT++) {
             // NOW FIGURE OUT WHERE TO PLACE IT ON SCREEN.
             TILE = MAP_SOURCE[0];
-            uint8_t VARIANT = (TILE == 66 || TILE == 148) ? (ANIM_STATE & 3) : 0;
+            uint8_t VARIANT = 0;
+            switch (TILE) {
+            case 66:
+            case 148:
+                VARIANT = ANIM_STATE & 3;
+                break;
+            case 196:
+            case 197:
+            case 200:
+            case 201:
+                VARIANT = ANIM_STATE & 1;
+                break;
+            default:
+                break;
+            }
             uint8_t FG_TILE = MAP_PRECALC[PRECALC_COUNT];
             uint8_t FG_VARIANT = 0;
             if (FG_TILE != 0) {
