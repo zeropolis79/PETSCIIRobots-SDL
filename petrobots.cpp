@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int i;
+    int i, j;
     for (i = 0; i < sizeof(MAPNAME); i++) {
 #ifdef PLATFORM_GZIP_SUPPORT
         MAPNAME[i] = "level-a.gz"[i];
@@ -132,7 +132,32 @@ int main(int argc, char *argv[])
 #endif
     }
     for (i = 0; i < sizeof(LOAD_MSG2); i++) {
-        LOAD_MSG2[i] = "loading map:"[i];
+        LOAD_MSG2[i] = convertToPETSCII("loading map:"[i]);
+    }
+    for (i = 0; i < 13 * 16; i++) {
+        MAP_NAMES[i] = convertToPETSCII(MAP_NAMES[i]);
+    }
+    for (i = 0; i < 197; i++) {
+        CINEMA_MESSAGE[i] = convertToPETSCII(CINEMA_MESSAGE[i]);
+    }
+    for (i = 0; i < 4; i++) {
+        for (j = 0; j < 10; j++) {
+            INTRO_TEXT[i][j] = convertToPETSCII(INTRO_TEXT[i][j]);
+        }
+    }
+    for (i = 0; i < 8; i++) {
+        WIN_MSG[i] = convertToPETSCII(WIN_MSG[i]);
+    }
+    for (i = 0; i < 9; i++) {
+        LOS_MSG[i] = convertToPETSCII(LOS_MSG[i]);
+    }
+    for (i = 0; i < 30; i++) {
+        CONTROLTEXT[i] = convertToPETSCII(CONTROLTEXT[i]);
+    }
+    for (i = 0; i < 3; i++) {
+        for (j = 0; DIFF_LEVEL_WORDS[i][j]; j++) {
+            DIFF_LEVEL_WORDS[i][j] = convertToPETSCII(DIFF_LEVEL_WORDS[i][j]);
+        }
     }
 
     platform->stopNote(); // RESET SOUND TO ZERO
@@ -238,19 +263,19 @@ const char* MSG_PAUSED = "game paused.\xff"
 const char* MSG_MUSICON = "music on.";
 const char* MSG_MUSICOFF = "music off.";
 uint8_t SELECTED_MAP = 0;
-const char* MAP_NAMES = "01-research lab "
-                        "02-headquarters "
-                        "03-the village  "
-                        "04-the islands  "
-                        "05-downtown     "
-                        "06-pi university"
-                        "07-more islands "
-                        "08-robot hotel  "
-                        "09-forest moon  "
-                        "10-death tower  "
-                        "11-river death  "
-                        "12-bunker       "
-                        "13-castle       ";
+char* MAP_NAMES = "01-research lab "
+                  "02-headquarters "
+                  "03-the village  "
+                  "04-the islands  "
+                  "05-downtown     "
+                  "06-pi university"
+                  "07-more islands "
+                  "08-robot hotel  "
+                  "09-forest moon  "
+                  "10-death tower  "
+                  "11-river death  "
+                  "12-bunker       "
+                  "13-castle       ";
 // THE FOLLOWING ARE USED BY THE SOUND SYSTEM*
 uint8_t TEMPO_TIMER = 0; // used for counting down to the next tick
 uint8_t TEMPO = 7; // How many IRQs between ticks
@@ -272,11 +297,11 @@ void DISPLAY_LOAD_MESSAGE2()
 {
     int Y;
     for (Y = 0; Y != 12; Y++) {
-        writeToScreenMemory(0x190 + Y, convertToPETSCII(LOAD_MSG2[Y]));
+        writeToScreenMemory(0x190 + Y, LOAD_MSG2[Y]);
     }
-    const char* name = CALC_MAP_NAME();
+    char* name = CALC_MAP_NAME();
     for (Y = 0; Y != 16; Y++) {
-        writeToScreenMemory(0x19c + Y, convertToPETSCII(name[Y]));
+        writeToScreenMemory(0x19c + Y, name[Y]);
     }
 }
 
@@ -1520,20 +1545,20 @@ void DRAW_MAP_WINDOW()
                     switch (TILE) {
                     case 20: {
                         platform->waitForScreenMemoryAccess();
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 41, convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE]) | 0x80, 1, 0);
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 42, convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE + 1]) | 0x80, 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 41, CINEMA_MESSAGE[CINEMA_STATE] | 0x80, 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 42, CINEMA_MESSAGE[CINEMA_STATE + 1] | 0x80, 1, 0);
                         break;
                     }
                     case 21: {
                         platform->waitForScreenMemoryAccess();
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 40, convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE + 2]) | 0x80, 1, 0);
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 41, convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE + 3]) | 0x80, 1, 0);
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 42, convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE + 4]) | 0x80, 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 40, CINEMA_MESSAGE[CINEMA_STATE + 2] | 0x80, 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 41, CINEMA_MESSAGE[CINEMA_STATE + 3] | 0x80, 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 42, CINEMA_MESSAGE[CINEMA_STATE + 4] | 0x80, 1, 0);
                         break;
                     }
                     case 22: {
                         platform->waitForScreenMemoryAccess();
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 40, convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE + 5]) | 0x80, 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 40, CINEMA_MESSAGE[CINEMA_STATE + 5] | 0x80, 1, 0);
                         break;
                     }
                     default:
@@ -1856,7 +1881,7 @@ void DISPLAY_GAME_SCREEN()
 #endif
 }
 
-const char* introText[] = {
+char* INTRO_TEXT[] = {
     "start game",
     "select map",
     "difficulty",
@@ -1869,7 +1894,7 @@ void DISPLAY_INTRO_SCREEN()
     uint8_t* row = SCREEN_MEMORY + MENU_CHART_L[0];
     for (int Y = 0; Y < 4; Y++, row += 40) {
         for (int X = 0; X < 10; X++) {
-            row[X] = convertToPETSCII(introText[Y][X]);
+            row[X] = INTRO_TEXT[Y][X];
         }
     }
     platform->displayImage(Platform::ImageIntro);
@@ -1887,9 +1912,9 @@ void DISPLAY_ENDGAME_SCREEN()
     DECOMPRESS_SCREEN(SCR_ENDGAME);
 #endif
     // display map name
-    const char* name = CALC_MAP_NAME();
+    char* name = CALC_MAP_NAME();
     for (int Y = 0; Y != 16; Y++) {
-        writeToScreenMemory(0x12E + Y, convertToPETSCII(name[Y]), 14);
+        writeToScreenMemory(0x12E + Y, name[Y], 14);
     }
     // display elapsed time
     DECNUM = HOURS;
@@ -1918,13 +1943,13 @@ void DISPLAY_ENDGAME_SCREEN()
     }
     DECWRITE(0x21E, 14);
     // display difficulty level
-    const char* WORD = DIFF_LEVEL_WORDS[DIFF_LEVEL];
+    char* WORD = DIFF_LEVEL_WORDS[DIFF_LEVEL];
     for (X = 0; WORD[X] != 0; X++) {
-        writeToScreenMemory(0x26E + X, convertToPETSCII(WORD[X]), 14);
+        writeToScreenMemory(0x26E + X, WORD[X], 14);
     }
 }
 
-const char* DIFF_LEVEL_WORDS[] = {
+char* DIFF_LEVEL_WORDS[] = {
     "easy",
     "normal",
     "hard"
@@ -2394,7 +2419,7 @@ void DISPLAY_WIN_LOSE()
     if (UNIT_TYPE[0] != 0) {
         // WIN MESSAGE
         for (int X = 0; X != 8; X++) {
-            writeToScreenMemory(0x088 + X, convertToPETSCII(WIN_MSG[X]), 14);
+            writeToScreenMemory(0x088 + X, WIN_MSG[X], 14);
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
         platform->playModule(Platform::ModuleWin);
@@ -2404,7 +2429,7 @@ void DISPLAY_WIN_LOSE()
     } else {
         // LOSE MESSAGE
         for (int X = 0; X != 9; X++) {
-            writeToScreenMemory(0x088 + X, convertToPETSCII(LOS_MSG[X]), 14);
+            writeToScreenMemory(0x088 + X, LOS_MSG[X], 14);
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
         platform->playModule(Platform::ModuleLose);
@@ -2414,8 +2439,8 @@ void DISPLAY_WIN_LOSE()
     }
 }
 
-const char* WIN_MSG = "you win!";
-const char* LOS_MSG = "you lose!";
+char* WIN_MSG = "you win!";
+char* LOS_MSG = "you lose!";
 
 void PRINT_INTRO_MESSAGE()
 {
@@ -2577,16 +2602,16 @@ void CYCLE_CONTROLS()
     // display control method on screen
     for (int X = 0, Y = CONTROLSTART[CONTROL]; X != 10; X++, Y++) {
 #ifdef PLATFORM_IMAGE_SUPPORT
-        writeToScreenMemory(0x0A4 + X, convertToPETSCII(CONTROLTEXT[Y]), 14, 5);
+        writeToScreenMemory(0x0A4 + X, CONTROLTEXT[Y], 14, 5);
 #else
-        writeToScreenMemory(0x0CC + X, convertToPETSCII(CONTROLTEXT[Y]) | 0x80);
+        writeToScreenMemory(0x0CC + X, CONTROLTEXT[Y] | 0x80);
 #endif
     }
 }
 
-const char* CONTROLTEXT = "standard  "
-                          "custom    "
-                          "cd32 pad  ";
+char* CONTROLTEXT = "standard  "
+                    "custom    "
+                    "cd32 pad  ";
 uint8_t CONTROLSTART[] = { 0, 10, 20 };
 
 void CYCLE_MAP()
@@ -2600,19 +2625,19 @@ void CYCLE_MAP()
 
 void DISPLAY_MAP_NAME()
 {
-    const char* name = CALC_MAP_NAME();
+    char* name = CALC_MAP_NAME();
     for (int Y = 0; Y != 16; Y++) {
 #ifdef PLATFORM_IMAGE_SUPPORT
-        writeToScreenMemory(0x119 + Y, convertToPETSCII(name[Y]), 15, 5);
+        writeToScreenMemory(0x119 + Y, name[Y], 15, 5);
 #else
-        writeToScreenMemory(0x16A + Y, convertToPETSCII(name[Y]));
+        writeToScreenMemory(0x16A + Y, name[Y]);
 #endif
     }
     // now set the mapname for the filesystem load
     MAPNAME[6] = SELECTED_MAP + 65;
 }
 
-const char* CALC_MAP_NAME()
+char* CALC_MAP_NAME()
 {
     // FIND MAP NAME
     return MAP_NAMES + (SELECTED_MAP << 4); // multiply by 16 by shifting 4 times to left.
@@ -2821,7 +2846,7 @@ void ANIMATE_WATER()
     TILE_DATA_MM[21] = TILE_DATA_MR[21]; // #5 -> #4
     TILE_DATA_MR[21] = TILE_DATA_ML[22]; // #6 -> #5
     // now insert new character.
-    TILE_DATA_ML[22] = convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE]); // #6
+    TILE_DATA_ML[22] = CINEMA_MESSAGE[CINEMA_STATE]; // #6
 
     CINEMA_STATE++;
     if (CINEMA_STATE == 197) {

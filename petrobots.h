@@ -129,7 +129,7 @@ extern const char* MSG_PAUSED;
 extern const char* MSG_MUSICON;
 extern const char* MSG_MUSICOFF;
 extern uint8_t SELECTED_MAP;
-extern const char* MAP_NAMES;
+extern char* MAP_NAMES;
 // THE FOLLOWING ARE USED BY THE SOUND SYSTEM*
 extern uint8_t TEMPO_TIMER; // used for counting down to the next tick
 extern uint8_t TEMPO; // How many IRQs between ticks
@@ -254,10 +254,13 @@ extern uint8_t DECTEMP;
 void TILE_LOAD_ROUTINE();
 void MAP_LOAD_ROUTINE();
 void DISPLAY_GAME_SCREEN();
+
+extern char* INTRO_TEXT[];
+
 void DISPLAY_INTRO_SCREEN();
 void DISPLAY_ENDGAME_SCREEN();
 
-extern const char* DIFF_LEVEL_WORDS[];
+extern char* DIFF_LEVEL_WORDS[];
 
 void DECOMPRESS_SCREEN(uint8_t* source, uint8_t color = 10);
 
@@ -288,8 +291,8 @@ extern uint8_t GAMEOVER3[];
 
 void DISPLAY_WIN_LOSE();
 
-extern const char* WIN_MSG;
-extern const char* LOS_MSG;
+extern char* WIN_MSG;
+extern char* LOS_MSG;
 
 void PRINT_INTRO_MESSAGE();
 void PRINT_INFO(const char *);
@@ -303,12 +306,12 @@ void START_INTRO_MUSIC();
 bool EXEC_COMMAND();
 void CYCLE_CONTROLS();
 
-extern const char* CONTROLTEXT;
+extern char* CONTROLTEXT;
 extern uint8_t CONTROLSTART[];
 
 void CYCLE_MAP();
 void DISPLAY_MAP_NAME();
-const char* CALC_MAP_NAME();
+char* CALC_MAP_NAME();
 void REVERSE_MENU_OPTION(bool reverse);
 
 extern uint8_t MENUY; // CURRENT MENU SELECTION
