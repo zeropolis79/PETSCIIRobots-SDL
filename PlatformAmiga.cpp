@@ -1106,7 +1106,7 @@ void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, 
             custom.bltbmod = 0;
             custom.bltcmod = 0;
             custom.bltdmod = 0;
-            custom.bltapt = backgroundPlanes + thirdOfForegroundTileOffset + thirdOfForegroundTileOffset + thirdOfForegroundTileOffset;
+            custom.bltapt = tilesPlanes + thirdOfForegroundTileOffset + thirdOfForegroundTileOffset + thirdOfForegroundTileOffset;
             custom.bltbpt = tilesMask + thirdOfForegroundTileMaskOffset + thirdOfForegroundTileMaskOffset + thirdOfForegroundTileMaskOffset;
             custom.bltcpt = backgroundPlanes + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset;
             custom.bltdpt = combinedTilePlanes;
