@@ -334,8 +334,8 @@ extern uint8_t ANIM_STATE;
 #else
 extern uint8_t WATER_TEMP1;
 extern uint8_t HVAC_STATE;
-extern uint8_t CINEMA_STATE;
 #endif
+extern uint8_t CINEMA_STATE;
 
 void ELEVATOR_SELECT();
 
@@ -474,9 +474,7 @@ extern uint8_t SCR_TEXT[];
 extern uint8_t SCR_ENDGAME[];
 #endif
 extern uint8_t SCR_CUSTOM_KEYS[];
-#ifndef PLATFORM_IMAGE_BASED_TILES
 extern uint8_t CINEMA_MESSAGE[];
-#endif
 #ifndef PLATFORM_IMAGE_SUPPORT
 extern uint8_t WEAPON1A[];
 extern uint8_t WEAPON1B[];

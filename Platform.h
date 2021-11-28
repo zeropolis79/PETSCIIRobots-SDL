@@ -117,6 +117,7 @@ public:
     virtual void playSample(uint8_t sample);
     virtual void stopSample();
     virtual void renderFrame(bool waitForNextFrame = false);
+    virtual void waitForScreenMemoryAccess();
     bool quit;
 };
 

@@ -1468,6 +1468,11 @@ void DRAW_MAP_WINDOW()
             case 201:
                 VARIANT = ANIM_STATE & 1;
                 break;
+            case 20: // CINEMA
+            case 21:
+            case 22:
+                VARIANT = ANIM_STATE;
+                break;
             default:
                 break;
             }
@@ -1507,6 +1512,29 @@ void DRAW_MAP_WINDOW()
                     PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] = VARIANT;
                     PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] = FG_TILE;
                     PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT] = FG_VARIANT;
+
+                    switch (TILE) {
+                    case 20: {
+                        platform->waitForScreenMemoryAccess();
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 41, convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE]) | 0x80, 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 42, convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE + 1]) | 0x80, 1, 0);
+                        break;
+                    }
+                    case 21: {
+                        platform->waitForScreenMemoryAccess();
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 40, convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE + 2]) | 0x80, 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 41, convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE + 3]) | 0x80, 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 42, convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE + 4]) | 0x80, 1, 0);
+                        break;
+                    }
+                    case 22: {
+                        platform->waitForScreenMemoryAccess();
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 40, convertToPETSCII(CINEMA_MESSAGE[CINEMA_STATE + 5]) | 0x80, 1, 0);
+                        break;
+                    }
+                    default:
+                        break;
+                    }
                 }
             }
         }
@@ -2719,6 +2747,10 @@ void ANIMATE_WATER()
     WATER_TIMER = 0;
 #ifdef PLATFORM_IMAGE_BASED_TILES
     ANIM_STATE++;
+    CINEMA_STATE++;
+    if (CINEMA_STATE == 197) {
+        CINEMA_STATE = 0;
+    }
 #else
     WATER_TEMP1 = TILE_DATA_BR[204];
     TILE_DATA_BR[204] = TILE_DATA_MM[204];
@@ -2809,8 +2841,8 @@ uint8_t ANIM_STATE = 0;
 #else
 uint8_t WATER_TEMP1 = 0;
 uint8_t HVAC_STATE = 0;
-uint8_t CINEMA_STATE = 0;
 #endif
+uint8_t CINEMA_STATE = 0;
 
 // This is the routine that allows a person to select
 // a level and highlights the selection in the information
@@ -5002,15 +5034,13 @@ uint8_t SCR_CUSTOM_KEYS[] = {
     0x4A, 0x60, 0x40, 0x25, 0x4B
 };
 
-#ifndef PLATFORM_IMAGE_BASED_TILES
 uint8_t CINEMA_MESSAGE[] = {
     "coming soon: space balls 2 - the search for more money, "
     "attack of the paperclips: clippy's revenge, "
     "it came from planet earth, "
     "rocky 5000, all my circuits the movie, "
-    "conan the librarian, and more! " 
+    "conan the librarian, and more! comin"
 };
-#endif
 
 #ifndef PLATFORM_IMAGE_SUPPORT
 uint8_t WEAPON1A[] = {

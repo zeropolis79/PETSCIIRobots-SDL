@@ -68,6 +68,7 @@ public:
     virtual void stopNote();
 #endif
     virtual void renderFrame(bool waitForNextFrame);
+    virtual void waitForScreenMemoryAccess();
 
 private:
     __saveds void runVerticalBlankInterrupt();

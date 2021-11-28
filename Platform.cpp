@@ -131,4 +131,8 @@ void Platform::renderFrame(bool)
 {
 }
 
+void Platform::waitForScreenMemoryAccess()
+{
+}
+
 Platform* platform = 0;

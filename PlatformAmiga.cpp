@@ -1659,3 +1659,8 @@ void PlatformAmiga::renderFrame(bool waitForNextFrame)
         WaitTOF();
     }
 }
+
+void PlatformAmiga::waitForScreenMemoryAccess()
+{
+    WaitBlit();
+}
