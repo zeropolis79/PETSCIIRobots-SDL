@@ -25,18 +25,23 @@ Amiga TODO
 ----------
 Code
 - Fit as many assets to memory as possible
-- Add map keys to custom controls screen
+- Add map related keys to custom controls screen
 
 Data
 - Plasma cannoning a dead player tile causes glitchy tile to appear
 
 Graphics
-- Death animation frames
-- Fix evilbot graphics
 - Fix mismatched tiles
-- Custom controls screen
+- Workbench icon (Vesa can provide)
+- Death animation frames (not needed if current implementation is fine)
+- Fix evilbot graphics (not needed if current implementation is fine)
+- Custom controls screen (not needed if current implementation is fine)
 
 Audio
-- Pistol sound
-- Explosion sound
 - Door sound too quiet
+- Pistol sound (currently FreeDoom, licensing unclear)
+- Explosion sound (currently FreeDoom, licensing unclear)
+
+Other
+- Hard disk installer script
+- WHDLoad install
