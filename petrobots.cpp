@@ -1456,12 +1456,13 @@ void DRAW_MAP_WINDOW()
             TILE = MAP_SOURCE[0];
             uint8_t VARIANT = 0;
             switch (TILE) {
-            case 66:
-            case 148:
-            case 143:
+            case 204: // WATER
+            case 66:  // FLAG
+            case 148: // TRASH COMPACTOR
+            case 143: // SERVER
                 VARIANT = ANIM_STATE & 3;
                 break;
-            case 196:
+            case 196: // HVAC
             case 197:
             case 200:
             case 201:
