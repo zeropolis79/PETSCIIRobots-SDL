@@ -80,11 +80,7 @@ extern bool quit;
 void INIT_GAME();
 
 extern const char* TILENAME;
-#ifdef PLATFORM_GZIP_SUPPORT
-extern char MAPNAME[11];
-#else
-extern char MAPNAME[8];
-#endif
+extern char* MAPNAME;
 extern const char* SNDNAME;
 extern const char* LOADMSG;
 extern const char* LOADMSG;
@@ -130,14 +126,16 @@ extern char* MSG_MUSICON;
 extern char* MSG_MUSICOFF;
 extern uint8_t SELECTED_MAP;
 extern char* MAP_NAMES;
+#ifndef PLATFORM_MODULE_BASED_AUDIO
 // THE FOLLOWING ARE USED BY THE SOUND SYSTEM*
 extern uint8_t TEMPO_TIMER; // used for counting down to the next tick
 extern uint8_t TEMPO; // How many IRQs between ticks
 extern uint8_t DATA_LINE; // used for playback to keep track of which line we are executing.
 extern uint8_t ARP_MODE; // 0=no 1=major 2=minor 3=sus4
 extern uint8_t CHORD_ROOT; // root note of the chord
-extern uint8_t MUSIC_ON; // 0=off 1=on
 extern uint8_t SOUND_EFFECT; // FF=OFF or number of effect in progress
+#endif
+extern uint8_t MUSIC_ON; // 0=off 1=on
 
 void DISPLAY_LOAD_MESSAGE1();
 void DISPLAY_LOAD_MESSAGE2();

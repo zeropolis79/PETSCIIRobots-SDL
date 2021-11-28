@@ -124,13 +124,6 @@ int main(int argc, char *argv[])
     }
 
     int i;
-    for (i = 0; i < sizeof(MAPNAME); i++) {
-#ifdef PLATFORM_GZIP_SUPPORT
-        MAPNAME[i] = "level-a.gz"[i];
-#else
-        MAPNAME[i] = "level-a"[i];
-#endif
-    }
     convertToPETSCII(INTRO_MESSAGE);
     convertToPETSCII(MSG_CANTMOVE);
     convertToPETSCII(MSG_BLOCKED);
@@ -208,13 +201,11 @@ void INIT_GAME()
 
 const char* TILENAME = "tileset.pet";
 #ifdef PLATFORM_GZIP_SUPPORT
-char MAPNAME[11];
+char* MAPNAME = "level-a.gz";
 #else
-char MAPNAME[8];
+char* MAPNAME = "level-a";
 #endif
-const char* SNDNAME = "pdrv-pet";
 const char* LOADMSG1 = "loading tiles...\x0d";
-const char* LOADMSG2 = "\x93loading map...\x0d";
 uint8_t KEYS = 0; // bit0=spade bit2=heart bit3=star
 uint8_t AMMO_PISTOL = 0; // how much ammo for the pistol
 uint8_t AMMO_PLASMA = 0; // how many shots of the plasmagun
@@ -281,14 +272,16 @@ char* MAP_NAMES = "01-research lab "
                   "11-river death  "
                   "12-bunker       "
                   "13-castle       ";
+#ifndef PLATFORM_MODULE_BASED_AUDIO
 // THE FOLLOWING ARE USED BY THE SOUND SYSTEM*
 uint8_t TEMPO_TIMER = 0; // used for counting down to the next tick
 uint8_t TEMPO = 7; // How many IRQs between ticks
 uint8_t DATA_LINE = 0; // used for playback to keep track of which line we are executing.
 uint8_t ARP_MODE = 0; // 0=no 1=major 2=minor 3=sus4
 uint8_t CHORD_ROOT = 0; // root note of the chord
-uint8_t MUSIC_ON = 0; // 0=off 1=on
 uint8_t SOUND_EFFECT = 0xff; // FF=OFF or number of effect in progress
+#endif
+uint8_t MUSIC_ON = 0; // 0=off 1=on
 
 void DISPLAY_LOAD_MESSAGE1()
 {
