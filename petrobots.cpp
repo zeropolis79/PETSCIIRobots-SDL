@@ -123,7 +123,7 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int i, j;
+    int i;
     for (i = 0; i < sizeof(MAPNAME); i++) {
 #ifdef PLATFORM_GZIP_SUPPORT
         MAPNAME[i] = "level-a.gz"[i];
@@ -131,34 +131,39 @@ int main(int argc, char *argv[])
         MAPNAME[i] = "level-a"[i];
 #endif
     }
-    for (i = 0; i < sizeof(LOAD_MSG2); i++) {
-        LOAD_MSG2[i] = convertToPETSCII("loading map:"[i]);
-    }
-    for (i = 0; i < 13 * 16; i++) {
-        MAP_NAMES[i] = convertToPETSCII(MAP_NAMES[i]);
-    }
-    for (i = 0; i < 197; i++) {
-        CINEMA_MESSAGE[i] = convertToPETSCII(CINEMA_MESSAGE[i]);
-    }
+    convertToPETSCII(INTRO_MESSAGE);
+    convertToPETSCII(MSG_CANTMOVE);
+    convertToPETSCII(MSG_BLOCKED);
+    convertToPETSCII(MSG_SEARCHING);
+    convertToPETSCII(MSG_NOTFOUND);
+    convertToPETSCII(MSG_FOUNDKEY);
+    convertToPETSCII(MSG_FOUNDGUN);
+    convertToPETSCII(MSG_FOUNDEMP);
+    convertToPETSCII(MSG_FOUNDBOMB);
+    convertToPETSCII(MSG_FOUNDPLAS);
+    convertToPETSCII(MSG_FOUNDMED);
+    convertToPETSCII(MSG_FOUNDMAG);
+    convertToPETSCII(MSG_MUCHBET);
+    convertToPETSCII(MSG_EMPUSED);
+    convertToPETSCII(MSG_TERMINATED);
+    convertToPETSCII(MSG_TRANS1);
+    convertToPETSCII(MSG_ELEVATOR);
+    convertToPETSCII(MSG_LEVELS);
+    convertToPETSCII(MSG_PAUSED);
+    convertToPETSCII(MSG_MUSICON);
+    convertToPETSCII(MSG_MUSICOFF);
+    convertToPETSCII(MAP_NAMES);
+    convertToPETSCII(LOAD_MSG2);
     for (i = 0; i < 4; i++) {
-        for (j = 0; j < 10; j++) {
-            INTRO_TEXT[i][j] = convertToPETSCII(INTRO_TEXT[i][j]);
-        }
-    }
-    for (i = 0; i < 8; i++) {
-        WIN_MSG[i] = convertToPETSCII(WIN_MSG[i]);
-    }
-    for (i = 0; i < 9; i++) {
-        LOS_MSG[i] = convertToPETSCII(LOS_MSG[i]);
-    }
-    for (i = 0; i < 30; i++) {
-        CONTROLTEXT[i] = convertToPETSCII(CONTROLTEXT[i]);
+        convertToPETSCII(INTRO_OPTIONS[i]);
     }
     for (i = 0; i < 3; i++) {
-        for (j = 0; DIFF_LEVEL_WORDS[i][j]; j++) {
-            DIFF_LEVEL_WORDS[i][j] = convertToPETSCII(DIFF_LEVEL_WORDS[i][j]);
-        }
+        convertToPETSCII(DIFF_LEVEL_WORDS[i]);
     }
+    convertToPETSCII(WIN_MSG);
+    convertToPETSCII(LOS_MSG);
+    convertToPETSCII(CONTROLTEXT);
+    convertToPETSCII(CINEMA_MESSAGE);
 
     platform->stopNote(); // RESET SOUND TO ZERO
     DISPLAY_LOAD_MESSAGE1();
@@ -230,38 +235,38 @@ uint8_t SCREEN_SHAKE = 0; // 1=shake 0=no shake
 uint8_t CONTROL = 0; // 0=keyboard 1=custom keys 2=snes
 uint16_t BORDER_COLOR = 0xf00; // Used for border flash coloring
 #ifdef _AMIGA
-const char* INTRO_MESSAGE   = "welcome to amiga-robots!\xff"
-                              "by david murray 2021\xff"
-                              "amiga port by vesa halttunen";
+char* INTRO_MESSAGE   = "welcome to amiga-robots!\xff"
+                        "by david murray 2021\xff"
+                        "amiga port by vesa halttunen";
 #else
-const char* INTRO_MESSAGE	= "welcome to sdl-robots!\xff"
-                              "by david murray 2021\xff"
-                              "sdl port by vesa halttunen";
+char* INTRO_MESSAGE	= "welcome to sdl-robots!\xff"
+                      "by david murray 2021\xff"
+                      "sdl port by vesa halttunen";
 #endif
-const char* MSG_CANTMOVE = "can't move that!";
-const char* MSG_BLOCKED = "blocked!";
-const char* MSG_SEARCHING = "searching";
-const char* MSG_NOTFOUND = "nothing found here.";
-const char* MSG_FOUNDKEY = "you found a key card!";
-const char* MSG_FOUNDGUN = "you found a pistol!";
-const char* MSG_FOUNDEMP = "you found an emp device!";
-const char* MSG_FOUNDBOMB = "you found a timebomb!";
-const char* MSG_FOUNDPLAS = "you found a plasma gun!";
-const char* MSG_FOUNDMED = "you found a medkit!";
-const char* MSG_FOUNDMAG = "you found a magnet!";
-const char* MSG_MUCHBET = "ahhh, much better!";
-const char* MSG_EMPUSED = "emp activated!\xff"
+char* MSG_CANTMOVE = "can't move that!";
+char* MSG_BLOCKED = "blocked!";
+char* MSG_SEARCHING = "searching";
+char* MSG_NOTFOUND = "nothing found here.";
+char* MSG_FOUNDKEY = "you found a key card!";
+char* MSG_FOUNDGUN = "you found a pistol!";
+char* MSG_FOUNDEMP = "you found an emp device!";
+char* MSG_FOUNDBOMB = "you found a timebomb!";
+char* MSG_FOUNDPLAS = "you found a plasma gun!";
+char* MSG_FOUNDMED = "you found a medkit!";
+char* MSG_FOUNDMAG = "you found a magnet!";
+char* MSG_MUCHBET = "ahhh, much better!";
+char* MSG_EMPUSED = "emp activated!\xff"
                           "nearby robots are rebooting.";
-const char* MSG_TERMINATED = "you're terminated!";
-const char* MSG_TRANS1 = "transporter will not activate\xff"
+char* MSG_TERMINATED = "you're terminated!";
+char* MSG_TRANS1 = "transporter will not activate\xff"
                          "until all robots destroyed.";
-const char* MSG_ELEVATOR = "[ elevator panel ]  down\xff"
+char* MSG_ELEVATOR = "[ elevator panel ]  down\xff"
                            "[  select level  ]  opens";
-const char* MSG_LEVELS = "[                ]  door";
-const char* MSG_PAUSED = "game paused.\xff"
+char* MSG_LEVELS = "[                ]  door";
+char* MSG_PAUSED = "game paused.\xff"
                          "exit game (y/n)";
-const char* MSG_MUSICON = "music on.";
-const char* MSG_MUSICOFF = "music off.";
+char* MSG_MUSICON = "music on.";
+char* MSG_MUSICOFF = "music off.";
 uint8_t SELECTED_MAP = 0;
 char* MAP_NAMES = "01-research lab "
                   "02-headquarters "
@@ -305,7 +310,7 @@ void DISPLAY_LOAD_MESSAGE2()
     }
 }
 
-char LOAD_MSG2[13];
+char* LOAD_MSG2 = "loading map:";
 
 void SETUP_INTERRUPT()
 {
@@ -1881,7 +1886,7 @@ void DISPLAY_GAME_SCREEN()
 #endif
 }
 
-char* INTRO_TEXT[] = {
+char* INTRO_OPTIONS[] = {
     "start game",
     "select map",
     "difficulty",
@@ -1894,7 +1899,7 @@ void DISPLAY_INTRO_SCREEN()
     uint8_t* row = SCREEN_MEMORY + MENU_CHART_L[0];
     for (int Y = 0; Y < 4; Y++, row += 40) {
         for (int X = 0; X < 10; X++) {
-            row[X] = INTRO_TEXT[Y][X];
+            row[X] = INTRO_OPTIONS[Y][X];
         }
     }
     platform->displayImage(Platform::ImageIntro);
@@ -2460,7 +2465,7 @@ void PRINT_INFO(const char *text)
             PRINTX = 0;
             SCROLL_INFO();
         } else {
-            writeToScreenMemory(0x3C0 + PRINTX, convertToPETSCII(text[Y]));
+            writeToScreenMemory(0x3C0 + PRINTX, text[Y]);
             PRINTX++;
         }
     }
@@ -5068,13 +5073,12 @@ uint8_t SCR_CUSTOM_KEYS[] = {
     0x4A, 0x60, 0x40, 0x25, 0x4B
 };
 
-uint8_t CINEMA_MESSAGE[] = {
+char* CINEMA_MESSAGE = 
     "coming soon: space balls 2 - the search for more money, "
     "attack of the paperclips: clippy's revenge, "
     "it came from planet earth, "
     "rocky 5000, all my circuits the movie, "
-    "conan the librarian, and more! comin"
-};
+    "conan the librarian, and more! comin";
 
 #ifndef PLATFORM_IMAGE_SUPPORT
 uint8_t WEAPON1A[] = {
@@ -5420,9 +5424,13 @@ uint8_t IN_GAME_MUSIC3[] = {
 };
 #endif
 
-char convertToPETSCII(char value)
+void convertToPETSCII(char* string)
 {
-    return value >= 96 ? (value - 96) : value;
+    for (char* c = string; *c; c++) {
+        if (*c >= 96) {
+            *c -= 96;
+        }
+    }
 }
 
 void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset)

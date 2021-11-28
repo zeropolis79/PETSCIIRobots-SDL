@@ -107,27 +107,27 @@ extern uint8_t BORDER; // Used for border flash timing
 extern uint8_t SCREEN_SHAKE; // 1=shake 0=no shake
 extern uint8_t CONTROL; // 0=keyboard 1=custom keys 2=snes
 extern uint16_t BORDER_COLOR; // Used for border flash coloring
-extern const char* INTRO_MESSAGE;
-extern const char* MSG_CANTMOVE;
-extern const char* MSG_BLOCKED;
-extern const char* MSG_SEARCHING;
-extern const char* MSG_NOTFOUND;
-extern const char* MSG_FOUNDKEY;
-extern const char* MSG_FOUNDGUN;
-extern const char* MSG_FOUNDEMP;
-extern const char* MSG_FOUNDBOMB;
-extern const char* MSG_FOUNDPLAS;
-extern const char* MSG_FOUNDMED;
-extern const char* MSG_FOUNDMAG;
-extern const char* MSG_MUCHBET;
-extern const char* MSG_EMPUSED;
-extern const char* MSG_TERMINATED;
-extern const char* MSG_TRANS1;
-extern const char* MSG_ELEVATOR;
-extern const char* MSG_LEVELS;
-extern const char* MSG_PAUSED;
-extern const char* MSG_MUSICON;
-extern const char* MSG_MUSICOFF;
+extern char* INTRO_MESSAGE;
+extern char* MSG_CANTMOVE;
+extern char* MSG_BLOCKED;
+extern char* MSG_SEARCHING;
+extern char* MSG_NOTFOUND;
+extern char* MSG_FOUNDKEY;
+extern char* MSG_FOUNDGUN;
+extern char* MSG_FOUNDEMP;
+extern char* MSG_FOUNDBOMB;
+extern char* MSG_FOUNDPLAS;
+extern char* MSG_FOUNDMED;
+extern char* MSG_FOUNDMAG;
+extern char* MSG_MUCHBET;
+extern char* MSG_EMPUSED;
+extern char* MSG_TERMINATED;
+extern char* MSG_TRANS1;
+extern char* MSG_ELEVATOR;
+extern char* MSG_LEVELS;
+extern char* MSG_PAUSED;
+extern char* MSG_MUSICON;
+extern char* MSG_MUSICOFF;
 extern uint8_t SELECTED_MAP;
 extern char* MAP_NAMES;
 // THE FOLLOWING ARE USED BY THE SOUND SYSTEM*
@@ -142,7 +142,7 @@ extern uint8_t SOUND_EFFECT; // FF=OFF or number of effect in progress
 void DISPLAY_LOAD_MESSAGE1();
 void DISPLAY_LOAD_MESSAGE2();
 
-extern char LOAD_MSG2[13];
+extern char* LOAD_MSG2;
 
 void SETUP_INTERRUPT();
 void RUNIRQ();
@@ -255,7 +255,7 @@ void TILE_LOAD_ROUTINE();
 void MAP_LOAD_ROUTINE();
 void DISPLAY_GAME_SCREEN();
 
-extern char* INTRO_TEXT[];
+extern char* INTRO_OPTIONS[];
 
 void DISPLAY_INTRO_SCREEN();
 void DISPLAY_ENDGAME_SCREEN();
@@ -478,7 +478,7 @@ extern uint8_t SCR_TEXT[];
 extern uint8_t SCR_ENDGAME[];
 #endif
 extern uint8_t SCR_CUSTOM_KEYS[];
-extern uint8_t CINEMA_MESSAGE[];
+extern char* CINEMA_MESSAGE;
 #ifndef PLATFORM_IMAGE_SUPPORT
 extern uint8_t WEAPON1A[];
 extern uint8_t WEAPON1B[];
@@ -531,7 +531,7 @@ extern uint8_t IN_GAME_MUSIC2[];
 extern uint8_t IN_GAME_MUSIC3[];
 #endif
 
-char convertToPETSCII(char value);
+void convertToPETSCII(char* string);
 void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color = 10, uint8_t yOffset = 0);
 
 #endif
