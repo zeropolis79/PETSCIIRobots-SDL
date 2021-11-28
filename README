@@ -26,7 +26,6 @@ Amiga TODO
 Code
 - Fit as many assets to memory as possible
 - Add map keys to custom controls screen
-- Use type specific dead robot tile
 
 Data
 - Plasma cannoning a dead player tile causes glitchy tile to appear

@@ -24,6 +24,7 @@ extern uint8_t UNIT_TILE[32];      // Current tile assigned to unit (32 bytes)
 extern uint8_t EXP_BUFFER[16];     // Explosion Buffer (16 bytes)
 extern uint8_t MAP_PRECALC[77];    // Stores pre-calculated objects for map window (77 bytes)
 extern uint8_t MAP_PRECALC_DIRECTION[77];    // Stores pre-calculated object directions for map window (77 bytes)
+extern uint8_t MAP_PRECALC_TYPE[77];    // Stores pre-calculated object types for map window (77 bytes)
 #ifdef OPTIMIZED_MAP_RENDERING
 extern uint8_t PREVIOUS_MAP_BACKGROUND[77];
 extern uint8_t PREVIOUS_MAP_FOREGROUND[77];

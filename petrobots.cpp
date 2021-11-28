@@ -35,6 +35,7 @@ uint8_t UNIT_DIRECTION[32]; // Movement direction of unit (32 bytes)
 uint8_t EXP_BUFFER[16];     // Explosion Buffer (16 bytes)
 uint8_t MAP_PRECALC[77];    // Stores pre-calculated objects for map window (77 bytes)
 uint8_t MAP_PRECALC_DIRECTION[77];    // Stores pre-calculated object directions for map window (77 bytes)
+uint8_t MAP_PRECALC_TYPE[77];    // Stores pre-calculated object types for map window (77 bytes)
 #ifdef OPTIMIZED_MAP_RENDERING
 uint8_t PREVIOUS_MAP_BACKGROUND[77];
 uint8_t PREVIOUS_MAP_BACKGROUND_VARIANT[77];
@@ -1453,6 +1454,7 @@ void MAP_PRE_CALCULATE()
             }
             MAP_PRECALC[Y] = UNIT_TILE[X];
             MAP_PRECALC_DIRECTION[Y] = UNIT_DIRECTION[X];
+            MAP_PRECALC_TYPE[Y] = UNIT_A[X];
         }
         // continue search
     }
@@ -1520,6 +1522,18 @@ void DRAW_MAP_WINDOW()
                         FG_VARIANT = DEMATERIALIZE_FRAME;
                     } else {
                         FG_TILE = 0;
+                    }
+                } else if (FG_TILE == 115) { // DEAD ROBOT
+                    switch (MAP_PRECALC_TYPE[PRECALC_COUNT]) {
+                    case 17:
+                    case 18:
+                        FG_VARIANT = 1;
+                        break;
+                    case 9:
+                        FG_VARIANT = 2;
+                        break;
+                    default:
+                        break;
                     }
                 }
             }
@@ -4133,6 +4147,7 @@ void WATER_DROID()
         return;
     }
     // kill unit after countdown reaches zero. 
+    UNIT_A[UNIT] = UNIT_TYPE[UNIT];
     UNIT_TYPE[UNIT] = 8; // Dead robot type
     UNIT_TIMER_A[UNIT] = 255;
     UNIT_TILE[UNIT] = 115; // dead robot tile
@@ -4290,6 +4305,7 @@ void INFLICT_DAMAGE()
     UNIT_HEALTH[UNIT_FIND] = 0;
     if (UNIT_FIND != 0) { // Is it the player that is dead?
         if (UNIT_TYPE[UNIT_FIND] != 8) { // Dead robot type - is it a dead robot already?
+            UNIT_A[UNIT_FIND] = UNIT_TYPE[UNIT_FIND];
             UNIT_TYPE[UNIT_FIND] = 8;
             UNIT_TIMER_A[UNIT_FIND] = 255;
             UNIT_TILE[UNIT_FIND] = 115; // dead robot tile
