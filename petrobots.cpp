@@ -91,6 +91,7 @@ uint8_t MAP[8 * 1024];      // Location of MAP (8K)
 uint8_t TILE;           // The tile number to be plotted
 uint8_t DIRECTION;      // The direction of the tile to be plotted
 uint8_t WALK_FRAME;     // Player walking animation frame
+uint8_t DEMATERIALIZE_FRAME; // Dematerialize animation frame
 uint8_t MAP_X;          // Current X location on map
 uint8_t MAP_Y;          // Current Y location on map
 uint8_t MAP_WINDOW_X;   // Top left location of what is displayed in map window
@@ -1480,7 +1481,7 @@ void DRAW_MAP_WINDOW()
             uint8_t FG_VARIANT = 0;
             if (FG_TILE != 0) {
                 DIRECTION = MAP_PRECALC_DIRECTION[PRECALC_COUNT];
-                if (FG_TILE == 96 || (FG_TILE >= 100 && FG_TILE <= 103)) {
+                if (FG_TILE == 96 || (FG_TILE >= 100 && FG_TILE <= 103)) { // PLAYER OR EVILBOT
                     if (DIRECTION == 0) {
                         FG_VARIANT = 8;
                     } else if (DIRECTION == 2) {
@@ -1491,22 +1492,25 @@ void DRAW_MAP_WINDOW()
                     if (FG_TILE == 96) {
                         FG_VARIANT += WALK_FRAME + (SELECTED_WEAPON << 4);
                     }
+                } else if (FG_TILE == 243) { // TRANSPORT
+                    if (DEMATERIALIZE_FRAME < 7) {
+                        FG_VARIANT = DEMATERIALIZE_FRAME;
+                    } else {
+                        FG_TILE = 0;
+                    }
                 }
-                if (TILE != PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] ||
-                    VARIANT != PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] ||
-                    FG_TILE != PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] ||
-                    FG_VARIANT != PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT]) {
+            }
+            if (TILE != PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] ||
+                VARIANT != PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] ||
+                FG_TILE != PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] ||
+                FG_VARIANT != PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT]) {
+                if (FG_TILE != 0) {
                     platform->renderTiles(TILE, FG_TILE, TEMP_X * 24, TEMP_Y * 24, VARIANT, FG_VARIANT);
                     PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] = TILE;
                     PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] = VARIANT;
                     PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] = FG_TILE;
                     PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT] = FG_VARIANT;
-                }
-            } else {
-                if (TILE != PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] ||
-                    VARIANT != PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] ||
-                    FG_TILE != PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] ||
-                    FG_VARIANT != PREVIOUS_MAP_FOREGROUND_VARIANT[PRECALC_COUNT]) {
+                } else {
                     platform->renderTile(TILE, TEMP_X * 24, TEMP_Y * 24, VARIANT);
                     PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] = TILE;
                     PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] = VARIANT;
@@ -3046,9 +3050,14 @@ uint8_t OUCH3[] = { 0xCE, 0xA0, 0xA0, 0xA0, 0xA0, 0xCD };
 // source because the screen effects used are unique on each system.
 void DEMATERIALIZE()
 {
+#ifdef PLATFORM_SPRITE_SUPPORT
+    UNIT_TILE[0] = 243; // dematerialize tile
+#else
     UNIT_TILE[0] = (UNIT_TIMER_B[UNIT] & 0x01) + 160; // dematerialize tile
     UNIT_TILE[0] += (UNIT_TIMER_B[UNIT] & 0x08) >> 3;
+#endif
     UNIT_TIMER_B[UNIT]++;
+    DEMATERIALIZE_FRAME = UNIT_TIMER_B[UNIT] >> 1;
     if (UNIT_TIMER_B[UNIT] != 0x10) { // %00010000
         UNIT_TIMER_A[UNIT] = 1;
         REDRAW_WINDOW = 1;

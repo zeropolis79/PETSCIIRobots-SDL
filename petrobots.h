@@ -50,6 +50,7 @@ extern uint8_t MAP[8 * 1024];      // Location of MAP (8K)
 extern uint8_t TILE;           // The tile number to be plotted
 extern uint8_t DIRECTION;      // The direction of the tile to be plotted
 extern uint8_t WALK_FRAME;     // Player walking animation frame
+extern uint8_t DEMATERIALIZE_FRAME; // Dematerialize animation frame
 extern uint8_t MAP_X;          // Current X location on map
 extern uint8_t MAP_Y;          // Current Y location on map
 extern uint8_t MAP_WINDOW_X;   // Top left location of what is displayed in map window
