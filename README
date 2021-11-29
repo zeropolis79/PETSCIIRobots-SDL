@@ -29,9 +29,6 @@ Code
 - Rename sound interrupt
 - Build PET look version
 
-Data
-- Plasma cannoning a dead player tile causes glitchy tile to appear
-
 Graphics
 - Fix mismatched tiles
 - Workbench icon (Vesa can provide)
