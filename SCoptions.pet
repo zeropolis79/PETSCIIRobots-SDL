@@ -1,0 +1,12 @@
+ANSI
+Strict
+NoStackCheck
+StripDebug
+Optimize
+OptimizerTime
+OptimizerInLocal
+Ignore=306,315,1597
+NoIcons
+Define=PLATFORM_TILE_BASED_RENDERING
+Define=PLATFORM_GZIP_SUPPORT
+Define=OPTIMIZED_MAP_RENDERING

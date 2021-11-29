@@ -17,7 +17,7 @@ PT2.3F_replay_cia.o: PT2.3F_replay_cia.s
 Tileset.o: tileset.pet
     Bin2Hunk tileset.pet Tileset.o NAME _tileset HUNK data
 C64Font.o: C64Font.raw
-    Bin2Hunk C64Font.raw C64Font.o NAME _c64Font HUNK data
+    Bin2Hunk C64Font.raw C64Font.o NAME _fontPlanes HUNK data
 Faces.o: Faces.raw
     Bin2Hunk Faces.raw Faces.o NAME _facesPlanes CHIP
 Tiles.o: Tiles.raw

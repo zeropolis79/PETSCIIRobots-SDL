@@ -173,7 +173,9 @@ int main(int argc, char *argv[])
 void INIT_GAME()
 {
     SCREEN_SHAKE = 0;
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
     LIVE_MAP_ON = 0;
+#endif
     RESET_KEYS_AMMO();
     platform->fadeScreen(0, false);
     DISPLAY_GAME_SCREEN();
@@ -1480,6 +1482,7 @@ void DRAW_MAP_WINDOW()
             // NOW FIGURE OUT WHERE TO PLACE IT ON SCREEN.
             TILE = MAP_SOURCE[0];
             uint8_t VARIANT = 0;
+#ifdef PLATFORM_IMAGE_BASED_TILES
             switch (TILE) {
             case 204: // WATER
             case 66:  // FLAG
@@ -1501,6 +1504,7 @@ void DRAW_MAP_WINDOW()
             default:
                 break;
             }
+#endif
             uint8_t FG_TILE = MAP_PRECALC[PRECALC_COUNT];
             uint8_t FG_VARIANT = 0;
             if (FG_TILE != 0) {

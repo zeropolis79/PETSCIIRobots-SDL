@@ -28,8 +28,10 @@
 #define PLANES 4
 #define SCREEN_PLANES_SIZE (SCREEN_SIZE * PLANES + 16 * 2)
 #ifdef PLATFORM_IMAGE_BASED_TILES
+#define TILES_PLANES_SIZE 0
 #define TILES_WITH_MASK 12
 #else
+#define TILES_PLANES_SIZE (32 / 8 * 24 * PLANES * 256)
 #define TILES_WITH_MASK 30
 #endif
 #define TILES_MASK_SIZE (32 / 8 * 24 * PLANES * TILES_WITH_MASK)
@@ -39,7 +41,7 @@
 #else
 #define LARGEST_MODULE_SIZE 0
 #endif
-#define CHIP_MEMORY_SIZE (SCREEN_PLANES_SIZE + TILES_MASK_SIZE + COMBINED_TILE_PLANES_SIZE + LARGEST_MODULE_SIZE)
+#define CHIP_MEMORY_SIZE (SCREEN_PLANES_SIZE + TILES_PLANES_SIZE + TILES_MASK_SIZE + COMBINED_TILE_PLANES_SIZE + LARGEST_MODULE_SIZE)
 
 static const char version[] = "$VER:Attack of the PETSCII Robots (2021-11-29) (C)2021 David Murray, Vesa Halttunen";
 
@@ -51,7 +53,7 @@ struct SpriteData {
 
 __far extern Custom custom;
 __far extern CIA ciaa;
-__far extern uint8_t c64Font[];
+__far extern uint8_t fontPlanes[];
 __chip extern uint8_t facesPlanes[];
 __chip extern uint8_t tilesPlanes[];
 __chip extern uint8_t animTilesPlanes[];
@@ -80,6 +82,7 @@ __chip extern int8_t soundShortBeep[];
 #endif
 __chip extern int8_t squareWave[];
 __chip static int32_t simpleTileMask = 0xffffff00;
+#ifdef PLATFORM_SPRITE_SUPPORT
 __chip static SpriteData cursorData1 = {
     { 0, 0 },
     {
@@ -148,6 +151,7 @@ __chip static SpriteData cursorData2 = {
     },
     { 0, 0 }
 };
+#endif
 __chip static uint16_t pointer[4];
 uint16_t addressMap[40 * 25];
 static uint8_t tileMaskMap[256];
@@ -240,6 +244,7 @@ static uint8_t standardControls[] = {
     0x15, // YES
     0x36 // NO
 };
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
 uint8_t tileLiveMap[] = {
      0,13,13,13, 1, 1, 1, 1,
      1, 5, 1, 1, 1, 1,13, 1,
@@ -278,6 +283,11 @@ uint8_t liveMapToPlane1[256];
 uint8_t liveMapToPlane2[256];
 uint8_t liveMapToPlane3[256];
 uint8_t liveMapToPlane4[256];
+#else
+uint8_t tileLiveMap[1];
+uint8_t liveMapToPlane1[1];
+uint8_t liveMapToPlane3[1];
+#endif
 uint8_t unitTypes[28];
 uint8_t unitX[28];
 uint8_t unitY[28];
@@ -292,6 +302,9 @@ PlatformAmiga::PlatformAmiga() :
     verticalBlankInterrupt(new Interrupt),
     chipMemory(0),
     screenPlanes(0),
+#ifndef PLATFORM_IMAGE_BASED_TILES
+    tilesPlanes(0),
+#endif
     tilesMask(0),
     combinedTilePlanes(0),
 #ifdef PLATFORM_MODULE_BASED_AUDIO
@@ -300,12 +313,16 @@ PlatformAmiga::PlatformAmiga() :
 #endif
     ioAudio(0),
     messagePort(0),
-    facesBitMap(new BitMap),
     tilesBitMap(new BitMap),
+#ifdef PLATFORM_IMAGE_SUPPORT
+    facesBitMap(new BitMap),
     itemsBitMap(new BitMap),
     healthBitMap(new BitMap),
+#endif
+#ifdef PLATFORM_SPRITE_SUPPORT
     cursorSprite1(new SimpleSprite),
     cursorSprite2(new SimpleSprite),
+#endif
     palette(new Palette(blackPalette, (1 << PLANES), 0)),
     bplcon1DefaultValue(0),
     shakeStep(0),
@@ -324,6 +341,7 @@ PlatformAmiga::PlatformAmiga() :
         }
     }
 
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
     for (i = 0; i < 256; i++) {
         uint8_t plane1 = 0;
         uint8_t plane2 = 0;
@@ -358,6 +376,7 @@ PlatformAmiga::PlatformAmiga() :
         liveMapToPlane3[i] = plane3;
         liveMapToPlane4[i] = plane4;
     }
+#endif
 
     chipMemory = (uint8_t*)AllocMem(CHIP_MEMORY_SIZE, MEMF_CHIP | MEMF_CLEAR);
     if (!chipMemory) {
@@ -368,6 +387,11 @@ PlatformAmiga::PlatformAmiga() :
 
     screenPlanes = address;
     address += SCREEN_PLANES_SIZE;
+
+#ifndef PLATFORM_IMAGE_BASED_TILES
+    tilesPlanes = address;
+    address += TILES_PLANES_SIZE;
+#endif
 
     tilesMask = address;
     address += TILES_MASK_SIZE;
@@ -380,31 +404,46 @@ PlatformAmiga::PlatformAmiga() :
 #endif
 
     InitBitMap(screenBitmap, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
-    InitBitMap(facesBitMap, PLANES, 16, 24 * 3);
-    InitBitMap(tilesBitMap, PLANES, 32, 24 * 256);
-    InitBitMap(itemsBitMap, PLANES, 48, 32 * 6);
-    InitBitMap(healthBitMap, PLANES, 48, 56 * 6);
     screenBitmap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
-    facesBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
-    tilesBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
-    itemsBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
-    healthBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     screenBitmap->BytesPerRow = SCREEN_WIDTH_IN_BYTES * PLANES;
-    facesBitMap->BytesPerRow = 2 * PLANES;
+
+    InitBitMap(tilesBitMap, PLANES, 32, 24 * 256);
+    tilesBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     tilesBitMap->BytesPerRow = 4 * PLANES;
+
+#ifdef PLATFORM_IMAGE_SUPPORT
+    InitBitMap(facesBitMap, PLANES, 16, 24 * 3);
+    facesBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
+    facesBitMap->BytesPerRow = 2 * PLANES;
+
+    InitBitMap(itemsBitMap, PLANES, 48, 32 * 6);
+    itemsBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     itemsBitMap->BytesPerRow = 6 * PLANES;
+
+    InitBitMap(healthBitMap, PLANES, 48, 56 * 6);
+    healthBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     healthBitMap->BytesPerRow = 6 * PLANES;
+#endif
+
     uint8_t* screenPlane = screenPlanes;
-    uint8_t* facesPlane = facesPlanes;
     uint8_t* tilesPlane = tilesPlanes;
+#ifdef PLATFORM_IMAGE_SUPPORT
+    uint8_t* facesPlane = facesPlanes;
     uint8_t* itemsPlane = itemsPlanes;
     uint8_t* healthPlane = healthPlanes;
-    for (int plane = 0; plane < PLANES; plane++, screenPlane += SCREEN_WIDTH_IN_BYTES, facesPlane += 2, tilesPlane += 4, itemsPlane += 6, healthPlane += 6) {
+#endif
+    for (int plane = 0; plane < PLANES; plane++, screenPlane += SCREEN_WIDTH_IN_BYTES, tilesPlane += 4
+#ifdef PLATFORM_IMAGE_SUPPORT
+        , facesPlane += 2, itemsPlane += 6, healthPlane += 6
+#endif
+        ) {
         screenBitmap->Planes[plane] = screenPlane;
-        facesBitMap->Planes[plane] = facesPlane;
         tilesBitMap->Planes[plane] = tilesPlane;
+#ifdef PLATFORM_IMAGE_SUPPORT
+        facesBitMap->Planes[plane] = facesPlane;
         itemsBitMap->Planes[plane] = itemsPlane;
         healthBitMap->Planes[plane] = healthPlane;
+#endif
     }
 
     ExtNewScreen newScreen = {0};
@@ -437,8 +476,10 @@ PlatformAmiga::PlatformAmiga() :
     }
 
     SetPointer(window, pointer, 0, 0, 0, 0);
+#ifdef PLATFORM_SPRITE_SUPPORT
     GetSprite(cursorSprite1, 2);
     GetSprite(cursorSprite2, 3);
+#endif
 
     verticalBlankInterrupt->is_Node.ln_Type = NT_INTERRUPT;
     verticalBlankInterrupt->is_Node.ln_Pri = 127;
@@ -545,6 +586,7 @@ PlatformAmiga::~PlatformAmiga()
         RemIntServer(INTB_VERTB, verticalBlankInterrupt);
     }
 
+#ifdef PLATFORM_SPRITE_SUPPORT
     if (cursorSprite2->num != -1) {
         FreeSprite(cursorSprite2->num);
     }
@@ -552,6 +594,7 @@ PlatformAmiga::~PlatformAmiga()
     if (cursorSprite1->num != -1) {
         FreeSprite(cursorSprite1->num);
     }
+#endif
 
     if (window) {
         CloseWindow(window);
@@ -566,12 +609,16 @@ PlatformAmiga::~PlatformAmiga()
     }
 
     delete palette;
+#ifdef PLATFORM_SPRITE_SUPPORT
     delete cursorSprite2;
     delete cursorSprite1;
+#endif
+#ifdef PLATFORM_IMAGE_SUPPORT
     delete healthBitMap;
     delete itemsBitMap;
-    delete tilesBitMap;
     delete facesBitMap;
+#endif
+    delete tilesBitMap;
 #ifndef PLATFORM_MODULE_BASED_AUDIO
     delete ioAudio;
 #endif
@@ -673,6 +720,7 @@ void PlatformAmiga::show()
         }
     }
 
+#ifdef PLATFORM_SPRITE_SUPPORT
     if (cursorSprite1->num != -1 && cursorSprite2->num != -1) {
         cursorSprite1->height = 0;
         cursorSprite2->height = 0;
@@ -682,6 +730,7 @@ void PlatformAmiga::show()
         MoveSprite(&screen->ViewPort, cursorSprite1, 0, 0);
         MoveSprite(&screen->ViewPort, cursorSprite2, 16, 0);
     }
+#endif
 }
 
 int PlatformAmiga::framesPerSecond()
@@ -937,7 +986,7 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                 for (int x = 0; x < 3; x++, tiles++, mask++) {
                     uint8_t character = characters[y][x];
                     bool reverse = character > 127;
-                    uint8_t* font = c64Font + ((character & 127) << 3);
+                    uint8_t* font = fontPlanes + ((character & 127) << 3);
                     for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
                         uint8_t byte = reverse ? ~*font : *font;
                         tiles[offset] = 0;
@@ -957,7 +1006,7 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                 for (int x = 0; x < 3; x++, tiles++) {
                     uint8_t character = characters[y][x];
                     bool reverse = character > 127;
-                    uint8_t* font = c64Font + ((character & 127) << 3);
+                    uint8_t* font = fontPlanes + ((character & 127) << 3);
                     for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
                         uint8_t byte = reverse ? ~*font : *font;
                         tiles[offset] = 0;
@@ -999,7 +1048,7 @@ void PlatformAmiga::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTi
             for (int x = 0; x < 3; x++, destination++) {
                 uint8_t character = characters[y][x];
                 bool reverse = character > 127;
-                uint8_t* font = c64Font + ((character & 127) << 3);
+                uint8_t* font = fontPlanes + ((character & 127) << 3);
                 for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
                     uint8_t byte = reverse ? ~*font : *font;
                     destination[offset] = 0;
@@ -1046,10 +1095,12 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t var
 
         DisownBlitter();
     } else {
+#ifdef PLATFORM_IMAGE_BASED_TILES
         if (animTileMap[tile] >= 0) {
             renderAnimTile(animTileMap[tile] + variant, x, y);
             return;
         }
+#endif
         bool shifted = x & 8;
         uint32_t thirdOfTileOffset = tile << 7;
         uint32_t screenOffsetXInWords = x >> 4;
@@ -1142,6 +1193,7 @@ void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, 
 #endif
 }
 
+#ifdef PLATFORM_SPRITE_SUPPORT
 void PlatformAmiga::renderSprite(uint8_t sprite, uint16_t x, uint16_t y)
 {
     bool shifted = x & 8;
@@ -1166,7 +1218,9 @@ void PlatformAmiga::renderSprite(uint8_t sprite, uint16_t x, uint16_t y)
 
     DisownBlitter();
 }
+#endif
 
+#ifdef PLATFORM_IMAGE_BASED_TILES
 void PlatformAmiga::renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y)
 {
     bool shifted = x & 8;
@@ -1191,7 +1245,9 @@ void PlatformAmiga::renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y)
 
     DisownBlitter();
 }
+#endif
 
+#ifdef PLATFORM_IMAGE_SUPPORT
 void PlatformAmiga::renderItem(uint8_t item, uint16_t x, uint16_t y)
 {
     BltBitMap(itemsBitMap, 0, item * 32, screen->RastPort.BitMap, x, y, 48, 32, 0xc0, 0xff, 0);
@@ -1222,16 +1278,16 @@ void PlatformAmiga::renderFace(uint8_t face, uint16_t x, uint16_t y)
 {
     BltBitMap(facesBitMap, 0, face * 24, screen->RastPort.BitMap, x, y, 16, 24, 0xc0, 0xff, 0);
 }
+#endif
 
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
 void PlatformAmiga::renderLiveMap(uint8_t* map)
 {
-#ifdef PLATFORM_LIVE_MAP_SUPPORT
     OwnBlitter();
     WaitBlit();
     DisownBlitter();
 
     renderLiveMapTiles(map);
-#endif
 }
 
 /*
@@ -1298,7 +1354,6 @@ void PlatformAmiga::renderLiveMapTiles(uint8_t* map)
 
 void PlatformAmiga::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots)
 {
-#ifdef PLATFORM_LIVE_MAP_SUPPORT
     for (int i = 0; i < 28; i++) {
         if (unitX[i] != ::unitX[i] || unitY[i] != ::unitY[i] || (i > 0 && (!showRobots || unitTypes[i] != ::unitTypes[i])) || (i == 0 && playerColor != ::unitTypes[i])) {
             // Remove old dot if any
@@ -1363,20 +1418,23 @@ void PlatformAmiga::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t
             }
         }
     }
-#endif
 }
+#endif
 
+#ifdef PLATFORM_SPRITE_SUPPORT
 void PlatformAmiga::showCursor(uint16_t x, uint16_t y)
 {
-    x <<= 3;
-    y <<= 3;
-    x += x + x - 3;
-    y += y + y - 2;
     if (cursorSprite1->num != -1 && cursorSprite2->num != -1) {
         cursorSprite1->height = 28;
         cursorSprite2->height = 28;
         ChangeSprite(&screen->ViewPort, cursorSprite1, (uint8_t*)&cursorData1);
         ChangeSprite(&screen->ViewPort, cursorSprite2, (uint8_t*)&cursorData2);
+
+        x <<= 3;
+        y <<= 3;
+        x += x + x - 3;
+        y += y + y - 2;
+
         MoveSprite(&screen->ViewPort, cursorSprite1, x, y);
         MoveSprite(&screen->ViewPort, cursorSprite2, x + 16, y);
     }
@@ -1391,6 +1449,7 @@ void PlatformAmiga::hideCursor()
         ChangeSprite(&screen->ViewPort, cursorSprite2, (uint8_t*)&cursorData2);
     }
 }
+#endif
 
 void PlatformAmiga::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
 {
@@ -1482,7 +1541,7 @@ void PlatformAmiga::stopFadeScreen()
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
 {
     bool reverse = value > 127;
-    uint8_t* source = c64Font + ((value & 127) << 3);
+    uint8_t* source = fontPlanes + ((value & 127) << 3);
     uint8_t* destination = screenPlanes + addressMap[address];
     if (reverse) {
         for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
@@ -1510,7 +1569,7 @@ void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t
     bool writePlane2 = color & 2;
     bool writePlane3 = color & 4;
     bool writePlane4 = color & 8;
-    uint8_t* source = c64Font + ((value & 127) << 3);
+    uint8_t* source = fontPlanes + ((value & 127) << 3);
     uint8_t* destination = screenPlanes + addressMap[address];
     if (yOffset > 0) {
         destination += yOffset * PLANES * SCREEN_WIDTH_IN_BYTES;
