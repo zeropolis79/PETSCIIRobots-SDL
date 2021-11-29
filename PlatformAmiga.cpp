@@ -221,15 +221,15 @@ static uint8_t standardControls[] = {
     0x21, // FIRE DOWN
     0x20, // FIRE LEFT
     0x22, // FIRE RIGHT
-    0x38, // CYCLE WEAPONS
-    0x39, // CYCLE ITEMS
+    0x50, // CYCLE WEAPONS
+    0x51, // CYCLE ITEMS
     0x40, // USE ITEM
     0x31, // SEARCH OBEJCT
     0x37, // MOVE OBJECT
     0x42, // LIVE MAP
     0xc2, // LIVE MAP ROBOTS
     0x45, // PAUSE
-    0x50, // MUSIC
+    0x55, // MUSIC
     0xb3, // CHEAT (TODO make this 5f)
     0x4c, // CURSOR UP
     0x4d, // CURSOR DOWN
