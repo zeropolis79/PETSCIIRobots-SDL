@@ -41,7 +41,7 @@
 #endif
 #define CHIP_MEMORY_SIZE (SCREEN_PLANES_SIZE + TILES_MASK_SIZE + COMBINED_TILE_PLANES_SIZE + LARGEST_MODULE_SIZE)
 
-static const char version[] = "$VER:Attack of the PETSCII robots (2021-11-29) (C)2021 David Murray, Vesa Halttunen";
+static const char version[] = "$VER:Attack of the PETSCII Robots (2021-11-29) (C)2021 David Murray, Vesa Halttunen";
 
 struct SpriteData {
     uint16_t posctl[2];
@@ -414,7 +414,7 @@ PlatformAmiga::PlatformAmiga() :
     newScreen.Depth = PLANES;
     newScreen.ViewModes = SPRITES;
     newScreen.Type = CUSTOMBITMAP | CUSTOMSCREEN | SCREENBEHIND | SCREENQUIET;
-    newScreen.DefaultTitle = (UBYTE*)"Attack of the PETSCII robots";
+    newScreen.DefaultTitle = (UBYTE*)"Attack of the PETSCII Robots";
     newScreen.CustomBitMap = screenBitmap;
     screen = OpenScreen((NewScreen*)&newScreen);
     if (!screen) {
@@ -443,7 +443,7 @@ PlatformAmiga::PlatformAmiga() :
 
     verticalBlankInterrupt->is_Node.ln_Type = NT_INTERRUPT;
     verticalBlankInterrupt->is_Node.ln_Pri = 127;
-    verticalBlankInterrupt->is_Node.ln_Name = "Attack of the PETSCII robots";
+    verticalBlankInterrupt->is_Node.ln_Name = "Attack of the PETSCII Robots vertical blank interrupt";
     verticalBlankInterrupt->is_Data = this;
     verticalBlankInterrupt->is_Code = (__stdargs void(*)())&verticalBlankInterruptServer;
     AddIntServer(INTB_VERTB, verticalBlankInterrupt);

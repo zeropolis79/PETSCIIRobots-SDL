@@ -26,7 +26,6 @@ Amiga TODO
 Code
 - Fit as many assets to memory as possible
 - Allocate audio channels on startup
-- Rename sound interrupt
 - Build PET look version
 - Include tileset.pet in the binary
 - Use all four channels for sound effects if not playing music
