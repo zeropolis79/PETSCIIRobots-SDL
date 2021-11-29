@@ -13,18 +13,18 @@
 #endif
 #include "petrobots.h"
 
-uint8_t DESTRUCT_PATH[256]; // Destruct path array (256 bytes)
-uint8_t TILE_ATTRIB[256];   // Tile attrib array (256 bytes)
+uint8_t *DESTRUCT_PATH = tileset + 2 + 0 * 256; // Destruct path array (256 bytes)
+uint8_t *TILE_ATTRIB = tileset + 2 + 1 * 256;   // Tile attrib array (256 bytes)
 #ifndef PLATFORM_SPRITE_SUPPORT
-uint8_t TILE_DATA_TL[256];  // Tile character top-left (256 bytes)
-uint8_t TILE_DATA_TM[256];  // Tile character top-middle (256 bytes)
-uint8_t TILE_DATA_TR[256];  // Tile character top-right (256 bytes)
-uint8_t TILE_DATA_ML[256];  // Tile character middle-left (256 bytes)
-uint8_t TILE_DATA_MM[256];  // Tile character middle-middle (256 bytes)
-uint8_t TILE_DATA_MR[256];  // Tile character middle-right (256 bytes)
-uint8_t TILE_DATA_BL[256];  // Tile character bottom-left (256 bytes)
-uint8_t TILE_DATA_BM[256];  // Tile character bottom-middle (256 bytes)
-uint8_t TILE_DATA_BR[256];  // Tile character bottom-right (256 bytes)
+uint8_t *TILE_DATA_TL = tileset + 2 + 2 * 256;  // Tile character top-left (256 bytes)
+uint8_t *TILE_DATA_TM = tileset + 2 + 3 * 256;  // Tile character top-middle (256 bytes)
+uint8_t *TILE_DATA_TR = tileset + 2 + 4 * 256;  // Tile character top-right (256 bytes)
+uint8_t *TILE_DATA_ML = tileset + 2 + 5 * 256;  // Tile character middle-left (256 bytes)
+uint8_t *TILE_DATA_MM = tileset + 2 + 6 * 256;  // Tile character middle-middle (256 bytes)
+uint8_t *TILE_DATA_MR = tileset + 2 + 7 * 256;  // Tile character middle-right (256 bytes)
+uint8_t *TILE_DATA_BL = tileset + 2 + 8 * 256;  // Tile character bottom-left (256 bytes)
+uint8_t *TILE_DATA_BM = tileset + 2 + 9 * 256;  // Tile character bottom-middle (256 bytes)
+uint8_t *TILE_DATA_BR = tileset + 2 + 10 * 256;  // Tile character bottom-right (256 bytes)
 #endif
 
 // These arrays can go anywhere in RAM
@@ -200,7 +200,6 @@ void INIT_GAME()
     MAIN_GAME_LOOP();
 }
 
-const char* TILENAME = "tileset.pet";
 #ifdef PLATFORM_GZIP_SUPPORT
 char* MAPNAME = "level-a.gz";
 #else
@@ -1863,10 +1862,8 @@ uint8_t DECTEMP = 0;
 void TILE_LOAD_ROUTINE()
 {
 #ifdef PLATFORM_SPRITE_SUPPORT
-    platform->load(TILENAME, DESTRUCT_PATH, 512, 2);
     platform->generateTiles(0, TILE_ATTRIB);
 #else
-    platform->load(TILENAME, DESTRUCT_PATH, 2816, 2);
     platform->generateTiles(TILE_DATA_TL, TILE_ATTRIB);
 #endif
 }
