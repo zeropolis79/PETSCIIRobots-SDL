@@ -1557,20 +1557,20 @@ void DRAW_MAP_WINDOW()
                     switch (TILE) {
                     case 20: {
                         platform->waitForScreenMemoryAccess();
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 41, CINEMA_MESSAGE[CINEMA_STATE] | 0x80, 1, 0);
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 42, CINEMA_MESSAGE[CINEMA_STATE + 1] | 0x80, 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 41, CINEMA_MESSAGE[CINEMA_STATE], 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 42, CINEMA_MESSAGE[CINEMA_STATE + 1], 1, 0);
                         break;
                     }
                     case 21: {
                         platform->waitForScreenMemoryAccess();
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 40, CINEMA_MESSAGE[CINEMA_STATE + 2] | 0x80, 1, 0);
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 41, CINEMA_MESSAGE[CINEMA_STATE + 3] | 0x80, 1, 0);
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 42, CINEMA_MESSAGE[CINEMA_STATE + 4] | 0x80, 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 40, CINEMA_MESSAGE[CINEMA_STATE + 2], 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 41, CINEMA_MESSAGE[CINEMA_STATE + 3], 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 42, CINEMA_MESSAGE[CINEMA_STATE + 4], 1, 0);
                         break;
                     }
                     case 22: {
                         platform->waitForScreenMemoryAccess();
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 40, CINEMA_MESSAGE[CINEMA_STATE + 5] | 0x80, 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 40, CINEMA_MESSAGE[CINEMA_STATE + 5], 1, 0);
                         break;
                     }
                     default:
