@@ -101,10 +101,9 @@ private:
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     uint8_t* moduleData;
     Module loadedModule;
-#else
+#endif
     IOAudio* ioAudio;
     MsgPort* messagePort;
-#endif
     BitMap* facesBitMap;
     BitMap* tilesBitMap;
     BitMap* itemsBitMap;

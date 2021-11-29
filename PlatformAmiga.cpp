@@ -297,10 +297,9 @@ PlatformAmiga::PlatformAmiga() :
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     moduleData(0),
     loadedModule(ModuleSoundFX),
-#else
+#endif
     ioAudio(0),
     messagePort(0),
-#endif
     facesBitMap(new BitMap),
     tilesBitMap(new BitMap),
     itemsBitMap(new BitMap),
@@ -448,7 +447,29 @@ PlatformAmiga::PlatformAmiga() :
     verticalBlankInterrupt->is_Code = (__stdargs void(*)())&verticalBlankInterruptServer;
     AddIntServer(INTB_VERTB, verticalBlankInterrupt);
 
+    messagePort = CreatePort(NULL, 0);
+    if (!messagePort) {
+        Write(Output(), unableToInitializeAudioError, 27);
+        return;
+    }
+
+    ioAudio = new IOAudio;
+    ioAudio->ioa_Request.io_Message.mn_ReplyPort = messagePort;
+    ioAudio->ioa_Request.io_Message.mn_Node.ln_Pri = 127;
+    ioAudio->ioa_Request.io_Command = ADCMD_ALLOCATE;
+    ioAudio->ioa_Request.io_Flags = ADIOF_NOWAIT;
+
 #ifdef PLATFORM_MODULE_BASED_AUDIO
+    // Allocate all channels
+    uint8_t requestChannels[1] = { 15 };
+    ioAudio->ioa_Data = requestChannels;
+    ioAudio->ioa_Length = 1;
+
+    if (OpenDevice((UBYTE*)AUDIONAME, 0, (IORequest*)ioAudio, 0)) {
+        Write(Output(), unableToInitializeAudioError, 27);
+        return;
+    }
+
     // Clear the first two bytes of effect samples to enable the 2-byte no-loop loop
     *((uint16_t*)soundExplosion) = 0;
     *((uint16_t*)soundMedkit) = 0;
@@ -472,19 +493,8 @@ PlatformAmiga::PlatformAmiga() :
 
     disableLowpassFilter();
 #else
-    messagePort = CreatePort(NULL, 0);
-    if (!messagePort) {
-        Write(Output(), unableToInitializeAudioError, 27);
-        return;
-    }
-
     // Don't care which channel gets allocated
     uint8_t requestChannels[4] = { 1, 8, 2, 4 };
-    ioAudio = new IOAudio;
-    ioAudio->ioa_Request.io_Message.mn_ReplyPort = messagePort;
-    ioAudio->ioa_Request.io_Message.mn_Node.ln_Pri = -50;
-    ioAudio->ioa_Request.io_Command = ADCMD_ALLOCATE;
-    ioAudio->ioa_Request.io_Flags = ADIOF_NOWAIT;
     ioAudio->ioa_Data = requestChannels;
     ioAudio->ioa_Length = 4;
 
@@ -512,24 +522,24 @@ PlatformAmiga::PlatformAmiga() :
 
 PlatformAmiga::~PlatformAmiga()
 {
-#ifdef PLATFORM_MODULE_BASED_AUDIO
-    stopModule();
-
-    ResetCIAInt();
-
-    if (filterState) {
-        enableLowpassFilter();
-    }
-#else
     if (ioAudio && ioAudio->ioa_Request.io_Device) {
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+        stopModule();
+
+        ResetCIAInt();
+
+        if (filterState) {
+            enableLowpassFilter();
+        }
+#else
         AbortIO((IORequest*)ioAudio);
+#endif
         CloseDevice((IORequest*)ioAudio);
     }
 
     if (messagePort) {
         DeletePort(messagePort);
     }
-#endif
 
     if (verticalBlankInterrupt->is_Data == this) {
         RemIntServer(INTB_VERTB, verticalBlankInterrupt);
