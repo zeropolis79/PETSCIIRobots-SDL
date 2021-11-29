@@ -28,6 +28,8 @@ Code
 - Allocate audio channels on startup
 - Rename sound interrupt
 - Build PET look version
+- Include tileset.pet in the binary
+- Use all four channels for sound effects if not playing music
 
 Graphics
 - Fix mismatched tiles
@@ -38,6 +40,8 @@ Graphics
 Audio
 - Pistol sound (currently FreeDoom, licensing unclear)
 - Explosion sound (currently FreeDoom, licensing unclear)
+- Try to improve highest notes
+- Check if the fourth channel can be used less
 
 Other
 - Hard disk installer script
