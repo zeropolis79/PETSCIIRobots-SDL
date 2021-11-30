@@ -1061,7 +1061,11 @@ void PlatformAmiga::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTi
             { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
         };
 
+#ifdef PLATFORM_COLOR_SUPPORT
         uint32_t thirdOfTileOffset = tile << 7;
+#else
+        uint32_t thirdOfTileOffset = tile << 5;
+#endif
         uint8_t* destination = tilesPlanes + thirdOfTileOffset + thirdOfTileOffset + thirdOfTileOffset;
         for (int y = 0; y < 3; y++, destination += 8 * 4 * PLANES - 3) {
             for (int x = 0; x < 3; x++, destination++) {
