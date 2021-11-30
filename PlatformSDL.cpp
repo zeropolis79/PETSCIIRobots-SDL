@@ -176,6 +176,13 @@ uint32_t PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t 
     return bytesRead;
 }
 
+uint8_t* PlatformSDL::loadTileset(const char* filename)
+{
+    uint8_t* tileset = new uint8_t[2818];
+    load(filename, tileset, 2818, 0);
+    return tileset;
+}
+
 void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
 {
     uint8_t* topLeft = tileData;

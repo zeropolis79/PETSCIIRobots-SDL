@@ -13,18 +13,18 @@
 #endif
 #include "petrobots.h"
 
-uint8_t *DESTRUCT_PATH = tileset + 2 + 0 * 256; // Destruct path array (256 bytes)
-uint8_t *TILE_ATTRIB = tileset + 2 + 1 * 256;   // Tile attrib array (256 bytes)
+uint8_t* DESTRUCT_PATH; // Destruct path array (256 bytes)
+uint8_t* TILE_ATTRIB;   // Tile attrib array (256 bytes)
 #ifndef PLATFORM_SPRITE_SUPPORT
-uint8_t *TILE_DATA_TL = tileset + 2 + 2 * 256;  // Tile character top-left (256 bytes)
-uint8_t *TILE_DATA_TM = tileset + 2 + 3 * 256;  // Tile character top-middle (256 bytes)
-uint8_t *TILE_DATA_TR = tileset + 2 + 4 * 256;  // Tile character top-right (256 bytes)
-uint8_t *TILE_DATA_ML = tileset + 2 + 5 * 256;  // Tile character middle-left (256 bytes)
-uint8_t *TILE_DATA_MM = tileset + 2 + 6 * 256;  // Tile character middle-middle (256 bytes)
-uint8_t *TILE_DATA_MR = tileset + 2 + 7 * 256;  // Tile character middle-right (256 bytes)
-uint8_t *TILE_DATA_BL = tileset + 2 + 8 * 256;  // Tile character bottom-left (256 bytes)
-uint8_t *TILE_DATA_BM = tileset + 2 + 9 * 256;  // Tile character bottom-middle (256 bytes)
-uint8_t *TILE_DATA_BR = tileset + 2 + 10 * 256;  // Tile character bottom-right (256 bytes)
+uint8_t* TILE_DATA_TL;  // Tile character top-left (256 bytes)
+uint8_t* TILE_DATA_TM;  // Tile character top-middle (256 bytes)
+uint8_t* TILE_DATA_TR;  // Tile character top-right (256 bytes)
+uint8_t* TILE_DATA_ML;  // Tile character middle-left (256 bytes)
+uint8_t* TILE_DATA_MM;  // Tile character middle-middle (256 bytes)
+uint8_t* TILE_DATA_MR;  // Tile character middle-right (256 bytes)
+uint8_t* TILE_DATA_BL;  // Tile character bottom-left (256 bytes)
+uint8_t* TILE_DATA_BM;  // Tile character bottom-middle (256 bytes)
+uint8_t* TILE_DATA_BR;  // Tile character bottom-right (256 bytes)
 #endif
 
 // These arrays can go anywhere in RAM
@@ -202,10 +202,11 @@ void INIT_GAME()
     MAIN_GAME_LOOP();
 }
 
+#define TILENAME "tileset.pet"
 #ifdef PLATFORM_GZIP_SUPPORT
-char* MAPNAME = "level-a.gz";
+char MAPNAME[] = "level-a.gz";
 #else
-char* MAPNAME = "level-a";
+char MAPNAME[] = "level-a";
 #endif
 const char* LOADMSG1 = "loading tiles...\x0d";
 uint8_t KEYS = 0; // bit0=spade bit2=heart bit3=star
@@ -1507,7 +1508,7 @@ void DRAW_MAP_WINDOW()
 #endif
             uint8_t FG_TILE = MAP_PRECALC[PRECALC_COUNT];
             uint8_t FG_VARIANT = 0;
-#ifdef PLATFORM_IMAGE_BASED_TILES
+#ifdef PLATFORM_SPRITE_SUPPORT
             if (FG_TILE != 0) {
                 DIRECTION = MAP_PRECALC_DIRECTION[PRECALC_COUNT];
                 if (FG_TILE == 96 || (FG_TILE >= 100 && FG_TILE <= 103)) { // PLAYER OR EVILBOT
@@ -1867,9 +1868,21 @@ uint8_t DECTEMP = 0;
 // The following routine loads the tileset from disk
 void TILE_LOAD_ROUTINE()
 {
+    uint8_t* tileset = platform->loadTileset(TILENAME);
+    DESTRUCT_PATH = tileset + 2 + 0 * 256;
+    TILE_ATTRIB = tileset + 2 + 1 * 256;
 #ifdef PLATFORM_SPRITE_SUPPORT
     platform->generateTiles(0, TILE_ATTRIB);
 #else
+    TILE_DATA_TL = tileset + 2 + 2 * 256;
+    TILE_DATA_TM = tileset + 2 + 3 * 256;
+    TILE_DATA_TR = tileset + 2 + 4 * 256;
+    TILE_DATA_ML = tileset + 2 + 5 * 256;
+    TILE_DATA_MM = tileset + 2 + 6 * 256;
+    TILE_DATA_MR = tileset + 2 + 7 * 256;
+    TILE_DATA_BL = tileset + 2 + 8 * 256;
+    TILE_DATA_BM = tileset + 2 + 9 * 256;
+    TILE_DATA_BR = tileset + 2 + 10 * 256;
     platform->generateTiles(TILE_DATA_TL, TILE_ATTRIB);
 #endif
 }

@@ -19,6 +19,7 @@ public:
     virtual uint8_t readKeyboard();
     virtual void clearKeyBuffer();
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
+    virtual uint8_t* loadTileset(const char* filename);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
 #ifndef PLATFORM_IMAGE_BASED_TILES
     virtual void updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles);

@@ -53,6 +53,7 @@ struct SpriteData {
 
 __far extern Custom custom;
 __far extern CIA ciaa;
+__far extern uint8_t tileset[];
 __far extern uint8_t fontPlanes[];
 __chip extern uint8_t facesPlanes[];
 __chip extern uint8_t tilesPlanes[];
@@ -915,6 +916,11 @@ uint32_t PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_
         Write(Output(), unableToLoadDataError, 20);
     }
     return bytesRead;
+}
+
+uint8_t* PlatformAmiga::loadTileset(const char* filename)
+{
+    return tileset;
 }
 
 void PlatformAmiga::displayImage(Image image)

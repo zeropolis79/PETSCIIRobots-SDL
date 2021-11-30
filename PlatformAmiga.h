@@ -30,6 +30,7 @@ public:
     virtual bool isKeyOrJoystickPressed();
     virtual uint16_t readJoystick(bool gamepad);
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
+    virtual uint8_t* loadTileset(const char* filename);
     virtual void displayImage(Image image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
 #ifndef PLATFORM_IMAGE_BASED_TILES

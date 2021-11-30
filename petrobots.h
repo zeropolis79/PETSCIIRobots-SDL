@@ -3,7 +3,6 @@
 
 #include "Platform.h"
 
-__far extern uint8_t tileset[];
 extern uint8_t *DESTRUCT_PATH; // Destruct path array (256 bytes)
 extern uint8_t *TILE_ATTRIB;   // Tile attrib array (256 bytes)
 #ifndef PLATFORM_SPRITE_SUPPORT
@@ -81,7 +80,7 @@ extern bool quit;
 
 void INIT_GAME();
 
-extern char* MAPNAME;
+extern char MAPNAME[];
 extern const char* SNDNAME;
 extern const char* LOADMSG;
 extern const char* LOADMSG;
