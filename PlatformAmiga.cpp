@@ -329,6 +329,7 @@ PlatformAmiga::PlatformAmiga() :
     cursorSprite2(new SimpleSprite),
 #endif
     palette(new Palette(blackPalette, (1 << PLANES), 0)),
+    loadBuffer(0),
     bplcon1DefaultValue(0),
     shakeStep(0),
     keyToReturn(0xff),
@@ -405,10 +406,26 @@ PlatformAmiga::PlatformAmiga() :
 
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     moduleData = (uint8_t*)AllocMem(LARGEST_MODULE_SIZE, MEMF_CHIP | MEMF_CLEAR);
-    if (!moduleData) {
+    if (moduleData) {
+        loadBuffer = new uint8_t[57248];
+
+        if (!loadBuffer) {
+            Write(Output(), unableToAllocateMemoryForMusic, 53);
+            FreeMem(moduleData, LARGEST_MODULE_SIZE);
+            moduleData = 0;
+        }
+    } else {
         Write(Output(), unableToAllocateMemoryForMusic, 53);
     }
 #endif
+
+    if (!loadBuffer) {
+        loadBuffer = new uint8_t[14351];
+        if (!loadBuffer) {
+            Write(Output(), unableToAllocateMemoryError, 26);
+            return;
+        }
+    }
 
     InitBitMap(screenBitmap, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
     screenBitmap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
@@ -621,6 +638,7 @@ PlatformAmiga::~PlatformAmiga()
         FreeMem(chipMemory, CHIP_MEMORY_SIZE);
     }
 
+    delete[] loadBuffer;
     delete palette;
 #ifdef PLATFORM_SPRITE_SUPPORT
     delete cursorSprite2;
@@ -906,15 +924,11 @@ uint32_t PlatformAmiga::load(const char* name, uint8_t* destination, uint32_t si
 
                 BPTR file = Open((char*)filename, MODE_OLDFILE);
                 if (file) {
-                    uint8_t* data = new uint8_t[fib.fib_Size];
-                    if (data) {
-                        Read(file, data, fib.fib_Size);
-                        ungzip(data, destination);
+                    Read(file, loadBuffer, fib.fib_Size);
+                    ungzip(loadBuffer, destination);
 
-                        bytesRead = (data[fib.fib_Size - 1] << 24) | (data[fib.fib_Size - 2] << 16) | (data[fib.fib_Size - 3] << 8) | data[fib.fib_Size - 4];
+                    bytesRead = (loadBuffer[fib.fib_Size - 1] << 24) | (loadBuffer[fib.fib_Size - 2] << 16) | (loadBuffer[fib.fib_Size - 3] << 8) | loadBuffer[fib.fib_Size - 4];
 
-                        delete[] data;
-                    }
                     Close(file);
                 }
             }

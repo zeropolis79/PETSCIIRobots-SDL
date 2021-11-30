@@ -132,6 +132,7 @@ private:
     SimpleSprite* cursorSprite2;
 #endif
     Palette* palette;
+    uint8_t* loadBuffer;
     uint16_t bplcon1DefaultValue;
     uint8_t shakeStep;
     uint8_t keyToReturn;
