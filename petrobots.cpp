@@ -124,7 +124,6 @@ int main(int argc, char *argv[])
         return 1;
     }
 
-    int i;
     convertToPETSCII(INTRO_MESSAGE);
     convertToPETSCII(MSG_CANTMOVE);
     convertToPETSCII(MSG_BLOCKED);
@@ -148,12 +147,8 @@ int main(int argc, char *argv[])
     convertToPETSCII(MSG_MUSICOFF);
     convertToPETSCII(MAP_NAMES);
     convertToPETSCII(LOAD_MSG2);
-    for (i = 0; i < 4; i++) {
-        convertToPETSCII(INTRO_OPTIONS[i]);
-    }
-    for (i = 0; i < 3; i++) {
-        convertToPETSCII(DIFF_LEVEL_WORDS[i]);
-    }
+    convertToPETSCII(INTRO_OPTIONS);
+    convertToPETSCII(DIFF_LEVEL_WORDS);
     convertToPETSCII(WIN_MSG);
     convertToPETSCII(LOS_MSG);
     convertToPETSCII(CONTROLTEXT);
@@ -229,52 +224,52 @@ uint8_t SCREEN_SHAKE = 0; // 1=shake 0=no shake
 uint8_t CONTROL = 0; // 0=keyboard 1=custom keys 2=snes
 uint16_t BORDER_COLOR = 0xf00; // Used for border flash coloring
 #ifdef _AMIGA
-char* INTRO_MESSAGE   = "welcome to amiga-robots!\xff"
-                        "by david murray 2021\xff"
-                        "amiga port by vesa halttunen";
+char INTRO_MESSAGE[] = "welcome to amiga-robots!\xff"
+                       "by david murray 2021\xff"
+                       "amiga port by vesa halttunen";
 #else
-char* INTRO_MESSAGE	= "welcome to sdl-robots!\xff"
-                      "by david murray 2021\xff"
-                      "sdl port by vesa halttunen";
+char INTRO_MESSAGE[] = "welcome to sdl-robots!\xff"
+                       "by david murray 2021\xff"
+                       "sdl port by vesa halttunen";
 #endif
-char* MSG_CANTMOVE = "can't move that!";
-char* MSG_BLOCKED = "blocked!";
-char* MSG_SEARCHING = "searching";
-char* MSG_NOTFOUND = "nothing found here.";
-char* MSG_FOUNDKEY = "you found a key card!";
-char* MSG_FOUNDGUN = "you found a pistol!";
-char* MSG_FOUNDEMP = "you found an emp device!";
-char* MSG_FOUNDBOMB = "you found a timebomb!";
-char* MSG_FOUNDPLAS = "you found a plasma gun!";
-char* MSG_FOUNDMED = "you found a medkit!";
-char* MSG_FOUNDMAG = "you found a magnet!";
-char* MSG_MUCHBET = "ahhh, much better!";
-char* MSG_EMPUSED = "emp activated!\xff"
-                          "nearby robots are rebooting.";
-char* MSG_TERMINATED = "you're terminated!";
-char* MSG_TRANS1 = "transporter will not activate\xff"
-                         "until all robots destroyed.";
-char* MSG_ELEVATOR = "[ elevator panel ]  down\xff"
-                           "[  select level  ]  opens";
-char* MSG_LEVELS = "[                ]  door";
-char* MSG_PAUSED = "game paused.\xff"
-                         "exit game (y/n)";
-char* MSG_MUSICON = "music on.";
-char* MSG_MUSICOFF = "music off.";
+char MSG_CANTMOVE[] = "can't move that!";
+char MSG_BLOCKED[] = "blocked!";
+char MSG_SEARCHING[] = "searching";
+char MSG_NOTFOUND[] = "nothing found here.";
+char MSG_FOUNDKEY[] = "you found a key card!";
+char MSG_FOUNDGUN[] = "you found a pistol!";
+char MSG_FOUNDEMP[] = "you found an emp device!";
+char MSG_FOUNDBOMB[] = "you found a timebomb!";
+char MSG_FOUNDPLAS[] = "you found a plasma gun!";
+char MSG_FOUNDMED[] = "you found a medkit!";
+char MSG_FOUNDMAG[] = "you found a magnet!";
+char MSG_MUCHBET[] = "ahhh, much better!";
+char MSG_EMPUSED[] = "emp activated!\xff"
+                     "nearby robots are rebooting.";
+char MSG_TERMINATED[] = "you're terminated!";
+char MSG_TRANS1[] = "transporter will not activate\xff"
+                    "until all robots destroyed.";
+char MSG_ELEVATOR[] = "[ elevator panel ]  down\xff"
+                      "[  select level  ]  opens";
+char MSG_LEVELS[] = "[                ]  door";
+char MSG_PAUSED[] = "game paused.\xff"
+                    "exit game (y/n)";
+char MSG_MUSICON[] = "music on.";
+char MSG_MUSICOFF[] = "music off.";
 uint8_t SELECTED_MAP = 0;
-char* MAP_NAMES = "01-research lab "
-                  "02-headquarters "
-                  "03-the village  "
-                  "04-the islands  "
-                  "05-downtown     "
-                  "06-pi university"
-                  "07-more islands "
-                  "08-robot hotel  "
-                  "09-forest moon  "
-                  "10-death tower  "
-                  "11-river death  "
-                  "12-bunker       "
-                  "13-castle       ";
+char MAP_NAMES[] = "01-research lab "
+                   "02-headquarters "
+                   "03-the village  "
+                   "04-the islands  "
+                   "05-downtown     "
+                   "06-pi university"
+                   "07-more islands "
+                   "08-robot hotel  "
+                   "09-forest moon  "
+                   "10-death tower  "
+                   "11-river death  "
+                   "12-bunker       "
+                   "13-castle       ";
 #ifndef PLATFORM_MODULE_BASED_AUDIO
 // THE FOLLOWING ARE USED BY THE SOUND SYSTEM*
 uint8_t TEMPO_TIMER = 0; // used for counting down to the next tick
@@ -306,7 +301,7 @@ void DISPLAY_LOAD_MESSAGE2()
     }
 }
 
-char* LOAD_MSG2 = "loading map:";
+char LOAD_MSG2[] = "loading map:";
 
 void SETUP_INTERRUPT()
 {
@@ -1909,20 +1904,18 @@ void DISPLAY_GAME_SCREEN()
 #endif
 }
 
-char* INTRO_OPTIONS[] = {
-    "start game",
-    "select map",
-    "difficulty",
-    "controls  "
-};
+char INTRO_OPTIONS[] = "start game"
+                       "select map"
+                       "difficulty"
+                       "controls  ";
 
 void DISPLAY_INTRO_SCREEN()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
     uint8_t* row = SCREEN_MEMORY + MENU_CHART_L[0];
-    for (int Y = 0; Y < 4; Y++, row += 40) {
-        for (int X = 0; X < 10; X++) {
-            row[X] = INTRO_OPTIONS[Y][X];
+    for (int Y = 0, i = 0; Y < 4; Y++, row += 40) {
+        for (int X = 0; X < 10; X++, i++) {
+            row[X] = INTRO_OPTIONS[i];
         }
     }
     platform->displayImage(Platform::ImageIntro);
@@ -1971,17 +1964,16 @@ void DISPLAY_ENDGAME_SCREEN()
     }
     DECWRITE(0x21E, 14);
     // display difficulty level
-    char* WORD = DIFF_LEVEL_WORDS[DIFF_LEVEL];
-    for (X = 0; WORD[X] != 0; X++) {
+    char* WORD = DIFF_LEVEL_WORDS + (DIFF_LEVEL * 6);
+    for (X = 0; X < 6; X++) {
         writeToScreenMemory(0x26E + X, WORD[X], 14);
     }
 }
 
-char* DIFF_LEVEL_WORDS[] = {
-    "easy",
-    "normal",
-    "hard"
-};
+char DIFF_LEVEL_WORDS[] = "easy  "
+                          "normal"
+                          "hard  "
+;
 
 void DECOMPRESS_SCREEN(uint8_t* source, uint8_t color)
 {
@@ -2467,8 +2459,8 @@ void DISPLAY_WIN_LOSE()
     }
 }
 
-char* WIN_MSG = "you win!";
-char* LOS_MSG = "you lose!";
+char WIN_MSG[] = "you win!";
+char LOS_MSG[] = "you lose!";
 
 void PRINT_INTRO_MESSAGE()
 {
@@ -2637,9 +2629,9 @@ void CYCLE_CONTROLS()
     }
 }
 
-char* CONTROLTEXT = "standard  "
-                    "custom    "
-                    "cd32 pad  ";
+char CONTROLTEXT[] = "standard  "
+                     "custom    "
+                     "cd32 pad  ";
 uint8_t CONTROLSTART[] = { 0, 10, 20 };
 
 void CYCLE_MAP()
@@ -5098,7 +5090,7 @@ uint8_t SCR_CUSTOM_KEYS[] = {
     0x4A, 0x60, 0x40, 0x25, 0x4B
 };
 
-char* CINEMA_MESSAGE = 
+char CINEMA_MESSAGE[] = 
     "coming soon: space balls 2 - the search for more money, "
     "attack of the paperclips: clippy's revenge, "
     "it came from planet earth, "
