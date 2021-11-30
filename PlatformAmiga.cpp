@@ -879,8 +879,13 @@ uint16_t PlatformAmiga::readJoystick(bool gamepad)
     return result;
 }
 
-uint32_t PlatformAmiga::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)
+uint32_t PlatformAmiga::load(const char* name, uint8_t* destination, uint32_t size, uint32_t offset)
 {
+#ifdef PLATFORM_COLOR_SUPPORT
+    const char* filename = name;
+#else
+    const char* filename = *name == 'l' ? (name + 4) : name;
+#endif
     uint32_t bytesRead = 0;
     const char* nameEnd = filename;
     while (*++nameEnd);
