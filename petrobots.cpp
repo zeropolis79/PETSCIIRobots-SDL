@@ -2886,6 +2886,9 @@ void ANIMATE_WATER()
     }
     uint8_t tiles[] = { 204, 221, 148, 196, 197, 200, 201, 20, 21, 22, 143 };
     platform->updateTiles(TILE_DATA_TL, tiles, 11);
+#ifdef OPTIMIZED_MAP_RENDERING
+    INVALIDATE_PREVIOUS_MAP();
+#endif
 #endif
     REDRAW_WINDOW = 1;
 }
