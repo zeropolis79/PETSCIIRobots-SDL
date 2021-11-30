@@ -1071,7 +1071,6 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t var
             return;
         }
 #endif
-
         bool shifted = x & 8;
         uint32_t thirdOfTileOffset = tile << 7;
         uint32_t thirdOfTileMaskOffset = tileMaskMap[tile] << 7;
@@ -1127,17 +1126,19 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t var
 
 void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t backgroundVariant, uint8_t foregroundVariant)
 {
-#ifdef PLATFORM_SPRITE_SUPPORT
         uint8_t* backgroundPlanes = tilesPlanes;
+#ifdef PLATFORM_IMAGE_BASED_TILES
         if (animTileMap[backgroundTile] >= 0) {
             backgroundTile = animTileMap[backgroundTile] + backgroundVariant;
             backgroundPlanes = animTilesPlanes;
         }
+#endif
         bool shifted = x & 8;
         uint32_t thirdOfBackgroundTileOffset = backgroundTile << 7;
         uint32_t screenOffsetXInWords = x >> 4;
         uint32_t screenOffset = y * SCREEN_WIDTH_IN_BYTES * PLANES + screenOffsetXInWords + screenOffsetXInWords;
         OwnBlitter();
+#ifdef PLATFORM_IMAGE_BASED_TILES
         if (tileSpriteMap[foregroundTile] >= 0) {
             uint8_t sprite = tileSpriteMap[foregroundTile] + foregroundVariant;
             uint32_t thirdOfSpriteOffset = sprite << 7;
@@ -1156,6 +1157,7 @@ void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, 
             custom.bltdpt = combinedTilePlanes;
             custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
         } else {
+#endif
             uint32_t thirdOfForegroundTileOffset = foregroundTile << 7;
             uint32_t thirdOfForegroundTileMaskOffset = tileMaskMap[foregroundTile] << 7;
             WaitBlit();
@@ -1172,7 +1174,9 @@ void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, 
             custom.bltcpt = backgroundPlanes + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset + thirdOfBackgroundTileOffset;
             custom.bltdpt = combinedTilePlanes;
             custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
+#ifdef PLATFORM_IMAGE_BASED_TILES
         }
+#endif
 
         WaitBlit();
         custom.bltafwm = 0xffff;
@@ -1190,7 +1194,6 @@ void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, 
         custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
 
         DisownBlitter();
-#endif
 }
 
 #ifdef PLATFORM_SPRITE_SUPPORT

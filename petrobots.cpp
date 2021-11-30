@@ -1507,6 +1507,7 @@ void DRAW_MAP_WINDOW()
 #endif
             uint8_t FG_TILE = MAP_PRECALC[PRECALC_COUNT];
             uint8_t FG_VARIANT = 0;
+#ifdef PLATFORM_IMAGE_BASED_TILES
             if (FG_TILE != 0) {
                 DIRECTION = MAP_PRECALC_DIRECTION[PRECALC_COUNT];
                 if (FG_TILE == 96 || (FG_TILE >= 100 && FG_TILE <= 103)) { // PLAYER OR EVILBOT
@@ -1540,6 +1541,7 @@ void DRAW_MAP_WINDOW()
                     }
                 }
             }
+#endif
             if (TILE != PREVIOUS_MAP_BACKGROUND[PRECALC_COUNT] ||
                 VARIANT != PREVIOUS_MAP_BACKGROUND_VARIANT[PRECALC_COUNT] ||
                 FG_TILE != PREVIOUS_MAP_FOREGROUND[PRECALC_COUNT] ||
