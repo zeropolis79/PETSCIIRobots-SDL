@@ -2760,7 +2760,6 @@ void EMP_FLASH()
 #ifdef OPTIMIZED_MAP_RENDERING
     platform->fillRect(0, 0, 264, 168, 15);
     INVALIDATE_PREVIOUS_MAP();
-    REDRAW_WINDOW = 1;
 #else
     for (int Y = 0; Y != 33; Y++) {
         writeToScreenMemory(0x000 + Y, SCREEN_MEMORY[0x000 + Y] ^ 0x80); // screen row 00
@@ -2786,6 +2785,7 @@ void EMP_FLASH()
         writeToScreenMemory(0x320 + Y, SCREEN_MEMORY[0x320 + Y] ^ 0x80); // screen row 20
     }
 #endif
+    REDRAW_WINDOW = 1;
 #endif
 }
 
