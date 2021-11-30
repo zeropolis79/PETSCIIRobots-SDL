@@ -1689,7 +1689,7 @@ uint8_t LIVE_MAP_PLAYER_BLINK = 0;
 // be defined in $FB.
 void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y)
 {
-#ifndef PLATFORM_SPRITE_SUPPORT
+#ifndef PLATFORM_IMAGE_BASED_TILES
     // DRAW THE TOP 3 CHARACTERS
     SCREEN_MEMORY[destination + 0] = TILE_DATA_TL[TILE];
     SCREEN_MEMORY[destination + 1] = TILE_DATA_TM[TILE];
@@ -1716,7 +1716,7 @@ void PLOT_TILE(uint16_t destination, uint16_t x, uint16_t y)
 // is not drawn.
 void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y)
 {
-#ifndef PLATFORM_SPRITE_SUPPORT
+#ifndef PLATFORM_IMAGE_BASED_TILES
     // DRAW THE TOP 3 CHARACTERS
     if (TILE_DATA_TL[TILE] != 0x3A) {
         SCREEN_MEMORY[destination + 0] = TILE_DATA_TL[TILE];
