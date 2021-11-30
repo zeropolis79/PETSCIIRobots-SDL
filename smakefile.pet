@@ -21,4 +21,4 @@ SquareWave.o: SquareWave.raw
     Bin2Hunk SquareWave.raw SquareWave.o NAME _squareWave CHIP
 
 clean:
-    delete $(OBJECTS) petrobots petrobots.info petrobots.lnk
+    delete $(OBJECTS) petrobots petrobots.lnk

@@ -1,10 +1,10 @@
 CFLAGS=WITH=SCoptions.amiga
 OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o PT2.3F_replay_cia.o Tileset.o C64Font.o Faces.o Tiles.o AnimTiles.o Sprites.o SpritesMask.o Items.o Keys.o Health.o SoundFXModule.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o SquareWave.o
 
-all: petrobots 
+all: amigarobots 
 
-petrobots: $(OBJECTS)
-   sc link to petrobots noicons with <<
+amigarobots: $(OBJECTS)
+   sc link to amigarobots noicons with <<
 $(OBJECtS)
 <
 
@@ -70,4 +70,4 @@ SquareWave.o: SquareWave.raw
     Bin2Hunk SquareWave.raw SquareWave.o NAME _squareWave CHIP
 
 clean:
-    delete $(OBJECTS) petrobots petrobots.info petrobots.lnk
+    delete $(OBJECTS) amigarobots amigarobots.lnk
