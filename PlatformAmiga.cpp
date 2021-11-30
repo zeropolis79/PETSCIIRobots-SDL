@@ -42,11 +42,8 @@
 #define COMBINED_TILE_PLANES_SIZE (32 / 8 * 24 * PLANES)
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 #define LARGEST_MODULE_SIZE 103754
-#else
-#define LARGEST_MODULE_SIZE 0
 #endif
-#define CHIP_MEMORY_SIZE (SCREEN_PLANES_SIZE + TILES_PLANES_SIZE + TILES_MASK_SIZE + COMBINED_TILE_PLANES_SIZE + LARGEST_MODULE_SIZE)
-
+#define CHIP_MEMORY_SIZE (SCREEN_PLANES_SIZE + TILES_PLANES_SIZE + TILES_MASK_SIZE + COMBINED_TILE_PLANES_SIZE)
 static const char version[] = "$VER:Attack of the PETSCII Robots (2021-11-29) (C)2021 David Murray, Vesa Halttunen";
 
 struct SpriteData {
@@ -218,6 +215,9 @@ static const char* moduleFilenames[] = {
     "mod.rushin in.gz"
 };
 static char* unableToAllocateMemoryError = "Unable to allocate memory\n";
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+static char* unableToAllocateMemoryForMusic = "Unable to allocate memory for music. Music disabled.\n";
+#endif
 static char* unableToInitializeDisplayError = "Unable to initialize display\n";
 static char* unableToInitializeAudioError = "Unable to initialize audio\n";
 static char* unableToLoadDataError = "Unable to load data\n";
@@ -402,10 +402,12 @@ PlatformAmiga::PlatformAmiga() :
     address += TILES_MASK_SIZE;
 
     combinedTilePlanes = address;
-    address += COMBINED_TILE_PLANES_SIZE;
 
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    moduleData = address;
+    moduleData = (uint8_t*)AllocMem(LARGEST_MODULE_SIZE, MEMF_CHIP | MEMF_CLEAR);
+    if (!moduleData) {
+        Write(Output(), unableToAllocateMemoryForMusic, 53);
+    }
 #endif
 
     InitBitMap(screenBitmap, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
@@ -608,6 +610,12 @@ PlatformAmiga::~PlatformAmiga()
     if (screen) {
         CloseScreen(screen);
     }
+
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    if (moduleData) {
+        FreeMem(moduleData, LARGEST_MODULE_SIZE);
+    }
+#endif
 
     if (chipMemory) {
         FreeMem(chipMemory, CHIP_MEMORY_SIZE);
@@ -1668,7 +1676,7 @@ void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 void PlatformAmiga::loadModule(Module module)
 {
-    if (loadedModule != module) {
+    if (loadedModule != module && moduleData) {
         uint32_t moduleSize = load(moduleFilenames[module - 1], moduleData, LARGEST_MODULE_SIZE, 0);
         undeltaSamples(moduleData, moduleSize);
         setSampleData(moduleData);
@@ -1681,7 +1689,7 @@ void PlatformAmiga::playModule(Module module)
     stopModule();
     stopSample();
 
-    if (module == ModuleSoundFX) {
+    if (module == ModuleSoundFX || !moduleData) {
         mt_init(soundFXModule);
     } else {
         loadModule(module);
