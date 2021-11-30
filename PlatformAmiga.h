@@ -85,6 +85,9 @@ private:
     __asm static void verticalBlankInterruptServer();
     __asm static int32_t ungzip(register __a0 void* input, register __a1 void* output);
     void (*interrupt)(void);
+#ifdef PLATFORM_PRELOAD_SUPPORT
+    void preloadAssets();
+#endif
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     void undeltaSamples(uint8_t* module, uint32_t moduleSize);
     void setSampleData(uint8_t* module);
@@ -133,6 +136,11 @@ private:
 #endif
     Palette* palette;
     uint8_t* loadBuffer;
+#ifdef PLATFORM_PRELOAD_SUPPORT
+    uint8_t* preloadedAssetBuffer;
+    uint8_t* preloadedAssets[6];
+    uint32_t preloadedAssetLengths[6];
+#endif
     uint16_t bplcon1DefaultValue;
     uint8_t shakeStep;
     uint8_t keyToReturn;

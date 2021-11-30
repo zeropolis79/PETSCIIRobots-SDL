@@ -44,6 +44,9 @@
 #define LARGEST_MODULE_SIZE 103754
 #endif
 #define CHIP_MEMORY_SIZE (SCREEN_PLANES_SIZE + TILES_PLANES_SIZE + TILES_MASK_SIZE + COMBINED_TILE_PLANES_SIZE)
+#ifdef PLATFORM_PRELOAD_SUPPORT
+#define PRELOADED_ASSETS_BUFFER_SIZE (32032 + 32032 + 32032 + 65108 + 33792 + 17184)
+#endif
 static const char version[] = "$VER:Attack of the PETSCII Robots (2021-11-29) (C)2021 David Murray, Vesa Halttunen";
 
 struct SpriteData {
@@ -330,6 +333,9 @@ PlatformAmiga::PlatformAmiga() :
 #endif
     palette(new Palette(blackPalette, (1 << PLANES), 0)),
     loadBuffer(0),
+#ifdef PLATFORM_PRELOAD_SUPPORT
+    preloadedAssetBuffer(0),
+#endif
     bplcon1DefaultValue(0),
     shakeStep(0),
     keyToReturn(0xff),
@@ -426,6 +432,10 @@ PlatformAmiga::PlatformAmiga() :
             return;
         }
     }
+
+#ifdef PLATFORM_PRELOAD_SUPPORT
+    preloadAssets();
+#endif
 
     InitBitMap(screenBitmap, PLANES, SCREEN_WIDTH, SCREEN_HEIGHT);
     screenBitmap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
@@ -663,6 +673,43 @@ void PlatformAmiga::runVerticalBlankInterrupt()
         interrupt();
     }
 }
+
+#ifdef PLATFORM_PRELOAD_SUPPORT
+void PlatformAmiga::preloadAssets()
+{
+    preloadedAssetBuffer = new uint8_t[PRELOADED_ASSETS_BUFFER_SIZE];
+
+    if (preloadedAssetBuffer) {
+        int asset = 0;
+        uint32_t offset = 0;
+
+        preloadedAssets[asset] = preloadedAssetBuffer + offset;
+        preloadedAssetLengths[asset] = load(imageFilenames[0], preloadedAssets[asset], 32032, 0);
+        offset += preloadedAssetLengths[asset++];
+
+        preloadedAssets[asset] = preloadedAssetBuffer + offset;
+        preloadedAssetLengths[asset] = load(imageFilenames[1], preloadedAssets[asset], 32032, 0);
+        offset += preloadedAssetLengths[asset++];
+
+        preloadedAssets[asset] = preloadedAssetBuffer + offset;
+        preloadedAssetLengths[asset] = load(imageFilenames[2], preloadedAssets[asset], 32032, 0);
+        offset += preloadedAssetLengths[asset++];
+
+        if (moduleData) {
+            preloadedAssets[asset] = preloadedAssetBuffer + offset;
+            preloadedAssetLengths[asset] = load(moduleFilenames[0], preloadedAssets[asset], 65108, 0);
+            offset += preloadedAssetLengths[asset++];
+
+            preloadedAssets[asset] = preloadedAssetBuffer + offset;
+            preloadedAssetLengths[asset] = load(moduleFilenames[1], preloadedAssets[asset], 33792, 0);
+            offset += preloadedAssetLengths[asset++];
+
+            preloadedAssets[asset] = preloadedAssetBuffer + offset;
+            preloadedAssetLengths[asset] = load(moduleFilenames[2], preloadedAssets[asset], 17182, 0);
+        }
+    }
+}
+#endif
 
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 void PlatformAmiga::undeltaSamples(uint8_t* module, uint32_t moduleSize)
@@ -956,7 +1003,24 @@ uint8_t* PlatformAmiga::loadTileset(const char* filename)
 
 void PlatformAmiga::displayImage(Image image)
 {
-    load(imageFilenames[image], screenPlanes, SCREEN_SIZE * PLANES + (2 << PLANES), 0);
+#ifdef PLATFORM_PRELOAD_SUPPORT
+    if (preloadedAssetBuffer) {
+        uint32_t* source = (uint32_t*)preloadedAssets[image];
+        uint32_t* destination = (uint32_t*)screenPlanes;
+        uint32_t* end = (uint32_t*)(screenPlanes + preloadedAssetLengths[image]);
+        while (destination < end) {
+            *destination++ = *source++;
+            *destination++ = *source++;
+            *destination++ = *source++;
+            *destination++ = *source++;
+            *destination++ = *source++;
+            *destination++ = *source++;
+            *destination++ = *source++;
+            *destination++ = *source++;
+        }
+    } else
+#endif
+        load(imageFilenames[image], screenPlanes, SCREEN_SIZE * PLANES + (2 << PLANES), 0);
 
     palette->setPalette((uint16_t*)(screenPlanes + SCREEN_SIZE * PLANES), (1 << PLANES));
 }
@@ -1691,7 +1755,32 @@ void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t
 void PlatformAmiga::loadModule(Module module)
 {
     if (loadedModule != module && moduleData) {
-        uint32_t moduleSize = load(moduleFilenames[module - 1], moduleData, LARGEST_MODULE_SIZE, 0);
+        uint32_t moduleSize;
+#ifdef PLATFORM_PRELOAD_SUPPORT
+        if (preloadedAssetBuffer && module < ModuleInGame1) {
+            moduleSize = preloadedAssetLengths[module + 2];
+            uint32_t* source = (uint32_t*)preloadedAssets[module + 2];
+            uint32_t* destination = (uint32_t*)moduleData;
+
+            uint32_t* quickEnd = (uint32_t*)(moduleData + (moduleSize & 0xffffffe0));
+            while (destination < quickEnd) {
+                *destination++ = *source++;
+                *destination++ = *source++;
+                *destination++ = *source++;
+                *destination++ = *source++;
+                *destination++ = *source++;
+                *destination++ = *source++;
+                *destination++ = *source++;
+                *destination++ = *source++;
+            }
+
+            uint32_t* end = (uint32_t*)(moduleData + moduleSize);
+            while (destination < end) {
+                *destination++ = *source++;
+            }
+        } else
+#endif
+        moduleSize = load(moduleFilenames[module - 1], moduleData, LARGEST_MODULE_SIZE, 0);
         undeltaSamples(moduleData, moduleSize);
         setSampleData(moduleData);
         loadedModule = module;
