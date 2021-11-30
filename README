@@ -19,6 +19,9 @@ make
 Amiga version
 -------------
 smake
+amigarobots
+
+smake -f smakefile.pet
 petrobots
 
 Amiga TODO
