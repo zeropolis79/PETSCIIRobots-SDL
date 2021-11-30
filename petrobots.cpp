@@ -270,16 +270,18 @@ char MAP_NAMES[] = "01-research lab "
                    "11-river death  "
                    "12-bunker       "
                    "13-castle       ";
-#ifndef PLATFORM_MODULE_BASED_AUDIO
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+uint8_t MUSIC_ON = 1; // 0=off 1=on
+#else
 // THE FOLLOWING ARE USED BY THE SOUND SYSTEM*
 uint8_t TEMPO_TIMER = 0; // used for counting down to the next tick
 uint8_t TEMPO = 7; // How many IRQs between ticks
 uint8_t DATA_LINE = 0; // used for playback to keep track of which line we are executing.
 uint8_t ARP_MODE = 0; // 0=no 1=major 2=minor 3=sus4
 uint8_t CHORD_ROOT = 0; // root note of the chord
+uint8_t MUSIC_ON = 0; // 0=off 1=on
 uint8_t SOUND_EFFECT = 0xff; // FF=OFF or number of effect in progress
 #endif
-uint8_t MUSIC_ON = 0; // 0=off 1=on
 
 void DISPLAY_LOAD_MESSAGE1()
 {
@@ -613,10 +615,10 @@ void TOGGLE_MUSIC()
 
 void START_IN_GAME_MUSIC()
 {
-    MUSIC_ON = 1;
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->playModule(LEVEL_MUSIC[SELECTED_MAP]);
+    platform->playModule(MUSIC_ON == 1 ? LEVEL_MUSIC[SELECTED_MAP] : Platform::ModuleSoundFX);
 #else
+    MUSIC_ON = 1;
     if (SOUND_EFFECT == 0xFF) { // FF=NO sound effect in progress
         DATA_LINE = 0;
         CUR_PATTERN = IN_GAME_MUSIC1 + (LEVEL_MUSIC[SELECTED_MAP] << 8);
@@ -2398,7 +2400,9 @@ void GAME_OVER()
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     platform->stopModule();
-    platform->loadModule(UNIT_TYPE[0] != 0 ? Platform::ModuleWin : Platform::ModuleLose);
+    if (MUSIC_ON == 1) {
+        platform->loadModule(UNIT_TYPE[0] != 0 ? Platform::ModuleWin : Platform::ModuleLose);
+    }
 #else
     KEYTIMER = 100;
     while (KEYTIMER != 0) {
@@ -2443,7 +2447,9 @@ void DISPLAY_WIN_LOSE()
             writeToScreenMemory(0x088 + X, WIN_MSG[X], 14);
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->playModule(Platform::ModuleWin);
+        if (MUSIC_ON == 1) {
+            platform->playModule(Platform::ModuleWin);
+        }
 #else
         PLAY_SOUND(18); // win music
 #endif
@@ -2453,7 +2459,9 @@ void DISPLAY_WIN_LOSE()
             writeToScreenMemory(0x088 + X, LOS_MSG[X], 14);
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-        platform->playModule(Platform::ModuleLose);
+        if (MUSIC_ON == 1) {
+            platform->playModule(Platform::ModuleLose);
+        }
 #else
         PLAY_SOUND(19); // LOSE music
 #endif
@@ -2567,6 +2575,16 @@ void INTRO_SCREEN()
                 PLAY_SOUND(15); // menu beep, SOUND PLAY
                 done = EXEC_COMMAND();
             }
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+             else if (A == KEY_CONFIG[KEY_MUSIC]) { // SHIFT-M
+                if (MUSIC_ON == 1) {
+                    MUSIC_ON = 0;
+                } else {
+                    MUSIC_ON = 1;
+                }
+                START_INTRO_MUSIC();
+            }
+#endif
             platform->renderFrame();
         }
     }
@@ -2575,7 +2593,7 @@ void INTRO_SCREEN()
 void START_INTRO_MUSIC()
 {
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-    platform->playModule(Platform::ModuleIntro);
+    platform->playModule(MUSIC_ON == 1 ? Platform::ModuleIntro : Platform::ModuleSoundFX);
 #else
     DATA_LINE = 0;
     SOUND_EFFECT = 0xFF;
