@@ -818,7 +818,7 @@ void BOMB_MAGNET_COMMON2()
 void USE_EMP()
 {
     EMP_FLASH();
-    REDRAW_WINDOW = 0;  // attempt to delay window redrawing (pet only)
+//    REDRAW_WINDOW = 0;  // attempt to delay window redrawing (pet only)
     PLAY_SOUND(3);  // EMP sound, SOUND PLAY
     INV_EMP--;
     DISPLAY_ITEM();
@@ -2756,6 +2756,11 @@ void EMP_FLASH()
     BORDER_COLOR = 0x00f;
     BORDER = 10;
 #else
+#ifdef OPTIMIZED_MAP_RENDERING
+    platform->fillRect(0, 0, 264, 168, 15);
+    INVALIDATE_PREVIOUS_MAP();
+    REDRAW_WINDOW = 1;
+#else
     for (int Y = 0; Y != 33; Y++) {
         writeToScreenMemory(0x000 + Y, SCREEN_MEMORY[0x000 + Y] ^ 0x80); // screen row 00
         writeToScreenMemory(0x028 + Y, SCREEN_MEMORY[0x028 + Y] ^ 0x80); // screen row 01
@@ -2779,6 +2784,7 @@ void EMP_FLASH()
         writeToScreenMemory(0x2F8 + Y, SCREEN_MEMORY[0x2F8 + Y] ^ 0x80); // screen row 19
         writeToScreenMemory(0x320 + Y, SCREEN_MEMORY[0x320 + Y] ^ 0x80); // screen row 20
     }
+#endif
 #endif
 }
 
@@ -3038,10 +3044,10 @@ void PET_SCREEN_SHAKE()
         return;
     }
 #ifndef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
+    platform->copyRect(8, 0, 0, 0, 264, 168);
 #ifdef OPTIMIZED_MAP_RENDERING
     INVALIDATE_PREVIOUS_MAP();
 #endif
-    platform->copyRect(8, 0, 0, 0, 256, 168);
     REDRAW_WINDOW = 1;
 #endif
 }

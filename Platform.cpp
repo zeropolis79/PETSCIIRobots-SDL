@@ -71,6 +71,10 @@ void Platform::hideCursor()
 {
 }
 
+void Platform::fillRect(uint16_t, uint16_t, uint16_t, uint16_t, uint8_t)
+{
+}
+
 void Platform::startShakeScreen()
 {
 }

@@ -1470,6 +1470,13 @@ void PlatformAmiga::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t h
     BltBitMap(screenBitmap, x, y, screenBitmap, x, y, width, height, 0, 0xff, 0);
 }
 
+void PlatformAmiga::fillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint8_t color)
+{
+    SetAPen(&screen->RastPort, color);
+    RectFill(&screen->RastPort, x, y, x + width - 1, y + height - 1);
+    SetAPen(&screen->RastPort, 0);
+}
+
 #ifdef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
 void PlatformAmiga::shakeScreen()
 {
@@ -1515,6 +1522,7 @@ void PlatformAmiga::stopShakeScreen()
 }
 #endif
 
+#ifdef PLATFORM_FADE_SUPPORT
 void PlatformAmiga::startFadeScreen(uint16_t color, uint16_t intensity)
 {
     palette->setFadeBaseColor(color);
@@ -1546,6 +1554,7 @@ void PlatformAmiga::stopFadeScreen()
     palette->setFade(15);
     LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
 }
+#endif
 
 void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
 {
