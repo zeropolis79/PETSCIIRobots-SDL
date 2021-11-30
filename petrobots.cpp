@@ -3038,17 +3038,11 @@ void PET_SCREEN_SHAKE()
         return;
     }
 #ifndef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
-    uint16_t source = 1;
-    uint16_t destination = 0;
-    for (int Y = 0; Y != 21; Y++) {
-        for (int X = 0; X != 32; X++) {
-            writeToScreenMemory(destination + X, SCREEN_MEMORY[source + X]);
-        }
-        destination += 40;
-        source += 40;
-    }
+#ifdef OPTIMIZED_MAP_RENDERING
+    INVALIDATE_PREVIOUS_MAP();
+#endif
+    platform->copyRect(8, 0, 0, 0, 256, 168);
     REDRAW_WINDOW = 1;
-    platform->renderFrame();
 #endif
 }
 
