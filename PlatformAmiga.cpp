@@ -25,7 +25,11 @@
 #define SCREEN_HEIGHT 200
 #define SCREEN_WIDTH_IN_BYTES (SCREEN_WIDTH >> 3)
 #define SCREEN_SIZE (SCREEN_WIDTH_IN_BYTES * SCREEN_HEIGHT)
+#ifdef PLATFORM_COLOR_SUPPORT
 #define PLANES 4
+#else
+#define PLANES 1
+#endif
 #define SCREEN_PLANES_SIZE (SCREEN_SIZE * PLANES + 16 * 2)
 #ifdef PLATFORM_IMAGE_BASED_TILES
 #define TILES_PLANES_SIZE 0
@@ -995,6 +999,7 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                     uint8_t* font = fontPlanes + ((character & 127) << 3);
                     for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
                         uint8_t byte = reverse ? ~*font : *font;
+#ifdef PLATFORM_COLOR_SUPPORT
                         tiles[offset] = 0;
                         tiles[offset + 4] = byte;
                         tiles[offset + 8] = 0;
@@ -1003,6 +1008,10 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                         mask[offset + 4] = mask[offset];
                         mask[offset + 8] = mask[offset];
                         mask[offset + 12] = mask[offset];
+#else
+                        tiles[offset] = byte;
+                        mask[offset] = character != 0x3a ? 0xff : 0;
+#endif
                     }
                 }
             }
@@ -1015,10 +1024,14 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                     uint8_t* font = fontPlanes + ((character & 127) << 3);
                     for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
                         uint8_t byte = reverse ? ~*font : *font;
+#ifdef PLATFORM_COLOR_SUPPORT
                         tiles[offset] = 0;
                         tiles[offset + 4] = byte;
                         tiles[offset + 8] = 0;
                         tiles[offset + 12] = byte;
+#else
+                        tiles[offset] = byte;
+#endif
                     }
                 }
             }
@@ -1057,10 +1070,14 @@ void PlatformAmiga::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTi
                 uint8_t* font = fontPlanes + ((character & 127) << 3);
                 for (int offset = 0; offset < 8 * 4 * PLANES; offset += 4 * PLANES, font++) {
                     uint8_t byte = reverse ? ~*font : *font;
+#ifdef PLATFORM_COLOR_SUPPORT
                     destination[offset] = 0;
                     destination[offset + 4] = byte;
                     destination[offset + 8] = 0;
                     destination[offset + 12] = byte;
+#else
+                    destination[offset] = byte;
+#endif
                 }
             }
         }
@@ -1078,8 +1095,13 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t var
         }
 #endif
         bool shifted = x & 8;
+#ifdef PLATFORM_COLOR_SUPPORT
         uint32_t thirdOfTileOffset = tile << 7;
         uint32_t thirdOfTileMaskOffset = tileMaskMap[tile] << 7;
+#else
+        uint32_t thirdOfTileOffset = tile << 5;
+        uint32_t thirdOfTileMaskOffset = tileMaskMap[tile] << 5;
+#endif
         uint32_t screenOffsetXInWords = x >> 4;
         uint32_t screenOffset = y * SCREEN_WIDTH_IN_BYTES * PLANES + screenOffsetXInWords + screenOffsetXInWords;
         OwnBlitter();
@@ -1107,7 +1129,11 @@ void PlatformAmiga::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t var
         }
 #endif
         bool shifted = x & 8;
+#ifdef PLATFORM_COLOR_SUPPORT
         uint32_t thirdOfTileOffset = tile << 7;
+#else
+        uint32_t thirdOfTileOffset = tile << 5;
+#endif
         uint32_t screenOffsetXInWords = x >> 4;
         uint32_t screenOffset = y * SCREEN_WIDTH_IN_BYTES * PLANES + screenOffsetXInWords + screenOffsetXInWords;
         OwnBlitter();
@@ -1140,7 +1166,11 @@ void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, 
         }
 #endif
         bool shifted = x & 8;
+#ifdef PLATFORM_COLOR_SUPPORT
         uint32_t thirdOfBackgroundTileOffset = backgroundTile << 7;
+#else
+        uint32_t thirdOfBackgroundTileOffset = backgroundTile << 5;
+#endif
         uint32_t screenOffsetXInWords = x >> 4;
         uint32_t screenOffset = y * SCREEN_WIDTH_IN_BYTES * PLANES + screenOffsetXInWords + screenOffsetXInWords;
         OwnBlitter();
@@ -1164,8 +1194,13 @@ void PlatformAmiga::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, 
             custom.bltsize = (uint16_t)(((24 * PLANES) << 6) | (32 >> 4));
         } else {
 #endif
+#ifdef PLATFORM_COLOR_SUPPORT
             uint32_t thirdOfForegroundTileOffset = foregroundTile << 7;
             uint32_t thirdOfForegroundTileMaskOffset = tileMaskMap[foregroundTile] << 7;
+#else
+            uint32_t thirdOfForegroundTileOffset = foregroundTile << 5;
+            uint32_t thirdOfForegroundTileMaskOffset = tileMaskMap[foregroundTile] << 5;
+#endif
             WaitBlit();
             custom.bltafwm = 0xffff;
             custom.bltalwm = 0xff00;
@@ -1565,17 +1600,21 @@ void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
         for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
             uint8_t font = ~*source++;
             *destination = font;
+#ifdef PLATFORM_COLOR_SUPPORT
             destination[1 * SCREEN_WIDTH_IN_BYTES] = font;
             destination[2 * SCREEN_WIDTH_IN_BYTES] = font;
             destination[3 * SCREEN_WIDTH_IN_BYTES] = font;
+#endif
         }
     } else {
         for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
             uint8_t font = *source++;
             *destination = font;
+#ifdef PLATFORM_COLOR_SUPPORT
             destination[1 * SCREEN_WIDTH_IN_BYTES] = font;
             destination[2 * SCREEN_WIDTH_IN_BYTES] = font;
             destination[3 * SCREEN_WIDTH_IN_BYTES] = font;
+#endif
         }
     }
 }
@@ -1584,9 +1623,11 @@ void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t
 {
     bool reverse = value > 127;
     bool writePlane1 = color & 1;
+#ifdef PLATFORM_COLOR_SUPPORT
     bool writePlane2 = color & 2;
     bool writePlane3 = color & 4;
     bool writePlane4 = color & 8;
+#endif
     uint8_t* source = fontPlanes + ((value & 127) << 3);
     uint8_t* destination = screenPlanes + addressMap[address];
     if (yOffset > 0) {
@@ -1596,17 +1637,21 @@ void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t
         for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
             uint8_t font = ~*source++;
             *destination = writePlane1 ? font : 0;
+#ifdef PLATFORM_COLOR_SUPPORT
             destination[1 * SCREEN_WIDTH_IN_BYTES] = writePlane2 ? font : 0;
             destination[2 * SCREEN_WIDTH_IN_BYTES] = writePlane3 ? font : 0;
             destination[3 * SCREEN_WIDTH_IN_BYTES] = writePlane4 ? font : 0;
+#endif
         }
     } else {
         for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
             uint8_t font = *source++;
             *destination = writePlane1 ? font : 0;
+#ifdef PLATFORM_COLOR_SUPPORT
             destination[1 * SCREEN_WIDTH_IN_BYTES] = writePlane2 ? font : 0;
             destination[2 * SCREEN_WIDTH_IN_BYTES] = writePlane3 ? font : 0;
             destination[3 * SCREEN_WIDTH_IN_BYTES] = writePlane4 ? font : 0;
+#endif
         }
     }
 }
