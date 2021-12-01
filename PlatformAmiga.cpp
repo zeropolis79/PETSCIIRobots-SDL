@@ -47,7 +47,7 @@
 #ifdef PLATFORM_PRELOAD_SUPPORT
 #define PRELOADED_ASSETS_BUFFER_SIZE (32032 + 32032 + 32032 + 65108 + 33792 + 17184)
 #endif
-static const char version[] = "$VER:Attack of the PETSCII Robots (2021-11-30) (C)2021 David Murray, Vesa Halttunen";
+static const char version[] = "$VER:Attack of the PETSCII Robots 1.0 (2021-12-01) (C)2021 David Murray, Vesa Halttunen";
 
 struct SpriteData {
     uint16_t posctl[2];
