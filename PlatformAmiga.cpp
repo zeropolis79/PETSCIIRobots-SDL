@@ -458,7 +458,7 @@ PlatformAmiga::PlatformAmiga() :
     itemsBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     itemsBitMap->BytesPerRow = 6 * PLANES;
 
-    InitBitMap(healthBitMap, PLANES, 48, 56 * 6);
+    InitBitMap(healthBitMap, PLANES, 48, 51 * 6);
     healthBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     healthBitMap->BytesPerRow = 6 * PLANES;
 #endif
@@ -1414,7 +1414,7 @@ void PlatformAmiga::renderKey(uint8_t key, uint16_t x, uint16_t y)
 
 void PlatformAmiga::renderHealth(uint8_t health, uint16_t x, uint16_t y)
 {
-    BltBitMap(healthBitMap, 0, health * 56, screen->RastPort.BitMap, x, y, 48, 56, 0xc0, 0xff, 0);
+    BltBitMap(healthBitMap, 0, health * 51, screen->RastPort.BitMap, x, y, 48, 51, 0xc0, 0xff, 0);
 }
 
 void PlatformAmiga::renderFace(uint8_t face, uint16_t x, uint16_t y)

@@ -2021,7 +2021,8 @@ void DISPLAY_PLAYER_HEALTH()
     }
 
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderHealth(5 - MIN(TEMP_A, 5), 272, 128);
+    int health = 5 - MIN(TEMP_A, 5);
+    platform->renderHealth(health, 272, 131 + (health >> 1));
 #endif
 }
 
