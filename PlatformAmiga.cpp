@@ -445,7 +445,7 @@ PlatformAmiga::PlatformAmiga() :
     screenBitmap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     screenBitmap->BytesPerRow = SCREEN_WIDTH_IN_BYTES * PLANES;
 
-    InitBitMap(tilesBitMap, PLANES, 32, 24 * 256);
+    InitBitMap(tilesBitMap, PLANES, 32, 24 * 253);
     tilesBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     tilesBitMap->BytesPerRow = 4 * PLANES;
 
