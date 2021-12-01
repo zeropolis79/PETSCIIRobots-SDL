@@ -2187,7 +2187,7 @@ void DISPLAY_MAGNET()
 void DISPLAY_BLANK_ITEM()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->clearRect(272, 48, 48, 32);
+    platform->clearRect(272, 48, 48, 40);
 #else
     platform->clearRect(272, 56, 48, 32);
 #endif
