@@ -291,14 +291,14 @@ uint8_t liveMapToPlane1[256];
 uint8_t liveMapToPlane2[256];
 uint8_t liveMapToPlane3[256];
 uint8_t liveMapToPlane4[256];
+uint8_t unitTypes[28];
+uint8_t unitX[28];
+uint8_t unitY[28];
 #else
 uint8_t tileLiveMap[1];
 uint8_t liveMapToPlane1[1];
 uint8_t liveMapToPlane3[1];
 #endif
-uint8_t unitTypes[28];
-uint8_t unitX[28];
-uint8_t unitY[28];
 
 PlatformAmiga::PlatformAmiga() :
     framesPerSecond_(50),
