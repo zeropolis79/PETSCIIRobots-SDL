@@ -1831,7 +1831,7 @@ void PlatformAmiga::stopModule()
 
 void PlatformAmiga::playSample(uint8_t sample)
 {
-    ChanInput* input = &mt_chan4input;
+    ChanInput* input = loadedModule == ModuleIntro ? &mt_chan2input : &mt_chan4input;
     if (mt_data == soundFXModule) {
         input = &mt_chan1input + (effectChannel < 2 ? effectChannel : (5 - effectChannel));
 
