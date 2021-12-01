@@ -9,7 +9,6 @@
 	xref	_liveMapToPlane3
 	xref	@runVerticalBlankInterrupt__13PlatformAmigaFv
 	xref	_addressMap
-	xref	_c64Font
 
 SCREEN_WIDTH_IN_BYTES	equ	40
 PLANES	equ	4
