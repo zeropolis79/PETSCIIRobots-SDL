@@ -454,7 +454,7 @@ PlatformAmiga::PlatformAmiga() :
     facesBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     facesBitMap->BytesPerRow = 2 * PLANES;
 
-    InitBitMap(itemsBitMap, PLANES, 48, 32 * 6);
+    InitBitMap(itemsBitMap, PLANES, 48, 22 * 6);
     itemsBitMap->Flags = BMF_DISPLAYABLE | BMF_INTERLEAVED;
     itemsBitMap->BytesPerRow = 6 * PLANES;
 
@@ -1393,7 +1393,7 @@ void PlatformAmiga::renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y)
 #ifdef PLATFORM_IMAGE_SUPPORT
 void PlatformAmiga::renderItem(uint8_t item, uint16_t x, uint16_t y)
 {
-    BltBitMap(itemsBitMap, 0, item * 32, screen->RastPort.BitMap, x, y, 48, 32, 0xc0, 0xff, 0);
+    BltBitMap(itemsBitMap, 0, item * 22, screen->RastPort.BitMap, x, y + 5, 48, 22, 0xc0, 0xff, 0);
 }
 
 void PlatformAmiga::renderKey(uint8_t key, uint16_t x, uint16_t y)
