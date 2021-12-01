@@ -417,7 +417,7 @@ PlatformAmiga::PlatformAmiga() :
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     moduleData = (uint8_t*)AllocMem(LARGEST_MODULE_SIZE, MEMF_CHIP | MEMF_CLEAR);
     if (moduleData) {
-        loadBuffer = new uint8_t[57248];
+        loadBuffer = new uint8_t[59884];
 
         if (!loadBuffer) {
             Write(Output(), unableToAllocateMemoryForMusic, 53);
