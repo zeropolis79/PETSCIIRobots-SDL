@@ -2115,7 +2115,7 @@ void PRESELECT_ITEM()
 void DISPLAY_TIMEBOMB()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderItem(5, 272, 48);
+    platform->renderItem(5, 272, 54);
     DECNUM = INV_BOMBS;
     DECWRITE(0x1B5, 1);
 #else
@@ -2133,7 +2133,7 @@ void DISPLAY_TIMEBOMB()
 void DISPLAY_EMP()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderItem(3, 272, 48);
+    platform->renderItem(3, 272, 54);
     DECNUM = INV_EMP;
     DECWRITE(0x1B5, 1);
 #else
@@ -2151,7 +2151,7 @@ void DISPLAY_EMP()
 void DISPLAY_MEDKIT()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderItem(2, 272, 48);
+    platform->renderItem(2, 272, 54);
     DECNUM = INV_MEDKIT;
     DECWRITE(0x1B5, 1);
 #else
@@ -2169,7 +2169,7 @@ void DISPLAY_MEDKIT()
 void DISPLAY_MAGNET()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderItem(4, 272, 48);
+    platform->renderItem(4, 272, 54);
     DECNUM = INV_MAGNET;
     DECWRITE(0x1B5, 1);
 #else
@@ -2271,7 +2271,7 @@ void PRESELECT_WEAPON()
 void DISPLAY_PLASMA_GUN()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderItem(1, 272, 8);
+    platform->renderItem(1, 272, 13);
     DECNUM = AMMO_PLASMA;
     DECWRITE(0x0C5, 1);
 #else
@@ -2289,7 +2289,7 @@ void DISPLAY_PLASMA_GUN()
 void DISPLAY_PISTOL()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderItem(0, 272, 8);
+    platform->renderItem(0, 272, 13);
     DECNUM = AMMO_PISTOL;
     DECWRITE(0x0C5, 1);
 #else
