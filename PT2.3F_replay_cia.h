@@ -15,9 +15,9 @@ struct SampleData {
 struct ChanTemp {
     uint16_t note;
     uint16_t cmd;
-    uint32_t start;
+    int8_t* start;
     uint16_t length;
-    uint32_t loopstart;
+    int8_t* loopstart;
     uint16_t replen;
     uint16_t period;
     uint8_t finetune;

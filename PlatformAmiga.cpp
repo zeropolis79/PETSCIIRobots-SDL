@@ -1810,16 +1810,16 @@ void PlatformAmiga::pauseModule()
     mt_speed = 0;
     mt_music();
     mt_Enable = false;
-    if ((mt_chan1temp.note & 0x1000) == 0) {
+    if (mt_chan1temp.start < soundExplosion || mt_chan1temp.start >= squareWave) {
         custom.aud[0].ac_vol = 0;
     }
-    if ((mt_chan2temp.note & 0x1000) == 0) {
+    if (mt_chan2temp.start < soundExplosion || mt_chan2temp.start >= squareWave) {
         custom.aud[1].ac_vol = 0;
     }
-    if ((mt_chan3temp.note & 0x1000) == 0) {
+    if (mt_chan3temp.start < soundExplosion || mt_chan3temp.start >= squareWave) {
         custom.aud[2].ac_vol = 0;
     }
-    if ((mt_chan4temp.note & 0x1000) == 0) {
+    if (mt_chan4temp.start < soundExplosion || mt_chan4temp.start >= squareWave) {
         custom.aud[3].ac_vol = 0;
     }
 }
