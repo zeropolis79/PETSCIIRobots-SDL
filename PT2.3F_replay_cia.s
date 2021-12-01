@@ -224,7 +224,7 @@ MusicIntServer
 	dc.l musintname
 	dc.l 0,mt_music
 
-musintname	dc.b "Attack of the PETSCII Robots audio interrupt",0,0
+musintname	dc.b "Attack of the PETSCII Robots CIA",0,0
 
 ;---- Playroutine ----
 

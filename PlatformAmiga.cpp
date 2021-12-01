@@ -521,7 +521,7 @@ PlatformAmiga::PlatformAmiga() :
 
     verticalBlankInterrupt->is_Node.ln_Type = NT_INTERRUPT;
     verticalBlankInterrupt->is_Node.ln_Pri = 127;
-    verticalBlankInterrupt->is_Node.ln_Name = "Attack of the PETSCII Robots vertical blank interrupt";
+    verticalBlankInterrupt->is_Node.ln_Name = "Attack of the PETSCII Robots VBI";
     verticalBlankInterrupt->is_Data = this;
     verticalBlankInterrupt->is_Code = (__stdargs void(*)())&verticalBlankInterruptServer;
     AddIntServer(INTB_VERTB, verticalBlankInterrupt);
