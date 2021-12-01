@@ -35,8 +35,6 @@ Graphics
 Audio
 - Pistol sound (currently FreeDoom, licensing unclear)
 - Explosion sound (currently FreeDoom, licensing unclear)
-- Try to improve highest notes
-- Check if the fourth channel can be used less
 
 Other
 - Hard disk installer script
