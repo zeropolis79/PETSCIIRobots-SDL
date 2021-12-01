@@ -2569,10 +2569,8 @@ void INTRO_SCREEN()
                     REVERSE_MENU_OPTION(true);
                     PLAY_SOUND(15); // menu beep
                 }
-            } else if (A == KEY_CONFIG[KEY_SPACE]) { // SPACE
-                done = EXEC_COMMAND();
-            } else if (A == KEY_CONFIG[KEY_RETURN] || (B & Platform::JoystickRed)) { // RETURN
-                PLAY_SOUND(15); // menu beep, SOUND PLAY
+            } else if (A == KEY_CONFIG[KEY_SPACE] || // SPACE
+                       A == KEY_CONFIG[KEY_RETURN] || (B & Platform::JoystickRed)) { // RETURN
                 done = EXEC_COMMAND();
             }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
