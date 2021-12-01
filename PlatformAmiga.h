@@ -149,6 +149,9 @@ private:
     uint16_t joystickStateToReturn;
     uint16_t joystickState;
     bool filterState;
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    uint8_t effectChannel;
+#endif
 };
 
 #endif

@@ -344,6 +344,10 @@ PlatformAmiga::PlatformAmiga() :
     joystickStateToReturn(0),
     joystickState(0),
     filterState(ciaa.ciapra & CIAF_LED ? true : false)
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    ,
+    effectChannel(0)
+#endif
 {
     Palette::initialize();
 
@@ -1827,18 +1831,32 @@ void PlatformAmiga::stopModule()
 
 void PlatformAmiga::playSample(uint8_t sample)
 {
-    mt_chan4input.note = 0x1000 + 320;
+    ChanInput* input = &mt_chan4input;
+    if (mt_data == soundFXModule) {
+        input = &mt_chan1input + (effectChannel < 2 ? effectChannel : (5 - effectChannel));
+
+        effectChannel++;
+        effectChannel &= 3;
+    }
+
+    input->note = 0x1000 + 320;
     if (sample < 16) {
-        mt_chan4input.cmd = sample << 12;
+        input->cmd = sample << 12;
     } else if (sample == 16) {
-        mt_chan4input.cmd = 1 << 12;
+        input->cmd = 1 << 12;
     } else {
-        mt_chan4input.cmd = 15 << 12;
+        input->cmd = 15 << 12;
     }
 }
 
 void PlatformAmiga::stopSample()
 {
+    mt_chan1input.note = 0;
+    mt_chan1input.cmd = 0;
+    mt_chan2input.note = 0;
+    mt_chan2input.cmd = 0;
+    mt_chan3input.note = 0;
+    mt_chan3input.cmd = 0;
     mt_chan4input.note = 0;
     mt_chan4input.cmd = 0;
 }

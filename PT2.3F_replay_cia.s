@@ -8,10 +8,14 @@
 	xdef	_mt_chan3temp
 	xdef	_mt_chan4temp
 	xdef	_mt_SampleStarts
+	xdef	_mt_data
 	xdef	_mt_speed
 	xdef	_mt_SongPos
 	xdef	_mt_Enable
 	xdef	_mt_PatternPos
+	xdef	_mt_chan1input
+	xdef	_mt_chan2input
+	xdef	_mt_chan3input
 	xdef	_mt_chan4input
 
 	section	code
@@ -362,31 +366,61 @@ mt_GetNewNote
 	CLR.W	mt_DMACONtemp
 
 	LEA	$DFF0A0,A5
+	movem.l	a0/d1,-(sp)
+	tst.l	mt_chan1input
+	beq.s	mt_PlayChannel1
+	lea	mt_chan1input,a0
+	moveq	#0,d1
+mt_PlayChannel1
 	LEA	mt_chan1temp(PC),A6
-	BSR.S	mt_PlayVoice
+	BSR	mt_PlayVoice
 	MOVEQ	#0,D0
 	MOVE.B	n_volume(A6),D0
 	MOVE.W	D0,8(A5)
+	clr.l	mt_chan1input
+
 	LEA	$DFF0B0,A5
+	move.l	(sp),a0
+	move.l	4(sp),d1
+	addq	#4,d1
+	tst.l	mt_chan2input
+	beq.s	mt_PlayChannel2
+	lea	mt_chan2input,a0
+	moveq	#0,d1
+mt_PlayChannel2
 	LEA	mt_chan2temp(PC),A6
-	BSR.S	mt_PlayVoice
+	BSR	mt_PlayVoice
 	MOVEQ	#0,D0
 	MOVE.B	n_volume(A6),D0
 	MOVE.W	D0,8(A5)
+	clr.l	mt_chan2input
+
 	LEA	$DFF0C0,A5
+	move.l	(sp),a0
+	move.l	4(sp),d1
+	addq	#8,d1
+	tst.l	mt_chan3input
+	beq.s	mt_PlayChannel3
+	lea	mt_chan3input,a0
+	moveq	#0,d1
+mt_PlayChannel3
 	LEA	mt_chan3temp(PC),A6
-	BSR.S	mt_PlayVoice
+	BSR	mt_PlayVoice
 	MOVEQ	#0,D0
 	MOVE.B	n_volume(A6),D0
 	MOVE.W	D0,8(A5)
+	clr.l	mt_chan3input
+
 	LEA	$DFF0D0,A5
+	movem.l	(sp)+,a0/d1
+	add.l	#12,d1
 	tst.l	mt_chan4input
 	beq.s	mt_PlayChannel4
 	lea	mt_chan4input,a0
 	moveq	#0,d1
 mt_PlayChannel4
 	LEA	mt_chan4temp(PC),A6
-	BSR.S	mt_PlayVoice
+	BSR	mt_PlayVoice
 	MOVEQ	#0,D0
 	MOVE.B	n_volume(A6),D0
 	MOVE.W	D0,8(A5)
@@ -399,7 +433,7 @@ mt_PlayVoice
 	BSR	mt_PerNop
 mt_plvskip
 	MOVE.L	(A0,D1.L),(A6)	; Read note from pattern
-	ADDQ.L	#4,D1
+;	ADDQ.L	#4,D1
 	MOVEQ	#0,D2
 	MOVE.B	n_cmd(A6),D2	; Get lower 4 bits of instrument
 	AND.B	#$F0,D2
@@ -1412,6 +1446,12 @@ mt_Enable	dc.b 0
 _mt_PatternPos:
 mt_PatternPos	dc.w 0
 mt_DMACONtemp	dc.w 0
+_mt_chan1input:
+mt_chan1input:	dc.l 0
+_mt_chan2input:
+mt_chan2input:	dc.l 0
+_mt_chan3input:
+mt_chan3input:	dc.l 0
 _mt_chan4input:
 mt_chan4input:	dc.l 0
 

@@ -40,6 +40,11 @@ struct ChanTemp {
     uint16_t padding;
 };
 
+struct ChanInput {
+    uint16_t note;
+    uint16_t cmd;
+};
+
 __asm extern void SetCIAInt(void);
 __asm extern void ResetCIAInt(void);
 __asm extern void mt_init(register __a0 uint8_t* songData);
@@ -50,10 +55,14 @@ __far extern ChanTemp mt_chan2temp;
 __far extern ChanTemp mt_chan3temp;
 __far extern ChanTemp mt_chan4temp;
 __far extern int8_t* mt_SampleStarts[31];
+__far extern uint8_t* mt_data;
 __far extern uint8_t mt_speed;
 __far extern uint8_t mt_SongPos;
 __far extern bool mt_Enable;
 __far extern uint16_t mt_PatternPos;
-__far extern ChanTemp mt_chan4input;
+__far extern ChanInput mt_chan1input;
+__far extern ChanInput mt_chan2input;
+__far extern ChanInput mt_chan3input;
+__far extern ChanInput mt_chan4input;
 
 #endif
