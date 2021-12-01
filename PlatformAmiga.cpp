@@ -47,7 +47,7 @@
 #ifdef PLATFORM_PRELOAD_SUPPORT
 #define PRELOADED_ASSETS_BUFFER_SIZE (32032 + 32032 + 32032 + 65108 + 33792 + 17184)
 #endif
-static const char version[] = "$VER:Attack of the PETSCII Robots 1.0 (2021-12-01) (C)2021 David Murray, Vesa Halttunen";
+static const char version[] = "$VER: Attack of the PETSCII Robots 1.0 (2021-12-01)";
 
 struct SpriteData {
     uint16_t posctl[2];
@@ -217,9 +217,9 @@ static const char* moduleFilenames[] = {
     "mod.robot attack.gz",
     "mod.rushin in.gz"
 };
-static char* unableToAllocateMemoryError = "Unable to allocate memory\n";
+static char* notEnoughMemoryError = "Not enough memory to run\n";
 #ifdef PLATFORM_MODULE_BASED_AUDIO
-static char* unableToAllocateMemoryForMusic = "Unable to allocate memory for music. Music disabled.\n";
+static char* notEnoughMemoryForMusic = "Not enough memory for music\n";
 #endif
 static char* unableToInitializeDisplayError = "Unable to initialize display\n";
 static char* unableToInitializeAudioError = "Unable to initialize audio\n";
@@ -396,7 +396,7 @@ PlatformAmiga::PlatformAmiga() :
 
     chipMemory = (uint8_t*)AllocMem(CHIP_MEMORY_SIZE, MEMF_CHIP | MEMF_CLEAR);
     if (!chipMemory) {
-        Write(Output(), unableToAllocateMemoryError, 26);
+        Write(Output(), notEnoughMemoryError, 25);
         return;
     }
     uint8_t* address = chipMemory;
@@ -420,19 +420,19 @@ PlatformAmiga::PlatformAmiga() :
         loadBuffer = new uint8_t[59884];
 
         if (!loadBuffer) {
-            Write(Output(), unableToAllocateMemoryForMusic, 53);
+            Write(Output(), notEnoughMemoryForMusic, 28);
             FreeMem(moduleData, LARGEST_MODULE_SIZE);
             moduleData = 0;
         }
     } else {
-        Write(Output(), unableToAllocateMemoryForMusic, 53);
+        Write(Output(), notEnoughMemoryForMusic, 28);
     }
 #endif
 
     if (!loadBuffer) {
         loadBuffer = new uint8_t[14351];
         if (!loadBuffer) {
-            Write(Output(), unableToAllocateMemoryError, 26);
+            Write(Output(), notEnoughMemoryError, 25);
             return;
         }
     }
