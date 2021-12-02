@@ -303,6 +303,7 @@ uint8_t liveMapToPlane3[1];
 PlatformAmiga::PlatformAmiga() :
     framesPerSecond_(50),
     clock(3546895),
+    originalDirectoryLock(-1),
     screenBitmap(new BitMap),
     screen(0),
     window(0),
@@ -393,6 +394,13 @@ PlatformAmiga::PlatformAmiga() :
         liveMapToPlane4[i] = plane4;
     }
 #endif
+
+    BPTR dataLock = Lock("Data", ACCESS_READ);
+    if (!dataLock) {
+        Write(Output(), unableToLoadDataError, 20);
+        return;
+    }
+    originalDirectoryLock = CurrentDir(dataLock);
 
     chipMemory = (uint8_t*)AllocMem(CHIP_MEMORY_SIZE, MEMF_CHIP | MEMF_CLEAR);
     if (!chipMemory) {
@@ -650,6 +658,10 @@ PlatformAmiga::~PlatformAmiga()
 
     if (chipMemory) {
         FreeMem(chipMemory, CHIP_MEMORY_SIZE);
+    }
+
+    if (originalDirectoryLock != -1) {
+        UnLock(CurrentDir(originalDirectoryLock));
     }
 
     delete[] loadBuffer;

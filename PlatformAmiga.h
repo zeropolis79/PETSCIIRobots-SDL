@@ -107,6 +107,7 @@ private:
     __asm static void disableLowpassFilter();
     int framesPerSecond_;
     uint32_t clock;
+    uint32_t originalDirectoryLock;
     BitMap* screenBitmap;
     Screen* screen;
     Window* window;
