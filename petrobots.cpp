@@ -320,6 +320,9 @@ void RUNIRQ()
 #ifndef PLATFORM_MODULE_BASED_AUDIO
     MUSIC_ROUTINE();
 #endif
+    if (CLOCK_ACTIVE != 1) {
+        return;
+    }
     UPDATE_GAME_CLOCK();
     ANIMATE_WATER();
     BGTIMER1 = 1;
