@@ -4392,17 +4392,16 @@ void HOVER_ATTACK()
 
 void CREATE_PLAYER_EXPLOSION()
 {
-    int X;
-    for (X = 28; X != 32; X++) { // max unit for weaponsfire
+    for (int X = 28; X != 32; X++) { // max unit for weaponsfire
         if (UNIT_TYPE[X] == 0) {
+            UNIT_TYPE[X] = 11; // Small explosion AI type
+            UNIT_TILE[X] = 248; // first tile for explosion
+            UNIT_TIMER_A[X] = 1;
+            UNIT_LOC_X[X] = UNIT_LOC_X[0];
+            UNIT_LOC_Y[X] = UNIT_LOC_Y[0];
             break;
         }
     }
-    UNIT_TYPE[X] = 11; // Small explosion AI type
-    UNIT_TILE[X] = 248; // first tile for explosion
-    UNIT_TIMER_A[X] = 1;
-    UNIT_LOC_X[X] = UNIT_LOC_X[0];
-    UNIT_LOC_Y[X] = UNIT_LOC_Y[0];
 }
 
 void EVILBOT()
