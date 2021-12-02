@@ -284,16 +284,16 @@ uint8_t tileLiveMap[] = {
      1, 1, 1, 9, 1, 1, 1,10,
      1, 1, 1,10, 3, 3,10,10,
      3, 3,10,10, 3, 3,13,13,
-    13,13, 1,13,13,13,13,13,
+    13,13, 5,13,13,13,13,13,
     13,13,13,13,13,13,13,13
 };
 uint8_t liveMapToPlane1[256];
 uint8_t liveMapToPlane2[256];
 uint8_t liveMapToPlane3[256];
 uint8_t liveMapToPlane4[256];
-uint8_t unitTypes[28];
-uint8_t unitX[28];
-uint8_t unitY[28];
+uint8_t unitTypes[48];
+uint8_t unitX[48];
+uint8_t unitY[48];
 #else
 uint8_t tileLiveMap[1];
 uint8_t liveMapToPlane1[1];
@@ -1509,8 +1509,8 @@ void PlatformAmiga::renderLiveMapTiles(uint8_t* map)
 
 void PlatformAmiga::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots)
 {
-    for (int i = 0; i < 28; i++) {
-        if (unitX[i] != ::unitX[i] || unitY[i] != ::unitY[i] || (i > 0 && (!showRobots || unitTypes[i] != ::unitTypes[i])) || (i == 0 && playerColor != ::unitTypes[i])) {
+    for (int i = 0; i < 48; i++) {
+        if ((i < 28 || unitTypes[i] == 22) && (unitX[i] != ::unitX[i] || unitY[i] != ::unitY[i] || (i > 0 && (!showRobots || unitTypes[i] == 22 || unitTypes[i] != ::unitTypes[i])) || (i == 0 && playerColor != ::unitTypes[i]))) {
             // Remove old dot if any
             if (::unitTypes[i] != 255) {
                 int x = ::unitX[i];
@@ -1540,6 +1540,7 @@ void PlatformAmiga::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t
             }
 
             if (i == 0 ||
+                (unitTypes[i] == 22 && (unitX[i] != unitX[0] || unitY[i] != unitY[0])) ||
                 (showRobots &&
                  (unitTypes[i] == 1 ||
                  (unitTypes[i] >= 2 && unitTypes[i] <= 5) ||
