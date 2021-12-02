@@ -3123,8 +3123,12 @@ void DEMATERIALIZE()
     UNIT_TILE[0] += (UNIT_TIMER_B[UNIT] & 0x08) >> 3;
 #endif
     UNIT_TIMER_B[UNIT]++;
-    DEMATERIALIZE_FRAME = UNIT_TIMER_B[UNIT] >> 1;
+    DEMATERIALIZE_FRAME = UNIT_TIMER_B[UNIT] >> 2;
+#ifdef PLATFORM_SPRITE_SUPPORT
+    if (UNIT_TIMER_B[UNIT] != 0x20) {
+#else
     if (UNIT_TIMER_B[UNIT] != 0x10) { // %00010000
+#endif
         UNIT_TIMER_A[UNIT] = 1;
         REDRAW_WINDOW = 1;
     } else {
