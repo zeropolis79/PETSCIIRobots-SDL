@@ -26,16 +26,6 @@ petrobots
 
 Amiga TODO
 ----------
-Graphics
-- Fix mismatched tiles
-- Workbench icon (Vesa can provide)
-- Death animation frames (not needed if current implementation is fine)
-- Fix evilbot graphics (not needed if current implementation is fine)
-
-Audio
-- Pistol sound (currently FreeDoom, licensing unclear)
-- Explosion sound (currently FreeDoom, licensing unclear)
-
-Other
+- Workbench icon
 - Hard disk installer script
 - WHDLoad install
