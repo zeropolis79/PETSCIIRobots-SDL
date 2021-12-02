@@ -1,10 +1,10 @@
-CFLAGS=WITH=SCoptions.pet
+CFLAGS=WITH SCoptions.pet
 OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o Tileset.o PETFont.o SquareWave.o
 
-all: petrobots 
+all: PETRobots 
 
-petrobots: $(OBJECTS)
-   sc link to petrobots noicons with <<
+PETRobots: $(OBJECTS)
+   sc LINK TO PETRobots NOICONS WITH <<
 $(OBJECtS)
 <
 
@@ -21,4 +21,4 @@ SquareWave.o: SquareWave.raw
     Bin2Hunk SquareWave.raw SquareWave.o NAME _squareWave CHIP
 
 clean:
-    delete $(OBJECTS) petrobots petrobots.lnk
+    delete $(OBJECTS) PETRobots PETRobots.lnk
