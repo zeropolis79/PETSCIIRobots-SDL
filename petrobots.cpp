@@ -4306,13 +4306,13 @@ void PISTOL_AI_COMMON()
                     return;
                 }
             }
-            // impact detected. convert to explosion
-            UNIT_TYPE[UNIT] = 6; // bomb AI
-            UNIT_TIMER_A[UNIT] = 1; // How long until exposion?
-            UNIT_A[UNIT] = 0;
-            PLASMA_ACT = 0;
-            CHECK_FOR_WINDOW_REDRAW();
         }
+        // impact detected. convert to explosion
+        UNIT_TYPE[UNIT] = 6; // bomb AI
+        UNIT_TIMER_A[UNIT] = 1; // How long until exposion?
+        UNIT_A[UNIT] = 0;
+        PLASMA_ACT = 0;
+        CHECK_FOR_WINDOW_REDRAW();
     }
 }
 
