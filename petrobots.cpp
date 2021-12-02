@@ -3468,7 +3468,6 @@ void GENERATE_RANDOM_NUMBER()
 
 void MAGNET()
 {
-MAGNET: 
     // First let's take care of the timers.  This unit runs
     // every cycle so that it can detect contact with another
     // unit.  But it still needs to count down to terminate
