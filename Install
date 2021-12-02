@@ -1,0 +1,63 @@
+(set #prefix "PETSCIIRobots")
+
+(set #dest
+  (askdir
+    (prompt
+      (cat
+	"Where should \"" @app-name "\" be installed?\n"
+	"A drawer \"" #prefix "\" will be automatically created."
+      )
+    )
+    (help @askdir-help)
+    (default @default-dest)
+  )
+)
+
+(set @default-dest #dest)
+(set #dest (tackon #dest #prefix))
+(set #dest-org #dest)
+
+(if
+  (exists #dest)
+  (
+    (set #choice
+      (askbool
+        (prompt
+          (cat
+            "\nDirectory \"" #dest "\" already exists.\n"
+            "Should it be deleted?"
+          )
+        )
+        (default 1)
+        (choices "Delete" "Skip")
+        (help @askbool-help)
+      )
+    )
+    (if
+      (= #choice 1)
+      (run ("Delete \"%s\" \"%s.info\" All" #dest #dest))
+    )
+  )
+)
+(makedir #dest
+  (help @makedir-help)
+  (infos)
+)
+
+(copyfiles
+  (help @copyfiles-help)
+  (source "AmigaRobots")
+  (dest #dest)
+  (infos))
+
+(copyfiles
+  (help @copyfiles-help)
+  (source "PETRobots")
+  (dest #dest)
+  (infos))
+
+(copyfiles
+  (help @copyfiles-help)
+  (source "Data")
+  (dest (tackon #dest "Data"))
+  (all))

@@ -1,7 +1,7 @@
 Attack of the PETSCII Robots C++
 ================================
 Ported by Vesa Halttunen <vesuri@jormas.com>
-Work in progress
+This source code may be used as basis for ports to different platforms as long as Vesa Halttunen gets co-credited.
 
 About
 -----
@@ -23,8 +23,3 @@ amigarobots
 
 smake -f smakefile.pet
 petrobots
-
-Amiga TODO
-----------
-- Hard disk installer script
-- WHDLoad install
