@@ -839,6 +839,7 @@ void USE_EMP()
             if (TILE == 204) {  // WATER
                 UNIT_TYPE[X] = 5;
                 UNIT_TIMER_A[X] = 5;
+                UNIT_TIMER_B[X] = 3;
                 UNIT_A[X] = 60; // how long to show sparks.
                 UNIT_TILE[X] = 140; // Electrocuting tile
             }
@@ -4169,9 +4170,14 @@ uint8_t TCPIECE4 = 0;
 void WATER_DROID()
 {
     // first rotate the tiles
-    UNIT_TILE[UNIT]++;
-    if (UNIT_TILE[UNIT] == 143) {
-        UNIT_TILE[UNIT] = 140;
+    if (UNIT_TIMER_B[UNIT] != 0) {
+        UNIT_TIMER_B[UNIT]--;
+    } else {
+        UNIT_TIMER_B[UNIT] = 3;
+        UNIT_TILE[UNIT]++;
+        if (UNIT_TILE[UNIT] == 143) {
+            UNIT_TILE[UNIT] = 140;
+        }
     }
     UNIT_A[UNIT]--;
     if (UNIT_A[UNIT] != 0) {
