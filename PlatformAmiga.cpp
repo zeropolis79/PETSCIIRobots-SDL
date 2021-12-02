@@ -592,7 +592,7 @@ PlatformAmiga::PlatformAmiga() :
 
     ioAudio->ioa_Request.io_Command = CMD_WRITE;
     ioAudio->ioa_Request.io_Flags = ADIOF_PERVOL | IOF_QUICK;
-    ioAudio->ioa_Volume = 64;
+    ioAudio->ioa_Volume = 0;
     ioAudio->ioa_Cycles = 0;
     ioAudio->ioa_Data = (uint8_t*)squareWave;
     ioAudio->ioa_Length = 2;
