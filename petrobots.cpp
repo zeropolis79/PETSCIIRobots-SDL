@@ -269,7 +269,7 @@ char MAP_NAMES[] = "01-research lab "
                    "10-death tower  "
                    "11-river death  "
                    "12-bunker       "
-                   "13-castle       ";
+                   "13-castle robot ";
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 uint8_t MUSIC_ON = 1; // 0=off 1=on
 #else
