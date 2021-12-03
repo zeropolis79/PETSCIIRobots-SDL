@@ -392,6 +392,9 @@ void MAIN_GAME_LOOP()
     platform->renderFrame();
     bool done = false;
     while (!done && !platform->quit) {
+        if (BGTIMER1 != 1) {
+            continue;
+        }
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
         if (UNIT_TYPE[0] != 1) { // Is player unit alive
@@ -701,6 +704,7 @@ bool PAUSE_GAME()
             GOM4();
             return true;
         }
+        platform->renderFrame(true);
     }
     return false;
 }
@@ -1258,6 +1262,9 @@ void USER_SELECT_OBJECT()
 #endif
     // First ask user which object to move
     while (!platform->quit) {
+        if (BGTIMER1 != 1) {
+            continue;
+        }
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
         if (UNIT_TYPE[0] == 0) { // Did player die wile moving something?
@@ -1344,6 +1351,9 @@ void MOVE_OBJECT()
 #endif
     // NOW ASK THE USER WHICH DIRECTION TO MOVE IT TO
     while (!platform->quit) {
+        if (BGTIMER1 != 1) {
+            continue;
+        }
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
         if (UNIT_TYPE[0] == 0) { // Did player die wile moving something?
@@ -1358,57 +1368,60 @@ void MOVE_OBJECT()
         uint8_t A = platform->readKeyboard();
         // SNES controls
         uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
-        if (A == 0xff && B == 0) {
-            continue;
-        } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
-            CURSOR_X++;
-        } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT] || (B & Platform::JoystickLeft)) { // CURSOR LEFT
-            CURSOR_X--;
-        } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
-            CURSOR_Y++;
-        } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP] || (B & Platform::JoystickUp)) { // CURSOR UP
-            CURSOR_Y--;
-        }
-        // NOW TEST TO SEE IF THAT SPOT IS OPEN
-#ifdef PLATFORM_CURSOR_SUPPORT
-        platform->hideCursor();
-#else
-        CURSOR_ON = 0;
-        DRAW_MAP_WINDOW(); // ERASE THE CURSOR
-#endif
-        MAP_X = CURSOR_X + MAP_WINDOW_X;
-        MOVTEMP_UX = MAP_X;
-        MAP_Y = CURSOR_Y + MAP_WINDOW_Y;
-        MOVTEMP_UY = MAP_Y;
-        GET_TILE_FROM_MAP();
-        if (TILE_ATTRIB[TILE] & 0x20) { // %00100000 is that spot available for something to move onto it?
-            // Now scan for any units at that location:
-            CHECK_FOR_UNIT();
-            if (UNIT_FIND == 255) { // 255 means no unit found.
-                PLAY_SOUND(6); // move sound, SOUND PLAY
-                MOVTEMP_D = MAP_SOURCE[0]; // Grab current object
-                MAP_SOURCE[0] = MOVTEMP_O; // replace with obect we are moving
-                MAP_X = MOVTEMP_X; // RETRIEVE original location of object
-                MAP_Y = MOVTEMP_Y;
-                GET_TILE_FROM_MAP();
-                int A = MOVTEMP_D;
-                if (A == 148) { // trash compactor tile
-                    A = 9; // Floor tile
-                }
-                MAP_SOURCE[0] = A; // Replace former location
-                REDRAW_WINDOW = 1; // See the result
-                if (MOVTEMP_U == 255) {
-                    return;
-                }
-                UNIT_LOC_X[MOVTEMP_U] = MOVTEMP_UX;
-                UNIT_LOC_Y[MOVTEMP_U] = MOVTEMP_UY;
-                return;
+        if (A != 0xff || B == 0) {
+            if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
+                CURSOR_X++;
+                break;
+            } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT] || (B & Platform::JoystickLeft)) { // CURSOR LEFT
+                CURSOR_X--;
+                break;
+            } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
+                CURSOR_Y++;
+                break;
+            } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP] || (B & Platform::JoystickUp)) { // CURSOR UP
+                CURSOR_Y--;
+                break;
             }
         }
-        PRINT_INFO(MSG_BLOCKED);
-        PLAY_SOUND(11); // ERROR SOUND, SOUND PLAY
-        return;
     }
+    // NOW TEST TO SEE IF THAT SPOT IS OPEN
+#ifdef PLATFORM_CURSOR_SUPPORT
+    platform->hideCursor();
+#else
+    CURSOR_ON = 0;
+    DRAW_MAP_WINDOW(); // ERASE THE CURSOR
+#endif
+    MAP_X = CURSOR_X + MAP_WINDOW_X;
+    MOVTEMP_UX = MAP_X;
+    MAP_Y = CURSOR_Y + MAP_WINDOW_Y;
+    MOVTEMP_UY = MAP_Y;
+    GET_TILE_FROM_MAP();
+    if (TILE_ATTRIB[TILE] & 0x20) { // %00100000 is that spot available for something to move onto it?
+        // Now scan for any units at that location:
+        CHECK_FOR_UNIT();
+        if (UNIT_FIND == 255) { // 255 means no unit found.
+            PLAY_SOUND(6); // move sound, SOUND PLAY
+            MOVTEMP_D = MAP_SOURCE[0]; // Grab current object
+            MAP_SOURCE[0] = MOVTEMP_O; // replace with obect we are moving
+            MAP_X = MOVTEMP_X; // RETRIEVE original location of object
+            MAP_Y = MOVTEMP_Y;
+            GET_TILE_FROM_MAP();
+            int A = MOVTEMP_D;
+            if (A == 148) { // trash compactor tile
+                A = 9; // Floor tile
+            }
+            MAP_SOURCE[0] = A; // Replace former location
+            REDRAW_WINDOW = 1; // See the result
+            if (MOVTEMP_U == 255) {
+                return;
+            }
+            UNIT_LOC_X[MOVTEMP_U] = MOVTEMP_UX;
+            UNIT_LOC_Y[MOVTEMP_U] = MOVTEMP_UY;
+            return;
+        }
+    }
+    PRINT_INFO(MSG_BLOCKED);
+    PLAY_SOUND(11); // ERROR SOUND, SOUND PLAY
 }
 
 uint8_t MOVTEMP_O = 0; // origin tile
@@ -2411,7 +2424,9 @@ void GAME_OVER()
         platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     }
 #endif
-    while (platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit);
+    while (platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit) {
+        platform->renderFrame(true);
+    }
     GOM4();
 }
 
@@ -2429,7 +2444,9 @@ void GOM4()
     DISPLAY_WIN_LOSE();
     platform->renderFrame();
     platform->fadeScreen(15, false);
-    while (platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit);
+    while (platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit) {
+        platform->renderFrame(true);
+    }
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->stopModule();
@@ -2585,8 +2602,8 @@ void INTRO_SCREEN()
                 START_INTRO_MUSIC();
             }
 #endif
-            platform->renderFrame();
         }
+        platform->renderFrame(true);
     }
 }
 
@@ -2956,6 +2973,7 @@ void ELEVATOR_SELECT()
                 return;
             }
         }
+        platform->renderFrame(true);
     }
 }
 
