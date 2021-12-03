@@ -393,7 +393,7 @@ void MAIN_GAME_LOOP()
     bool done = false;
     while (!done && !platform->quit) {
         if (BGTIMER1 != 1) {
-            continue;
+            platform->renderFrame(true);
         }
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
@@ -1263,7 +1263,7 @@ void USER_SELECT_OBJECT()
     // First ask user which object to move
     while (!platform->quit) {
         if (BGTIMER1 != 1) {
-            continue;
+            platform->renderFrame(true);
         }
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
@@ -1352,7 +1352,7 @@ void MOVE_OBJECT()
     // NOW ASK THE USER WHICH DIRECTION TO MOVE IT TO
     while (!platform->quit) {
         if (BGTIMER1 != 1) {
-            continue;
+            platform->renderFrame(true);
         }
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
