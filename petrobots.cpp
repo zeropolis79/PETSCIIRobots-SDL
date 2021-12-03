@@ -1362,7 +1362,7 @@ void MOVE_OBJECT()
         uint8_t A = platform->readKeyboard();
         // SNES controls
         uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
-        if (A != 0xff || B == 0) {
+        if (A != 0xff || B != 0) {
             if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
                 CURSOR_X++;
                 break;
