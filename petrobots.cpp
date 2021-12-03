@@ -523,60 +523,54 @@ void MAIN_GAME_LOOP()
                     KEYTIMER = 15;
                 }
             } else {
-                if (B & Platform::JoystickGreen) {
-                    FIRE_LEFT();
-                    KEYTIMER = 20;
-                }
-                if (B & Platform::JoystickBlue) {
+                if (B & Platform::JoystickPlay) {
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
-                    if (B & Platform::JoystickPlay) {
+                    if (B & Platform::JoystickBlue) {
                         TOGGLE_LIVE_MAP_ROBOTS();
                         CLEAR_KEY_BUFFER();
-                    } else {
-#endif
-                        FIRE_RIGHT();
-                        KEYTIMER = 20;
-#ifdef PLATFORM_LIVE_MAP_SUPPORT
                     }
-#endif
-                }
-                if (B & Platform::JoystickYellow) {
-#ifdef PLATFORM_LIVE_MAP_SUPPORT
-                    if (B & Platform::JoystickPlay) {
+                    if (B & Platform::JoystickYellow) {
                         TOGGLE_LIVE_MAP();
                         CLEAR_KEY_BUFFER();
-                    } else {
-#endif
-                        FIRE_UP();
-                        KEYTIMER = 20;
-#ifdef PLATFORM_LIVE_MAP_SUPPORT
                     }
 #endif
-                }
-                if (B & Platform::JoystickRed) {
-                    if (B & Platform::JoystickPlay) {
+                    if (B & Platform::JoystickRed) {
                         USE_ITEM();
                         KEYTIMER = 15;
-                    } else {
+                    }
+                    if (B & Platform::JoystickReverse) {
+                        CYCLE_ITEM();
+                        KEYTIMER = 15;
+                    }
+                    if (B & Platform::JoystickForward) {
+                        CYCLE_WEAPON();
+                        KEYTIMER = 15;
+                    }
+                } else {
+                    if (B & Platform::JoystickGreen) {
+                        FIRE_LEFT();
+                        KEYTIMER = 20;
+                    }
+                    if (B & Platform::JoystickBlue) {
+                        FIRE_RIGHT();
+                        KEYTIMER = 20;
+                    }
+                    if (B & Platform::JoystickYellow) {
+                        FIRE_UP();
+                        KEYTIMER = 20;
+                    }
+                    if (B & Platform::JoystickRed) {
                         FIRE_DOWN();
                         KEYTIMER = 20;
                     }
-                }
-                if (B & Platform::JoystickReverse) {
-                    if (B & Platform::JoystickPlay) {
-                        CYCLE_ITEM();
-                    } else {
+                    if (B & Platform::JoystickReverse) {
                         SEARCH_OBJECT();
+                        KEYTIMER = 15;
                     }
-                    KEYTIMER = 15;
-                }
-                if (B & Platform::JoystickForward) {
-                    if (B & Platform::JoystickPlay) {
-                        CYCLE_WEAPON();
-                    } else {
+                    if (B & Platform::JoystickForward) {
                         MOVE_OBJECT();
+                        KEYTIMER = 15;
                     }
-                    KEYTIMER = 15;
                 }
             }
         }
