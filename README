@@ -23,3 +23,42 @@ amigarobots
 
 smake -f smakefile.pet
 petrobots
+
+Amiga keyboard controls
+-----------------------
+IJKL move
+ASDF fire
+Z search
+M move
+SPACE use item
+F1 cycle weapon
+F2 cycle item
+F6 toggle music
+F10 quit
+ESC pause
+TAB live map
+SHIFT+TAB live map robots
+
+Amiga joystick controls
+-----------------------
+UP/DOWN/LEFT/RIGHT move
+BUTTON1+UP/DOWN/LEFT/RIGHT fire
+BUTTON2 use item
+BUTTON2+LEFT cycle item
+BUTTON2+RIGHT cycle weapon
+BUTTON2+UP search
+BUTTON2+DOWN move
+
+Amiga CD32 controls
+-------------------
+UP/DOWN/LEFT/RIGHT move
+YELLOW/RED/GREEN/BLUE fire
+REVERSE search
+FORWARD move
+PLAY use item
+PLAY+REVERSE cycle item
+PLAY+FORWARD cycle weapon
+PLAY+LEFT live map
+PLAY+DOWN live map robots
+PLAY+BLUE pause
+PLAY+RED toggle music
