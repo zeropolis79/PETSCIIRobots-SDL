@@ -1662,7 +1662,7 @@ void PlatformAmiga::shakeScreen()
     uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
     for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
         if (*copperList++ == offsetof(Custom, bplcon1)) {
-            *copperList++ = bplcon1Value;
+            *copperList = bplcon1Value;
             break;
         } else {
             copperList++;
@@ -1677,7 +1677,7 @@ void PlatformAmiga::stopShakeScreen()
     uint16_t* copperList = GfxBase->ActiView->LOFCprList->start;
     for (int i = 0; i < GfxBase->ActiView->LOFCprList->MaxCount; i++) {
         if (*copperList++ == offsetof(Custom, bplcon1)) {
-            *copperList++ = bplcon1DefaultValue;
+            *copperList = bplcon1DefaultValue;
             break;
         } else {
             copperList++;
