@@ -82,7 +82,7 @@ public:
     virtual uint8_t readKeyboard() = 0;
     virtual void keyRepeat();
     virtual void clearKeyBuffer() = 0;
-    virtual bool isKeyOrJoystickPressed();
+    virtual bool isKeyOrJoystickPressed(bool gamepad);
     virtual uint16_t readJoystick(bool gamepad);
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset = 0) = 0;
     virtual uint8_t* loadTileset(const char* filename) = 0;

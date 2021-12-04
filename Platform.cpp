@@ -17,7 +17,7 @@ void Platform::keyRepeat()
 {
 }
 
-bool Platform::isKeyOrJoystickPressed()
+bool Platform::isKeyOrJoystickPressed(bool)
 {
     return false;
 }

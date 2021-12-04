@@ -27,7 +27,7 @@ public:
     virtual uint8_t readKeyboard();
     virtual void keyRepeat();
     virtual void clearKeyBuffer();
-    virtual bool isKeyOrJoystickPressed();
+    virtual bool isKeyOrJoystickPressed(bool gamepad);
     virtual uint16_t readJoystick(bool gamepad);
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
     virtual uint8_t* loadTileset(const char* filename);
@@ -149,7 +149,7 @@ private:
     uint8_t shift;
     uint16_t joystickStateToReturn;
     uint16_t joystickState;
-    bool playButtonPending;
+    uint16_t pendingState;
     bool filterState;
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     uint8_t effectChannel;

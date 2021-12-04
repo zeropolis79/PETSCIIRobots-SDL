@@ -401,7 +401,7 @@ void MAIN_GAME_LOOP()
             GAME_OVER();
             return;
         }
-        KEY_REPEAT(platform->isKeyOrJoystickPressed());
+        KEY_REPEAT(platform->isKeyOrJoystickPressed(CONTROL == 2 ? true : false));
         uint8_t A = platform->readKeyboard();
         uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
         // Keyboard controls here.
@@ -475,65 +475,49 @@ void MAIN_GAME_LOOP()
         // SNES CONTROLLER starts here
         if (B != 0) {
             // first we start with the 4 directional buttons.
-            if (B & Platform::JoystickLeft) {
+            if ((CONTROL == 2 && (B & Platform::JoystickPlay) == 0) ||
+                (CONTROL != 2 && (B & Platform::JoystickBlue) == 0)) {
                 if (CONTROL != 2 && B & Platform::JoystickRed) {
-                    FIRE_LEFT();
-                    KEYTIMER = 20;
+                    if (B & Platform::JoystickLeft) {
+                        FIRE_LEFT();
+                        KEYTIMER = 20;
+                    } else if (B & Platform::JoystickRight) {
+                        FIRE_RIGHT();
+                        KEYTIMER = 20;
+                    } else if (B & Platform::JoystickUp) {
+                        FIRE_UP();
+                        KEYTIMER = 20;
+                    } else if (B & Platform::JoystickDown) {
+                        FIRE_DOWN();
+                        KEYTIMER = 20;
+                    }
                 } else {
-                    UNIT = 0;
-                    MOVE_TYPE = 1; // %00000001
-                    REQUEST_WALK_LEFT();
-                    AFTER_MOVE_SNES();
-                }
-            } else if (B & Platform::JoystickRight) {
-                if (CONTROL != 2 && B & Platform::JoystickRed) {
-                    FIRE_RIGHT();
-                    KEYTIMER = 20;
-                } else {
-                    UNIT = 0;
-                    MOVE_TYPE = 1; // %00000001
-                    REQUEST_WALK_RIGHT();
-                    AFTER_MOVE_SNES();
-                }
-            } else if (B & Platform::JoystickUp) {
-                if (CONTROL != 2 && B & Platform::JoystickRed) {
-                    FIRE_UP();
-                    KEYTIMER = 20;
-                } else {
-                    UNIT = 0;
-                    MOVE_TYPE = 1; // %00000001
-                    REQUEST_WALK_UP();
-                    AFTER_MOVE_SNES();
-                }
-            } else if (B & Platform::JoystickDown) {
-                if (CONTROL != 2 && B & Platform::JoystickRed) {
-                    FIRE_DOWN();
-                    KEYTIMER = 20;
-                } else {
-                    UNIT = 0;
-                    MOVE_TYPE = 1; // %00000001
-                    REQUEST_WALK_DOWN();
-                    AFTER_MOVE_SNES();
+                    if (B & Platform::JoystickLeft) {
+                        UNIT = 0;
+                        MOVE_TYPE = 1; // %00000001
+                        REQUEST_WALK_LEFT();
+                        AFTER_MOVE_SNES();
+                    } else if (B & Platform::JoystickRight) {
+                        UNIT = 0;
+                        MOVE_TYPE = 1; // %00000001
+                        REQUEST_WALK_RIGHT();
+                        AFTER_MOVE_SNES();
+                    } else if (B & Platform::JoystickUp) {
+                        UNIT = 0;
+                        MOVE_TYPE = 1; // %00000001
+                        REQUEST_WALK_UP();
+                        AFTER_MOVE_SNES();
+                    } else if (B & Platform::JoystickDown) {
+                        UNIT = 0;
+                        MOVE_TYPE = 1; // %00000001
+                        REQUEST_WALK_DOWN();
+                        AFTER_MOVE_SNES();
+                    }
                 }
             }
             // Now check for non-repeating buttons
-            if (CONTROL != 2) {
-                if (B & Platform::JoystickBlue) {
-                    USE_ITEM();
-                    KEYTIMER = 15;
-                }
-            } else {
+            if (CONTROL == 2) {
                 if (B & Platform::JoystickPlay) {
-#ifdef PLATFORM_LIVE_MAP_SUPPORT
-                    if (B & Platform::JoystickBlue) {
-                        TOGGLE_LIVE_MAP_ROBOTS();
-                        CLEAR_KEY_BUFFER();
-                    }
-                    if (B & Platform::JoystickYellow) {
-                        TOGGLE_LIVE_MAP();
-                        CLEAR_KEY_BUFFER();
-                    }
-#endif
                     if (B & Platform::JoystickReverse) {
                         CYCLE_ITEM();
                         KEYTIMER = 15;
@@ -541,6 +525,23 @@ void MAIN_GAME_LOOP()
                     if (B & Platform::JoystickForward) {
                         CYCLE_WEAPON();
                         KEYTIMER = 15;
+                    }
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+                    if (B & Platform::JoystickLeft) {
+                        TOGGLE_LIVE_MAP();
+                        CLEAR_KEY_BUFFER();
+                    }
+                    if (B & Platform::JoystickDown) {
+                        TOGGLE_LIVE_MAP_ROBOTS();
+                        CLEAR_KEY_BUFFER();
+                    }
+#endif
+                    if (B & Platform::JoystickBlue) {
+                        done = PAUSE_GAME();
+                    }
+                    if (B & Platform::JoystickRed) {
+                        TOGGLE_MUSIC();
+                        CLEAR_KEY_BUFFER();
                     }
                     if (B == Platform::JoystickPlay) {
                         USE_ITEM();
@@ -569,6 +570,29 @@ void MAIN_GAME_LOOP()
                     }
                     if (B & Platform::JoystickForward) {
                         MOVE_OBJECT();
+                        KEYTIMER = 15;
+                    }
+                }
+            } else {
+                if (B & Platform::JoystickBlue) {
+                    if (B & Platform::JoystickLeft) {
+                        CYCLE_ITEM();
+                        KEYTIMER = 15;
+                    }
+                    if (B & Platform::JoystickRight) {
+                        CYCLE_WEAPON();
+                        KEYTIMER = 15;
+                    }
+                    if (B & Platform::JoystickUp) {
+                        SEARCH_OBJECT();
+                        KEYTIMER = 15;
+                    }
+                    if (B & Platform::JoystickDown) {
+                        MOVE_OBJECT();
+                        KEYTIMER = 15;
+                    }
+                    if (B == Platform::JoystickBlue) {
+                        USE_ITEM();
                         KEYTIMER = 15;
                     }
                 }

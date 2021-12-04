@@ -344,7 +344,7 @@ PlatformAmiga::PlatformAmiga() :
     shift(0),
     joystickStateToReturn(0),
     joystickState(0),
-    playButtonPending(false),
+    pendingState(0),
     filterState(ciaa.ciapra & CIAF_LED ? true : false)
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     ,
@@ -895,9 +895,9 @@ void PlatformAmiga::clearKeyBuffer()
     joystickStateToReturn = 0;
 }
 
-bool PlatformAmiga::isKeyOrJoystickPressed()
+bool PlatformAmiga::isKeyOrJoystickPressed(bool gamepad)
 {
-    return downKey != 0xff || (joystickState != 0 && joystickState != JoystickPlay);
+    return downKey != 0xff || (joystickState != 0 && ((gamepad && joystickState != JoystickPlay) || (!gamepad && joystickState != JoystickBlue)));
 }
 
 uint16_t PlatformAmiga::readJoystick(bool gamepad)
@@ -965,17 +965,25 @@ uint16_t PlatformAmiga::readJoystick(bool gamepad)
     }
 
     if (joystickState != state) {
-        if (joystickState == 0) {
-            playButtonPending = state == JoystickPlay ? true : false;
-        } else if (state != 0) {
-            playButtonPending &= state == JoystickPlay ? true : false;
+        if (gamepad) {
+            if (joystickState == 0) {
+                pendingState = state == JoystickPlay ? JoystickPlay : 0;
+            } else if (state != 0) {
+                pendingState &= state == JoystickPlay ? JoystickPlay : 0;
+            }
+        } else {
+            if (joystickState == 0) {
+                pendingState = state == JoystickBlue ? JoystickBlue : 0;
+            } else if (state != 0) {
+                pendingState &= state == JoystickBlue ? JoystickBlue : 0;
+            }
         }
 
         // Return Play button press only when released
         if (state != 0) {
-            joystickStateToReturn = state != JoystickPlay ? state : 0;
+            joystickStateToReturn = state != (gamepad ? JoystickPlay : JoystickBlue) ? state : 0;
         } else {
-            joystickStateToReturn = playButtonPending ? JoystickPlay : state;
+            joystickStateToReturn = pendingState ? pendingState : state;
         }
         joystickState = state;
     }
