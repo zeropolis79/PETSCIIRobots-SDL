@@ -149,6 +149,7 @@ private:
     uint8_t shift;
     uint16_t joystickStateToReturn;
     uint16_t joystickState;
+    bool playButtonPending;
     bool filterState;
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     uint8_t effectChannel;

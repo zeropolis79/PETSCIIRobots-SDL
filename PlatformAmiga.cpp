@@ -344,6 +344,7 @@ PlatformAmiga::PlatformAmiga() :
     shift(0),
     joystickStateToReturn(0),
     joystickState(0),
+    playButtonPending(false),
     filterState(ciaa.ciapra & CIAF_LED ? true : false)
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     ,
@@ -891,7 +892,7 @@ void PlatformAmiga::clearKeyBuffer()
 
 bool PlatformAmiga::isKeyOrJoystickPressed()
 {
-    return downKey != 0xff || joystickState != 0;
+    return downKey != 0xff || (joystickState != 0 && joystickState != JoystickPlay);
 }
 
 uint16_t PlatformAmiga::readJoystick(bool gamepad)
@@ -959,8 +960,19 @@ uint16_t PlatformAmiga::readJoystick(bool gamepad)
     }
 
     if (joystickState != state) {
+        if (joystickState == 0) {
+            playButtonPending = state == JoystickPlay ? true : false;
+        } else if (state != 0) {
+            playButtonPending &= state == JoystickPlay ? true : false;
+        }
+
+        // Return Play button press only when released
+        if (state != 0) {
+            joystickStateToReturn = state != JoystickPlay ? state : 0;
+        } else {
+            joystickStateToReturn = playButtonPending ? JoystickPlay : state;
+        }
         joystickState = state;
-        joystickStateToReturn = state;
     }
 
     uint16_t result = joystickStateToReturn;

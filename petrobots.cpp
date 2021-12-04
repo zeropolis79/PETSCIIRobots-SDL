@@ -534,16 +534,16 @@ void MAIN_GAME_LOOP()
                         CLEAR_KEY_BUFFER();
                     }
 #endif
-                    if (B & Platform::JoystickRed) {
-                        USE_ITEM();
-                        KEYTIMER = 15;
-                    }
                     if (B & Platform::JoystickReverse) {
                         CYCLE_ITEM();
                         KEYTIMER = 15;
                     }
                     if (B & Platform::JoystickForward) {
                         CYCLE_WEAPON();
+                        KEYTIMER = 15;
+                    }
+                    if (B == Platform::JoystickPlay) {
+                        USE_ITEM();
                         KEYTIMER = 15;
                     }
                 } else {
