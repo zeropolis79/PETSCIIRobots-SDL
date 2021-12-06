@@ -855,7 +855,15 @@ uint8_t PlatformAmiga::readKeyboard()
             if (keyCode == 0x59) { // F10
                 quit = true;
             } else if (keyCode == 0x60 || keyCode == 0x61) {
-                shift = keyDown ? 0x80 : 0x00;
+                if (keyDown) {
+                    shift = 0x80;
+                    downKey |= 0x80;
+                } else {
+                    shift = 0x00;
+                    if (downKey != 0xff) {
+                        downKey &= 0x7f;
+                    }
+                }
             } else if (keyDown) {
                 if (downKey != keyCodeWithShift && (messageQualifier & IEQUALIFIER_REPEAT) != IEQUALIFIER_REPEAT) {
                     downKey = keyCodeWithShift;
