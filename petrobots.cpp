@@ -458,6 +458,7 @@ void MAIN_GAME_LOOP()
                 done = PAUSE_GAME();
             } else if (A == KEY_CONFIG[KEY_CHEAT]) { // SHIFT-C
                 CHEATER();
+                CLEAR_KEY_BUFFER();
             } else if (A == KEY_CONFIG[KEY_MUSIC]) { // SHIFT-M
                 TOGGLE_MUSIC();
                 CLEAR_KEY_BUFFER();
