@@ -3411,11 +3411,12 @@ void WATER_RAFT_LR()
             RAFT_PLOT();
             CACULATE_AND_REDRAW();
         } else {
+            CHECK_FOR_WINDOW_REDRAW();
             UNIT_LOC_X[UNIT]++; // raft
             RAFT_PLOT();
-            // Now check if it has reached its destination
             CHECK_FOR_WINDOW_REDRAW();
         }
+        // Now check if it has reached its destination
         if (UNIT_LOC_X[UNIT] != UNIT_C[UNIT]) {
             UNIT_TIMER_A[UNIT] = 6;
         } else {
@@ -3432,9 +3433,9 @@ void WATER_RAFT_LR()
             RAFT_PLOT();
             CACULATE_AND_REDRAW();
         } else {
+            CHECK_FOR_WINDOW_REDRAW();
             UNIT_LOC_X[UNIT]--; // raft
             RAFT_PLOT();
-            // Now check if it has reached its destination
             CHECK_FOR_WINDOW_REDRAW();
         }
         // Now check if it has reached its destination
@@ -3465,6 +3466,7 @@ void RAFT_PLOT()
 
 void MAGNETIZED_ROBOT()
 {
+    CHECK_FOR_WINDOW_REDRAW();
     MOVE_TYPE = 0x01; // %00000001
     GENERATE_RANDOM_NUMBER();
     switch (RANDOM & 0x03) { // %00000011
@@ -3549,6 +3551,7 @@ void UP_DOWN_ROLLERBOT()
 {
     UNIT_TIMER_A[UNIT] = 7;
     ROLLERBOT_ANIMATE();
+    CHECK_FOR_WINDOW_REDRAW();
     if (UNIT_A[UNIT] != 1) { // GET DIRECTION 0=UP 1=DOWN
         MOVE_TYPE = 0x01; // %00000001
         REQUEST_WALK_UP();
@@ -3572,6 +3575,7 @@ void LEFT_RIGHT_ROLLERBOT()
 {
     UNIT_TIMER_A[UNIT] = 7;
     ROLLERBOT_ANIMATE();
+    CHECK_FOR_WINDOW_REDRAW();
     if (UNIT_A[UNIT] != 1) { // GET DIRECTION 0=LEFT 1=RIGHT
         MOVE_TYPE = 0x01; // %00000001
         REQUEST_WALK_LEFT();
@@ -4237,6 +4241,7 @@ void PISTOL_FIRE_UP()
         DEACTIVATE_WEAPON();
         CHECK_FOR_WINDOW_REDRAW();
     } else {
+        CHECK_FOR_WINDOW_REDRAW();
         UNIT_LOC_Y[UNIT]--; // move it up one.
         PISTOL_AI_COMMON();
     }
@@ -4250,6 +4255,7 @@ void PISTOL_FIRE_DOWN()
         DEACTIVATE_WEAPON();
         CHECK_FOR_WINDOW_REDRAW();
     } else {
+        CHECK_FOR_WINDOW_REDRAW();
         UNIT_LOC_Y[UNIT]++; // move it down one.
         PISTOL_AI_COMMON();
     }
@@ -4263,6 +4269,7 @@ void PISTOL_FIRE_LEFT()
         DEACTIVATE_WEAPON();
         CHECK_FOR_WINDOW_REDRAW();
     } else {
+        CHECK_FOR_WINDOW_REDRAW();
         UNIT_LOC_X[UNIT]--; // move it left one.
         PISTOL_AI_COMMON();
     }
@@ -4276,6 +4283,7 @@ void PISTOL_FIRE_RIGHT()
         DEACTIVATE_WEAPON();
         CHECK_FOR_WINDOW_REDRAW();
     } else {
+        CHECK_FOR_WINDOW_REDRAW();
         UNIT_LOC_X[UNIT]++; // move it right one.
         PISTOL_AI_COMMON();
     }
@@ -4410,6 +4418,7 @@ void HOVER_ATTACK()
     UNIT_TIMER_B[UNIT] = 0;
     HOVERBOT_ANIMATE(UNIT);
     UNIT_TIMER_A[UNIT] = 7;
+    CHECK_FOR_WINDOW_REDRAW();
     MOVE_TYPE = 0x02; // %00000010 HOVER
     // CHECK FOR HORIZONTAL MOVEMENT
     if (UNIT_LOC_X[UNIT] > UNIT_LOC_X[0]) {
@@ -4469,6 +4478,7 @@ void EVILBOT()
         CHECK_FOR_WINDOW_REDRAW();
     } else {
         UNIT_TIMER_B[UNIT] = 1; // Reset timer B
+        CHECK_FOR_WINDOW_REDRAW();
         MOVE_TYPE = 0x01; // %00000001 WALK
         // CHECK FOR HORIZONTAL MOVEMENT
         if (UNIT_LOC_X[UNIT] > UNIT_LOC_X[0]) {
@@ -4883,6 +4893,7 @@ void LEFT_RIGHT_DROID()
     HOVERBOT_ANIMATE(UNIT);
     UNIT_TIMER_A[UNIT] = 10; // reset timer to 10
     if (UNIT_A[UNIT] != 1) { // GET DIRECTION 0=LEFT 1=RIGHT
+        CHECK_FOR_WINDOW_REDRAW();
         MOVE_TYPE = 0x02; // %00000010
         REQUEST_WALK_LEFT();
         if (MOVE_RESULT != 1) {
@@ -4890,6 +4901,7 @@ void LEFT_RIGHT_DROID()
         }
         CHECK_FOR_WINDOW_REDRAW();
     } else {
+        CHECK_FOR_WINDOW_REDRAW();
         MOVE_TYPE = 0x02; // %00000010
         REQUEST_WALK_RIGHT();
         if (MOVE_RESULT != 1) {
@@ -4907,6 +4919,7 @@ void UP_DOWN_DROID()
     HOVERBOT_ANIMATE(UNIT);
     UNIT_TIMER_A[UNIT] = 10; // reset timer to 10
     if (UNIT_A[UNIT] != 1) { // GET DIRECTION 0=UP 1=DOWN
+        CHECK_FOR_WINDOW_REDRAW();
         MOVE_TYPE = 0x02; // %00000010
         REQUEST_WALK_UP();
         if (MOVE_RESULT != 1) {
@@ -4914,6 +4927,7 @@ void UP_DOWN_DROID()
         }
         CHECK_FOR_WINDOW_REDRAW();
     } else {
+        CHECK_FOR_WINDOW_REDRAW();
         MOVE_TYPE = 0x02; // %00000010
         REQUEST_WALK_DOWN();
         if (MOVE_RESULT != 1) {
