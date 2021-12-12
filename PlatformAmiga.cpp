@@ -852,7 +852,7 @@ uint8_t PlatformAmiga::readKeyboard()
             uint8_t keyCode = messageCode & 0x7f;
             uint8_t keyCodeWithShift = keyCode | shift;
 
-            if (keyCode == 0x59) { // F10
+            if ((messageQualifier & IEQUALIFIER_RCOMMAND) && keyCode == 0x10) { // RAmiga-Q
                 quit = true;
             } else if (keyCode == 0x60 || keyCode == 0x61) {
                 if (keyDown) {
@@ -865,7 +865,7 @@ uint8_t PlatformAmiga::readKeyboard()
                     }
                 }
             } else if (keyDown) {
-                if (downKey != keyCodeWithShift && (messageQualifier & IEQUALIFIER_REPEAT) != IEQUALIFIER_REPEAT) {
+                if (downKey != keyCodeWithShift && !(messageQualifier & IEQUALIFIER_REPEAT)) {
                     downKey = keyCodeWithShift;
                     keyToReturn = downKey;
                 }
