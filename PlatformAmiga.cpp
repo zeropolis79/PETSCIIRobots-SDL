@@ -496,7 +496,7 @@ PlatformAmiga::PlatformAmiga() :
     ExtNewScreen newScreen = {0};
     Screen workbenchScreen;
     GetScreenData(&workbenchScreen, sizeof(Screen), WBENCHSCREEN, 0);
-    if (workbenchScreen.ViewPort.Modes & HIRES && workbenchScreen.ViewPort.DWidth > 640) {
+    if (workbenchScreen.ViewPort.Modes & HIRES && workbenchScreen.ViewPort.DWidth > 640 && workbenchScreen.ViewPort.DWidth <= 724) {
         newScreen.LeftEdge = (workbenchScreen.ViewPort.DWidth - 640) >> 1;
     }
     newScreen.Width = SCREEN_WIDTH;
