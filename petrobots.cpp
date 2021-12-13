@@ -2963,7 +2963,13 @@ uint8_t CINEMA_STATE = 0;
 // to the screen directly.
 void ELEVATOR_SELECT()
 {
-    DRAW_MAP_WINDOW();
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    if (LIVE_MAP_ON == 0) {
+#endif
+        DRAW_MAP_WINDOW();
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    }
+#endif
     ELEVATOR_MAX_FLOOR = UNIT_D[UNIT]; // get max levels
     // Now draw available levels on screen
     for (int Y = 0, A = 0x31; Y != ELEVATOR_MAX_FLOOR; A++, Y++) {
@@ -2992,6 +2998,11 @@ void ELEVATOR_SELECT()
                 return;
             }
         }
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+        if (LIVE_MAP_ON == 1) {
+            DRAW_LIVE_MAP();
+        }
+#endif
         platform->renderFrame(true);
     }
 }
@@ -3035,7 +3046,13 @@ void ELEVATOR_FIND_XY()
                 MAP_WINDOW_X = UNIT_LOC_X[X] - 5;
                 UNIT_LOC_Y[0] = UNIT_LOC_Y[X] - 1; // player location = new elevator location
                 MAP_WINDOW_Y = UNIT_LOC_Y[X] - 4;
-                DRAW_MAP_WINDOW();
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+                if (LIVE_MAP_ON == 0) {
+#endif
+                    DRAW_MAP_WINDOW();
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+                }
+#endif
                 PLAY_SOUND(17); // elevator sound SOUND PLAY
                 break;
             }
