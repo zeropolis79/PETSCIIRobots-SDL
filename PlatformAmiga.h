@@ -46,6 +46,7 @@ public:
 #endif
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
     virtual void renderLiveMap(uint8_t* map);
+    virtual void renderLiveMapTile(uint8_t* map, uint8_t x, uint8_t y);
     virtual void renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots);
 #endif
 #ifdef PLATFORM_SPRITE_SUPPORT

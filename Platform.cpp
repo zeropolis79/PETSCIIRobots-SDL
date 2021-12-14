@@ -59,6 +59,10 @@ void Platform::renderLiveMap(uint8_t*)
 {
 }
 
+void Platform::renderLiveMapTile(uint8_t*, uint8_t, uint8_t)
+{
+}
+
 void Platform::renderLiveMapUnits(uint8_t*, uint8_t*, uint8_t*, uint8_t*, uint8_t, bool)
 {
 }

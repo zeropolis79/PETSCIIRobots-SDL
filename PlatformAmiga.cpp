@@ -1540,6 +1540,28 @@ void PlatformAmiga::renderLiveMapTiles(uint8_t* map)
 #endif
 */
 
+void PlatformAmiga::renderLiveMapTile(uint8_t* map, uint8_t x, uint8_t y)
+{
+    int maskShift = (x & 3);
+    maskShift += maskShift;
+    int planeShift = 6 - maskShift;
+    uint8_t* dest = screenPlanes + (20 + y * 2) * PLANES * SCREEN_WIDTH_IN_BYTES + (x >> 2);
+    uint8_t color = tileLiveMap[map[(y << 7) + x]];
+    uint8_t plane1 = liveMapToPlane1[color] << planeShift;
+    uint8_t plane2 = liveMapToPlane2[color] << planeShift;
+    uint8_t plane3 = liveMapToPlane3[color] << planeShift;
+    uint8_t plane4 = liveMapToPlane4[color] << planeShift;
+    uint16_t mask = 0xff3f >> maskShift;
+    dest[0 * SCREEN_WIDTH_IN_BYTES] = (dest[0 * SCREEN_WIDTH_IN_BYTES] & mask) | plane1;
+    dest[1 * SCREEN_WIDTH_IN_BYTES] = (dest[1 * SCREEN_WIDTH_IN_BYTES] & mask) | plane2;
+    dest[2 * SCREEN_WIDTH_IN_BYTES] = (dest[2 * SCREEN_WIDTH_IN_BYTES] & mask) | plane3;
+    dest[3 * SCREEN_WIDTH_IN_BYTES] = (dest[3 * SCREEN_WIDTH_IN_BYTES] & mask) | plane4;
+    dest[4 * SCREEN_WIDTH_IN_BYTES] = (dest[4 * SCREEN_WIDTH_IN_BYTES] & mask) | plane1;
+    dest[5 * SCREEN_WIDTH_IN_BYTES] = (dest[5 * SCREEN_WIDTH_IN_BYTES] & mask) | plane2;
+    dest[6 * SCREEN_WIDTH_IN_BYTES] = (dest[6 * SCREEN_WIDTH_IN_BYTES] & mask) | plane3;
+    dest[7 * SCREEN_WIDTH_IN_BYTES] = (dest[7 * SCREEN_WIDTH_IN_BYTES] & mask) | plane4;
+}
+
 void PlatformAmiga::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots)
 {
     for (int i = 0; i < 48; i++) {

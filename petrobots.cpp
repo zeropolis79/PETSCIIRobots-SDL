@@ -12,6 +12,7 @@
 #include "PlatformSDL.h"
 #endif
 #include "petrobots.h"
+#include <stdio.h>
 
 uint8_t* DESTRUCT_PATH; // Destruct path array (256 bytes)
 uint8_t* TILE_ATTRIB;   // Tile attrib array (256 bytes)
@@ -1432,6 +1433,12 @@ void MOVE_OBJECT()
             MAP_SOURCE[0] = A; // Replace former location
             REDRAW_WINDOW = 1; // See the result
             if (MOVTEMP_U == 255) {
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+                if (LIVE_MAP_ON == 1) {
+                    platform->renderLiveMapTile(MAP, MOVTEMP_X, MOVTEMP_Y);
+                    platform->renderLiveMapTile(MAP, MOVTEMP_UX, MOVTEMP_UY);
+                }
+#endif
                 return;
             }
             UNIT_LOC_X[MOVTEMP_U] = MOVTEMP_UX;
@@ -3790,6 +3797,14 @@ void BIG_EXP_PHASE1()
     PLAY_SOUND(0); // explosion-sound SOUND PLAY
     BEX_PART1(); // check center piece for unit
     BEXCEN(); // check center piece for unit
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    if (LIVE_MAP_ON == 1) {
+        GET_TILE_FROM_MAP();
+        MAP_SOURCE[0] = 246;
+        platform->renderLiveMapTile(MAP, MAP_X, MAP_Y);
+        MAP_SOURCE[0] = TILE;
+    }
+#endif
     BEX1_NORTH();
     BEX1_SOUTH();
     BEX1_EAST();
@@ -3983,6 +3998,11 @@ bool BEX_PART2()
 void BEX_PART3()
 {
     MAP_SOURCE[0] = 246;
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    if (LIVE_MAP_ON == 1) {
+        platform->renderLiveMapTile(MAP, MAP_X, MAP_Y);
+    }
+#endif
     BEXCEN();
 }
 
@@ -4104,9 +4124,19 @@ void RESTORE_TILE()
         } else {
             MAP_SOURCE[0] = TEMP_A;
         }
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+        if (LIVE_MAP_ON == 1) {
+            platform->renderLiveMapTile(MAP, MAP_X, MAP_Y);
+        }
+#endif
     } else {
         // What to do if we encounter an explosive cannister
         MAP_SOURCE[0] = 135; // Blown cannister
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+        if (LIVE_MAP_ON == 1) {
+            platform->renderLiveMapTile(MAP, MAP_X, MAP_Y);
+        }
+#endif
         for (int X = 28; X != 32; X++) { // Start of weapons units
             if (UNIT_TYPE[X] == 0) {
                 UNIT_TYPE[X] = 6; // bomb AI
@@ -4702,6 +4732,11 @@ void DRAW_VERTICAL_DOOR()
     MAP_SOURCE[0] = DOORPIECE2;
     MAP_SOURCE += 128;
     MAP_SOURCE[0] = DOORPIECE3;
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    if (LIVE_MAP_ON == 1) {
+        platform->renderLiveMapTile(MAP, UNIT_LOC_X[UNIT], UNIT_LOC_Y[UNIT]);
+    }
+#endif
 }
 
 void DRAW_HORIZONTAL_DOOR()
@@ -4713,6 +4748,11 @@ void DRAW_HORIZONTAL_DOOR()
     PLOT_TILE_TO_MAP();
     MAP_SOURCE[1] = DOORPIECE2;
     MAP_SOURCE[2] = DOORPIECE3;
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    if (LIVE_MAP_ON == 1) {
+        platform->renderLiveMapTile(MAP, UNIT_LOC_X[UNIT], UNIT_LOC_Y[UNIT]);
+    }
+#endif
 }
 uint8_t DOORPIECE1 = 0;
 uint8_t DOORPIECE2 = 0;
