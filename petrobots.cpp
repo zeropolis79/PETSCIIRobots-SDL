@@ -2995,6 +2995,18 @@ void ELEVATOR_SELECT()
         // SNES INPUT
         uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
         if (A != 0xff || B != 0) {
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+            if (A == KEY_CONFIG[KEY_LIVE_MAP] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickLeft))) {
+                TOGGLE_LIVE_MAP();
+                if (LIVE_MAP_ON == 0) {
+                    DRAW_MAP_WINDOW();
+                }
+                CLEAR_KEY_BUFFER();
+            } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickDown))) {
+                TOGGLE_LIVE_MAP_ROBOTS();
+                CLEAR_KEY_BUFFER();
+            } else
+#endif
             if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT] || (B & Platform::JoystickLeft)) { // CURSOR LEFT
                 ELEVATOR_DEC();
             } else if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
@@ -3006,18 +3018,6 @@ void ELEVATOR_SELECT()
                 CLEAR_KEY_BUFFER();
                 return;
             }
-#ifdef PLATFORM_LIVE_MAP_SUPPORT
-            else if (A == KEY_CONFIG[KEY_LIVE_MAP] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickLeft))) {
-                TOGGLE_LIVE_MAP();
-                if (LIVE_MAP_ON == 0) {
-                    DRAW_MAP_WINDOW();
-                }
-                CLEAR_KEY_BUFFER();
-            } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickDown))) {
-                TOGGLE_LIVE_MAP_ROBOTS();
-                CLEAR_KEY_BUFFER();
-            }
-#endif
         }
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
         if (LIVE_MAP_ON == 1) {
