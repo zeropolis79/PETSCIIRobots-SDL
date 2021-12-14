@@ -238,7 +238,9 @@ void PLOT_TRANSPARENT_TILE(uint16_t destination, uint16_t x, uint16_t y);
 void PLOT_TILE(uint16_t destination);
 void PLOT_TRANSPARENT_TILE(uint16_t destination);
 #endif
+#ifndef PLATFORM_CURSOR_SUPPORT
 void REVERSE_TILE();
+#endif
 void CHECK_FOR_WINDOW_REDRAW();
 void DECWRITE(uint16_t destination, uint8_t color = 10);
 

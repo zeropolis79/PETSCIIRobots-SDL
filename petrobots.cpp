@@ -1868,6 +1868,7 @@ void PLOT_TRANSPARENT_TILE(uint16_t destination)
 }
 #endif
 
+#ifndef PLATFORM_CURSOR_SUPPORT
 void REVERSE_TILE()
 {
     uint16_t destination = MAP_CHART[CURSOR_Y] + CURSOR_X + CURSOR_X + CURSOR_X;
@@ -1881,6 +1882,7 @@ void REVERSE_TILE()
     writeToScreenMemory(destination + 81, SCREEN_MEMORY[destination + 81] ^= 0x80);
     writeToScreenMemory(destination + 82, SCREEN_MEMORY[destination + 82] ^= 0x80);
 }
+#endif
 
 // This routine checks to see if UNIT is occupying any space
 // that is currently visible in the window.  If so, the
