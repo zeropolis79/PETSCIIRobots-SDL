@@ -3000,13 +3000,13 @@ void ELEVATOR_SELECT()
                 return;
             }
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
-            else if (A == KEY_CONFIG[KEY_LIVE_MAP]) {
+            else if (A == KEY_CONFIG[KEY_LIVE_MAP] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickLeft))) {
                 TOGGLE_LIVE_MAP();
                 if (LIVE_MAP_ON == 0) {
                     DRAW_MAP_WINDOW();
                 }
                 CLEAR_KEY_BUFFER();
-            } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS]) {
+            } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickDown))) {
                 TOGGLE_LIVE_MAP_ROBOTS();
                 CLEAR_KEY_BUFFER();
             }
