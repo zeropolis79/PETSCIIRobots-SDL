@@ -3177,9 +3177,11 @@ void PET_BORDER_FLASH()
 }
 
 uint8_t FLASH_STATE = 0;
+#ifndef PLATFORM_IMAGE_SUPPORT
 uint8_t OUCH1[] = { 0xCD, 0xA0, 0xA0, 0xA0, 0xA0, 0xCE };
 uint8_t OUCH2[] = { 0xA0, 0x8F, 0x95, 0x83, 0x88, 0xA0 };
 uint8_t OUCH3[] = { 0xCE, 0xA0, 0xA0, 0xA0, 0xA0, 0xCD };
+#endif
 
 // This is actually part of a background routine, but it has to be in the main
 // source because the screen effects used are unique on each system.

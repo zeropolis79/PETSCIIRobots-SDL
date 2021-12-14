@@ -358,9 +358,11 @@ void PET_SCREEN_SHAKE();
 void PET_BORDER_FLASH();
 
 extern uint8_t FLASH_STATE;
+#ifndef PLATFORM_IMAGE_SUPPORT
 extern uint8_t OUCH1[];
 extern uint8_t OUCH2[];
 extern uint8_t OUCH3[];
+#endif
 
 void DEMATERIALIZE();
 void ANIMATE_PLAYER();
