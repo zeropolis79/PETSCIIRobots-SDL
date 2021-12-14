@@ -1,17 +1,23 @@
 CFLAGS=WITH SCoptions.amiga
-OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o PT2.3F_replay_cia.o Tileset.o C64Font.o Faces.o Tiles.o AnimTiles.o Sprites.o SpritesMask.o Items.o Keys.o Health.o SoundFXModule.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o SquareWave.o
+OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o ungzip.o Palette.o PT2.3F_replay_cia.o Tileset.o C64Font.o Faces.o Tiles.o AnimTiles.o Sprites.o SpritesMask.o Items.o Keys.o Health.o SoundFXModule.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o SquareWave.o
 
-all: AmigaRobots 
+all: AmigaRobots DecompressData
 
 AmigaRobots: $(OBJECTS)
    sc LINK TO AmigaRobots NOICONS WITH <<
-$(OBJECtS)
+$(OBJECTS)
+<
+
+DecompressData: DecompressData.o ungzip.o
+   sc LINK TO DecompressData NOICONS WITH <<
+DecompressData.o ungzip.o
 <
 
 petrobots.o: petrobots.cpp
 Platform.o: Platform.cpp
 PlatformAmiga.o: PlatformAmiga.cpp
 PlatformAmigaAssembler.o: PlatformAmigaAssembler.s
+ungzip.o: ungzip.s
 Palette.o: Palette.cpp
 PT2.3F_replay_cia.o: PT2.3F_replay_cia.s
 Tileset.o: tileset.amiga
@@ -68,6 +74,7 @@ SoundShortBeep.o: SOUND_BEEP.raw
     Bin2Hunk SOUND_BEEP.raw SoundShortBeep.o NAME _soundShortBeep CHIP
 SquareWave.o: SquareWave.raw
     Bin2Hunk SquareWave.raw SquareWave.o NAME _squareWave CHIP
+DecompressData.o: DecompressData.c
 
 clean:
-    delete $(OBJECTS) AmigaRobots AmigaRobots.lnk
+    delete $(OBJECTS) DecompressData.o AmigaRobots AmigaRobots.lnk DecompressData DecompressData.lnk

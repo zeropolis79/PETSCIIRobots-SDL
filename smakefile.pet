@@ -1,5 +1,5 @@
 CFLAGS=WITH SCoptions.pet
-OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o Palette.o Tileset.o PETFont.o SquareWave.o
+OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o ungzip.o Palette.o Tileset.o PETFont.o SquareWave.o
 
 all: PETRobots 
 
@@ -12,6 +12,7 @@ petrobots.o: petrobots.cpp
 Platform.o: Platform.cpp
 PlatformAmiga.o: PlatformAmiga.cpp
 PlatformAmigaAssembler.o: PlatformAmigaAssembler.s
+ungzip.o: ungzip.s
 Palette.o: Palette.cpp
 Tileset.o: tileset.pet
     Bin2Hunk tileset.pet Tileset.o NAME _tileset HUNK data

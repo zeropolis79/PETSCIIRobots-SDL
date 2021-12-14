@@ -84,7 +84,6 @@ public:
 private:
     __saveds void runVerticalBlankInterrupt();
     __asm static void verticalBlankInterruptServer();
-    __asm static int32_t ungzip(register __a0 void* input, register __a1 void* output);
     void (*interrupt)(void);
 #ifdef PLATFORM_PRELOAD_SUPPORT
     void preloadAssets();
