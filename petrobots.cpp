@@ -1905,11 +1905,6 @@ void DECWRITE(uint16_t destination, uint8_t color)
     }
 }
 
-uint8_t DECA[] = { 128, 160, 200 };
-uint8_t DECB = 1;
-uint8_t SCREENPOS = 0;
-uint8_t DECTEMP = 0;
-
 // The following routine loads the tileset from disk
 void TILE_LOAD_ROUTINE()
 {

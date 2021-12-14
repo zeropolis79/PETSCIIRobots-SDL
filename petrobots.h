@@ -244,11 +244,6 @@ void REVERSE_TILE();
 void CHECK_FOR_WINDOW_REDRAW();
 void DECWRITE(uint16_t destination, uint8_t color = 10);
 
-extern uint8_t DECA[];
-extern uint8_t DECB;
-extern uint8_t SCREENPOS;
-extern uint8_t DECTEMP;
-
 void TILE_LOAD_ROUTINE();
 void MAP_LOAD_ROUTINE();
 void DISPLAY_GAME_SCREEN();
