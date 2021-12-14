@@ -155,7 +155,9 @@ int main(int argc, char *argv[])
     convertToPETSCII(CINEMA_MESSAGE);
 
     platform->stopNote(); // RESET SOUND TO ZERO
+#ifdef PLATFORM_STDOUT_MESSAGES
     DISPLAY_LOAD_MESSAGE1();
+#endif
     TILE_LOAD_ROUTINE();
     SETUP_INTERRUPT();
     SET_CONTROLS(); // copy initial key controls
@@ -203,7 +205,9 @@ void INIT_GAME()
 #define TILENAME "tileset.pet"
 #endif
 char MAPNAME[] = "level-a";
+#ifdef PLATFORM_STDOUT_MESSAGES
 const char* LOADMSG1 = "loading tiles...\x0d";
+#endif
 uint8_t KEYS = 0; // bit0=spade bit2=heart bit3=star
 uint8_t AMMO_PISTOL = 0; // how much ammo for the pistol
 uint8_t AMMO_PLASMA = 0; // how many shots of the plasmagun
@@ -283,12 +287,14 @@ uint8_t MUSIC_ON = 0; // 0=off 1=on
 uint8_t SOUND_EFFECT = 0xff; // FF=OFF or number of effect in progress
 #endif
 
+#ifdef PLATFORM_STDOUT_MESSAGES
 void DISPLAY_LOAD_MESSAGE1()
 {
     for (int Y = 0; Y != 17; Y++) {
         platform->chrout(LOADMSG1[Y]);
     }
 }
+#endif
 
 // Displays loading message for map.
 void DISPLAY_LOAD_MESSAGE2()
