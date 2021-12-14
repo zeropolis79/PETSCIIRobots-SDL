@@ -1460,6 +1460,10 @@ void PlatformAmiga::renderLiveMap(uint8_t* map)
     DisownBlitter();
 
     renderLiveMapTiles(map);
+
+    for (int i = 0; i < 48; i++) {
+        unitTypes[i] = 255;
+    }
 }
 
 /*

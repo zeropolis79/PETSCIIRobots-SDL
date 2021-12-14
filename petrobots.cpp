@@ -12,7 +12,6 @@
 #include "PlatformSDL.h"
 #endif
 #include "petrobots.h"
-#include <stdio.h>
 
 uint8_t* DESTRUCT_PATH; // Destruct path array (256 bytes)
 uint8_t* TILE_ATTRIB;   // Tile attrib array (256 bytes)
@@ -3004,6 +3003,18 @@ void ELEVATOR_SELECT()
                 CLEAR_KEY_BUFFER();
                 return;
             }
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+            else if (A == KEY_CONFIG[KEY_LIVE_MAP]) {
+                TOGGLE_LIVE_MAP();
+                if (LIVE_MAP_ON == 0) {
+                    DRAW_MAP_WINDOW();
+                }
+                CLEAR_KEY_BUFFER();
+            } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS]) {
+                TOGGLE_LIVE_MAP_ROBOTS();
+                CLEAR_KEY_BUFFER();
+            }
+#endif
         }
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
         if (LIVE_MAP_ON == 1) {
