@@ -198,11 +198,7 @@ void INIT_GAME()
 }
 
 #define TILENAME "tileset.pet"
-#ifdef PLATFORM_GZIP_SUPPORT
-char MAPNAME[] = "level-a.gz";
-#else
 char MAPNAME[] = "level-a";
-#endif
 const char* LOADMSG1 = "loading tiles...\x0d";
 uint8_t KEYS = 0; // bit0=spade bit2=heart bit3=star
 uint8_t AMMO_PISTOL = 0; // how much ammo for the pistol

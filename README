@@ -26,7 +26,6 @@ petrobots
 
 To do
 -----
-- support unpacked files
 - unpack files when installing to the hard disk
 - don't create icons in installer
 - AmigaGuide/README

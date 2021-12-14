@@ -27,8 +27,18 @@
 #define SCREEN_SIZE (SCREEN_WIDTH_IN_BYTES * SCREEN_HEIGHT)
 #ifdef PLATFORM_COLOR_SUPPORT
 #define PLANES 4
+#ifdef PLATFORM_GZIP_SUPPORT
+#define LONGEST_FILENAME 25 // mod.metallic bop amiga.gz
+#else
+#define LONGEST_FILENAME 22 // mod.metallic bop amiga
+#endif
 #else
 #define PLANES 1
+#ifdef PLATFORM_GZIP_SUPPORT
+#define LONGEST_FILENAME 14 // pet-level-a.gz
+#else
+#define LONGEST_FILENAME 11 // pet-level-a
+#endif
 #endif
 #define SCREEN_PLANES_SIZE (SCREEN_SIZE * PLANES + 16 * 2)
 #ifdef PLATFORM_IMAGE_BASED_TILES
@@ -204,18 +214,18 @@ static uint16_t blackPalette[16] = { 0 };
 static uint16_t blackPalette[16] = { 0x000, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0 };
 #endif
 static const char* imageFilenames[] = {
-    "IntroScreen.raw.gz",
-    "GameScreen.raw.gz",
-    "GameOver.raw.gz"
+    "IntroScreen.raw",
+    "GameScreen.raw",
+    "GameOver.raw"
 };
 static const char* moduleFilenames[] = {
-    "mod.metal heads.gz",
-    "mod.win.gz",
-    "mod.lose.gz",
-    "mod.metallic bop amiga.gz",
-    "mod.get psyched.gz",
-    "mod.robot attack.gz",
-    "mod.rushin in.gz"
+    "mod.metal heads",
+    "mod.win",
+    "mod.lose",
+    "mod.metallic bop amiga",
+    "mod.get psyched",
+    "mod.robot attack",
+    "mod.rushin in"
 };
 static char* notEnoughMemoryError = "Not enough memory to run\n";
 #ifdef PLATFORM_MODULE_BASED_AUDIO
@@ -987,41 +997,57 @@ uint16_t PlatformAmiga::readJoystick(bool gamepad)
 
 uint32_t PlatformAmiga::load(const char* name, uint8_t* destination, uint32_t size, uint32_t offset)
 {
-#ifdef PLATFORM_COLOR_SUPPORT
-    const char* filename = name;
-#else
-    const char* filename = *name == 'l' ? (name + 4) : name;
+    char filename[LONGEST_FILENAME + 1];
+    char* c = filename;
+#ifndef PLATFORM_COLOR_SUPPORT
+    *c++ = 'p';
+    *c++ = 'e';
+    *c++ = 't';
+    *c++ = '-';
 #endif
+    while (*name) {
+        *c++ = *name++;
+    }
+#ifdef PLATFORM_GZIP_SUPPORT
+    *c++ = '.';
+    *c++ = 'g';
+    *c++ = 'z';
+#endif
+    *c = 0;
+
     uint32_t bytesRead = 0;
-    const char* nameEnd = filename;
-    while (*++nameEnd);
-    if ((nameEnd - filename) >= 3 && *--nameEnd == 'z' && *--nameEnd == 'g' && *--nameEnd == '.') {
-        BPTR lock = Lock((char*)filename, ACCESS_READ);
-        if (lock) {
-            FileInfoBlock fib;
-            if (Examine(lock, &fib)) {
-                UnLock(lock);
+#ifdef PLATFORM_GZIP_SUPPORT
+    BPTR lock = Lock((char*)filename, ACCESS_READ);
+    if (lock) {
+        FileInfoBlock fib;
+        if (Examine(lock, &fib)) {
+            UnLock(lock);
 
-                BPTR file = Open((char*)filename, MODE_OLDFILE);
-                if (file) {
-                    Read(file, loadBuffer, fib.fib_Size);
-                    ungzip(loadBuffer, destination);
+            BPTR file = Open((char*)filename, MODE_OLDFILE);
+            if (file) {
+                Read(file, loadBuffer, fib.fib_Size);
+                ungzip(loadBuffer, destination);
 
-                    bytesRead = (loadBuffer[fib.fib_Size - 1] << 24) | (loadBuffer[fib.fib_Size - 2] << 16) | (loadBuffer[fib.fib_Size - 3] << 8) | loadBuffer[fib.fib_Size - 4];
+                bytesRead = (loadBuffer[fib.fib_Size - 1] << 24) | (loadBuffer[fib.fib_Size - 2] << 16) | (loadBuffer[fib.fib_Size - 3] << 8) | loadBuffer[fib.fib_Size - 4];
 
-                    Close(file);
+                Close(file);
+
+                if (bytesRead != 0) {
+                    return bytesRead;
                 }
             }
         }
-    } else {
-        BPTR file = Open((char*)filename, MODE_OLDFILE);
-        if (file) {
-            if (offset > 0) {
-                Seek(file, offset, OFFSET_BEGINNING);
-            }
-            bytesRead = Read(file, destination, size);
-            Close(file);
+    }
+    c[-3] = 0;
+#endif
+
+    BPTR file = Open((char*)filename, MODE_OLDFILE);
+    if (file) {
+        if (offset > 0) {
+            Seek(file, offset, OFFSET_BEGINNING);
         }
+        bytesRead = Read(file, destination, size);
+        Close(file);
     }
     if (bytesRead == 0) {
         Write(Output(), unableToLoadDataError, 20);
