@@ -24,9 +24,9 @@ amigarobots
 smake -f smakefile.pet
 petrobots
 
-To do
------
-- AmigaGuide/README
+Amiga requirements
+------------------
+- Any classic Motorola 680x0 based Amiga with at least 512 kB of chip memory
 
 Amiga keyboard controls
 -----------------------
@@ -38,7 +38,7 @@ SPACE use item
 F1 cycle weapon
 F2 cycle item
 F6 toggle music
-F10 quit
+RAMIGA+Q quit
 ESC pause
 TAB live map
 SHIFT+TAB live map robots
@@ -69,7 +69,7 @@ PLAY+RED toggle music
 
 Making of
 ---------
-The first task was to convert the 6502 assembler PET source code to C line by line. Even though this won't produce the most elegant high level language code it ensures that the code behaves exactly like the original does. PET KERNAL calls and memory accesses were abstracted to an interface which can be implemented for different platforms.
+The first task was to convert the 6502 assembler PET source code to C++ line by line. Even though this won't produce the most elegant high level language code it ensures that the code behaves exactly like the original does. PET KERNAL calls and memory accesses were abstracted to an interface which can be implemented for different platforms.
 
 To make initial testing and verification of the ported code easier an SDL platform implementation was written first. This allowed the game logic to be tested on a modern operating system. When eveything seemed to work it was time to write an implementation of the platform interface for the Amiga. Since the game shouldn't necessarily require every last drop of the Amiga's resources to run, the interface was implemented in an AmigaOS friendly way, multitasking in it's own AmigaOS screen.
 
