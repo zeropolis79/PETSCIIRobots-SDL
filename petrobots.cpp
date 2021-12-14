@@ -197,7 +197,11 @@ void INIT_GAME()
     MAIN_GAME_LOOP();
 }
 
+#ifdef PLATFORM_BUILTIN_TILESET
+#define TILENAME 0
+#else
 #define TILENAME "tileset.pet"
+#endif
 char MAPNAME[] = "level-a";
 const char* LOADMSG1 = "loading tiles...\x0d";
 uint8_t KEYS = 0; // bit0=spade bit2=heart bit3=star
