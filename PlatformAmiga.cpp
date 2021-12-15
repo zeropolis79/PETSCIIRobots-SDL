@@ -1651,11 +1651,6 @@ void PlatformAmiga::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t
 void PlatformAmiga::showCursor(uint16_t x, uint16_t y)
 {
     if (cursorSprite1->num != -1 && cursorSprite2->num != -1) {
-        cursorSprite1->height = 28;
-        cursorSprite2->height = 28;
-        ChangeSprite(&screen->ViewPort, cursorSprite1, (uint8_t*)&cursorData1);
-        ChangeSprite(&screen->ViewPort, cursorSprite2, (uint8_t*)&cursorData2);
-
         x <<= 3;
         y <<= 3;
         x += x + x - 3;
@@ -1663,6 +1658,11 @@ void PlatformAmiga::showCursor(uint16_t x, uint16_t y)
 
         MoveSprite(&screen->ViewPort, cursorSprite1, x, y);
         MoveSprite(&screen->ViewPort, cursorSprite2, x + 16, y);
+
+        cursorSprite1->height = 28;
+        cursorSprite2->height = 28;
+        ChangeSprite(&screen->ViewPort, cursorSprite1, (uint8_t*)&cursorData1);
+        ChangeSprite(&screen->ViewPort, cursorSprite2, (uint8_t*)&cursorData2);
     }
 }
 
