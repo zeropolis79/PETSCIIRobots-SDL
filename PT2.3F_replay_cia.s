@@ -61,7 +61,7 @@
 ;	BSR	ResetCIAInt
 ;	RTS
 
-DOSname	dc.b "dos.library",0
+;DOSname	dc.b "dos.library",0
 
 ;---- CIA Interrupt ----
 
