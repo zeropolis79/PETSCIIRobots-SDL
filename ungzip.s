@@ -841,3 +841,5 @@ lencode:	ds.l	2
 distcode:	ds.l	2
 codes_data:	ds.b	1328
 offs:		ds.w	MAXBITS+1
+
+		end
