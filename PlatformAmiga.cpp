@@ -56,7 +56,7 @@
 #endif
 #define CHIP_MEMORY_SIZE (SCREEN_PLANES_SIZE + TILES_PLANES_SIZE + TILES_MASK_SIZE + COMBINED_TILE_PLANES_SIZE)
 #ifdef PLATFORM_PRELOAD_SUPPORT
-#define PRELOADED_ASSETS_BUFFER_SIZE (32032 + 32032 + 32032 + 65108 + 33792 + 17184)
+#define PRELOADED_ASSETS_BUFFER_SIZE (32032 + 32032 + 32032 + 69536 + 33792 + 17184)
 #endif
 static const char version[] = "$VER: Attack of the PETSCII Robots 1.0 (2021-12-15)";
 
@@ -712,7 +712,7 @@ void PlatformAmiga::preloadAssets()
 
         if (moduleData) {
             preloadedAssets[asset] = preloadedAssetBuffer + offset;
-            preloadedAssetLengths[asset] = load(moduleFilenames[0], preloadedAssets[asset], 65108, 0);
+            preloadedAssetLengths[asset] = load(moduleFilenames[0], preloadedAssets[asset], 69536, 0);
             offset += preloadedAssetLengths[asset++];
 
             preloadedAssets[asset] = preloadedAssetBuffer + offset;
