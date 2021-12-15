@@ -189,8 +189,13 @@ stored:	move.l	d1,-(sp)
 	clr.l	bitbuf		; discard leftover bits from current byte (assumes s->bitcnt < 8)
 	clr.l	bitcnt
 
-	move.w	(a0)+,d0
-	move.w	(a0)+,d1
+	move.b	1(a0),d0
+	lsl.w	#8,d0
+	move.b	(a0),d0
+	move.b	3(a0),d1
+	lsl.w	#8,d1
+	move.b	2(a0),d1
+	addq	#4,a0
 	not.w	d1
 	cmp.w	d0,d1
 	beq.s	.stored_ok
