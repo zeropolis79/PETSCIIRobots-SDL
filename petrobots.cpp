@@ -1980,18 +1980,18 @@ void DISPLAY_ENDGAME_SCREEN()
     // display map name
     char* name = CALC_MAP_NAME();
     for (int Y = 0; Y != 16; Y++) {
-        writeToScreenMemory(0x12E + Y, name[Y], 14);
+        writeToScreenMemory(0x12E + Y, name[Y], 4);
     }
     // display elapsed time
     DECNUM = HOURS;
-    DECWRITE(0x17D, 14);
+    DECWRITE(0x17D, 4);
     DECNUM = MINUTES;
-    DECWRITE(0x180, 14);
+    DECWRITE(0x180, 4);
     DECNUM = SECONDS;
-    DECWRITE(0x183, 14);
-    writeToScreenMemory(0x17D, 32, 14); // SPACE
-    writeToScreenMemory(0x180, 58, 14); // COLON
-    writeToScreenMemory(0x183, 58, 14);
+    DECWRITE(0x183, 4);
+    writeToScreenMemory(0x17D, 32, 4); // SPACE
+    writeToScreenMemory(0x180, 58, 4); // COLON
+    writeToScreenMemory(0x183, 58, 4);
     // count robots remaining
     DECNUM = 0;
     for (X = 1; X != 28; X++) {
@@ -1999,7 +1999,7 @@ void DISPLAY_ENDGAME_SCREEN()
             DECNUM++;
         }
     }
-    DECWRITE(0x1CE, 14);
+    DECWRITE(0x1CE, 4);
     // Count secrets remaining
     DECNUM = 0;
     for (X = 48; X != 64; X++) {
@@ -2007,11 +2007,11 @@ void DISPLAY_ENDGAME_SCREEN()
             DECNUM++;
         }
     }
-    DECWRITE(0x21E, 14);
+    DECWRITE(0x21E, 4);
     // display difficulty level
     char* WORD = DIFF_LEVEL_WORDS + (DIFF_LEVEL * 6);
     for (X = 0; X < 6; X++) {
-        writeToScreenMemory(0x26E + X, WORD[X], 14);
+        writeToScreenMemory(0x26E + X, WORD[X], 4);
     }
 }
 
@@ -2491,7 +2491,7 @@ void DISPLAY_WIN_LOSE()
     if (UNIT_TYPE[0] != 0) {
         // WIN MESSAGE
         for (int X = 0; X != 8; X++) {
-            writeToScreenMemory(0x088 + X, WIN_MSG[X], 14);
+            writeToScreenMemory(0x088 + X, WIN_MSG[X], 4, 1);
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
         if (MUSIC_ON == 1) {
@@ -2503,7 +2503,7 @@ void DISPLAY_WIN_LOSE()
     } else {
         // LOSE MESSAGE
         for (int X = 0; X != 9; X++) {
-            writeToScreenMemory(0x088 + X, LOS_MSG[X], 14);
+            writeToScreenMemory(0x088 + X, LOS_MSG[X], 4, 1);
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
         if (MUSIC_ON == 1) {
