@@ -69,7 +69,7 @@ PLAY+RED toggle music
 
 Troubleshooting
 ---------------
-The hard disk installation script "Install" requires the AmigaOS tool "Installer" to be in path. It is included with AmigaOS 2.1 and above but can also be installed from Aminet: https://aminet.net/package/util/misc/Installer-43_3
+The hard disk installation script "Install" requires the AmigaOS tool "Installer" to be in path. It is included with AmigaOS 2.1 and above but can also be installed from Aminet (https://aminet.net/package/util/misc/Installer-43_3). The game can also be installed by manually copying the contents of the disk to the desired location, making sure to copy the Data directory as well.
 
 On systems with only 512 kilobytes of memory the game disk uses the tool "Add44k" to increase the amount of available memory. This tool is not compatible with Kickstart 3.0 and causes display corruption while the game is loading. The solution is to use a different Kickstart version, add more memory to the system or find an alternative for Add44k to be placed in s/startup-sequence.
 
