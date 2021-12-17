@@ -591,11 +591,11 @@ void MAIN_GAME_LOOP()
                         KEYTIMER = 15;
                     }
                     if (B & Platform::JoystickUp) {
-                        SEARCH_OBJECT();
+                        MOVE_OBJECT();
                         KEYTIMER = 15;
                     }
                     if (B & Platform::JoystickDown) {
-                        MOVE_OBJECT();
+                        SEARCH_OBJECT();
                         KEYTIMER = 15;
                     }
                     if (B == Platform::JoystickBlue) {

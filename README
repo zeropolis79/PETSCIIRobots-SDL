@@ -50,8 +50,8 @@ BUTTON1+UP/DOWN/LEFT/RIGHT fire
 BUTTON2 use item
 BUTTON2+LEFT cycle item
 BUTTON2+RIGHT cycle weapon
-BUTTON2+UP search
-BUTTON2+DOWN move
+BUTTON2+UP move
+BUTTON2+DOWN search
 
 Amiga CD32 controls
 -------------------
