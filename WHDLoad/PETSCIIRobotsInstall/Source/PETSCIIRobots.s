@@ -80,9 +80,6 @@ _bootdos:	move.l	_resload,a2
 	jsr	(a1)
 	movem.l	(sp)+,d1/d7/a2/a6
 
-	move.l	d7,d1
-	jsr	_LVOUnLoadSeg(a6)
-
 	pea	TDREASON_OK
 	jmp	resload_Abort(a2)
 
