@@ -1,0 +1,1238 @@
+; $Id: Install 1.27 2020/04/27 23:12:29 wepl Exp wepl $
+
+(set #multiple-versions "")		;set to <> "" if there are multiple versions
+(set #version 3)			;set if no multiple versions 0=RawDIC 1=Patcher 2=DIC 3=Files 4=CD 5=SingleFile 6=Arcadia
+(set #sub-dir "Data")			;sub directory containing data files
+(set #highs-file "highs")		;name of high scores file
+
+(set #readme-file "ReadMe")		;name of readme file
+(set #readme2-file "ReadMe2")		;name of second readme file
+(set #man-file "Manual")		;name of manual file
+(set #hint-file "Hints")		;name of hint file
+(set #sol-file "Solution")		;name of solution file
+(set #extra-file "Extra")		;name of extra file
+(set #extra2-file "Extra2")		;name of second extra file
+(set #extra3-file "Extra3")		;name of third extra file
+(set #prefix @app-name)			;name of slave, directory
+(set #prefix-slave "")
+
+(set #ico_suffix_00 "inf")		;Icon suffixes (not all of these must exist)
+(set #ico_suffix_01 "magicwb")
+(set #ico_suffix_02 "romicon")
+(set #ico_suffix_03 "romirek")
+(set #ico_suffix_10 "newicon")
+(set #ico_suffix_11 "newicon2")
+(set #ico_suffix_12 "newicon3")
+(set #ico_suffix_13 "newexot")
+(set #ico_suffix_14 "newcfou")
+(set #ico_suffix_15 "newirek")
+(set #ico_suffix_16 "newirek2")
+(set #ico_suffix_20 "colicon")
+(set #ico_suffix_21 "colicon2")
+(set #ico_suffix_22 "colicon3")
+(set #ico_suffix_23 "colexot")
+(set #ico_suffix_24 "colfrank")
+(set #ico_suffix_25 "colchris")
+(set #ico_suffix_26 "colcode")
+(set #ico_suffix_27 "colcfou")
+(set #ico_suffix_28 "colcfou2")
+(set #ico_suffix_29 "colzarkov")
+(set #ico_suffix_30 "colirek")
+(set #ico_suffix_31 "colirek2")
+(set #ico_suffix_32 "colmura")
+(set #ico_suffix_40 "boxicon")
+(set #ico_suffix_41 "boxicon2")
+(set #ico_suffix_42 "boxirek")
+
+;Icon descriptions (max 21 chars if you have > 9 entries, or 27 chars otherwise.
+;These are renamed to "gamename.info" so no illegal characters like :/* etc
+;		  "123456789012345678901234567"
+(set #ico_desc_00 "Normal")
+(set #ico_desc_01 "MagicWB")
+(set #ico_desc_02 "RomIcon")
+(set #ico_desc_03 "RomIcon Irek")
+(set #ico_desc_10 "NewIcon")
+(set #ico_desc_11 "NewIcon 2")
+(set #ico_desc_12 "NewIcon 3")
+(set #ico_desc_13 "NewIcon Exotica")
+(set #ico_desc_14 "NewIcon CFou!")
+(set #ico_desc_15 "NewIcon Irek")
+(set #ico_desc_16 "NewIcon Irek 2")
+(set #ico_desc_20 "OS3.5 Icon")
+(set #ico_desc_21 "OS3.5 Icon 2")
+(set #ico_desc_22 "OS3.5 Icon 3")
+(set #ico_desc_23 "OS3.5 Exotica")
+(set #ico_desc_24 "OS3.5 Frank")
+(set #ico_desc_25 "OS3.5 Chris Vella")
+(set #ico_desc_26 "OS3.5 Codetapper")
+(set #ico_desc_27 "OS3.5 CFou!")
+(set #ico_desc_28 "OS3.5 CFou! 2")
+(set #ico_desc_29 "OS3.5 Dr.Zarkov")
+(set #ico_desc_30 "OS3.5 Irek")
+(set #ico_desc_31 "OS3.5 Irek 2")
+(set #ico_desc_32 "OS3.5 Murakami")
+(set #ico_desc_40 "OS3.5 BoxIcon")
+(set #ico_desc_41 "OS3.5 BoxIcon 2")
+(set #ico_desc_42 "OS3.5 BoxIcon Irek")
+
+;---------------------------------------------------------------------
+; Which version does the user want to install? This routine doesn't need
+; to be changed UNLESS there are multiple versions.
+
+(procedure P_SelectVersion
+  (if (= #multiple-versions "")
+    ("")
+    (
+      (set #version
+        (askchoice
+          (prompt ("Which version of %s would you like to install?" @app-name))
+          (default 0)
+	  ;
+	  ; it is recommend to simply set choices which are not required to an
+	  ; empty string ala "", because then other procedures must bot changed
+	  ; because the number of the #version remains unchanged
+	  ;
+	  (choices
+		"Original release (RawDIC)"
+		"Alternate version (Patcher)"
+		"Budget re-release (DIC)"
+		"Hit-Squad version (Files)"
+		"CD/CDTV/CD³² version (Files)"
+		"Defjam compact (Single File)"
+	  )
+          (help @askchoice-help)
+        )
+      )
+      ;
+      ; Certain versions may use different slaves, islaves, imager and icons.
+      ;	This can be set up here if required.
+      ; If you set #prefix it will change: install directory, islave, imager
+      ; and icon. If you set #prefix-slave it only changes the slave name.
+      ; You may also set the #sub-dir here if this is not required with all
+      ; versions
+      ;                                                                         §
+      (select #version
+	; 0 = RawDIC
+        ("")
+	; 1 = Patcher
+        ("")
+	; 2 = DIC
+        ("")
+	; 3 = Files
+        ("")
+	;(set #prefix ("%s%s" #prefix "AGA"))
+	; 4 = CD Files
+        ("")
+	;(
+	;  (set #prefix-slave (cat #prefix "CDTV"))
+	;  (set #sub-dir "data")
+	;)
+	; 5 = Single File
+	("")
+      )
+    )
+  )
+)
+
+;---------------------------------------------------------------------
+; Make the disk images for the install
+
+(procedure P_MakeImages
+  (select #version
+    (				;----- 0 = RawDIC -----
+      (set #last-file "Disk.1")		;last file the imager should create
+      (copyfiles
+        (help @copyfiles-help)
+        (source ("%s.ISlave" #prefix))
+        (dest #dest)
+      )
+      (P_AskSrcDrvRaw)
+      (working "calling RawDIC...")
+      (run ("CD \"%s\"\nRawDIC SLAVE=%s.islave SOURCE=%s\nDelete %s.ISlave Quiet" #dest #prefix #CI_drive #prefix))
+      (if (exists (tackon #dest #last-file))
+        ("")
+        (abort "Disk imaging was not successful!\nRawDIC was unable to create all needed files!")
+      )
+    )
+
+    (				;----- 1 = Patcher -----
+      (set #last-file "Disk.1")		;last file the imager should create
+      (copyfiles
+        (help @copyfiles-help)
+        (source ("%s.imager" #prefix))
+        (dest #dest)
+      )
+      (P_AskSrcDrvRaw)
+      (working "calling Patcher...")
+      (run ("CD \"%s\"\nPatcher -p%s.imager -s%s\nDelete %s.imager Quiet" #dest @app-name #CI_drive @app-name))
+      (if (exists (tackon #dest #last-file))
+        ("")
+        (abort "Disk imaging was not successful!\nThe Patcher was unable to create all needed files!")
+      )
+    )
+
+    (				;----- 2 = DIC (Disk Images) -----
+
+      ;the following lines must be copied and adjusted for multiple disk images
+
+      (set #CI_disknum 1)
+      (set #CI_diskname ("%s Disk %ld" @app-name #CI_disknum))
+      (set #CI_disklen 901120)
+      (set #CI_skiptrk "")
+      (P_CreateImage)
+
+      ;for example...
+      (set #CI_disknum 2)
+      (set #CI_diskname ("%s Disk %ld" @app-name #CI_disknum))
+      (P_CreateImage)
+
+    )
+
+    (				;----- 3 = DOS (Files) -----
+
+      ;if the disk can be requested by the volume name:
+      (set #AD_disk "Attack of the PETSCII Robots")
+      (set #source ("%s:" #AD_disk))
+      (P_AskDisk)
+      (copyfiles
+        (help @copyfiles-help)
+        (source #source)
+        (dest #dest)
+        (pattern "AmigaRobots")
+      )
+
+      (set #source-data (tackon #source "Data"))
+      (set #dest-data (tackon #dest "Data"))
+
+      (working "Decompressing data files")
+
+      (foreach
+        #source-data
+        "#?.gz"
+        (
+         (set #source-file (tackon #source-data @each-name))
+         (set #dest-file (tackon #dest-data (substr @each-name 0 (- (strlen @each-name) 3))))
+         (working "Decompressing " #source-file " to " #dest-file)
+         (run ("\"%s\" \"%s\" \"%s\"" (tackon #source "C/DecompressData") #source-file #dest-file))
+        )
+      )
+    )
+
+    (				;----- 4 = CD (Files) -----
+
+      ;single CD name
+      (message ("\nInsert your %s CD in any drive." @app-name))
+
+      ;multiple CD names, won't give message if already inserted
+      (set #AD_filereq "reshootr.bin")
+      (set #AD_diskname1 "RESHOOTR")
+      (set #AD_diskname2 "reshootr_v1.2")
+      (until
+	#AD_disk
+	(if
+	  (exists ("%s:%s" #AD_diskname1 #AD_filereq) (noreq))
+	  (set #AD_disk #AD_diskname1)
+	)
+	(if
+	  (exists ("%s:%s" #AD_diskname2 #AD_filereq) (noreq))
+	  (set #AD_disk #AD_diskname2)
+	)
+	(if
+	  #AD_disk
+	  ("")
+	  (message ("\nInsert your %s CD in any drive." @app-name))
+	)
+      )
+
+      (copyfiles
+        (help @copyfiles-help)
+        (source "HolidayMakerCDTV:")
+        (pattern "(fonts|[1-9hnp]#?|de|map|se)")
+        (dest #dest)
+      )
+      (copyfiles
+        (help @copyfiles-help)
+        (source "HolidayMakerCDTV:libs")
+        (pattern "diskfont.library")
+        (dest #dest)
+      )
+    )
+
+    (				;----- 5 = DOS (Select a single file on an unknown disk) -----
+      (set #SF_prompt "Please select the xxxxxx file (xxxxxx bytes)")
+      (set #SF_default_filename "xxxxxx")
+      (set #SF_new_filename #SF_default_filename)
+      (P_SelectFile)
+      (if (= #SF_filename "")
+        (abort ("Disk imaging was not successful!\nCould not locate the required file\n%s\n" #SF_default_filename))
+      )
+      (copyfiles
+        (help @copyfiles-help)
+        (source #SF_filename)
+        (dest #dest)
+        (newname #SF_new_filename)
+      )
+    )
+
+    (				;----- 6 = Arcadia
+      (if (getenv "WHDLArcadiaCtrl")
+	(set #ArcadiaCtrl (getenv "WHDLArcadiaCtrl"))
+	(set #ArcadiaCtrl "")
+      )
+      (set #ArcadiaCtrl
+        (askdir
+	  (prompt "Please select the directory where the Arcadia control ROMs named 'scpav3_0.1h' and 'scpav3_0.1l' are located.")
+          (help @askdir-help)
+	  (default #ArcadiaCtrl)
+	)
+      )
+      (run ("setenv WHDLArcadiaCtrl \"%s\"\ncopy ENV:WHDLArcadiaCtrl ENVARC:" #ArcadiaCtrl))
+      (copyfiles
+        (help @copyfiles-help)
+	(source #ArcadiaCtrl)
+        (dest #dest)
+	(pattern "scpav3_0.1[hl]")
+      )
+      (if (getenv "WHDLArcadiaGame")
+	(set #ArcadiaGame (getenv "WHDLArcadiaGame"))
+	(set #ArcadiaGame "")
+      )
+      (set #ArcadiaGame
+        (askdir
+	  (prompt "Please select the directory where the Arcadia game ROMs named 'arcadia2.u#?' or 'lbg240#?' or 'ldrb_#?.bin' are located.")
+          (help @askdir-help)
+	  (default #ArcadiaGame)
+	)
+      )
+      (run ("setenv WHDLArcadiaGame \"%s\"\ncopy ENV:WHDLArcadiaGame ENVARC:" #ArcadiaGame))
+      (copyfiles
+        (help @copyfiles-help)
+	(source #ArcadiaGame)
+        (dest #dest)
+	(pattern "(arcadia2|ldbg240|ldrb_)#?")
+      )
+
+    )
+  )
+)
+
+;----------------------------
+; Create all the icons for the install. If the game requires multiple icons
+; set them up here by calling P_SelectIcon multiple times, one for each
+; icon/slave that the game needs. For 99% of cases, you do not need to
+; change this routine.
+;
+; If you have not setup the WHDLoad tooltypes in the icons, you should
+; change the line(s) below to (set #icon_set_slave_preload "true")
+
+(procedure P_MakeIcons
+  (set #icon_desc "game")
+  (set #icon_prefix #prefix)
+  (set #icon_slave #prefix-slave)
+  (set #icon_set_slave_preload "")
+  (set #icon_set_deftool_stack "true")
+  (P_CopySlave)
+  (P_SelectIcon)
+
+  ; Uncomment the following lines if you have a multiple slave/icon
+  ;(set #icon_desc "Extended RAM")
+  ;(set #icon_newname ("%s AGA" #prefix))
+  ;(set #icon_slave ("%sAGA" #prefix-slave))
+  ;(P_CopySlave)
+  ;(P_SelectIcon)
+)
+
+
+; ** ATTENTION! YOU SHOULD NOT HAVE TO CHANGE ANYTHING BEYOND THIS POINT! **
+
+
+;****************************
+;----------------------------
+; checks if given program is installed, if not abort install
+; #program - to check
+
+(procedure P_ChkRun
+  (set #package "WHDLoad (http://www.whdload.de)")
+  (P_ChkRun_Package)
+)
+(procedure P_ChkRun_Package
+  (if (= 0 (run ("cd SYS:\nWhich %s >NIL:" #program)))
+    ("")
+    (abort
+      (cat
+	"You must install \"" #program "\" first!\n"
+	"It must be accessible via the path.\n"
+	"You can find it in the package " #package "."
+      )
+    )
+  )
+)
+
+;----------------------------
+; decrunch one file using XFD package
+; IN:  #file - file to decrunch (full path)
+; OUT: -
+
+(procedure P_XFDDecrunch
+  (set #program "xfddecrunch")
+  (set #package "XFD (aminet:util/pack/xfdmaster.lha)")
+  (P_ChkRun_Package)
+  (if
+    (<> 0 (run ("%s \"%s\" >CON:///1000//CLOSE" #program #file)))
+    (abort ("\"%s\" has failed to decompress the file \"%s\"" #program #file))
+  )
+)
+
+;----------------------------
+; unpack archive using XAD package
+; IN:  #archive - archive to extract (full path)
+;      #files   - files to extract, pattern possible
+; OUT: -
+
+(procedure P_XADUnfile
+  (set #program "xadunfile")
+  (set #package "XAD (aminet:util/pack/xadmaster.lha)")
+  (P_ChkRun_Package)
+  (if
+    (<> 0 (run ("%s \"%s\" DEST \"%s\" FILE \"%s\" NOABS >CON:///1000//CLOSE" #program #archive #dest #files)))
+    (abort ("\"%s\" has failed to decompress the archive \"%s\"" #program #archive))
+  )
+)
+
+;----------------------------
+; variables to handle disk image files
+
+(set #DI_mode 9)
+(set #DI_image "SYS:")
+(set #DI_imagetmp "T:WHDI.image")
+(set #DI_mount "T:WHDI.mountlist")
+(set #DI_dev "WHDI")
+
+;----------------------------
+; functions to handle disk image files
+; ask the name of the image file
+; IN:  -
+; OUT: -
+
+(procedure PDI_AskMode
+  (if (> #DI_mode 3)
+    (set #DI_mode
+      (askchoice
+	(prompt "In which form of media are your disks to install this program?")
+	(default 0)
+	(choices
+	  "real floppy disks"
+	  "standard disk images (adf, 901120 bytes)"
+	  "CAPS/SPS images or warp files (ipf,mfm,wrp,wwp,...)"
+	)
+	(help
+	  "To install from 'real floppy disks' you have to insert your physical disks into"
+	  " any of your floppy drives.\n\n"
+	  "To install from 'disk images' you must have installed one of the DiskImage packages"
+	  " (aminet:disk/misc/diskimage.lha or aminet:disk/misc/diskimage.mk68-aos.tar.bz2)."
+	  " Required is DEVS:diskimage.device and the program DiskImageCtrl/MountDiskImage"
+	  " in the path.\n\n"
+	  "To install from 'warp files' you must additionally have installed"
+	  " the TrackWarp package (http://www.whdload.de/whdload/TrackWarp16.lha). Required"
+	  " is LIBS:trackwarp.library and the program tw2adf in the path. tw2adf must have"
+	  " version 1.1 or better.\n\n"
+	  "To install from 'SPS/CAPS images' you must additionally have installed the"
+	  " capsimage.device in DEVS: (http://www.softpres.org/)\n\n"
+	  @askchoice-help
+	)
+      )
+    )
+  )
+)
+
+;----------------------------
+; functions to handle disk image files
+; ask the name of the image file
+; IN:  #DI_diskname - name of the disk to insert
+; OUT: -
+
+(procedure PDI_AskImage
+  (if (getenv "WHDLImage")
+    (set #DI_image (getenv "WHDLImage"))
+  )
+  (set #DI_image
+    (askfile
+      (prompt "Please select disk image which is the disk named \"" #DI_diskname "\".\n"
+		"Beware the Installer has problems with long file names!")
+      (default #DI_image)
+      (help @askfile-help)
+    )
+  )
+  (run ("setenv WHDLImage \"%s\"\ncopy ENV:WHDLImage ENVARC:" #DI_image))
+)
+
+;----------------------------
+; functions to handle disk image files
+; insert the image file into the virtual drive
+; IN:  -
+; OUT: -
+
+(procedure PDI_Insert
+  (if
+    (<> 0 (run ("%s Drive=%s: %s Insert=\"%s\" >CON:///1000//CLOSE/AUTO" #DI_cmd #DI_dev #DI_ro #DI_image)))
+    (abort
+	"Sorry, could not load the Image to the Device.\n"
+	"Make sure you have correctly installed " #DI_package ",\n"
+	"you have selected the right disk image\n"
+	"and there are enough free ressources."
+    )
+  )
+)
+
+;----------------------------
+; functions to handle disk image files
+; convert alien image to adf
+; IN:  -
+; OUT: -
+
+(procedure PDI_Convert
+  (set #program "tw2adf")
+  (set #package "TrackWarp (http://www.whdload.de/whdload/TrackWarp15.lha)")
+  (P_ChkRun_Package)
+  (run ("%s Drive=%s: Eject >CON:///1000//CLOSE/AUTO" #DI_cmd #DI_dev))
+  (if
+    (<> 0 (run ("tw2adf \"%s\" %s Quiet Overwrite >CON:///1000//CLOSE/AUTO" #DI_image #DI_imagetmp)))
+    (abort
+	"Sorry, could not convert the specified image file.\n"
+	"Make sure you have correctly installed the package " #package
+	" and there is enough free memory."
+    )
+  )
+  (set #DI_image #DI_imagetmp)
+)
+
+;----------------------------
+; functions to handle disk image files
+; mount the virtual drive
+; IN:  -
+; OUT: -
+
+(procedure PDI_Mount
+  (if (= 37 (/ (getversion "DEVS:diskimage.device") 65536))
+    (
+      (set #program "DiskImageCtrl")
+      (set #DI_ro "ReadOnly")
+      (set #package "DiskImage (aminet:disk/misc/diskimage.lha)")
+    )
+    (
+      (set #program "MountDiskImage")
+      (set #DI_ro "WP")
+      (set #package "DiskImage (aminet:disk/misc/diskimage.mk68-aos.tar.bz2)")
+    )
+  )
+  (P_ChkRun_Package)
+  (set #DI_cmd #program)
+  (set #DI_package #package)
+  (if (getassign #DI_dev "d")
+    ("")
+    (
+      (textfile
+	(dest #DI_mount)
+        (append
+		"/**/\n"
+		#DI_dev ":\n"
+		"\tDevice = diskimage.device\n"
+		"\tUnit = 9\n"
+		"\tFlags = 0\n"
+		"\tSurfaces = 2\n"
+		"\tBlocksPerTrack = 11\n"
+		"\tReserved = 2\n"
+		"\tLowCyl = 0\n"
+		"\tHighCyl = 79\n"
+		"\tStackSize = 4096\n"
+		"\tGlobVec = -1\n"
+		"\tActivate = 1\n"
+        )
+        (help @textfile-help)
+      )
+      (if
+	(<> 0 (run ("mount %s: FROM %s >CON:///1000//CLOSE/AUTO" #DI_dev #DI_mount)))
+        (abort
+	  "Sorry, could not mount the Device " #DI_dev ":.\n"
+	  "Make sure you have correctly installed the package " #DI_package "\n"
+	  "and there are enough free ressources and Unit #9 is not already used."
+        )
+      )
+    )
+  )
+)
+
+;----------------------------
+; functions to handle disk image files
+; eject image from the virtual drive
+; IN:  -
+; OUT: -
+
+(procedure PDI_Eject
+  (if (or (= #DI_mode 1) (= #DI_mode 2))
+    (if
+      (<> 0 (run ("%s Drive=%s: Eject >CON:///1000//CLOSE/AUTO" #DI_cmd #DI_dev)))
+      (message "Could not eject the Image from the Device.")
+      (run ("assign %s: DISMOUNT" #DI_dev))
+    )
+  )
+)
+
+;----------------------------
+; Wait for inserting a named disk or a disk with a named file on it
+; IN:  #AD_disk OR #AD_filereq must be specified!
+;      #AD_disk - name of disk
+;      #AD_filereq - name of a file on the disk which must exist (if all disks have same name,
+;		or there are multiple versions with different disk names)
+;      #AD_diskname - optional on #AD_disk: name of disk for the user requester
+; OUT: - on #AD_disk
+;      #AD_dev on #AD_filereq
+
+(procedure P_AskDisk
+  (set #AD_mode 0)
+  (if #AD_disk (set #AD_mode (+ #AD_mode 1)))
+  (if #AD_filereq (set #AD_mode (+ #AD_mode 2)))
+  (if (= #AD_mode 0) (abort "P_AskDisk: at least one of #AD_disk and #AD_filereq must be specified!"))
+  (if (= #AD_mode 3) (abort "P_AskDisk: only one of #AD_disk and #AD_filereq can be specified!"))
+  (set #AD_mode (- #AD_mode 1))		;becasue 'select' starts with 0
+  (if #AD_diskname
+    ("")
+    (if #AD_disk (set #AD_diskname #AD_disk) (abort "P_AskDisk: #AD_diskname is required for #AD_filereq"))
+  )
+  (PDI_AskMode)
+  (set #DI_diskname #AD_diskname)
+  (select #DI_mode
+    ;0 = floppy
+    (select #AD_mode
+      ;0 = identify by volume name
+      (askdisk
+        (dest #AD_disk)
+        (prompt ("\nInsert Disk \"%s\" in any drive!" #AD_diskname))
+        (help @askdisk-help)
+      )
+      ;0 = identify by a named file on the disk
+      (
+        (P_AskSrcDrv)
+        (set #AD_dev (substr #CI_drive 0 (- (strlen #CI_drive) 1)))	;without colon
+	(until
+	  (exists ("%s:%s" #AD_dev #AD_filereq) (noreq))
+          (message
+            (cat
+	      "\nInsert \"" #AD_diskname "\" into drive " #AD_dev "!"
+	    )
+          )
+	)
+      )
+    )
+    ;1 = adf
+    (
+      (PDI_Mount)
+      (until
+	(select #AD_mode
+	  (getassign #AD_disk "v")
+	  (exists ("%s:%s" #DI_dev #AD_filereq) (noreq))
+	)
+	(PDI_AskImage)
+	(PDI_Insert)
+	(run "wait 1")
+      )
+      (set #AD_dev #DI_dev)
+    )
+    ;2 = warp
+    (
+      (PDI_Mount)
+      (until
+	(select #AD_mode
+	  (getassign #AD_disk "v")
+	  (exists ("%s:%s" #DI_dev #AD_filereq) (noreq))
+	)
+	(PDI_AskImage)
+	(PDI_Convert)
+	(PDI_Insert)
+	(run "wait 1")
+      )
+      (set #AD_dev #DI_dev)
+    )
+  )
+  (set #AD_diskname "")		;reset for next call of this function
+  (set #AD_filereq "")		;reset for next call of this function
+)
+
+;----------------------------
+; Ask for inserting a disk without the possebility to check for the right disk
+; e.g. if the volume label not useable for P_AskDisk
+; IN:  #AD_diskname - name of disk to request
+; OUT: #AD_drive - device name in which the disk has been inserted
+
+(procedure P_AskDiskDev
+  (PDI_AskMode)
+  (set #DI_diskname #AD_diskname)
+  (select #DI_mode
+    ;0 = floppy
+    (
+      (P_AskSrcDrv)
+      (set #AD_drive #CI_drive)
+      (message
+        (cat
+	  "\nInsert \"" #AD_diskname "\" into drive " #AD_drive "!\n\n"
+	  "(make sure it's the right disk because it will not be checked)"
+	)
+      )
+    )
+    ;1 = adf
+    (
+      (PDI_Mount)
+      (PDI_AskImage)
+      (PDI_Insert)
+      (run "wait 1")
+      (set #AD_drive #DI_dev)
+    )
+    ;2 = warp
+    (
+      (PDI_Mount)
+      (PDI_AskImage)
+      (PDI_Convert)
+      (PDI_Insert)
+      (run "wait 1")
+      (set #AD_drive #DI_dev)
+    )
+  )
+)
+
+;----------------------------
+; ask for source drive (DIC installs)
+
+(procedure P_AskSrcDrv
+  (if #CI_drive
+    ("")
+    (
+      (set #dcnt 0)
+      (set #CI_cfg (getenv "WHDLSrcDrv"))
+      (if (#CI_cfg)
+        (if (getassign (substr #CI_cfg 0 (- (strlen #CI_cfg) 1)) "d")
+          (set #dcnt (+ 1 #dcnt)) (set #CI_cfg "")
+        )
+      )
+      (set #CI_df0 "")
+      (if (<> "DF0:" #CI_cfg)
+        (if (getassign "DF0" "d") ((set #dcnt (+ 1 #dcnt)) (set #CI_df0 "DF0:")))
+      )
+      (set #CI_df1 "")
+      (if (<> "DF1:" #CI_cfg)
+        (if (getassign "DF1" "d") ((set #dcnt (+ 1 #dcnt)) (set #CI_df1 "DF1:")))
+      )
+      (set #CI_df2 "")
+      (if (<> "DF2:" #CI_cfg)
+        (if (getassign "DF2" "d") ((set #dcnt (+ 1 #dcnt)) (set #CI_df2 "DF2:")))
+      )
+      (set #CI_df3 "")
+      (if (<> "DF3:" #CI_cfg)
+        (if (getassign "DF3" "d") ((set #dcnt (+ 1 #dcnt)) (set #CI_df3 "DF3:")))
+      )
+      (set #CI_rad "")
+      (if (<> "RAD:" #CI_cfg)
+        (if (getassign "RAD" "d") ((set #dcnt (+ 1 #dcnt)) (set #CI_rad "RAD:")))
+      )
+      (set #CI_ff0 "")
+      (if (<> "FF0:" #CI_cfg)
+        (if (getassign "FF0" "d") ((set #dcnt (+ 1 #dcnt)) (set #CI_ff0 "FF0:")))
+      )
+      (if (< #dcnt 1) (set #CI_cfg "DF0:"))
+      (set #CI_ask "Enter Device Name")
+      (set #CI_drive
+        (askchoice
+          (prompt "Select source drive for diskimages")
+          (choices #CI_cfg #CI_df0 #CI_df1 #CI_df2 #CI_df3 #CI_rad #CI_ff0 #CI_ask)
+          (help @askchoice-help)
+        )
+      )
+      (select #CI_drive
+        (set #CI_drive #CI_cfg)
+        (set #CI_drive #CI_df0)
+        (set #CI_drive #CI_df1)
+        (set #CI_drive #CI_df2)
+        (set #CI_drive #CI_df3)
+        (set #CI_drive #CI_rad)
+        (set #CI_drive #CI_ff0)
+        (set #CI_drive
+          (askstring
+            (prompt "Select source drive for diskimages")
+            (default "DF0:")
+            (help @askstring-help)
+          )
+        )
+      )
+      (run ("setenv WHDLSrcDrv \"%s\"\ncopy ENV:WHDLSrcDrv ENVARC:" #CI_drive))
+    )
+  )
+)
+
+;----------------------------
+; ask for source drive (RawDIC/Patcher installs)
+
+(procedure P_AskSrcDrvRaw
+  (set #dcnt 0)
+  (set #CI_cfg (getenv "WHDLSrcDrvRaw"))
+  (if (#CI_cfg)
+    (if (getassign (substr #CI_cfg 0 (- (strlen #CI_cfg) 1)) "d")
+      (set #dcnt (+ 1 #dcnt)) (set #CI_cfg "")
+    )
+  )
+  (set #CI_df0 "")
+  (if (<> "DF0:" #CI_cfg)
+    (if (getassign "DF0" "d") ((set #dcnt (+ 1 #dcnt)) (set #CI_df0 "DF0:")))
+  )
+  (set #CI_df1 "")
+  (if (<> "DF1:" #CI_cfg)
+    (if (getassign "DF1" "d") ((set #dcnt (+ 1 #dcnt)) (set #CI_df1 "DF1:")))
+  )
+  (set #CI_df2 "")
+  (if (<> "DF2:" #CI_cfg)
+    (if (getassign "DF2" "d") ((set #dcnt (+ 1 #dcnt)) (set #CI_df2 "DF2:")))
+  )
+  (set #CI_df3 "")
+  (if (<> "DF3:" #CI_cfg)
+    (if (getassign "DF3" "d") ((set #dcnt (+ 1 #dcnt)) (set #CI_df3 "DF3:")))
+  )
+  (if (< #dcnt 1)
+    (set #CI_drive "DF0:")
+    (if (> #dcnt 1)
+      (
+	(set #CI_drive
+	  (askchoice
+	    (prompt "Select source drive for diskimages")
+	    (choices #CI_cfg #CI_df0 #CI_df1 #CI_df2 #CI_df3)
+	    (help @askchoice-help)
+	  )
+	)
+	(select #CI_drive
+	  (set #CI_drive #CI_cfg)
+	  (set #CI_drive #CI_df0)
+	  (set #CI_drive #CI_df1)
+	  (set #CI_drive #CI_df2)
+	  (set #CI_drive #CI_df3)
+	)
+      )
+      (set #CI_drive (cat #CI_cfg #CI_df0 #CI_df1 #CI_df2 #CI_df3))
+    )
+  )
+  (run ("setenv WHDLSrcDrvRaw \"%s\"\ncopy ENV:WHDLSrcDrvRaw ENVARC:" #CI_drive))
+)
+
+;----------------------------
+; Create Image using DIC
+; #dest        - path to save image in
+; #CI_disknum  - number of the disk image to create
+; #CI_diskname - label of the disk
+; #CI_disklen  - length of disk image to create
+; #CI_skiptrk  - track to skip, -1 means no skip
+; #CI_drive    - drive to create image from
+
+(procedure P_CreateImage
+  (PDI_AskMode)
+  (set #DI_diskname #CI_diskname)
+  (select #DI_mode
+    ;0 = floppy
+    (
+      (P_AskSrcDrv)
+      (message
+        (cat
+	  "\nInsert \"" #CI_diskname "\" into drive " #CI_drive "!\n\n"
+	  "(make sure it's the right disk because it will not be checked)"
+	)
+      )
+    )
+    ;1 = adf
+    (
+      (set #CI_drive ("%s:" #DI_dev))
+      (PDI_Mount)
+      (PDI_AskImage)
+      (PDI_Insert)
+    )
+    ;1 = warp
+    (
+      (set #CI_drive ("%s:" #DI_dev))
+      (PDI_Mount)
+      (PDI_AskImage)
+      (PDI_Convert)
+      (PDI_Insert)
+    )
+  )
+  (if (= #CI_skiptrk "")
+    (set #option "")
+    (set #option (cat " SKIPTRACK=" #CI_skiptrk))
+  )
+  (if
+    (= 0
+      (run
+        (cat
+          "cd \"" #dest "\"\n"
+          "DIC " #CI_drive " FD=" #CI_disknum " LD=" #CI_disknum " SIZE="
+          #CI_disklen #option " PEDANTIC >CON:///1000//CLOSE"
+        )
+      )
+    )
+    (run ("FileNote \"%s.%ld\" \"%s\" Quiet" (tackon #dest "disk") #CI_disknum @app-name))
+    (abort "\"DIC\" has failed to create a diskimage")
+  )
+)
+
+;----------------------------
+; Select a file (when unsure what disk the file exists on)
+; IN:  #SF_prompt           - message to display when asking for the file
+;      #SF_default_filename - default filename
+; OUT: #SF_filename         - output filename or "" if nothing selected
+
+(procedure P_SelectFile
+  (set #SF_filename "")
+  (set #SF_filename
+    (askfile
+      (prompt #SF_prompt)
+      (help @askfile-help)
+      (default #SF_default_filename)
+    )
+  )
+)
+
+;----------------------------
+; copy file/directory including icon if exist
+; #copy-file - name of file to copy
+
+(procedure P_CopyFile
+  (set #CF_type (exists #copy-file))
+  (if #CF_type (
+    (if (= #CF_type 2)
+      ((copyfiles
+          (help @copyfiles-help)
+          (source #copy-file)
+          (dest (tackon #dest #copy-file))
+	  (all)
+      ))
+      ((copyfiles
+          (help @copyfiles-help)
+          (source #copy-file)
+          (dest #dest)
+      ))
+    )
+    (if (exists ("%s.info" #copy-file)) (
+      (copyfiles
+        (help @copyfiles-help)
+        (source ("%s.info" #copy-file))
+        (dest #dest)
+      )
+      (tooltype
+        (dest (tackon #dest #copy-file))
+        (noposition)
+      )
+    ))
+  ))
+)
+
+;----------------------------
+; copy a WHDLoad slave
+; #icon_slave - name of the slave to copy (without .Slave extension)
+
+(procedure P_CopySlave
+  (copyfiles
+    (help @copyfiles-help)
+    (source ("%s.Slave" #icon_slave))
+    (dest #dest)
+  )
+)
+
+;----------------------------
+
+(procedure P_Icon
+  (copyfiles
+    (help @copyfiles-help)
+    (source ("%s.%s" #icon_prefix #icon-suf))
+    (newname ("%s.info" #icon-name))
+    (dest #icon-dir)
+  )
+  (tooltype
+    (dest (tackon #icon-dir #icon-name))
+    (noposition)
+  )
+)
+
+;----------------------------
+; Select an icon by presenting the user with a list of all found icons
+; IN:  #icon_prefix  - filename prefix for this icon (eg. intro, game)
+;      #icon_newname - destination filename for the icon (optional, default is #icon_prefix)
+;      #icon_desc    - description of the icon (eg. intro, game)
+;      #icon_slave   - name of the slave the tooltype Slave= should be set
+;                      to (without the .slave suffix)
+
+(procedure P_SelectIcon
+  (if #icon_newname ("") (set #icon_newname #icon_prefix))
+  (set #icnt 0)
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_42)) (set #icon #ico_suffix_42 #icnt (+ 1 #icnt) #icon_42 #ico_desc_42) (set #icon_42 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_41)) (set #icon #ico_suffix_41 #icnt (+ 1 #icnt) #icon_41 #ico_desc_41) (set #icon_41 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_40)) (set #icon #ico_suffix_40 #icnt (+ 1 #icnt) #icon_40 #ico_desc_40) (set #icon_40 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_32)) (set #icon #ico_suffix_32 #icnt (+ 1 #icnt) #icon_32 #ico_desc_32) (set #icon_32 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_31)) (set #icon #ico_suffix_31 #icnt (+ 1 #icnt) #icon_31 #ico_desc_31) (set #icon_31 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_30)) (set #icon #ico_suffix_30 #icnt (+ 1 #icnt) #icon_30 #ico_desc_30) (set #icon_30 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_29)) (set #icon #ico_suffix_29 #icnt (+ 1 #icnt) #icon_29 #ico_desc_29) (set #icon_29 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_28)) (set #icon #ico_suffix_28 #icnt (+ 1 #icnt) #icon_28 #ico_desc_28) (set #icon_28 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_27)) (set #icon #ico_suffix_27 #icnt (+ 1 #icnt) #icon_27 #ico_desc_27) (set #icon_27 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_26)) (set #icon #ico_suffix_26 #icnt (+ 1 #icnt) #icon_26 #ico_desc_26) (set #icon_26 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_25)) (set #icon #ico_suffix_25 #icnt (+ 1 #icnt) #icon_25 #ico_desc_25) (set #icon_25 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_24)) (set #icon #ico_suffix_24 #icnt (+ 1 #icnt) #icon_24 #ico_desc_24) (set #icon_24 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_23)) (set #icon #ico_suffix_23 #icnt (+ 1 #icnt) #icon_23 #ico_desc_23) (set #icon_23 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_22)) (set #icon #ico_suffix_22 #icnt (+ 1 #icnt) #icon_22 #ico_desc_22) (set #icon_22 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_21)) (set #icon #ico_suffix_21 #icnt (+ 1 #icnt) #icon_21 #ico_desc_21) (set #icon_21 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_20)) (set #icon #ico_suffix_20 #icnt (+ 1 #icnt) #icon_20 #ico_desc_20) (set #icon_20 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_16)) (set #icon #ico_suffix_16 #icnt (+ 1 #icnt) #icon_16 #ico_desc_16) (set #icon_16 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_15)) (set #icon #ico_suffix_15 #icnt (+ 1 #icnt) #icon_15 #ico_desc_15) (set #icon_15 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_14)) (set #icon #ico_suffix_14 #icnt (+ 1 #icnt) #icon_14 #ico_desc_14) (set #icon_14 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_13)) (set #icon #ico_suffix_13 #icnt (+ 1 #icnt) #icon_13 #ico_desc_13) (set #icon_13 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_12)) (set #icon #ico_suffix_12 #icnt (+ 1 #icnt) #icon_12 #ico_desc_12) (set #icon_12 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_11)) (set #icon #ico_suffix_11 #icnt (+ 1 #icnt) #icon_11 #ico_desc_11) (set #icon_11 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_10)) (set #icon #ico_suffix_10 #icnt (+ 1 #icnt) #icon_10 #ico_desc_10) (set #icon_10 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_03)) (set #icon #ico_suffix_03 #icnt (+ 1 #icnt) #icon_03 #ico_desc_03) (set #icon_03 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_02)) (set #icon #ico_suffix_02 #icnt (+ 1 #icnt) #icon_02 #ico_desc_02) (set #icon_02 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_01)) (set #icon #ico_suffix_01 #icnt (+ 1 #icnt) #icon_01 #ico_desc_01) (set #icon_01 ""))
+  (if (exists ("%s.%s" #icon_prefix #ico_suffix_00)) (set #icon #ico_suffix_00 #icnt (+ 1 #icnt) #icon_00 #ico_desc_00) (set #icon_00 ""))
+  (if (= #icnt 0) (abort "no icon found"))
+  (if (> #icnt 1) (
+    (if (= #newstuff 1) (
+      (set #icon-dir ("T:%s Icons" #icon_prefix))
+      (makedir #icon-dir
+        (help @makedir-help)
+      )
+      (if #icon_00 ((set #icon-suf #ico_suffix_00) (set #icon-name #ico_desc_00) (P_Icon)))
+      (if #icon_01 ((set #icon-suf #ico_suffix_01) (set #icon-name #ico_desc_01) (P_Icon)))
+      (if #icon_02 ((set #icon-suf #ico_suffix_02) (set #icon-name #ico_desc_02) (P_Icon)))
+      (if #icon_03 ((set #icon-suf #ico_suffix_03) (set #icon-name #ico_desc_03) (P_Icon)))
+      (if #icon_10 ((set #icon-suf #ico_suffix_10) (set #icon-name #ico_desc_10) (P_Icon)))
+      (if #icon_11 ((set #icon-suf #ico_suffix_11) (set #icon-name #ico_desc_11) (P_Icon)))
+      (if #icon_12 ((set #icon-suf #ico_suffix_12) (set #icon-name #ico_desc_12) (P_Icon)))
+      (if #icon_13 ((set #icon-suf #ico_suffix_13) (set #icon-name #ico_desc_13) (P_Icon)))
+      (if #icon_14 ((set #icon-suf #ico_suffix_14) (set #icon-name #ico_desc_14) (P_Icon)))
+      (if #icon_15 ((set #icon-suf #ico_suffix_15) (set #icon-name #ico_desc_15) (P_Icon)))
+      (if #icon_16 ((set #icon-suf #ico_suffix_16) (set #icon-name #ico_desc_16) (P_Icon)))
+      (if #icon_20 ((set #icon-suf #ico_suffix_20) (set #icon-name #ico_desc_20) (P_Icon)))
+      (if #icon_21 ((set #icon-suf #ico_suffix_21) (set #icon-name #ico_desc_21) (P_Icon)))
+      (if #icon_22 ((set #icon-suf #ico_suffix_22) (set #icon-name #ico_desc_22) (P_Icon)))
+      (if #icon_23 ((set #icon-suf #ico_suffix_23) (set #icon-name #ico_desc_23) (P_Icon)))
+      (if #icon_24 ((set #icon-suf #ico_suffix_24) (set #icon-name #ico_desc_24) (P_Icon)))
+      (if #icon_25 ((set #icon-suf #ico_suffix_25) (set #icon-name #ico_desc_25) (P_Icon)))
+      (if #icon_26 ((set #icon-suf #ico_suffix_26) (set #icon-name #ico_desc_26) (P_Icon)))
+      (if #icon_27 ((set #icon-suf #ico_suffix_27) (set #icon-name #ico_desc_27) (P_Icon)))
+      (if #icon_28 ((set #icon-suf #ico_suffix_28) (set #icon-name #ico_desc_28) (P_Icon)))
+      (if #icon_29 ((set #icon-suf #ico_suffix_29) (set #icon-name #ico_desc_29) (P_Icon)))
+      (if #icon_30 ((set #icon-suf #ico_suffix_30) (set #icon-name #ico_desc_30) (P_Icon)))
+      (if #icon_31 ((set #icon-suf #ico_suffix_31) (set #icon-name #ico_desc_31) (P_Icon)))
+      (if #icon_32 ((set #icon-suf #ico_suffix_32) (set #icon-name #ico_desc_32) (P_Icon)))
+      (if #icon_40 ((set #icon-suf #ico_suffix_40) (set #icon-name #ico_desc_40) (P_Icon)))
+      (if #icon_41 ((set #icon-suf #ico_suffix_41) (set #icon-name #ico_desc_41) (P_Icon)))
+      (if #icon_42 ((set #icon-suf #ico_suffix_42) (set #icon-name #ico_desc_42) (P_Icon)))
+      (openwbobject #icon-dir)
+    ))
+    ;the following statement should enable proportional font for 'askchoice'
+    ;according to the docs, but doesn't seems to change anything
+    ;(set #icon_00 ("%c[2p%s" 27 #icon_00))
+    (set #icon
+      (askchoice
+        (prompt ("\nWhich %s icon would you like to install?\n" #icon_desc))
+	(choices #icon_00 #icon_01 #icon_02 #icon_03
+		 #icon_10 #icon_11 #icon_12 #icon_13 #icon_14 #icon_15 #icon_16
+		 #icon_20 #icon_21 #icon_22 #icon_23 #icon_24 #icon_25 #icon_26 #icon_27 #icon_28 #icon_29
+		 #icon_30 #icon_31 #icon_32
+		 #icon_40 #icon_41 #icon_42)
+        (default #icon)
+        (help @askchoice-help)
+      )
+    )
+    (if (= #newstuff 1) (
+      (closewbobject #icon-dir)
+      (run ("Delete \"%s\" All Quiet Force" #icon-dir))
+    ))
+    (select #icon
+      (set #icon #ico_suffix_00)
+      (set #icon #ico_suffix_01)
+      (set #icon #ico_suffix_02)
+      (set #icon #ico_suffix_03)
+      (set #icon #ico_suffix_10)
+      (set #icon #ico_suffix_11)
+      (set #icon #ico_suffix_12)
+      (set #icon #ico_suffix_13)
+      (set #icon #ico_suffix_14)
+      (set #icon #ico_suffix_15)
+      (set #icon #ico_suffix_16)
+      (set #icon #ico_suffix_20)
+      (set #icon #ico_suffix_21)
+      (set #icon #ico_suffix_22)
+      (set #icon #ico_suffix_23)
+      (set #icon #ico_suffix_24)
+      (set #icon #ico_suffix_25)
+      (set #icon #ico_suffix_26)
+      (set #icon #ico_suffix_27)
+      (set #icon #ico_suffix_28)
+      (set #icon #ico_suffix_29)
+      (set #icon #ico_suffix_30)
+      (set #icon #ico_suffix_31)
+      (set #icon #ico_suffix_32)
+      (set #icon #ico_suffix_40)
+      (set #icon #ico_suffix_41)
+      (set #icon #ico_suffix_42)
+    )
+  ))
+  (copyfiles
+    (help @copyfiles-help)
+    (source ("%s.%s" #icon_prefix #icon))
+    (newname ("%s.info" #icon_newname))
+    (dest #dest)
+  )
+  ;installer has problems on deleting tooltypes with newicons
+  (if (<> (substr #icon 0 3) "new")
+    (tooltype
+      (dest (tackon #dest #icon_newname))
+      (settooltype "Slave")
+      (settooltype "PreLoad")
+    )
+  )
+  (tooltype
+    (dest (tackon #dest #icon_newname))
+    (settooltype "PreLoad" "")
+    (settooltype "Slave" ("%s.Slave" #icon_slave))
+  )
+  (tooltype
+    (dest (tackon #dest #icon_newname))
+    (setdefaulttool "WHDLoad")
+    (setstack 10240)
+    (noposition)
+  )
+)
+
+;****************************
+
+(if (< @installer-version (+ (* 44 65536) 10))
+  (
+    (message
+      (cat
+        "Warning: your installer is outdated.\n"
+        "Some features of this installation won't be available, "
+        "such as icon show and drawer opening. "
+        "You have version " (/ @installer-version 65536) "."
+        (BITAND @installer-version 65535) ", recommended is version 44.10. "
+        "The 'installer' 44.10 comes with OS 3.5 but is also contained in the NDK 3.9. "
+        "You may also use InstallerNG by Jens Tröger."
+        "\n\n"
+        "The installers can be obtained from the net:\n"
+	"http://www.haage-partner.de/download/AmigaOS/NDK3.9.lha\n"
+        "aminet:util/sys/InstallerNG.lha"
+      )
+    )
+    (set #newstuff 0)
+  )
+  (set #newstuff 1)
+)
+
+(if (exists #readme-file)
+  (if (= 0 (run ("SYS:Utilities/Multiview %s" #readme-file)))
+    ("")
+    (run ("SYS:Utilities/More %s" #readme-file))
+  )
+)
+(if (exists #readme2-file)
+  (if (= 0 (run ("SYS:Utilities/Multiview \"%s\"" #readme2-file)))
+    ("")
+    (run ("SYS:Utilities/More \"%s\"" #readme2-file))
+  )
+)
+
+(set #program "WHDLoad")
+(P_ChkRun)
+
+(set #program "RawDIC")
+(P_ChkRun)
+
+(set #program "Patcher")
+(P_ChkRun)
+
+(set #program "DIC")
+(P_ChkRun)
+
+(if (getenv "WHDLInstPath")
+  (set @default-dest (getenv "WHDLInstPath"))
+)
+
+(P_SelectVersion)
+(if (= #prefix-slave "") (set #prefix-slave #prefix))
+
+(set #dest
+  (askdir
+    (prompt
+      (cat
+	"Where should \"" @app-name "\" be installed?\n"
+	"A drawer \"" #prefix "\" will be automatically created."
+      )
+    )
+    (help @askdir-help)
+    (default @default-dest)
+  )
+)
+(run ("setenv WHDLInstPath \"%s\"\ncopy ENV:WHDLInstPath ENVARC:" #dest))
+(set #dest (tackon #dest #prefix))
+(if (exists #dest) (
+  (set #choice
+    (askbool
+      (prompt
+        (cat
+          "\nDirectory \"" #dest "\" already exists.\n"
+          "Should it be deleted?"
+        )
+      )
+      (default 1)
+      (choices "Delete" "Skip")
+      (help @askbool-help)
+    )
+  )
+  (if (= #choice 1)
+    (run ("Delete \"%s\" \"%s.info\" All Quiet Force" #dest #dest))
+  )
+))
+(makedir #dest
+  (help @makedir-help)
+  (infos)
+)
+
+;----------------------------
+
+(P_MakeIcons)
+(set #copy-file #readme-file)
+(P_CopyFile)
+(set #copy-file #readme2-file)
+(P_CopyFile)
+(set #copy-file #man-file)
+(P_CopyFile)
+(set #copy-file #hint-file)
+(P_CopyFile)
+(set #copy-file #sol-file)
+(P_CopyFile)
+(set #copy-file #extra-file)
+(P_CopyFile)
+(set #copy-file #extra2-file)
+(P_CopyFile)
+(set #copy-file #extra3-file)
+(P_CopyFile)
+(set #dest-org #dest)
+(if (= #sub-dir "")
+  ("")
+  (
+    (set #dest (tackon #dest #sub-dir))
+    (makedir #dest
+      (help @makedir-help)
+    )
+  )
+)
+(set #copy-file #highs-file)
+(P_CopyFile)
+(P_MakeImages)
+(PDI_Eject)
+(if (= #newstuff 1)
+  (openwbobject #dest-org)
+)
+(set @default-dest #dest-org)
+(exit)

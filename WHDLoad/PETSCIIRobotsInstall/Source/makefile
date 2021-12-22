@@ -1,0 +1,11 @@
+PROGNAME = PETSCIIRobots
+WHDLOADER = $(PROGNAME).slave
+SOURCE = $(PROGNAME).s
+
+all :  $(WHDLOADER)
+
+$(WHDLOADER) : $(SOURCE)
+	basm $(SOURCE)
+
+clean:
+	delete $(WHDLOADER)
