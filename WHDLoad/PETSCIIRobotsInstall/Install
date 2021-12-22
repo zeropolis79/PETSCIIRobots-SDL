@@ -204,6 +204,10 @@
       (set #source-data (tackon #source "Data"))
       (set #dest-data (tackon #dest "Data"))
 
+      (makedir #dest-data
+        (help @makedir-help)
+      )
+
       (working "Decompressing data files")
 
       (foreach
