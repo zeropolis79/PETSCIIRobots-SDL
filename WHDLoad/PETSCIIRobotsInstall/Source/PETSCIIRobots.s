@@ -31,31 +31,33 @@ slv_keyexit	= $59	; F10
 
 	INCLUDE	"kick13.s"
 
-	dc.b	"$VER: PETSCIIRobots.slave 1.0 (22.12.2021)",0
+	dc.b	"$VER: PETSCIIRobots.slave 1.0 (23.12.2021)",0
 
 slv_CurrentDir:	dc.b	"Data",0
 slv_name:		dc.b	"Attack of the PETSCII Robots",0
 slv_copy:		dc.b	"2021 8-Bit Productions, LLC.",0
 slv_info:		dc.b	"Adapted by Vesa Halttunen",10
-				dc.b	"Version 1.0 (22.12.2021)",0
+				dc.b	"Version 1.0 (23.12.2021)",0
 programName:	dc.b	"AmigaRobots",0
 args:			dc.b	10
 argsEnd:		dc.b	0
 				EVEN
 
-_bootdos:	move.l	_resload,a2
+_bootdos:
+	move.l	_resload,a2
+	lea	programName(pc),a3
 
 	lea	_dosname(pc),a1
 	move.l	4.w,a6
 	jsr	_LVOOldOpenLibrary(a6)
 	move.l	d0,a6
 
-	lea	programName(pc),a3
 	move.l	a3,d1
 	jsr	_LVOLoadSeg(a6)
 	tst.l	d0
 	bne.s	.checkVersion
 
+.readFailure:
 	jsr	_LVOIoErr(a6)
 	move.l	a3,-(sp)
 	move.l	d0,-(sp)
@@ -68,27 +70,45 @@ _bootdos:	move.l	_resload,a2
 	add.l	d0,d0
 	add.l	d0,d0
 	addq	#4,d0
-	move.l	d0,a3
+	move.l	d0,a4
 
-	move.l	a3,a0
-	move.l	#$907c,d0
+	move.l	a3,d1
+	move.l	#MODE_OLDFILE,d2
+	jsr	_LVOOpen(a6)
+	move.l	d0,d1
+	beq.s	.readFailure
+
+	move.l	#300,d3
+	sub.l	d3,sp
+	move.l	sp,d2
+	jsr	_LVORead(a6)
+
+	move.l	d3,d0
+	move.l	sp,a0
 	jsr	resload_CRC16(a2)
-	move.w	d0,$41000000
-	cmp.w	#$683a,d0
-	beq	.patch
+
+	add.l	d3,sp
+
+	cmp.w	#$20af,d0
+	beq	.checkJSR
+
+.wrongVersion:
 	pea	TDREASON_WRONGVER
 	jmp	resload_Abort(a2)
 
-.patch:
+.checkJSR:
+	cmp.w	#$4e92,$2a68(a4)	; jsr(a2)
+	bne.s	.wrongVersion
+
 	lea	patchList(pc),a0	
-	move.l	a3,a1
+	move.l	a4,a1
 	jsr	resload_Patch(a2)
 
 	lea	args(pc),a0
 	move.l	4(sp),d0
 	sub.l	#5*4,d0
 	moveq	#argsEnd-args,d0
-	jsr	(a3)
+	jsr	(a4)
 
 	move.l	_resload,a2
 	pea	TDREASON_OK
