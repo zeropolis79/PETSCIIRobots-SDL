@@ -214,11 +214,13 @@ static uint16_t blackPalette[16] = { 0 };
 #else
 static uint16_t blackPalette[16] = { 0x000, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0 };
 #endif
+#ifdef PLATFORM_IMAGE_SUPPORT
 static const char* imageFilenames[] = {
     "IntroScreen.raw",
     "GameScreen.raw",
     "GameOver.raw"
 };
+#endif
 static const char* moduleFilenames[] = {
     "mod.metal heads",
     "mod.win",
@@ -1649,7 +1651,7 @@ void PlatformAmiga::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t
 }
 #endif
 
-#ifdef PLATFORM_SPRITE_SUPPORT
+#ifdef PLATFORM_CURSOR_SUPPORT
 void PlatformAmiga::showCursor(uint16_t x, uint16_t y)
 {
     if (cursorSprite1->num != -1 && cursorSprite2->num != -1) {

@@ -51,7 +51,7 @@ public:
     virtual void renderLiveMapTile(uint8_t* map, uint8_t x, uint8_t y);
     virtual void renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots);
 #endif
-#ifdef PLATFORM_SPRITE_SUPPORT
+#ifdef PLATFORM_CURSOR_SUPPORT
     virtual void showCursor(uint16_t x, uint16_t y);
     virtual void hideCursor();
 #endif
