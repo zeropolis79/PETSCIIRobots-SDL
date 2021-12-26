@@ -87,6 +87,10 @@ PlatformSDL::PlatformSDL() :
     for (int i = 0; i < 3; i++) {
         imageSurfaces[i] = IMG_Load(imageFilenames[i]);
     }
+    itemsSurface = IMG_Load("items.png");
+    keysSurface = IMG_Load("keys.png");
+    healthSurface = IMG_Load("health.png");
+    facesSurface = IMG_Load("faces.png");
 #endif
     SDL_SetSurfaceBlendMode(fontSurface, SDL_BLENDMODE_NONE);
 
@@ -343,6 +347,64 @@ void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t varia
     SDL_BlitSurface(tileSurfaces[tile], &sourceRect, windowSurface, &destinationRect);
 #endif
 }
+
+#ifdef PLATFORM_IMAGE_SUPPORT
+void PlatformSDL::renderItem(uint8_t item, uint16_t x, uint16_t y)
+{
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.x = 0;
+    sourceRect.y = item * 21;
+    sourceRect.w = 48;
+    sourceRect.h = 21;
+    destinationRect.x = x;
+    destinationRect.y = y;
+    destinationRect.w = 48;
+    destinationRect.h = 21;
+    SDL_BlitSurface(itemsSurface, &sourceRect, windowSurface, &destinationRect);
+}
+
+void PlatformSDL::renderKey(uint8_t key, uint16_t x, uint16_t y)
+{
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.x = 0;
+    sourceRect.y = key * 14;
+    sourceRect.w = 16;
+    sourceRect.h = 14;
+    destinationRect.x = x;
+    destinationRect.y = y;
+    destinationRect.w = 16;
+    destinationRect.h = 14;
+    SDL_BlitSurface(keysSurface, &sourceRect, windowSurface, &destinationRect);
+}
+
+void PlatformSDL::renderHealth(uint8_t health, uint16_t x, uint16_t y)
+{
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.x = 0;
+    sourceRect.y = health * 51;
+    sourceRect.w = 48;
+    sourceRect.h = 51;
+    destinationRect.x = x;
+    destinationRect.y = y;
+    destinationRect.w = 48;
+    destinationRect.h = 51;
+    SDL_BlitSurface(healthSurface, &sourceRect, windowSurface, &destinationRect);
+}
+
+void PlatformSDL::renderFace(uint8_t face, uint16_t x, uint16_t y)
+{
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.x = 0;
+    sourceRect.y = face * 24;
+    sourceRect.w = 16;
+    sourceRect.h = 24;
+    destinationRect.x = x;
+    destinationRect.y = y;
+    destinationRect.w = 16;
+    destinationRect.h = 24;
+    SDL_BlitSurface(facesSurface, &sourceRect, windowSurface, &destinationRect);
+}
+#endif
 
 void PlatformSDL::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
 {
