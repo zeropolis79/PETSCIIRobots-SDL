@@ -75,7 +75,11 @@ PlatformSDL::PlatformSDL() :
 
     window = SDL_CreateWindow("Attack of the PETSCII robots", 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT, 0);
     windowSurface = SDL_GetWindowSurface(window);
+#ifdef PLATFORM_COLOR_SUPPORT
+    fontSurface = IMG_Load("c64font.png");
+#else
     fontSurface = IMG_Load("petfont.png");
+#endif
 #ifdef PLATFORM_IMAGE_BASED_TILES
     tileSurface = IMG_Load("tiles.png");
 #else
@@ -250,8 +254,8 @@ void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
 
             for (int y = 0; y < 3; y++) {
                 for (int x = 0; x < 3; x++) {
-                    sourceRect.x = characters[y][x] << 3;
-                    sourceRect.y = 0;
+                    sourceRect.x = 0;
+                    sourceRect.y = characters[y][x] << 3;
                     destinationRect.x = x << 3;
                     destinationRect.y = tile * 24 + (y << 3);
                     if (characters[y][x] != 0x3A) {
@@ -269,8 +273,8 @@ void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 3; x++) {
-                sourceRect.x = characters[y][x] << 3;
-                sourceRect.y = 0;
+                sourceRect.x = 0;
+                sourceRect.y = characters[y][x] << 3;
                 destinationRect.x = x << 3;
                 destinationRect.y = y << 3;
                 SDL_SetSurfaceAlphaMod(fontSurface, ((tileAttributes[tile] & 0x80) == 0 || characters[y][x] != 0x3A) ? 255 : 0);
@@ -309,8 +313,8 @@ void PlatformSDL::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTile
 
         for (int y = 0; y < 3; y++) {
             for (int x = 0; x < 3; x++) {
-                sourceRect.x = characters[y][x] << 3;
-                sourceRect.y = 0;
+                sourceRect.x = 0;
+                sourceRect.y = characters[y][x] << 3;
                 destinationRect.x = x << 3;
                 destinationRect.y = y << 3;
                 SDL_BlitSurface(fontSurface, &sourceRect, tileSurfaces[tile], &destinationRect);
@@ -438,8 +442,8 @@ void PlatformSDL::shakeScreen()
 void PlatformSDL::writeToScreenMemory(uint16_t address, uint8_t value)
 {
     SDL_Rect sourceRect, destinationRect;
-    sourceRect.x = value << 3;
-    sourceRect.y = 0;
+    sourceRect.x = 0;
+    sourceRect.y = value << 3;
     sourceRect.w = 8;
     sourceRect.h = 8;
     destinationRect.x = (address % 40) << 3;
