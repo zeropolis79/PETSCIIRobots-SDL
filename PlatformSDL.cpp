@@ -1,5 +1,11 @@
 #include "PlatformSDL.h"
 
+static const char* imageFilenames[] = {
+    "introscreen.png",
+    "gamescreen.png",
+    "gameover.png"
+};
+
 static uint8_t standardControls[] = {
     SDL_SCANCODE_I, // MOVE UP orig: 56 (8)
     SDL_SCANCODE_K, // MOVE DOWN orig: 50 (2)
@@ -77,6 +83,11 @@ PlatformSDL::PlatformSDL() :
         tileSurfaces[i] = SDL_CreateRGBSurface(0, 24, 24, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
     }
 #endif
+#ifdef PLATFORM_IMAGE_SUPPORT
+    for (int i = 0; i < 3; i++) {
+        imageSurfaces[i] = IMG_Load(imageFilenames[i]);
+    }
+#endif
     SDL_SetSurfaceBlendMode(fontSurface, SDL_BLENDMODE_NONE);
 
     platform = this;
@@ -84,6 +95,11 @@ PlatformSDL::PlatformSDL() :
 
 PlatformSDL::~PlatformSDL()
 {
+#ifdef PLATFORM_IMAGE_SUPPORT
+    for (int i = 0; i < 3; i++) {
+        SDL_FreeSurface(imageSurfaces[i]);
+    }
+#endif
 #ifdef PLATFORM_IMAGE_BASED_TILES
     SDL_FreeSurface(tileSurface);
 #else
@@ -182,6 +198,18 @@ uint8_t* PlatformSDL::loadTileset(const char* filename)
     load(filename, tileset, 2818, 0);
     return tileset;
 }
+
+#ifdef PLATFORM_IMAGE_SUPPORT
+void PlatformSDL::displayImage(Image image)
+{
+    SDL_Rect rect;
+    rect.x = 0;
+    rect.y = 0;
+    rect.w = PLATFORM_SCREEN_WIDTH;
+    rect.h = PLATFORM_SCREEN_HEIGHT;
+    SDL_BlitSurface(imageSurfaces[image], &rect, windowSurface, &rect);
+}
+#endif
 
 void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
 {
