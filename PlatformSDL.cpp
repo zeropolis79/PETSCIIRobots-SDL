@@ -8,7 +8,7 @@ static uint8_t standardControls[] = {
     SDL_SCANCODE_W, // FIRE UP
     SDL_SCANCODE_S, // FIRE DOWN
     SDL_SCANCODE_A, // FIRE LEFT
-    SDL_SCANCODE_F, // FIRE RIGHT
+    SDL_SCANCODE_D, // FIRE RIGHT
     SDL_SCANCODE_COMMA, // CYCLE WEAPONS
     SDL_SCANCODE_PERIOD, // CYCLE ITEMS
     SDL_SCANCODE_SPACE, // USE ITEM
@@ -67,7 +67,7 @@ PlatformSDL::PlatformSDL() :
     samplesSinceInterrupt = interruptIntervalInSamples;
     SDL_PauseAudioDevice(audioDeviceID, 0);
 
-    window = SDL_CreateWindow("Attack of the PETSCII robots", 0, 0, 320, 200, 0);
+    window = SDL_CreateWindow("Attack of the PETSCII robots", 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT, 0);
     windowSurface = SDL_GetWindowSurface(window);
     fontSurface = IMG_Load("petfont.png");
 #ifdef PLATFORM_IMAGE_BASED_TILES

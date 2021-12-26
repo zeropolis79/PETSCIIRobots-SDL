@@ -33,14 +33,14 @@ uint8_t UNIT_TIMER_B[64];   // Secondary timer for units (64 bytes)
 uint8_t UNIT_TILE[32];      // Current tile assigned to unit (32 bytes)
 uint8_t UNIT_DIRECTION[32]; // Movement direction of unit (32 bytes)
 uint8_t EXP_BUFFER[16];     // Explosion Buffer (16 bytes)
-uint8_t MAP_PRECALC[77];    // Stores pre-calculated objects for map window (77 bytes)
-uint8_t MAP_PRECALC_DIRECTION[77];    // Stores pre-calculated object directions for map window (77 bytes)
-uint8_t MAP_PRECALC_TYPE[77];    // Stores pre-calculated object types for map window (77 bytes)
+uint8_t MAP_PRECALC[MAP_WINDOW_SIZE];    // Stores pre-calculated objects for map window (77 bytes)
+uint8_t MAP_PRECALC_DIRECTION[MAP_WINDOW_SIZE];    // Stores pre-calculated object directions for map window (77 bytes)
+uint8_t MAP_PRECALC_TYPE[MAP_WINDOW_SIZE];    // Stores pre-calculated object types for map window (77 bytes)
 #ifdef OPTIMIZED_MAP_RENDERING
-uint8_t PREVIOUS_MAP_BACKGROUND[77];
-uint8_t PREVIOUS_MAP_BACKGROUND_VARIANT[77];
-uint8_t PREVIOUS_MAP_FOREGROUND[77];
-uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[77];
+uint8_t PREVIOUS_MAP_BACKGROUND[MAP_WINDOW_SIZE];
+uint8_t PREVIOUS_MAP_BACKGROUND_VARIANT[MAP_WINDOW_SIZE];
+uint8_t PREVIOUS_MAP_FOREGROUND[MAP_WINDOW_SIZE];
+uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[MAP_WINDOW_SIZE];
 #endif
 
 // The following are the locations where the current
@@ -1477,7 +1477,7 @@ void CACULATE_AND_REDRAW()
 void MAP_PRE_CALCULATE()
 {
     // CLEAR OLD BUFFER
-    for (int Y = 0; Y != 77; Y++) {
+    for (int Y = 0; Y != MAP_WINDOW_SIZE; Y++) {
         MAP_PRECALC[Y] = 0;
     }
     for (int X = 0; X != 32; X++) {
@@ -1511,7 +1511,7 @@ uint8_t PRECALC_ROWS[] = { 0,11,22,33,44,55,66 };
 #ifdef OPTIMIZED_MAP_RENDERING
 void INVALIDATE_PREVIOUS_MAP()
 {
-    for (int i = 0; i < 77; i++) {
+    for (int i = 0; i < MAP_WINDOW_SIZE; i++) {
         PREVIOUS_MAP_BACKGROUND[i] = 255;
     }
 }
@@ -1521,8 +1521,8 @@ void DRAW_MAP_WINDOW()
     MAP_PRE_CALCULATE();
     REDRAW_WINDOW = 0;
     MAP_SOURCE = MAP + ((MAP_WINDOW_Y << 7) + MAP_WINDOW_X);
-    for (uint8_t TEMP_Y = 0, PRECALC_COUNT = 0; TEMP_Y != 7; TEMP_Y++, MAP_SOURCE += 117) {
-        for (uint8_t TEMP_X = 0; TEMP_X != 11; TEMP_X++, MAP_SOURCE++, PRECALC_COUNT++) {
+    for (uint8_t TEMP_Y = 0, PRECALC_COUNT = 0; TEMP_Y != PLATFORM_MAP_WINDOW_TILES_HEIGHT; TEMP_Y++, MAP_SOURCE += 117) {
+        for (uint8_t TEMP_X = 0; TEMP_X != PLATFORM_MAP_WINDOW_TILES_WIDTH; TEMP_X++, MAP_SOURCE++, PRECALC_COUNT++) {
             // NOW FIGURE OUT WHERE TO PLACE IT ON SCREEN.
             TILE = MAP_SOURCE[0];
             uint8_t VARIANT = 0;
@@ -1636,8 +1636,8 @@ void DRAW_MAP_WINDOW()
 {
     MAP_PRE_CALCULATE();
     REDRAW_WINDOW = 0;
-    for (uint8_t TEMP_Y = 0, PRECALC_COUNT = 0; TEMP_Y != 7; TEMP_Y++) {
-        for (uint8_t TEMP_X = 0; TEMP_X != 11; TEMP_X++) {
+    for (uint8_t TEMP_Y = 0, PRECALC_COUNT = 0; TEMP_Y != PLATFORM_MAP_WINDOW_TILES_HEIGHT; TEMP_Y++) {
+        for (uint8_t TEMP_X = 0; TEMP_X != PLATFORM_MAP_WINDOW_TILES_WIDTH; TEMP_X++) {
             // FIRST CALCULATE WHERE THE BYTE IS STORED IN THE MAP
             MAP_SOURCE = MAP + (((MAP_WINDOW_Y + TEMP_Y) << 7) + TEMP_X + MAP_WINDOW_X);
             TILE = MAP_SOURCE[0];
@@ -1700,7 +1700,7 @@ void TOGGLE_LIVE_MAP()
     if (LIVE_MAP_ON != 1) {
         LIVE_MAP_ON = 1;
 
-        platform->clearRect(0, 0, 264, 168);
+        platform->clearRect(0, 0, MAP_WINDOW_WIDTH, MAP_WINDOW_HEIGHT);
         platform->renderLiveMap(MAP);
     } else {
         LIVE_MAP_ON = 0;
@@ -2064,7 +2064,7 @@ void DISPLAY_PLAYER_HEALTH()
 
 #ifdef PLATFORM_IMAGE_SUPPORT
     int health = 5 - MIN(TEMP_A, 5);
-    platform->renderHealth(health, 272, 131 + (health >> 1));
+    platform->renderHealth(health, PLATFORM_SCREEN_WIDTH - 48, PLATFORM_SCREEN_HEIGHT - 69 + (health >> 1));
 #endif
 }
 
@@ -2158,7 +2158,7 @@ void PRESELECT_ITEM()
 void DISPLAY_TIMEBOMB()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderItem(5, 272, 54);
+    platform->renderItem(5, PLATFORM_SCREEN_WIDTH - 48, 54);
     DECNUM = INV_BOMBS;
     DECWRITE(0x1B5, 1);
 #else
@@ -2176,7 +2176,7 @@ void DISPLAY_TIMEBOMB()
 void DISPLAY_EMP()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderItem(3, 272, 54);
+    platform->renderItem(3, PLATFORM_SCREEN_WIDTH - 48, 54);
     DECNUM = INV_EMP;
     DECWRITE(0x1B5, 1);
 #else
@@ -2194,7 +2194,7 @@ void DISPLAY_EMP()
 void DISPLAY_MEDKIT()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderItem(2, 272, 54);
+    platform->renderItem(2, PLATFORM_SCREEN_WIDTH - 48, 54);
     DECNUM = INV_MEDKIT;
     DECWRITE(0x1B5, 1);
 #else
@@ -2212,7 +2212,7 @@ void DISPLAY_MEDKIT()
 void DISPLAY_MAGNET()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderItem(4, 272, 54);
+    platform->renderItem(4, PLATFORM_SCREEN_WIDTH - 48, 54);
     DECNUM = INV_MAGNET;
     DECWRITE(0x1B5, 1);
 #else
@@ -2314,7 +2314,7 @@ void PRESELECT_WEAPON()
 void DISPLAY_PLASMA_GUN()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderItem(1, 272, 13);
+    platform->renderItem(1, PLATFORM_SCREEN_WIDTH - 48, 13);
     DECNUM = AMMO_PLASMA;
     DECWRITE(0x0C5, 1);
 #else
@@ -2332,7 +2332,7 @@ void DISPLAY_PLASMA_GUN()
 void DISPLAY_PISTOL()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->renderItem(0, 272, 13);
+    platform->renderItem(0, PLATFORM_SCREEN_WIDTH - 48, 13);
     DECNUM = AMMO_PISTOL;
     DECWRITE(0x0C5, 1);
 #else
@@ -2370,13 +2370,13 @@ void DISPLAY_KEYS()
 #ifdef PLATFORM_IMAGE_SUPPORT
     platform->clearRect(272, 106, 48, 14); // ERASE ALL 3 SPOTS
     if (KEYS & 0x01) { // %00000001 Spade key
-        platform->renderKey(0, 272, 106);
+        platform->renderKey(0, PLATFORM_SCREEN_WIDTH - 48, 106);
     }
     if (KEYS & 0x02) { // %00000010 heart key
-        platform->renderKey(1, 288, 106);
+        platform->renderKey(1, PLATFORM_SCREEN_WIDTH - 32, 106);
     }
     if (KEYS & 0x04) { // %00000100 star key
-        platform->renderKey(2, 304, 106);
+        platform->renderKey(2, PLATFORM_SCREEN_WIDTH - 16, 106);
     }
 #else
     platform->clearRect(272, 120, 48, 16); // ERASE ALL 3 SPOTS
@@ -2435,7 +2435,7 @@ void GAME_OVER()
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
     }
-    for (int X = 0; X != 11; X++) {
+    for (int X = 0; X != PLATFORM_MAP_WINDOW_TILES_WIDTH; X++) {
         writeToScreenMemory(0x173 + X, GAMEOVER1[X]);
         writeToScreenMemory(0x19B + X, GAMEOVER2[X]);
         writeToScreenMemory(0x1C3 + X, GAMEOVER3[X]);
@@ -2559,9 +2559,9 @@ void SCROLL_INFO()
         writeToScreenMemory(0x3C0 + X, 32); // BOTTOM ROW
     }
     */
-    platform->copyRect(0, 184, 0, 176, 264, 16);
+    platform->copyRect(0, PLATFORM_SCREEN_HEIGHT - 16, 0, PLATFORM_SCREEN_HEIGHT - 24, MAP_WINDOW_WIDTH, 16);
     // NOW CLEAR BOTTOM ROW
-    platform->clearRect(0, 192, 264, 8);
+    platform->clearRect(0, PLATFORM_SCREEN_HEIGHT - 8, MAP_WINDOW_WIDTH, 8);
     platform->renderFrame(true);
 }
 
@@ -2821,7 +2821,7 @@ void EMP_FLASH()
     BORDER = 10;
 #else
 #ifdef OPTIMIZED_MAP_RENDERING
-    platform->fillRect(0, 0, 264, 168, 15);
+    platform->fillRect(0, 0, MAP_WINDOW_WIDTH, MAP_WINDOW_HEIGHT, 15);
     INVALIDATE_PREVIOUS_MAP();
 #else
     for (int Y = 0; Y != 33; Y++) {
@@ -3141,7 +3141,7 @@ void PET_SCREEN_SHAKE()
         return;
     }
 #ifndef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
-    platform->copyRect(8, 0, 0, 0, 264, 168);
+    platform->copyRect(8, 0, 0, 0, MAP_WINDOW_WIDTH, MAP_WINDOW_HEIGHT);
 #ifdef OPTIMIZED_MAP_RENDERING
     INVALIDATE_PREVIOUS_MAP();
 #endif

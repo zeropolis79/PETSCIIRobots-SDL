@@ -3,6 +3,10 @@
 
 #include "Platform.h"
 
+#define MAP_WINDOW_SIZE (PLATFORM_MAP_WINDOW_TILES_WIDTH * PLATFORM_MAP_WINDOW_TILES_HEIGHT)
+#define MAP_WINDOW_WIDTH (PLATFORM_MAP_WINDOW_TILES_WIDTH * 24)
+#define MAP_WINDOW_HEIGHT (PLATFORM_MAP_WINDOW_TILES_HEIGHT * 24)
+
 extern uint8_t *DESTRUCT_PATH; // Destruct path array (256 bytes)
 extern uint8_t *TILE_ATTRIB;   // Tile attrib array (256 bytes)
 #ifndef PLATFORM_SPRITE_SUPPORT
@@ -22,13 +26,13 @@ extern uint8_t UNIT_TIMER_A[64];   // Primary timer for units (64 bytes)
 extern uint8_t UNIT_TIMER_B[64];   // Secondary timer for units (64 bytes)
 extern uint8_t UNIT_TILE[32];      // Current tile assigned to unit (32 bytes)
 extern uint8_t EXP_BUFFER[16];     // Explosion Buffer (16 bytes)
-extern uint8_t MAP_PRECALC[77];    // Stores pre-calculated objects for map window (77 bytes)
-extern uint8_t MAP_PRECALC_DIRECTION[77];    // Stores pre-calculated object directions for map window (77 bytes)
-extern uint8_t MAP_PRECALC_TYPE[77];    // Stores pre-calculated object types for map window (77 bytes)
+extern uint8_t MAP_PRECALC[MAP_WINDOW_SIZE];    // Stores pre-calculated objects for map window (77 bytes)
+extern uint8_t MAP_PRECALC_DIRECTION[MAP_WINDOW_SIZE];    // Stores pre-calculated object directions for map window (77 bytes)
+extern uint8_t MAP_PRECALC_TYPE[MAP_WINDOW_SIZE];    // Stores pre-calculated object types for map window (77 bytes)
 #ifdef OPTIMIZED_MAP_RENDERING
-extern uint8_t PREVIOUS_MAP_BACKGROUND[77];
-extern uint8_t PREVIOUS_MAP_FOREGROUND[77];
-extern uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[77];
+extern uint8_t PREVIOUS_MAP_BACKGROUND[MAP_WINDOW_SIZE];
+extern uint8_t PREVIOUS_MAP_FOREGROUND[MAP_WINDOW_SIZE];
+extern uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[MAP_WINDOW_SIZE];
 #endif
 
 // The following are the locations where the current
