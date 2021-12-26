@@ -31,7 +31,9 @@ public:
     virtual uint16_t readJoystick(bool gamepad);
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
     virtual uint8_t* loadTileset(const char* filename);
+#ifdef PLATFORM_IMAGE_SUPPORT
     virtual void displayImage(Image image);
+#endif
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
 #ifndef PLATFORM_IMAGE_BASED_TILES
     virtual void updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles);

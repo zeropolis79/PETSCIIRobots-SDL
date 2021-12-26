@@ -1061,6 +1061,7 @@ uint8_t* PlatformAmiga::loadTileset(const char* filename)
     return tileset;
 }
 
+#ifdef PLATFORM_IMAGE_SUPPORT
 void PlatformAmiga::displayImage(Image image)
 {
 #ifdef PLATFORM_PRELOAD_SUPPORT
@@ -1084,6 +1085,7 @@ void PlatformAmiga::displayImage(Image image)
 
     palette->setPalette((uint16_t*)(screenPlanes + SCREEN_SIZE * PLANES), (1 << PLANES));
 }
+#endif
 
 void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
 {
