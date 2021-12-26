@@ -450,12 +450,21 @@ void PlatformSDL::writeToScreenMemory(uint16_t address, uint8_t value)
     destinationRect.y = (address / 40) << 3;
     destinationRect.w = 8;
     destinationRect.h = 8;
-    SDL_BlitSurface(fontSurface, &sourceRect, windowSurface, &destinationRect); // blit it to the screen
+    SDL_BlitSurface(fontSurface, &sourceRect, windowSurface, &destinationRect);
 }
 
 void PlatformSDL::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
-    writeToScreenMemory(address, value);
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.x = 0;
+    sourceRect.y = value << 3;
+    sourceRect.w = 8;
+    sourceRect.h = 8;
+    destinationRect.x = (address % 40) << 3;
+    destinationRect.y = ((address / 40) << 3) + yOffset;
+    destinationRect.w = 8;
+    destinationRect.h = 8;
+    SDL_BlitSurface(fontSurface, &sourceRect, windowSurface, &destinationRect);
 }
 
 static const float noteToFrequency[] = {
