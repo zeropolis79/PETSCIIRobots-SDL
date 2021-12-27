@@ -1,5 +1,44 @@
 #include "PlatformSDL.h"
 
+#ifdef PLATFORM_SPRITE_SUPPORT
+static int8_t tileSpriteMap[256] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+     0,  1, 49, 50, 57, 58, 59, 60, -1, -1, -1, -1, -1, -1, -1, 48,
+    -1, -1, -1, 73, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+     1,  0,  3, -1, 53, 54, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, 76, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+};
+#endif
+static int8_t animTileMap[256] = {
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1,  0, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, 16,
+    -1, -1, -1, -1,  4, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1,  8, 10, -1, -1, 12, 14, -1, -1, 20, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
+    -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
+};
+
 static const char* imageFilenames[] = {
     "introscreen.png",
     "gamescreen.png",
@@ -95,6 +134,11 @@ PlatformSDL::PlatformSDL() :
     keysSurface = IMG_Load("keys.png");
     healthSurface = IMG_Load("health.png");
     facesSurface = IMG_Load("faces.png");
+    animTilesSurface = IMG_Load("animtiles.png");
+#ifdef PLATFORM_SPRITE_SUPPORT
+    spritesSurface = IMG_Load("../Images/sprites.png");
+    SDL_SetColorKey(spritesSurface, SDL_TRUE, 16);
+#endif
 #endif
     SDL_SetSurfaceBlendMode(fontSurface, SDL_BLENDMODE_NONE);
 
@@ -104,6 +148,14 @@ PlatformSDL::PlatformSDL() :
 PlatformSDL::~PlatformSDL()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
+#ifdef PLATFORM_SPRITE_SUPPORT
+    SDL_FreeSurface(spritesSurface);
+#endif
+    SDL_FreeSurface(animTilesSurface);
+    SDL_FreeSurface(facesSurface);
+    SDL_FreeSurface(healthSurface);
+    SDL_FreeSurface(keysSurface);
+    SDL_FreeSurface(itemsSurface);
     for (int i = 0; i < 3; i++) {
         SDL_FreeSurface(imageSurfaces[i]);
     }
@@ -203,7 +255,7 @@ uint32_t PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t 
 uint8_t* PlatformSDL::loadTileset(const char* filename)
 {
     uint8_t* tileset = new uint8_t[2818];
-    load(filename, tileset, 2818, 0);
+    load("tileset.amiga", tileset, 2818, 0);
     return tileset;
 }
 
@@ -221,6 +273,7 @@ void PlatformSDL::displayImage(Image image)
 
 void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
 {
+#ifndef PLATFORM_IMAGE_BASED_TILES
     uint8_t* topLeft = tileData;
     uint8_t* topMiddle = topLeft + 256;
     uint8_t* topRight = topMiddle + 256;
@@ -236,35 +289,8 @@ void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
     sourceRect.h = 8;
     destinationRect.w = 8;
     destinationRect.h = 8;
-    for (int tile = 0; tile < 256; tile++) {
-#ifdef PLATFORM_IMAGE_BASED_TILES
-        if ((tile >= 96 && tile <= 103) ||
-            tile == 111 ||
-            tile == 115 ||
-            tile == 130 ||
-            tile == 134 ||
-            (tile >= 140 && tile <= 142) ||
-            tile == 160 ||
-            (tile >= 164 && tile <= 165)) {
-            uint8_t characters[3][3] = {
-                { topLeft[tile], topMiddle[tile], topRight[tile] },
-                { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
-                { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
-            };
 
-            for (int y = 0; y < 3; y++) {
-                for (int x = 0; x < 3; x++) {
-                    sourceRect.x = 0;
-                    sourceRect.y = characters[y][x] << 3;
-                    destinationRect.x = x << 3;
-                    destinationRect.y = tile * 24 + (y << 3);
-                    if (characters[y][x] != 0x3A) {
-                        SDL_BlitSurface(fontSurface, &sourceRect, tileSurface, &destinationRect);
-                    }
-                }
-            }
-        }
-#else
+    for (int tile = 0; tile < 256; tile++) {
         uint8_t characters[3][3] = {
             { topLeft[tile], topMiddle[tile], topRight[tile] },
             { middleLeft[tile], middleMiddle[tile], middleRight[tile] },
@@ -281,8 +307,8 @@ void PlatformSDL::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
                 SDL_BlitSurface(fontSurface, &sourceRect, tileSurfaces[tile], &destinationRect);
             }
         }
-#endif
     }
+#endif
 }
 
 #ifndef PLATFORM_IMAGE_BASED_TILES
@@ -326,6 +352,22 @@ void PlatformSDL::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTile
 
 void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent)
 {
+    if (transparent) {
+#ifdef PLATFORM_SPRITE_SUPPORT
+        if (tileSpriteMap[tile] >= 0) {
+            renderSprite(tileSpriteMap[tile] + variant, x, y);
+            return;
+        }
+#endif
+    } else {
+#ifdef PLATFORM_IMAGE_BASED_TILES
+        if (animTileMap[tile] >= 0) {
+            renderAnimTile(animTileMap[tile] + variant, x, y);
+            return;
+        }
+#endif
+    }
+
 #ifdef PLATFORM_IMAGE_BASED_TILES
     SDL_Rect sourceRect, destinationRect;
     sourceRect.x = 0;
@@ -351,6 +393,77 @@ void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t varia
     SDL_BlitSurface(tileSurfaces[tile], &sourceRect, windowSurface, &destinationRect);
 #endif
 }
+
+void PlatformSDL::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t backgroundVariant, uint8_t foregroundVariant)
+{
+    SDL_Surface* backgroundSurface = tileSurface;
+#ifdef PLATFORM_IMAGE_BASED_TILES
+    if (animTileMap[backgroundTile] >= 0) {
+        backgroundTile = animTileMap[backgroundTile] + backgroundVariant;
+        backgroundSurface = animTilesSurface;
+    }
+#endif
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.x = 0;
+    sourceRect.w = 24;
+    sourceRect.h = 24;
+    destinationRect.w = 24;
+    destinationRect.h = 24;
+#ifdef PLATFORM_IMAGE_BASED_TILES
+    if (tileSpriteMap[foregroundTile] >= 0) {
+        uint8_t sprite = tileSpriteMap[foregroundTile] + foregroundVariant;
+        sourceRect.y = backgroundTile * 24;
+        destinationRect.x = x;
+        destinationRect.y = y;
+        SDL_BlitSurface(backgroundSurface, &sourceRect, windowSurface, &destinationRect);
+
+        sourceRect.y = sprite * 24;
+        SDL_BlitSurface(spritesSurface, &sourceRect, windowSurface, &destinationRect);
+    } else {
+#endif
+        sourceRect.y = backgroundTile * 24;
+        destinationRect.x = x;
+        destinationRect.y = y;
+        SDL_BlitSurface(backgroundSurface, &sourceRect, windowSurface, &destinationRect);
+
+        sourceRect.y = foregroundTile * 24;
+        SDL_BlitSurface(tileSurface, &sourceRect, windowSurface, &destinationRect);
+#ifdef PLATFORM_IMAGE_BASED_TILES
+    }
+#endif
+}
+
+#ifdef PLATFORM_SPRITE_SUPPORT
+void PlatformSDL::renderSprite(uint8_t sprite, uint16_t x, uint16_t y)
+{
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.x = 0;
+    sourceRect.y = sprite * 24;
+    sourceRect.w = 24;
+    sourceRect.h = 24;
+    destinationRect.x = x;
+    destinationRect.y = y;
+    destinationRect.w = 24;
+    destinationRect.h = 24;
+    SDL_BlitSurface(spritesSurface, &sourceRect, windowSurface, &destinationRect);
+}
+#endif
+
+#ifdef PLATFORM_IMAGE_BASED_TILES
+void PlatformSDL::renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y)
+{
+    SDL_Rect sourceRect, destinationRect;
+    sourceRect.x = 0;
+    sourceRect.y = animTile * 24;
+    sourceRect.w = 24;
+    sourceRect.h = 24;
+    destinationRect.x = x;
+    destinationRect.y = y;
+    destinationRect.w = 24;
+    destinationRect.h = 24;
+    SDL_BlitSurface(animTilesSurface, &sourceRect, windowSurface, &destinationRect);
+}
+#endif
 
 #ifdef PLATFORM_IMAGE_SUPPORT
 void PlatformSDL::renderItem(uint8_t item, uint16_t x, uint16_t y)

@@ -28,6 +28,7 @@ public:
     virtual void updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles);
 #endif
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent);
+    virtual void renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t backgroundVariant, uint8_t foregroundVariant);
 #ifdef PLATFORM_IMAGE_SUPPORT
     virtual void renderItem(uint8_t item, uint16_t x, uint16_t y);
     virtual void renderKey(uint8_t key, uint16_t x, uint16_t y);
@@ -44,6 +45,12 @@ public:
     virtual void renderFrame(bool waitForNextFrame);
 
 private:
+#ifdef PLATFORM_SPRITE_SUPPORT
+    void renderSprite(uint8_t sprite, uint16_t x, uint16_t y);
+#endif
+#ifdef PLATFORM_IMAGE_BASED_TILES
+    void renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y);
+#endif
     static void audioCallback(void* data, uint8_t* stream, int bytes);
     void (*interrupt)(void);
     SDL_AudioSpec audioSpec;
@@ -62,6 +69,10 @@ private:
     SDL_Surface* keysSurface;
     SDL_Surface* healthSurface;
     SDL_Surface* facesSurface;
+    SDL_Surface* animTilesSurface;
+#ifdef PLATFORM_SPRITE_SUPPORT
+    SDL_Surface* spritesSurface;
+#endif
 #endif
     int framesPerSecond_;
     float audioAngle;
