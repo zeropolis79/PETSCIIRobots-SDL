@@ -38,7 +38,24 @@ static int8_t animTileMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
-
+static uint32_t palette[16] = {
+    0x000000,
+    0xffffff,
+    0x445577,
+    0x778899,
+    0xaabbcc,
+    0x003399,
+    0x3366bb,
+    0x00aaff,
+    0x556600,
+    0x779900,
+    0xaadd00,
+    0x774400,
+    0xbb7700,
+    0xffcc00,
+    0xeeaa99,
+    0xee0000
+};
 static const char* imageFilenames[] = {
     "introscreen.png",
     "gamescreen.png",
@@ -563,6 +580,7 @@ void PlatformSDL::writeToScreenMemory(uint16_t address, uint8_t value)
     destinationRect.y = (address / 40) << 3;
     destinationRect.w = 8;
     destinationRect.h = 8;
+    SDL_SetSurfaceColorMod(fontSurface, 0x77, 0xbb, 0x55);
     SDL_BlitSurface(fontSurface, &sourceRect, windowSurface, &destinationRect);
 }
 
@@ -577,6 +595,7 @@ void PlatformSDL::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t c
     destinationRect.y = ((address / 40) << 3) + yOffset;
     destinationRect.w = 8;
     destinationRect.h = 8;
+    SDL_SetSurfaceColorMod(fontSurface, palette[color] >> 16, (palette[color] >> 8) & 0xff, palette[color] & 0xff);
     SDL_BlitSurface(fontSurface, &sourceRect, windowSurface, &destinationRect);
 }
 
