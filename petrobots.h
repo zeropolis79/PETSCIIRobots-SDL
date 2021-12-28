@@ -312,7 +312,12 @@ char* CALC_MAP_NAME();
 void REVERSE_MENU_OPTION(bool reverse);
 
 extern uint8_t MENUY; // CURRENT MENU SELECTION
-extern uint8_t MENU_CHART_L[];
+#if (MAP_WINDOW_SIZE == 77)
+typedef uint8_t menu_chart_t;
+#else
+typedef uint16_t menu_chart_t;
+#endif
+extern menu_chart_t MENU_CHART[];
 
 void CHANGE_DIFFICULTY_LEVEL();
 
@@ -531,6 +536,6 @@ extern uint8_t IN_GAME_MUSIC3[];
 #endif
 
 void convertToPETSCII(char* string);
-void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color = 10, uint8_t yOffset = 0);
+void writeToScreenMemory(address_t address, uint8_t value, uint8_t color = 10, uint8_t yOffset = 0);
 
 #endif

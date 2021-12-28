@@ -24,6 +24,12 @@ typedef unsigned char bool;
 #include <cstdint>
 #endif
 
+#if (PLATFORM_MAP_WINDOW_TILES_WIDTH == 11 && PLATFORM_MAP_WINDOW_TILES_HEIGHT == 7)
+typedef uint16_t address_t;
+#else
+typedef uint32_t address_t;
+#endif
+
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
 #define ABS(a) ((a) >= 0 ? (a) : -(a))
@@ -112,8 +118,8 @@ public:
     virtual void startFadeScreen(uint16_t color, uint16_t intensity);
     virtual void fadeScreen(uint16_t intensity, bool immediate = true);
     virtual void stopFadeScreen();
-    virtual void writeToScreenMemory(uint16_t address, uint8_t value) = 0;
-    virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset) = 0;
+    virtual void writeToScreenMemory(address_t address, uint8_t value) = 0;
+    virtual void writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset) = 0;
     virtual void playNote(uint8_t note);
     virtual void stopNote();
     virtual void loadModule(Module module);

@@ -1970,7 +1970,7 @@ char INTRO_OPTIONS[] = "start game"
 void DISPLAY_INTRO_SCREEN()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    uint8_t* row = SCREEN_MEMORY + MENU_CHART_L[0];
+    uint8_t* row = SCREEN_MEMORY + MENU_CHART[0];
     for (int Y = 0, i = 0; Y < 4; Y++, row += SCREEN_WIDTH_IN_CHARACTERS) {
         for (int X = 0; X < 10; X++, i++) {
             row[X] = INTRO_OPTIONS[i];
@@ -2744,20 +2744,20 @@ void REVERSE_MENU_OPTION(bool reverse)
 {
 #ifdef PLATFORM_COLOR_SUPPORT
     for (int Y = 0; Y != 10; Y++) {
-        writeToScreenMemory(MENU_CHART_L[MENUY] + Y, SCREEN_MEMORY[MENU_CHART_L[MENUY] + Y], reverse ? 14 : 15, 5);
+        writeToScreenMemory(MENU_CHART[MENUY] + Y, SCREEN_MEMORY[MENU_CHART[MENUY] + Y], reverse ? 14 : 15, 5);
     }
 #else
     for (int Y = 0; Y != 10; Y++) {
-        writeToScreenMemory(MENU_CHART_L[MENUY] + Y, SCREEN_MEMORY[MENU_CHART_L[MENUY] + Y] ^ 0x80);
+        writeToScreenMemory(MENU_CHART[MENUY] + Y, SCREEN_MEMORY[MENU_CHART[MENUY] + Y] ^ 0x80);
     }
 #endif
 }
 
 uint8_t MENUY = 0; // CURRENT MENU SELECTION
 #ifdef PLATFORM_IMAGE_SUPPORT
-uint8_t MENU_CHART_L[] = { 1 * SCREEN_WIDTH_IN_CHARACTERS + 4, 2 * SCREEN_WIDTH_IN_CHARACTERS + 4, 3 * SCREEN_WIDTH_IN_CHARACTERS + 4, 4 * SCREEN_WIDTH_IN_CHARACTERS + 4 };
+menu_chart_t MENU_CHART[] = { 1 * SCREEN_WIDTH_IN_CHARACTERS + 4, 2 * SCREEN_WIDTH_IN_CHARACTERS + 4, 3 * SCREEN_WIDTH_IN_CHARACTERS + 4, 4 * SCREEN_WIDTH_IN_CHARACTERS + 4 };
 #else
-uint8_t MENU_CHART_L[] = { 2 * SCREEN_WIDTH_IN_CHARACTERS + 4, 3 * SCREEN_WIDTH_IN_CHARACTERS + 4, 4 * SCREEN_WIDTH_IN_CHARACTERS + 4, 5 * SCREEN_WIDTH_IN_CHARACTERS + 4 };
+menu_chart_t MENU_CHART[] = { 2 * SCREEN_WIDTH_IN_CHARACTERS + 4, 3 * SCREEN_WIDTH_IN_CHARACTERS + 4, 4 * SCREEN_WIDTH_IN_CHARACTERS + 4, 5 * SCREEN_WIDTH_IN_CHARACTERS + 4 };
 #endif
 
 void CHANGE_DIFFICULTY_LEVEL()
@@ -5616,7 +5616,7 @@ void convertToPETSCII(char* string)
     }
 }
 
-void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset)
+void writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
     SCREEN_MEMORY[address] = value;
 #ifdef PLATFORM_COLOR_SUPPORT

@@ -569,7 +569,7 @@ void PlatformSDL::shakeScreen()
     copyRect(8, 0, 0, 0, 256, 168);
 }
 
-void PlatformSDL::writeToScreenMemory(uint16_t address, uint8_t value)
+void PlatformSDL::writeToScreenMemory(address_t address, uint8_t value)
 {
     SDL_Rect sourceRect, destinationRect;
     sourceRect.x = 0;
@@ -584,7 +584,7 @@ void PlatformSDL::writeToScreenMemory(uint16_t address, uint8_t value)
     SDL_BlitSurface(fontSurface, &sourceRect, windowSurface, &destinationRect);
 }
 
-void PlatformSDL::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset)
+void PlatformSDL::writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
     SDL_Rect sourceRect, destinationRect;
     sourceRect.x = 0;

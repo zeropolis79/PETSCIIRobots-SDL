@@ -67,8 +67,8 @@ public:
     virtual void fadeScreen(uint16_t intensity, bool immediate);
     virtual void stopFadeScreen();
 #endif
-    virtual void writeToScreenMemory(uint16_t address, uint8_t value);
-    virtual void writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset);
+    virtual void writeToScreenMemory(address_t address, uint8_t value);
+    virtual void writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset);
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     virtual void loadModule(Module module);
     virtual void playModule(Module module);

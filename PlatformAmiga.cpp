@@ -1777,7 +1777,7 @@ void PlatformAmiga::stopFadeScreen()
 }
 #endif
 
-void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
+void PlatformAmiga::writeToScreenMemory(address_t address, uint8_t value)
 {
     bool reverse = value > 127;
     uint8_t* source = fontPlanes + ((value & 127) << 3);
@@ -1805,7 +1805,7 @@ void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value)
     }
 }
 
-void PlatformAmiga::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t color, uint8_t yOffset)
+void PlatformAmiga::writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
     bool reverse = value > 127;
     bool writePlane1 = color & 1;
