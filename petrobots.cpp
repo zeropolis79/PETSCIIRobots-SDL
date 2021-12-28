@@ -301,11 +301,11 @@ void DISPLAY_LOAD_MESSAGE2()
 {
     int Y;
     for (Y = 0; Y != 12; Y++) {
-        writeToScreenMemory(0x190 + Y, LOAD_MSG2[Y]);
+        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS + Y, LOAD_MSG2[Y]);
     }
     char* name = CALC_MAP_NAME();
     for (Y = 0; Y != 16; Y++) {
-        writeToScreenMemory(0x19c + Y, name[Y]);
+        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS + 12 + Y, name[Y]);
     }
 }
 
@@ -1197,7 +1197,7 @@ void SEARCH_OBJECT()
                 PET_SCREEN_SHAKE();
                 BACKGROUND_TASKS();
             }
-            writeToScreenMemory(0x3C9 + SEARCHBAR, 46); // PERIOD
+            writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS + 9 + SEARCHBAR, 46); // PERIOD
         }
 #ifdef PLATFORM_CURSOR_SUPPORT
         platform->hideCursor();
@@ -1951,12 +1951,12 @@ void DISPLAY_GAME_SCREEN()
 #ifdef PLATFORM_IMAGE_SUPPORT
     platform->displayImage(Platform::ImageGame);
 
-    writeToScreenMemory(0x3E2, 0x71, 15);
-    writeToScreenMemory(0x3E3, 0x71, 15);
-    writeToScreenMemory(0x3E4, 0x71, 12);
-    writeToScreenMemory(0x3E5, 0x71, 12);
-    writeToScreenMemory(0x3E6, 0x71, 9);
-    writeToScreenMemory(0x3E7, 0x71, 9);
+    writeToScreenMemory(SCREEN_HEIGHT_IN_CHARACTERS * SCREEN_WIDTH_IN_CHARACTERS - 6, 0x71, 15);
+    writeToScreenMemory(SCREEN_HEIGHT_IN_CHARACTERS * SCREEN_WIDTH_IN_CHARACTERS - 5, 0x71, 15);
+    writeToScreenMemory(SCREEN_HEIGHT_IN_CHARACTERS * SCREEN_WIDTH_IN_CHARACTERS - 4, 0x71, 12);
+    writeToScreenMemory(SCREEN_HEIGHT_IN_CHARACTERS * SCREEN_WIDTH_IN_CHARACTERS - 3, 0x71, 12);
+    writeToScreenMemory(SCREEN_HEIGHT_IN_CHARACTERS * SCREEN_WIDTH_IN_CHARACTERS - 2, 0x71, 9);
+    writeToScreenMemory(SCREEN_HEIGHT_IN_CHARACTERS * SCREEN_WIDTH_IN_CHARACTERS - 1, 0x71, 9);
 #else
     DECOMPRESS_SCREEN(SCR_TEXT);
 #endif
@@ -1971,7 +1971,7 @@ void DISPLAY_INTRO_SCREEN()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
     uint8_t* row = SCREEN_MEMORY + MENU_CHART_L[0];
-    for (int Y = 0, i = 0; Y < 4; Y++, row += 40) {
+    for (int Y = 0, i = 0; Y < 4; Y++, row += SCREEN_WIDTH_IN_CHARACTERS) {
         for (int X = 0; X < 10; X++, i++) {
             row[X] = INTRO_OPTIONS[i];
         }
@@ -1993,7 +1993,7 @@ void DISPLAY_ENDGAME_SCREEN()
     // display map name
     char* name = CALC_MAP_NAME();
     for (int Y = 0; Y != 16; Y++) {
-        writeToScreenMemory(0x12E + Y, name[Y], 4);
+        writeToScreenMemory(7 * SCREEN_WIDTH_IN_CHARACTERS + 22 + Y, name[Y], 4);
     }
     // display elapsed time
     DECNUM = HOURS;
@@ -2002,9 +2002,9 @@ void DISPLAY_ENDGAME_SCREEN()
     DECWRITE(9 * SCREEN_WIDTH_IN_CHARACTERS + 24, 4);
     DECNUM = SECONDS;
     DECWRITE(9 * SCREEN_WIDTH_IN_CHARACTERS + 27, 4);
-    writeToScreenMemory(0x17D, 32, 4); // SPACE
-    writeToScreenMemory(0x180, 58, 4); // COLON
-    writeToScreenMemory(0x183, 58, 4);
+    writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS + 21, 32, 4); // SPACE
+    writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS + 24, 58, 4); // COLON
+    writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS + 27, 58, 4);
     // count robots remaining
     DECNUM = 0;
     for (X = 1; X != 28; X++) {
@@ -2024,7 +2024,7 @@ void DISPLAY_ENDGAME_SCREEN()
     // display difficulty level
     char* WORD = DIFF_LEVEL_WORDS + (DIFF_LEVEL * 6);
     for (X = 0; X < 6; X++) {
-        writeToScreenMemory(0x26E + X, WORD[X], 4);
+        writeToScreenMemory(15 * SCREEN_WIDTH_IN_CHARACTERS + 22 + X, WORD[X], 4);
     }
 }
 
@@ -2066,13 +2066,13 @@ void DISPLAY_PLAYER_HEALTH()
     TEMP_A = UNIT_HEALTH[0] >> 1; // No index needed because it is the player, divide by two
     int Y = 0;
     while (Y != TEMP_A) {
-        writeToScreenMemory(0x3BA + Y++, 0x66); // GRAY BLOCK
+        writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y++, 0x66); // GRAY BLOCK
     }
     if (UNIT_HEALTH[0] & 0x01) {
-        writeToScreenMemory(0x3BA + Y++, 0x5C); // HALF GRAY BLOCK
+        writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y++, 0x5C); // HALF GRAY BLOCK
     }
     while (Y != 6) {
-        writeToScreenMemory(0x3BA + Y++, 0x20); // SPACE
+        writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y++, 0x20); // SPACE
     }
 
 #ifdef PLATFORM_IMAGE_SUPPORT
@@ -2176,10 +2176,10 @@ void DISPLAY_TIMEBOMB()
     DECWRITE(11 * SCREEN_WIDTH_IN_CHARACTERS - 3, 1);
 #else
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x162 + Y, TBOMB1A[Y]);
-        writeToScreenMemory(0x18A + Y, TBOMB1B[Y]);
-        writeToScreenMemory(0x1B2 + Y, TBOMB1C[Y]);
-        writeToScreenMemory(0x1DA + Y, TBOMB1D[Y]);
+        writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, TBOMB1A[Y]);
+        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, TBOMB1B[Y]);
+        writeToScreenMemory(11 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, TBOMB1C[Y]);
+        writeToScreenMemory(12 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, TBOMB1D[Y]);
     }
     DECNUM = INV_BOMBS;
     DECWRITE(13 * SCREEN_WIDTH_IN_CHARACTERS - 3);
@@ -2194,10 +2194,10 @@ void DISPLAY_EMP()
     DECWRITE(11 * SCREEN_WIDTH_IN_CHARACTERS - 3, 1);
 #else
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x162 + Y, EMP1A[Y]);
-        writeToScreenMemory(0x18A + Y, EMP1B[Y]);
-        writeToScreenMemory(0x1B2 + Y, EMP1C[Y]);
-        writeToScreenMemory(0x1DA + Y, EMP1D[Y]);
+        writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, EMP1A[Y]);
+        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, EMP1B[Y]);
+        writeToScreenMemory(11 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, EMP1C[Y]);
+        writeToScreenMemory(12 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, EMP1D[Y]);
     }
     DECNUM = INV_EMP;
     DECWRITE(13 * SCREEN_WIDTH_IN_CHARACTERS - 3);
@@ -2212,10 +2212,10 @@ void DISPLAY_MEDKIT()
     DECWRITE(11 * SCREEN_WIDTH_IN_CHARACTERS - 3, 1);
 #else
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x162 + Y, MED1A[Y]);
-        writeToScreenMemory(0x18A + Y, MED1B[Y]);
-        writeToScreenMemory(0x1B2 + Y, MED1C[Y]);
-        writeToScreenMemory(0x1DA + Y, MED1D[Y]);
+        writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, MED1A[Y]);
+        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, MED1B[Y]);
+        writeToScreenMemory(11 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, MED1C[Y]);
+        writeToScreenMemory(12 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, MED1D[Y]);
     }
     DECNUM = INV_MEDKIT;
     DECWRITE(13 * SCREEN_WIDTH_IN_CHARACTERS - 3);
@@ -2230,10 +2230,10 @@ void DISPLAY_MAGNET()
     DECWRITE(11 * SCREEN_WIDTH_IN_CHARACTERS - 3, 1);
 #else
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x162 + Y, MAG1A[Y]);
-        writeToScreenMemory(0x18A + Y, MAG1B[Y]);
-        writeToScreenMemory(0x1B2 + Y, MAG1C[Y]);
-        writeToScreenMemory(0x1DA + Y, MAG1D[Y]);
+        writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, MAG1A[Y]);
+        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, MAG1B[Y]);
+        writeToScreenMemory(11 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, MAG1C[Y]);
+        writeToScreenMemory(12 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, MAG1D[Y]);
     }
     DECNUM = INV_MAGNET;
     DECWRITE(13 * SCREEN_WIDTH_IN_CHARACTERS - 3);
@@ -2249,11 +2249,11 @@ void DISPLAY_BLANK_ITEM()
 #endif
 /*
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x162 + Y, 32);
-        writeToScreenMemory(0x18A + Y, 32);
-        writeToScreenMemory(0x1B2 + Y, 32);
-        writeToScreenMemory(0x1DA + Y, 32);
-        writeToScreenMemory(0x202 + Y, 32);
+        writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
+        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
+        writeToScreenMemory(11 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
+        writeToScreenMemory(12 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
+        writeToScreenMemory(13 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
     }
 */
 }
@@ -2332,10 +2332,10 @@ void DISPLAY_PLASMA_GUN()
     DECWRITE(5 * SCREEN_WIDTH_IN_CHARACTERS - 3, 1);
 #else
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x04A + Y, WEAPON1A[Y]);
-        writeToScreenMemory(0x072 + Y, WEAPON1B[Y]);
-        writeToScreenMemory(0x09A + Y, WEAPON1C[Y]);
-        writeToScreenMemory(0x0C2 + Y, WEAPON1D[Y]);
+        writeToScreenMemory(2 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, WEAPON1A[Y]);
+        writeToScreenMemory(3 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, WEAPON1B[Y]);
+        writeToScreenMemory(4 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, WEAPON1C[Y]);
+        writeToScreenMemory(5 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, WEAPON1D[Y]);
     }
     DECNUM = AMMO_PLASMA;
     DECWRITE(6 * SCREEN_WIDTH_IN_CHARACTERS - 3);
@@ -2350,10 +2350,10 @@ void DISPLAY_PISTOL()
     DECWRITE(5 * SCREEN_WIDTH_IN_CHARACTERS - 3, 1);
 #else
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x04A + Y, PISTOL1A[Y]);
-        writeToScreenMemory(0x072 + Y, PISTOL1B[Y]);
-        writeToScreenMemory(0x09A + Y, PISTOL1C[Y]);
-        writeToScreenMemory(0x0C2 + Y, PISTOL1D[Y]);
+        writeToScreenMemory(2 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, PISTOL1A[Y]);
+        writeToScreenMemory(3 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, PISTOL1B[Y]);
+        writeToScreenMemory(4 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, PISTOL1C[Y]);
+        writeToScreenMemory(5 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, PISTOL1D[Y]);
     }
     DECNUM = AMMO_PISTOL;
     DECWRITE(6 * SCREEN_WIDTH_IN_CHARACTERS - 3);
@@ -2369,11 +2369,11 @@ void DISPLAY_BLANK_WEAPON()
 #endif
     /*
     for (int Y = 0; Y != 6; Y++) {
-        writeToScreenMemory(0x04A + Y, 32);
-        writeToScreenMemory(0x072 + Y, 32);
-        writeToScreenMemory(0x09A + Y, 32);
-        writeToScreenMemory(0x0C2 + Y, 32);
-        writeToScreenMemory(0x0EA + Y, 32);
+        writeToScreenMemory(2 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
+        writeToScreenMemory(3 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
+        writeToScreenMemory(4 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
+        writeToScreenMemory(5 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
+        writeToScreenMemory(6 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
     }
     */
 }
@@ -2394,36 +2394,36 @@ void DISPLAY_KEYS()
 #else
     platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 120, 48, 16); // ERASE ALL 3 SPOTS
     /*
-    writeToScreenMemory(0x27A, 32); // ERASE ALL 3 SPOTS
-    writeToScreenMemory(0x27B, 32);
-    writeToScreenMemory(0x27C, 32);
-    writeToScreenMemory(0x27D, 32);
-    writeToScreenMemory(0x27E, 32);
-    writeToScreenMemory(0x27F, 32);
-    writeToScreenMemory(0x2A2, 32);
-    writeToScreenMemory(0x2A3, 32);
-    writeToScreenMemory(0x2A4, 32);
-    writeToScreenMemory(0x2A5, 32);
-    writeToScreenMemory(0x2A6, 32);
-    writeToScreenMemory(0x2A7, 32);
+    writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 6, 32); // ERASE ALL 3 SPOTS
+    writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 5, 32);
+    writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 4, 32);
+    writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 3, 32);
+    writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 2, 32);
+    writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 1, 32);
+    writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS - 6, 32);
+    writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS - 5, 32);
+    writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS - 4, 32);
+    writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS - 3, 32);
+    writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS - 2, 32);
+    writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS - 1, 32);
     */
     if (KEYS & 0x01) { // %00000001 Spade key
-        writeToScreenMemory(0x27A, 0x63);
-        writeToScreenMemory(0x27B, 0x4D);
-        writeToScreenMemory(0x2A2, 0x41);
-        writeToScreenMemory(0x2A3, 0x67);
+        writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 6, 0x63);
+        writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 5, 0x4D);
+        writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS - 6, 0x41);
+        writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS - 5, 0x67);
     }
     if (KEYS & 0x02) { // %00000010 heart key
-        writeToScreenMemory(0x27C, 0x63);
-        writeToScreenMemory(0x27D, 0x4D);
-        writeToScreenMemory(0x2A4, 0x53);
-        writeToScreenMemory(0x2A5, 0x67);
+        writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 4, 0x63);
+        writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 3, 0x4D);
+        writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS - 4, 0x53);
+        writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS - 3, 0x67);
     }
     if (KEYS & 0x04) { // %00000100 star key
-        writeToScreenMemory(0x27E, 0x63);
-        writeToScreenMemory(0x27F, 0x4D);
-        writeToScreenMemory(0x2A6, 0x2A);
-        writeToScreenMemory(0x2A7, 0x67);
+        writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 2, 0x63);
+        writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 1, 0x4D);
+        writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS - 2, 0x2A);
+        writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS - 1, 0x67);
     }
 #endif
 }
@@ -2449,9 +2449,9 @@ void GAME_OVER()
         BACKGROUND_TASKS();
     }
     for (int X = 0; X != PLATFORM_MAP_WINDOW_TILES_WIDTH; X++) {
-        writeToScreenMemory(0x173 + X, GAMEOVER1[X]);
-        writeToScreenMemory(0x19B + X, GAMEOVER2[X]);
-        writeToScreenMemory(0x1C3 + X, GAMEOVER3[X]);
+        writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS + 11 + X, GAMEOVER1[X]);
+        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS + 11 + X, GAMEOVER2[X]);
+        writeToScreenMemory(11 * SCREEN_WIDTH_IN_CHARACTERS + 11 + X, GAMEOVER3[X]);
     }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
@@ -2504,7 +2504,7 @@ void DISPLAY_WIN_LOSE()
     if (UNIT_TYPE[0] != 0) {
         // WIN MESSAGE
         for (int X = 0; X != 8; X++) {
-            writeToScreenMemory(0x088 + X, WIN_MSG[X], 4, 1);
+            writeToScreenMemory(3 * SCREEN_WIDTH_IN_CHARACTERS + 16 + X, WIN_MSG[X], 4, 1);
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
         if (MUSIC_ON == 1) {
@@ -2516,7 +2516,7 @@ void DISPLAY_WIN_LOSE()
     } else {
         // LOSE MESSAGE
         for (int X = 0; X != 9; X++) {
-            writeToScreenMemory(0x088 + X, LOS_MSG[X], 4, 1);
+            writeToScreenMemory(3 * SCREEN_WIDTH_IN_CHARACTERS + 16 + X, LOS_MSG[X], 4, 1);
         }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
         if (MUSIC_ON == 1) {
@@ -2549,7 +2549,7 @@ void PRINT_INFO(const char *text)
             PRINTX = 0;
             SCROLL_INFO();
         } else {
-            writeToScreenMemory(0x3C0 + PRINTX, text[Y]);
+            writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS + PRINTX, text[Y]);
             PRINTX++;
         }
     }
@@ -2564,12 +2564,12 @@ void SCROLL_INFO()
     /*
     int X;
     for (X = 0; X != 33; X++) {
-        writeToScreenMemory(0x370 + X, SCREEN_MEMORY[0x398 + X]);
-        writeToScreenMemory(0x398 + X, SCREEN_MEMORY[0x3C0 + X]); // BOTTOM ROW
+        writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 3) * SCREEN_WIDTH_IN_CHARACTERS + X, SCREEN_MEMORY[0x398 + X]);
+        writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 2) * SCREEN_WIDTH_IN_CHARACTERS + X, SCREEN_MEMORY[0x3C0 + X]); // BOTTOM ROW
     }
     // NOW CLEAR BOTTOM ROW
     for (X = 0; X != 33; X++) {
-        writeToScreenMemory(0x3C0 + X, 32); // BOTTOM ROW
+        writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS + X, 32); // BOTTOM ROW
     }
     */
     platform->copyRect(0, PLATFORM_SCREEN_HEIGHT - 16, 0, PLATFORM_SCREEN_HEIGHT - 24, MAP_WINDOW_WIDTH, 16);
@@ -2699,9 +2699,9 @@ void CYCLE_CONTROLS()
     // display control method on screen
     for (int X = 0, Y = CONTROLSTART[CONTROL]; X != 10; X++, Y++) {
 #ifdef PLATFORM_IMAGE_SUPPORT
-        writeToScreenMemory(0x0A4 + X, CONTROLTEXT[Y], 14, 5);
+        writeToScreenMemory(4 * SCREEN_WIDTH_IN_CHARACTERS + 4 + X, CONTROLTEXT[Y], 14, 5);
 #else
-        writeToScreenMemory(0x0CC + X, CONTROLTEXT[Y] | 0x80);
+        writeToScreenMemory(5 * SCREEN_WIDTH_IN_CHARACTERS + 4 + X, CONTROLTEXT[Y] | 0x80);
 #endif
     }
 }
@@ -2725,9 +2725,9 @@ void DISPLAY_MAP_NAME()
     char* name = CALC_MAP_NAME();
     for (int Y = 0; Y != 16; Y++) {
 #ifdef PLATFORM_IMAGE_SUPPORT
-        writeToScreenMemory(0x119 + Y, name[Y], 15, 5);
+        writeToScreenMemory(7 * SCREEN_WIDTH_IN_CHARACTERS + 1 + Y, name[Y], 15, 5);
 #else
-        writeToScreenMemory(0x16A + Y, name[Y]);
+        writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS + 2 + Y, name[Y]);
 #endif
     }
     // now set the mapname for the filesystem load
@@ -2755,9 +2755,9 @@ void REVERSE_MENU_OPTION(bool reverse)
 
 uint8_t MENUY = 0; // CURRENT MENU SELECTION
 #ifdef PLATFORM_IMAGE_SUPPORT
-uint8_t MENU_CHART_L[] = { 0x2C, 0x54, 0x7C, 0xA4 };
+uint8_t MENU_CHART_L[] = { 1 * SCREEN_WIDTH_IN_CHARACTERS + 4, 2 * SCREEN_WIDTH_IN_CHARACTERS + 4, 3 * SCREEN_WIDTH_IN_CHARACTERS + 4, 4 * SCREEN_WIDTH_IN_CHARACTERS + 4 };
 #else
-uint8_t MENU_CHART_L[] = { 0x54, 0x7C, 0xA4, 0xCC };
+uint8_t MENU_CHART_L[] = { 2 * SCREEN_WIDTH_IN_CHARACTERS + 4, 3 * SCREEN_WIDTH_IN_CHARACTERS + 4, 4 * SCREEN_WIDTH_IN_CHARACTERS + 4, 5 * SCREEN_WIDTH_IN_CHARACTERS + 4 };
 #endif
 
 void CHANGE_DIFFICULTY_LEVEL()
@@ -2767,14 +2767,14 @@ void CHANGE_DIFFICULTY_LEVEL()
 #else
     int Y = FACE_LEVEL[DIFF_LEVEL];
     // DO CHARACTERS FIRST
-    writeToScreenMemory(0x0DD, ROBOT_FACE[Y++]);
-    writeToScreenMemory(0x0DE, ROBOT_FACE[Y++]);
-    writeToScreenMemory(0x0DF, ROBOT_FACE[Y++]);
-    writeToScreenMemory(0x0E1, ROBOT_FACE[Y++]);
-    writeToScreenMemory(0x0E2, ROBOT_FACE[Y++]);
-    writeToScreenMemory(0x0E3, ROBOT_FACE[Y++]);
-    writeToScreenMemory(0x107, ROBOT_FACE[Y++]);
-    writeToScreenMemory(0x109, ROBOT_FACE[Y]);
+    writeToScreenMemory(5 * SCREEN_WIDTH_IN_CHARACTERS + 21, ROBOT_FACE[Y++]);
+    writeToScreenMemory(5 * SCREEN_WIDTH_IN_CHARACTERS + 22, ROBOT_FACE[Y++]);
+    writeToScreenMemory(5 * SCREEN_WIDTH_IN_CHARACTERS + 23, ROBOT_FACE[Y++]);
+    writeToScreenMemory(5 * SCREEN_WIDTH_IN_CHARACTERS + 25, ROBOT_FACE[Y++]);
+    writeToScreenMemory(5 * SCREEN_WIDTH_IN_CHARACTERS + 26, ROBOT_FACE[Y++]);
+    writeToScreenMemory(5 * SCREEN_WIDTH_IN_CHARACTERS + 27, ROBOT_FACE[Y++]);
+    writeToScreenMemory(6 * SCREEN_WIDTH_IN_CHARACTERS + 23, ROBOT_FACE[Y++]);
+    writeToScreenMemory(6 * SCREEN_WIDTH_IN_CHARACTERS + 25, ROBOT_FACE[Y]);
 #endif
 }
 
@@ -2838,27 +2838,27 @@ void EMP_FLASH()
     INVALIDATE_PREVIOUS_MAP();
 #else
     for (int Y = 0; Y != 33; Y++) {
-        writeToScreenMemory(0x000 + Y, SCREEN_MEMORY[0x000 + Y] ^ 0x80); // screen row 00
-        writeToScreenMemory(0x028 + Y, SCREEN_MEMORY[0x028 + Y] ^ 0x80); // screen row 01
-        writeToScreenMemory(0x050 + Y, SCREEN_MEMORY[0x050 + Y] ^ 0x80); // screen row 02
-        writeToScreenMemory(0x078 + Y, SCREEN_MEMORY[0x078 + Y] ^ 0x80); // screen row 03
-        writeToScreenMemory(0x0A0 + Y, SCREEN_MEMORY[0x0A0 + Y] ^ 0x80); // screen row 04
-        writeToScreenMemory(0x0C8 + Y, SCREEN_MEMORY[0x0C8 + Y] ^ 0x80); // screen row 05
-        writeToScreenMemory(0x0F0 + Y, SCREEN_MEMORY[0x0F0 + Y] ^ 0x80); // screen row 06
-        writeToScreenMemory(0x118 + Y, SCREEN_MEMORY[0x118 + Y] ^ 0x80); // screen row 07
-        writeToScreenMemory(0x140 + Y, SCREEN_MEMORY[0x140 + Y] ^ 0x80); // screen row 08
-        writeToScreenMemory(0x168 + Y, SCREEN_MEMORY[0x168 + Y] ^ 0x80); // screen row 09
-        writeToScreenMemory(0x190 + Y, SCREEN_MEMORY[0x190 + Y] ^ 0x80); // screen row 10
-        writeToScreenMemory(0x1B8 + Y, SCREEN_MEMORY[0x1B8 + Y] ^ 0x80); // screen row 11
-        writeToScreenMemory(0x1E0 + Y, SCREEN_MEMORY[0x1E0 + Y] ^ 0x80); // screen row 12
-        writeToScreenMemory(0x208 + Y, SCREEN_MEMORY[0x208 + Y] ^ 0x80); // screen row 13
-        writeToScreenMemory(0x230 + Y, SCREEN_MEMORY[0x230 + Y] ^ 0x80); // screen row 14
-        writeToScreenMemory(0x258 + Y, SCREEN_MEMORY[0x258 + Y] ^ 0x80); // screen row 15
-        writeToScreenMemory(0x280 + Y, SCREEN_MEMORY[0x280 + Y] ^ 0x80); // screen row 16
-        writeToScreenMemory(0x2A8 + Y, SCREEN_MEMORY[0x2A8 + Y] ^ 0x80); // screen row 17
-        writeToScreenMemory(0x2D0 + Y, SCREEN_MEMORY[0x2D0 + Y] ^ 0x80); // screen row 18
-        writeToScreenMemory(0x2F8 + Y, SCREEN_MEMORY[0x2F8 + Y] ^ 0x80); // screen row 19
-        writeToScreenMemory(0x320 + Y, SCREEN_MEMORY[0x320 + Y] ^ 0x80); // screen row 20
+        writeToScreenMemory(0 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[0 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 00
+        writeToScreenMemory(1 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[1 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 01
+        writeToScreenMemory(2 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[2 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 02
+        writeToScreenMemory(3 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[3 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 03
+        writeToScreenMemory(4 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[4 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 04
+        writeToScreenMemory(5 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[5 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 05
+        writeToScreenMemory(6 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[6 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 06
+        writeToScreenMemory(7 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[7 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 07
+        writeToScreenMemory(8 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[8 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 08
+        writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[9 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 09
+        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[10 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 10
+        writeToScreenMemory(11 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[11 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 11
+        writeToScreenMemory(12 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[12 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 12
+        writeToScreenMemory(13 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[13 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 13
+        writeToScreenMemory(14 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[14 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 14
+        writeToScreenMemory(15 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[15 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 15
+        writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[16 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 16
+        writeToScreenMemory(17 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[17 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 17
+        writeToScreenMemory(18 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[18 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 18
+        writeToScreenMemory(19 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[19 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 19
+        writeToScreenMemory(20 * SCREEN_WIDTH_IN_CHARACTERS + Y, SCREEN_MEMORY[20 * SCREEN_WIDTH_IN_CHARACTERS + Y] ^ 0x80); // screen row 20
     }
 #endif
     REDRAW_WINDOW = 1;
@@ -2995,7 +2995,7 @@ void ELEVATOR_SELECT()
     ELEVATOR_MAX_FLOOR = UNIT_D[UNIT]; // get max levels
     // Now draw available levels on screen
     for (int Y = 0, A = 0x31; Y != ELEVATOR_MAX_FLOOR; A++, Y++) {
-        writeToScreenMemory(0x3C6 + Y, A);
+        writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS + 6 + Y, A);
     }
     ELEVATOR_CURRENT_FLOOR = UNIT_C[UNIT]; // what level are we on now?
     // Now highlight current level
@@ -3046,7 +3046,7 @@ uint8_t ELEVATOR_CURRENT_FLOOR = 0;
 
 void ELEVATOR_INVERT()
 {
-    writeToScreenMemory(0x3C5 + ELEVATOR_CURRENT_FLOOR, SCREEN_MEMORY[0x3C5 + ELEVATOR_CURRENT_FLOOR] ^ 0x80); // %10000000
+    writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS + 5 + ELEVATOR_CURRENT_FLOOR, SCREEN_MEMORY[0x3C5 + ELEVATOR_CURRENT_FLOOR] ^ 0x80); // %10000000
 }
 
 void ELEVATOR_INC()
@@ -3172,9 +3172,9 @@ void PET_BORDER_FLASH()
 #ifndef PLATFORM_IMAGE_SUPPORT
             // copy flash message to screen
             for (int X = 0; X != 6; X++) {
-                writeToScreenMemory(0x2F2 + X, OUCH1[X]);
-                writeToScreenMemory(0x31A + X, OUCH2[X]);
-                writeToScreenMemory(0x342 + X, OUCH3[X]);
+                writeToScreenMemory(19 * SCREEN_WIDTH_IN_CHARACTERS - 6 + X, OUCH1[X]);
+                writeToScreenMemory(20 * SCREEN_WIDTH_IN_CHARACTERS - 6 + X, OUCH2[X]);
+                writeToScreenMemory(21 * SCREEN_WIDTH_IN_CHARACTERS - 6 + X, OUCH3[X]);
             }
 #endif
             platform->startFadeScreen(BORDER_COLOR, 15 - BORDER);
@@ -3185,9 +3185,9 @@ void PET_BORDER_FLASH()
 #ifndef PLATFORM_IMAGE_SUPPORT
             // Remove message from screen
             for (int X = 0; X != 6; X++) {
-                writeToScreenMemory(0x2F2 + X, 32);
-                writeToScreenMemory(0x31A + X, 32);
-                writeToScreenMemory(0x342 + X, 32);
+                writeToScreenMemory(19 * SCREEN_WIDTH_IN_CHARACTERS - 6 + X, 32);
+                writeToScreenMemory(20 * SCREEN_WIDTH_IN_CHARACTERS - 6 + X, 32);
+                writeToScreenMemory(21 * SCREEN_WIDTH_IN_CHARACTERS - 6 + X, 32);
             }
 #endif
             FLASH_STATE = 0;
