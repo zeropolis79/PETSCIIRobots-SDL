@@ -114,7 +114,7 @@ uint8_t MOVE_TYPE;      // %00000001=WALK %00000010=HOVER
 uint8_t* CUR_PATTERN;   // stores the memory location of the current musical pattern being played.
 
 uint8_t* MAP_SOURCE;    // $FD
-uint8_t SCREEN_MEMORY[40 * 25]; // $8000
+uint8_t SCREEN_MEMORY[SCREEN_WIDTH_IN_CHARACTERS * SCREEN_HEIGHT_IN_CHARACTERS]; // $8000
 
 int main(int argc, char *argv[])
 {
@@ -1997,11 +1997,11 @@ void DISPLAY_ENDGAME_SCREEN()
     }
     // display elapsed time
     DECNUM = HOURS;
-    DECWRITE(0x17D, 4);
+    DECWRITE(9 * SCREEN_WIDTH_IN_CHARACTERS + 21, 4);
     DECNUM = MINUTES;
-    DECWRITE(0x180, 4);
+    DECWRITE(9 * SCREEN_WIDTH_IN_CHARACTERS + 24, 4);
     DECNUM = SECONDS;
-    DECWRITE(0x183, 4);
+    DECWRITE(9 * SCREEN_WIDTH_IN_CHARACTERS + 27, 4);
     writeToScreenMemory(0x17D, 32, 4); // SPACE
     writeToScreenMemory(0x180, 58, 4); // COLON
     writeToScreenMemory(0x183, 58, 4);
@@ -2012,7 +2012,7 @@ void DISPLAY_ENDGAME_SCREEN()
             DECNUM++;
         }
     }
-    DECWRITE(0x1CE, 4);
+    DECWRITE(11 * SCREEN_WIDTH_IN_CHARACTERS + 22, 4);
     // Count secrets remaining
     DECNUM = 0;
     for (X = 48; X != 64; X++) {
@@ -2020,7 +2020,7 @@ void DISPLAY_ENDGAME_SCREEN()
             DECNUM++;
         }
     }
-    DECWRITE(0x21E, 4);
+    DECWRITE(13 * SCREEN_WIDTH_IN_CHARACTERS + 22, 4);
     // display difficulty level
     char* WORD = DIFF_LEVEL_WORDS + (DIFF_LEVEL * 6);
     for (X = 0; X < 6; X++) {
@@ -2173,7 +2173,7 @@ void DISPLAY_TIMEBOMB()
 #ifdef PLATFORM_IMAGE_SUPPORT
     platform->renderItem(5, PLATFORM_SCREEN_WIDTH - 48, 54);
     DECNUM = INV_BOMBS;
-    DECWRITE(0x1B5, 1);
+    DECWRITE(11 * SCREEN_WIDTH_IN_CHARACTERS - 3, 1);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, TBOMB1A[Y]);
@@ -2182,7 +2182,7 @@ void DISPLAY_TIMEBOMB()
         writeToScreenMemory(0x1DA + Y, TBOMB1D[Y]);
     }
     DECNUM = INV_BOMBS;
-    DECWRITE(0x205);
+    DECWRITE(13 * SCREEN_WIDTH_IN_CHARACTERS - 3);
 #endif
 }
 
@@ -2191,7 +2191,7 @@ void DISPLAY_EMP()
 #ifdef PLATFORM_IMAGE_SUPPORT
     platform->renderItem(3, PLATFORM_SCREEN_WIDTH - 48, 54);
     DECNUM = INV_EMP;
-    DECWRITE(0x1B5, 1);
+    DECWRITE(11 * SCREEN_WIDTH_IN_CHARACTERS - 3, 1);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, EMP1A[Y]);
@@ -2200,7 +2200,7 @@ void DISPLAY_EMP()
         writeToScreenMemory(0x1DA + Y, EMP1D[Y]);
     }
     DECNUM = INV_EMP;
-    DECWRITE(0x205);
+    DECWRITE(13 * SCREEN_WIDTH_IN_CHARACTERS - 3);
 #endif
 }
 
@@ -2209,7 +2209,7 @@ void DISPLAY_MEDKIT()
 #ifdef PLATFORM_IMAGE_SUPPORT
     platform->renderItem(2, PLATFORM_SCREEN_WIDTH - 48, 54);
     DECNUM = INV_MEDKIT;
-    DECWRITE(0x1B5, 1);
+    DECWRITE(11 * SCREEN_WIDTH_IN_CHARACTERS - 3, 1);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, MED1A[Y]);
@@ -2218,7 +2218,7 @@ void DISPLAY_MEDKIT()
         writeToScreenMemory(0x1DA + Y, MED1D[Y]);
     }
     DECNUM = INV_MEDKIT;
-    DECWRITE(0x205);
+    DECWRITE(13 * SCREEN_WIDTH_IN_CHARACTERS - 3);
 #endif
 }
 
@@ -2227,7 +2227,7 @@ void DISPLAY_MAGNET()
 #ifdef PLATFORM_IMAGE_SUPPORT
     platform->renderItem(4, PLATFORM_SCREEN_WIDTH - 48, 54);
     DECNUM = INV_MAGNET;
-    DECWRITE(0x1B5, 1);
+    DECWRITE(11 * SCREEN_WIDTH_IN_CHARACTERS - 3, 1);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x162 + Y, MAG1A[Y]);
@@ -2236,16 +2236,16 @@ void DISPLAY_MAGNET()
         writeToScreenMemory(0x1DA + Y, MAG1D[Y]);
     }
     DECNUM = INV_MAGNET;
-    DECWRITE(0x205);
+    DECWRITE(13 * SCREEN_WIDTH_IN_CHARACTERS - 3);
 #endif
 }
 
 void DISPLAY_BLANK_ITEM()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->clearRect(272, 48, 48, 40);
+    platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 48, 48, 40);
 #else
-    platform->clearRect(272, 56, 48, 32);
+    platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 56, 48, 32);
 #endif
 /*
     for (int Y = 0; Y != 6; Y++) {
@@ -2329,7 +2329,7 @@ void DISPLAY_PLASMA_GUN()
 #ifdef PLATFORM_IMAGE_SUPPORT
     platform->renderItem(1, PLATFORM_SCREEN_WIDTH - 48, 13);
     DECNUM = AMMO_PLASMA;
-    DECWRITE(0x0C5, 1);
+    DECWRITE(5 * SCREEN_WIDTH_IN_CHARACTERS - 3, 1);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x04A + Y, WEAPON1A[Y]);
@@ -2338,7 +2338,7 @@ void DISPLAY_PLASMA_GUN()
         writeToScreenMemory(0x0C2 + Y, WEAPON1D[Y]);
     }
     DECNUM = AMMO_PLASMA;
-    DECWRITE(0x0ED);
+    DECWRITE(6 * SCREEN_WIDTH_IN_CHARACTERS - 3);
 #endif
 }
 
@@ -2347,7 +2347,7 @@ void DISPLAY_PISTOL()
 #ifdef PLATFORM_IMAGE_SUPPORT
     platform->renderItem(0, PLATFORM_SCREEN_WIDTH - 48, 13);
     DECNUM = AMMO_PISTOL;
-    DECWRITE(0x0C5, 1);
+    DECWRITE(5 * SCREEN_WIDTH_IN_CHARACTERS - 3, 1);
 #else
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(0x04A + Y, PISTOL1A[Y]);
@@ -2356,16 +2356,16 @@ void DISPLAY_PISTOL()
         writeToScreenMemory(0x0C2 + Y, PISTOL1D[Y]);
     }
     DECNUM = AMMO_PISTOL;
-    DECWRITE(0x0ED);
+    DECWRITE(6 * SCREEN_WIDTH_IN_CHARACTERS - 3);
 #endif
 }
 
 void DISPLAY_BLANK_WEAPON()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->clearRect(272, 8, 48, 32);
+    platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 8, 48, 32);
 #else
-    platform->clearRect(272, 16, 48, 32);
+    platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 16, 48, 32);
 #endif
     /*
     for (int Y = 0; Y != 6; Y++) {
@@ -2381,7 +2381,7 @@ void DISPLAY_BLANK_WEAPON()
 void DISPLAY_KEYS()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->clearRect(272, 106, 48, 14); // ERASE ALL 3 SPOTS
+    platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 106, 48, 14); // ERASE ALL 3 SPOTS
     if (KEYS & 0x01) { // %00000001 Spade key
         platform->renderKey(0, PLATFORM_SCREEN_WIDTH - 48, 106);
     }
@@ -2392,7 +2392,7 @@ void DISPLAY_KEYS()
         platform->renderKey(2, PLATFORM_SCREEN_WIDTH - 16, 106);
     }
 #else
-    platform->clearRect(272, 120, 48, 16); // ERASE ALL 3 SPOTS
+    platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 120, 48, 16); // ERASE ALL 3 SPOTS
     /*
     writeToScreenMemory(0x27A, 32); // ERASE ALL 3 SPOTS
     writeToScreenMemory(0x27B, 32);
@@ -3120,7 +3120,7 @@ void SET_CUSTOM_KEYS()
 #endif
     platform->renderFrame();
     platform->fadeScreen(15, false);
-    uint16_t destination = 0x151;
+    uint16_t destination = 8 * SCREEN_WIDTH_IN_CHARACTERS + 17;
     for (TEMP_A = 0; TEMP_A != 13;) {
         uint8_t A = platform->readKeyboard();
         if (A != 0xff) {

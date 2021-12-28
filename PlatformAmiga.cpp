@@ -169,7 +169,7 @@ __chip static SpriteData cursorData2 = {
 };
 #endif
 __chip static uint16_t pointer[4];
-uint16_t addressMap[40 * 25];
+uint16_t addressMap[SCREEN_WIDTH_IN_CHARACTERS * SCREEN_HEIGHT_IN_CHARACTERS];
 static uint8_t tileMaskMap[256];
 #ifdef PLATFORM_SPRITE_SUPPORT
 static int8_t tileSpriteMap[256] = {
@@ -350,8 +350,8 @@ PlatformAmiga::PlatformAmiga() :
 {
     Palette::initialize();
 
-    for (int y = 0, i = 0; y < 25; y++) {
-        for (int x = 0; x < 40; x++, i++) {
+    for (int y = 0, i = 0; y < SCREEN_HEIGHT_IN_CHARACTERS; y++) {
+        for (int x = 0; x < SCREEN_WIDTH_IN_CHARACTERS; x++, i++) {
             addressMap[i] = y * SCREEN_WIDTH_IN_BYTES * PLANES * 8 + x;
         }
     }

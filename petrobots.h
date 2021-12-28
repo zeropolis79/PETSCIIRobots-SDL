@@ -79,7 +79,7 @@ extern uint8_t* CUR_PATTERN;   // stores the memory location of the current musi
 //extern uint8_t LSTX;           // $97 Current Key Pressed: 255 = No Key
 extern uint8_t NDX;            // $9E No. of Chars. in Keyboard Buffer (Queue)
 extern uint8_t* MAP_SOURCE;    // $FD
-extern uint8_t SCREEN_MEMORY[40 * 25]; // $8000
+extern uint8_t SCREEN_MEMORY[SCREEN_WIDTH_IN_CHARACTERS * SCREEN_HEIGHT_IN_CHARACTERS]; // $8000
 extern bool quit;
 
 void INIT_GAME();

@@ -576,8 +576,8 @@ void PlatformSDL::writeToScreenMemory(uint16_t address, uint8_t value)
     sourceRect.y = value << 3;
     sourceRect.w = 8;
     sourceRect.h = 8;
-    destinationRect.x = (address % 40) << 3;
-    destinationRect.y = (address / 40) << 3;
+    destinationRect.x = (address % SCREEN_WIDTH_IN_CHARACTERS) << 3;
+    destinationRect.y = (address / SCREEN_WIDTH_IN_CHARACTERS) << 3;
     destinationRect.w = 8;
     destinationRect.h = 8;
     SDL_SetSurfaceColorMod(fontSurface, 0x77, 0xbb, 0x55);
@@ -591,8 +591,8 @@ void PlatformSDL::writeToScreenMemory(uint16_t address, uint8_t value, uint8_t c
     sourceRect.y = value << 3;
     sourceRect.w = 8;
     sourceRect.h = 8;
-    destinationRect.x = (address % 40) << 3;
-    destinationRect.y = ((address / 40) << 3) + yOffset;
+    destinationRect.x = (address % SCREEN_WIDTH_IN_CHARACTERS) << 3;
+    destinationRect.y = ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset;
     destinationRect.w = 8;
     destinationRect.h = 8;
     SDL_SetSurfaceColorMod(fontSurface, palette[color] >> 16, (palette[color] >> 8) & 0xff, palette[color] & 0xff);
