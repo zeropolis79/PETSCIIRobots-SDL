@@ -857,9 +857,9 @@ void USE_EMP()
     for (int X = 1; X != 28; X++) { // start with unit#1 (skip player)
         if (UNIT_TYPE[X] != 0 &&                    // CHECK THAT UNIT EXISTS
             UNIT_LOC_X[X] >= MAP_WINDOW_X &&        // CHECK HORIZONTAL POSITION
-            UNIT_LOC_X[X] <= (MAP_WINDOW_X + 10) &&  // NOW CHECK VERTICAL
+            UNIT_LOC_X[X] <= (MAP_WINDOW_X + PLATFORM_MAP_WINDOW_TILES_WIDTH - 1) &&  // NOW CHECK VERTICAL
             UNIT_LOC_Y[X] >= MAP_WINDOW_Y &&
-            UNIT_LOC_Y[X] <= (MAP_WINDOW_Y + 6)) {
+            UNIT_LOC_Y[X] <= (MAP_WINDOW_Y + PLATFORM_MAP_WINDOW_TILES_HEIGHT - 1)) {
             UNIT_TIMER_A[X] = 255;
             // test to see if unit is above water
             MAP_X = UNIT_LOC_X[X];
@@ -1484,12 +1484,16 @@ void MAP_PRE_CALCULATE()
         if (X == 0 || // skip the check for unit zero, always draw it.
             (UNIT_TYPE[X] != 0 &&                    // CHECK THAT UNIT EXISTS
              UNIT_LOC_X[X] >= MAP_WINDOW_X &&        // CHECK HORIZONTAL POSITION
-             UNIT_LOC_X[X] <= (MAP_WINDOW_X + 10) && // NOW CHECK VERTICAL
+             UNIT_LOC_X[X] <= (MAP_WINDOW_X + PLATFORM_MAP_WINDOW_TILES_WIDTH - 1) && // NOW CHECK VERTICAL
              UNIT_LOC_Y[X] >= MAP_WINDOW_Y &&
-             UNIT_LOC_Y[X] <= (MAP_WINDOW_Y + 6))) {
+             UNIT_LOC_Y[X] <= (MAP_WINDOW_Y + PLATFORM_MAP_WINDOW_TILES_HEIGHT - 1))) {
             // Unit found in map window, now add that unit's
             // tile to the precalc map.
+#if (MAP_WINDOW_SIZE == 77)
             int Y = UNIT_LOC_X[X] - MAP_WINDOW_X + PRECALC_ROWS[UNIT_LOC_Y[X] - MAP_WINDOW_Y];
+#else
+            int Y = UNIT_LOC_X[X] - MAP_WINDOW_X + (UNIT_LOC_Y[X] - MAP_WINDOW_Y) * PLATFORM_MAP_WINDOW_TILES_WIDTH;
+#endif
             if (UNIT_TILE[X] == 130 || UNIT_TILE[X] == 134) { // is it a bomb, is it a magnet?
                 // What to do in case of bomb or magnet that should
                 // go underneath the unit or robot.
@@ -1505,7 +1509,9 @@ void MAP_PRE_CALCULATE()
     }
 }
 
+#if (MAP_WINDOW_SIZE == 77)
 uint8_t PRECALC_ROWS[] = { 0,11,22,33,44,55,66 };
+#endif
 
 // This routine is where the MAP is displayed on the screen
 #ifdef OPTIMIZED_MAP_RENDERING
@@ -1521,8 +1527,15 @@ void DRAW_MAP_WINDOW()
     MAP_PRE_CALCULATE();
     REDRAW_WINDOW = 0;
     MAP_SOURCE = MAP + ((MAP_WINDOW_Y << 7) + MAP_WINDOW_X);
-    for (uint8_t TEMP_Y = 0, PRECALC_COUNT = 0; TEMP_Y != PLATFORM_MAP_WINDOW_TILES_HEIGHT; TEMP_Y++, MAP_SOURCE += 117) {
+#if (MAP_WINDOW_SIZE == 77)
+    for (uint8_t TEMP_Y = 0, PRECALC_COUNT = 0; TEMP_Y != PLATFORM_MAP_WINDOW_TILES_HEIGHT; TEMP_Y++, MAP_SOURCE += 128 - PLATFORM_MAP_WINDOW_TILES_WIDTH) {
         for (uint8_t TEMP_X = 0; TEMP_X != PLATFORM_MAP_WINDOW_TILES_WIDTH; TEMP_X++, MAP_SOURCE++, PRECALC_COUNT++) {
+#else
+    uint16_t TO_DRAW_WIDTH = MIN(128 - MAP_WINDOW_X, PLATFORM_MAP_WINDOW_TILES_WIDTH);
+    uint16_t TO_DRAW_HEIGHT = MIN(64 - MAP_WINDOW_Y, PLATFORM_MAP_WINDOW_TILES_HEIGHT);
+    for (uint16_t TEMP_Y = 0, PRECALC_COUNT = 0; TEMP_Y != TO_DRAW_HEIGHT; TEMP_Y++, MAP_SOURCE += 128 - TO_DRAW_WIDTH, PRECALC_COUNT += PLATFORM_MAP_WINDOW_TILES_WIDTH - TO_DRAW_WIDTH) {
+        for (uint16_t TEMP_X = 0; TEMP_X != TO_DRAW_WIDTH; TEMP_X++, MAP_SOURCE++, PRECALC_COUNT++) {
+#endif
             // NOW FIGURE OUT WHERE TO PLACE IT ON SCREEN.
             TILE = MAP_SOURCE[0];
             uint8_t VARIANT = 0;
@@ -1890,9 +1903,9 @@ void REVERSE_TILE()
 void CHECK_FOR_WINDOW_REDRAW()
 {
     if (UNIT_LOC_X[UNIT] >= MAP_WINDOW_X && // FIRST CHECK HORIZONTAL
-        UNIT_LOC_X[UNIT] <= (MAP_WINDOW_X + 10) &&
+        UNIT_LOC_X[UNIT] <= (MAP_WINDOW_X + PLATFORM_MAP_WINDOW_TILES_WIDTH - 1) &&
         UNIT_LOC_Y[UNIT] >= MAP_WINDOW_Y && // NOW CHECK VERTICAL
-        UNIT_LOC_Y[UNIT] <= (MAP_WINDOW_Y + 6)) {
+        UNIT_LOC_Y[UNIT] <= (MAP_WINDOW_Y + PLATFORM_MAP_WINDOW_TILES_HEIGHT - 1)) {
         REDRAW_WINDOW = 1;
     }
 }

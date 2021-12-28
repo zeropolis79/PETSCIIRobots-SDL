@@ -129,7 +129,7 @@ PlatformSDL::PlatformSDL() :
     samplesSinceInterrupt = interruptIntervalInSamples;
     SDL_PauseAudioDevice(audioDeviceID, 0);
 
-    window = SDL_CreateWindow("Attack of the PETSCII robots", 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT, 0);
+    window = SDL_CreateWindow("Attack of the PETSCII Robots", 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT, 0);
     windowSurface = SDL_GetWindowSurface(window);
 #ifdef PLATFORM_COLOR_SUPPORT
     fontSurface = IMG_Load("c64font.png");
