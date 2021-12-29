@@ -1275,8 +1275,8 @@ void CALC_COORDINATES()
 void USER_SELECT_OBJECT()
 {
     PLAY_SOUND(16); // beep sound, SOUND PLAY
-    CURSOR_X = 5;
-    CURSOR_Y = 3;
+    CURSOR_X = PLATFORM_MAP_WINDOW_TILES_WIDTH / 2;
+    CURSOR_Y = PLATFORM_MAP_WINDOW_TILES_HEIGHT / 2;
 #ifdef PLATFORM_CURSOR_SUPPORT
     if (LIVE_MAP_ON == 0) {
         platform->showCursor(CURSOR_X, CURSOR_Y);
@@ -1465,8 +1465,8 @@ uint8_t MOVTEMP_UY = 0;
 
 void CACULATE_AND_REDRAW()
 {
-    MAP_WINDOW_X = UNIT_LOC_X[0] - 5; // no index needed since it's player unit
-    MAP_WINDOW_Y = UNIT_LOC_Y[0] - 3; // no index needed since it's player unit
+    MAP_WINDOW_X = UNIT_LOC_X[0] - PLATFORM_MAP_WINDOW_TILES_WIDTH / 2; // no index needed since it's player unit
+    MAP_WINDOW_Y = UNIT_LOC_Y[0] - PLATFORM_MAP_WINDOW_TILES_HEIGHT / 2; // no index needed since it's player unit
     REDRAW_WINDOW = 1;
 }
 
