@@ -137,7 +137,7 @@ PlatformSDL::PlatformSDL() :
     fontSurface = IMG_Load("petfont.png");
 #endif
 #ifdef PLATFORM_IMAGE_BASED_TILES
-    tileSurface = IMG_Load("tiles.png");
+    tileSurface = IMG_Load("tilesalpha.png");
 #else
     for (int i = 0; i < 256; i++) {
         tileSurfaces[i] = SDL_CreateRGBSurface(0, 24, 24, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
@@ -153,7 +153,7 @@ PlatformSDL::PlatformSDL() :
     facesSurface = IMG_Load("faces.png");
     animTilesSurface = IMG_Load("animtiles.png");
 #ifdef PLATFORM_SPRITE_SUPPORT
-    spritesSurface = IMG_Load("../Images/sprites.png");
+    spritesSurface = IMG_Load("spritesalpha.png");
     SDL_SetColorKey(spritesSurface, SDL_TRUE, 16);
 #endif
 #endif
