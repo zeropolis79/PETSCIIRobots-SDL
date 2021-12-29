@@ -157,6 +157,9 @@ PlatformSDL::PlatformSDL() :
     SDL_SetColorKey(spritesSurface, SDL_TRUE, 16);
 #endif
 #endif
+#ifdef PLATFORM_CURSOR_SUPPORT
+    cursorSurface = SDL_CreateRGBSurface(0, 28, 28, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+#endif
     SDL_SetSurfaceBlendMode(fontSurface, SDL_BLENDMODE_NONE);
 
     platform = this;
@@ -540,6 +543,31 @@ void PlatformSDL::renderFace(uint8_t face, uint16_t x, uint16_t y)
 }
 #endif
 
+#ifdef PLATFORM_CURSOR_SUPPORT
+static SDL_Rect cursorSurfaceRect = {
+    0, 0, 28, 28
+};
+void PlatformSDL::showCursor(uint16_t x, uint16_t y)
+{
+    if (cursorRect.h > 0) {
+        SDL_BlitSurface(cursorSurface, &cursorSurfaceRect, windowSurface, &cursorRect);
+    }
+    cursorRect.x = x * 24 - 2;
+    cursorRect.y = y * 24 - 2;
+    cursorRect.w = 28;
+    cursorRect.h = 28;
+    SDL_BlitSurface(windowSurface, &cursorRect, cursorSurface, &cursorSurfaceRect);
+}
+
+void PlatformSDL::hideCursor()
+{
+    if (cursorRect.h > 0) {
+        SDL_BlitSurface(cursorSurface, &cursorSurfaceRect, windowSurface, &cursorRect);
+        cursorRect.h = 0;
+    }
+}
+#endif
+
 void PlatformSDL::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
 {
     SDL_Rect sourceRect, destinationRect;
@@ -655,5 +683,14 @@ void PlatformSDL::stopNote()
 
 void PlatformSDL::renderFrame(bool)
 {
+    if (cursorRect.h > 0) {
+        SDL_Rect rects[4] = {
+            { cursorRect.x, cursorRect.y, cursorRect.w, 2 },
+            { cursorRect.x, cursorRect.y + 2, 2, cursorRect.h - 4 },
+            { cursorRect.x + cursorRect.w - 2, cursorRect.y + 2, 2, cursorRect.h - 4 },
+            { cursorRect.x, cursorRect.y + cursorRect.h - 2, cursorRect.w, 2 }
+        };
+        SDL_FillRects(windowSurface, rects, 4, 0xffffffff);
+    }
     SDL_UpdateWindowSurface(window);
 }

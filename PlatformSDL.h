@@ -35,6 +35,10 @@ public:
     virtual void renderHealth(uint8_t health, uint16_t x, uint16_t y);
     virtual void renderFace(uint8_t face, uint16_t x, uint16_t y);
 #endif
+#ifdef PLATFORM_CURSOR_SUPPORT
+    virtual void showCursor(uint16_t x, uint16_t y);
+    virtual void hideCursor();
+#endif
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     virtual void shakeScreen();
@@ -73,6 +77,10 @@ private:
 #ifdef PLATFORM_SPRITE_SUPPORT
     SDL_Surface* spritesSurface;
 #endif
+#endif
+#ifdef PLATFORM_CURSOR_SUPPORT
+    SDL_Surface* cursorSurface;
+    SDL_Rect cursorRect;
 #endif
     int framesPerSecond_;
     float audioAngle;

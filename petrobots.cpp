@@ -1278,9 +1278,13 @@ void USER_SELECT_OBJECT()
     CURSOR_X = PLATFORM_MAP_WINDOW_TILES_WIDTH / 2;
     CURSOR_Y = PLATFORM_MAP_WINDOW_TILES_HEIGHT / 2;
 #ifdef PLATFORM_CURSOR_SUPPORT
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
     if (LIVE_MAP_ON == 0) {
+#endif
         platform->showCursor(CURSOR_X, CURSOR_Y);
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
     }
+#endif
 #else
     CURSOR_ON = 1;
     REVERSE_TILE();
@@ -1307,36 +1311,52 @@ void USER_SELECT_OBJECT()
             UNIT_DIRECTION[0] = 3;
             CURSOR_X++;
 #ifdef PLATFORM_CURSOR_SUPPORT
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
             if (LIVE_MAP_ON == 0) {
+#endif
                 platform->showCursor(CURSOR_X, CURSOR_Y);
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
             }
+#endif
 #endif
             return;
         } else if (A == KEY_CONFIG[KEY_CURSOR_LEFT] || A == KEY_CONFIG[KEY_MOVE_LEFT] || (B & Platform::JoystickLeft)) { // CURSOR LEFT
             UNIT_DIRECTION[0] = 2;
             CURSOR_X--;
 #ifdef PLATFORM_CURSOR_SUPPORT
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
             if (LIVE_MAP_ON == 0) {
+#endif
                 platform->showCursor(CURSOR_X, CURSOR_Y);
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
             }
+#endif
 #endif
             return;
         } else if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
             UNIT_DIRECTION[0] = 1;
             CURSOR_Y++;
 #ifdef PLATFORM_CURSOR_SUPPORT
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
             if (LIVE_MAP_ON == 0) {
+#endif
                 platform->showCursor(CURSOR_X, CURSOR_Y);
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
             }
+#endif
 #endif
             return;
         } else if (A == KEY_CONFIG[KEY_CURSOR_UP] || A == KEY_CONFIG[KEY_MOVE_UP] || (B & Platform::JoystickUp)) { // CURSOR UP
             UNIT_DIRECTION[0] = 0;
             CURSOR_Y--;
 #ifdef PLATFORM_CURSOR_SUPPORT
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
             if (LIVE_MAP_ON == 0) {
+#endif
                 platform->showCursor(CURSOR_X, CURSOR_Y);
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
             }
+#endif
 #endif
             return;
         }
@@ -1367,9 +1387,13 @@ void MOVE_OBJECT()
     MOVTEMP_X = MAP_X; // Store original location of object
     MOVTEMP_Y = MAP_Y;
 #ifdef PLATFORM_CURSOR_SUPPORT
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
     if (LIVE_MAP_ON == 0) {
+#endif
         platform->showCursor(CURSOR_X, CURSOR_Y);
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
     }
+#endif
 #else
     CURSOR_ON = 1;
     REVERSE_TILE();
