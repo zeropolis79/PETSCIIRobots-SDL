@@ -44,11 +44,24 @@ public:
     virtual void shakeScreen();
     virtual void writeToScreenMemory(address_t address, uint8_t value);
     virtual void writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset);
-	virtual void playNote(uint8_t note);
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    virtual void loadModule(Module module);
+    virtual void playModule(Module module);
+    virtual void pauseModule();
+    virtual void stopModule();
+    virtual void playSample(uint8_t sample);
+    virtual void stopSample();
+#else
+    virtual void playNote(uint8_t note);
     virtual void stopNote();
+#endif
     virtual void renderFrame(bool waitForNextFrame);
 
 private:
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    void undeltaSamples(uint8_t* module, uint32_t moduleSize);
+    void setSampleData(uint8_t* module);
+#endif
 #ifdef PLATFORM_SPRITE_SUPPORT
     void renderSprite(uint8_t sprite, uint16_t x, uint16_t y);
 #endif
@@ -83,9 +96,15 @@ private:
     SDL_Rect cursorRect;
 #endif
     int framesPerSecond_;
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    uint8_t* moduleData;
+    Module loadedModule;
+    uint8_t effectChannel;
+#else
     float audioAngle;
     float audioFrequency;
     int16_t audioVolume;
+#endif
     uint16_t interruptIntervalInSamples;
     uint16_t samplesSinceInterrupt;
 };

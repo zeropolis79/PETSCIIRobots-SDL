@@ -221,6 +221,7 @@ static const char* imageFilenames[] = {
     "GameOver.raw"
 };
 #endif
+#ifdef PLATFORM_MODULE_BASED_AUDIO
 static const char* moduleFilenames[] = {
     "mod.metal heads",
     "mod.win",
@@ -230,6 +231,7 @@ static const char* moduleFilenames[] = {
     "mod.robot attack",
     "mod.rushin in"
 };
+#endif
 static char* notEnoughMemoryError = "Not enough memory to run\n";
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 static char* notEnoughMemoryForMusic = "Not enough memory for music\n";
