@@ -3,6 +3,7 @@
 
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 #define LARGEST_MODULE_SIZE 105654
+#define TOTAL_SAMPLE_SIZE 75755
 #endif
 
 #ifdef PLATFORM_SPRITE_SUPPORT
@@ -79,6 +80,24 @@ static const char* moduleFilenames[] = {
     "mod.robot attack",
     "mod.rushin in"
 };
+static const char* sampleFilenames[] = {
+    "sounds_dsbarexp.raw",
+    "SOUND_MEDKIT.raw",
+    "SOUND_EMP.raw",
+    "SOUND_MAGNET2.raw",
+    "SOUND_SHOCK.raw",
+    "SOUND_MOVE.raw",
+    "SOUND_PLASMA_FASTER.raw",
+    "sounds_dspistol.raw",
+    "SOUND_FOUND_ITEM.raw",
+    "SOUND_ERROR.raw",
+    "SOUND_CYCLE_WEAPON.raw",
+    "SOUND_CYCLE_ITEM.raw",
+    "SOUND_DOOR_FASTER.raw",
+    "SOUND_BEEP2.raw",
+    "SOUND_BEEP.raw",
+    "SquareWave.raw"
+};
 #endif
 
 static uint8_t standardControls[] = {
@@ -121,6 +140,7 @@ PlatformSDL::PlatformSDL() :
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     moduleData(new uint8_t[LARGEST_MODULE_SIZE]),
     loadedModule(ModuleSoundFX),
+    sampleData(new int8_t[TOTAL_SAMPLE_SIZE]),
     effectChannel(0),
 #else
     audioAngle(0),
@@ -131,10 +151,10 @@ PlatformSDL::PlatformSDL() :
     samplesSinceInterrupt(0)
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
-        printf("Error initializing SDL: %s\n", SDL_GetError());
+        fprintf(stderr, "Error initializing SDL: %s\n", SDL_GetError());
     }
     if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) == 0) {
-        printf("Error initializing SDL_image: %s\n", IMG_GetError());
+        fprintf(stderr, "Error initializing SDL_image: %s\n", IMG_GetError());
     }
 
     SDL_AudioSpec requestedAudioSpec;
@@ -147,7 +167,7 @@ PlatformSDL::PlatformSDL() :
     requestedAudioSpec.userdata = this;
     audioDeviceID = SDL_OpenAudioDevice(NULL, 0, &requestedAudioSpec, &audioSpec, SDL_AUDIO_ALLOW_ANY_CHANGE);
     if (!audioDeviceID) {
-        printf("Failed to open audio device: %s\n", SDL_GetError());
+        fprintf(stderr, "Failed to open audio device: %s\n", SDL_GetError());
     }
 
     interruptIntervalInSamples = audioSpec.freq / framesPerSecond_;
@@ -186,6 +206,59 @@ PlatformSDL::PlatformSDL() :
     cursorSurface = SDL_CreateRGBSurface(0, 28, 28, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
 #endif
     SDL_SetSurfaceBlendMode(fontSurface, SDL_BLENDMODE_NONE);
+#ifdef PLATFORM_MODULE_BASED_AUDIO
+    int sample = 0;
+    int8_t* destination = sampleData;
+    soundExplosion = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundMedkit = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundEMP = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundMagnet = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundShock = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundMove = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundPlasma = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundPistol = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundItemFound = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundError = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundCycleWeapon = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundCycleItem = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundDoor = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundMenuBeep = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    soundShortBeep = destination;
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    squareWave = destination;
+    load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+
+    // Clear the first two bytes of effect samples to enable the 2-byte no-loop loop
+    *((uint16_t*)soundExplosion) = 0;
+    *((uint16_t*)soundMedkit) = 0;
+    *((uint16_t*)soundEMP) = 0;
+    *((uint16_t*)soundMagnet) = 0;
+    *((uint16_t*)soundShock) = 0;
+    *((uint16_t*)soundMove) = 0;
+    *((uint16_t*)soundPlasma) = 0;
+    *((uint16_t*)soundPistol) = 0;
+    *((uint16_t*)soundItemFound) = 0;
+    *((uint16_t*)soundError) = 0;
+    *((uint16_t*)soundCycleWeapon) = 0;
+    *((uint16_t*)soundCycleItem) = 0;
+    *((uint16_t*)soundDoor) = 0;
+    *((uint16_t*)soundMenuBeep) = 0;
+    *((uint16_t*)soundShortBeep) = 0;
+#endif
 
     platform = this;
 }
@@ -214,6 +287,7 @@ PlatformSDL::~PlatformSDL()
 #endif
     SDL_FreeSurface(fontSurface);
 #ifdef PLATFORM_MODULE_BASED_AUDIO
+    delete[] sampleData;
     delete[] moduleData;
 #endif
     SDL_DestroyWindow(window);     
@@ -265,7 +339,6 @@ void PlatformSDL::undeltaSamples(uint8_t* module, uint32_t moduleSize)
 
 void PlatformSDL::setSampleData(uint8_t* module)
 {
-    /*
     mt_SampleStarts[15 + 0] = soundExplosion;
     mt_SampleStarts[15 + 1] = soundShortBeep;
     mt_SampleStarts[15 + 2] = soundMedkit;
@@ -284,26 +357,24 @@ void PlatformSDL::setSampleData(uint8_t* module)
     mt_SampleStarts[15 + 15] = soundMenuBeep;
 
     SampleData* sampleData = (SampleData*)(module + 20);
-    sampleData[15 + 0].length = (uint16_t)(soundMedkit - soundExplosion) >> 1;
-    sampleData[15 + 1].length = (uint16_t)(squareWave - soundShortBeep) >> 1;
-    sampleData[15 + 2].length = (uint16_t)(soundEMP - soundMedkit) >> 1;
-    sampleData[15 + 3].length = (uint16_t)(soundMagnet - soundEMP) >> 1;
-    sampleData[15 + 4].length = (uint16_t)(soundShock - soundMagnet) >> 1;
-    sampleData[15 + 5].length = (uint16_t)(soundMove - soundShock) >> 1;
-    sampleData[15 + 6].length = (uint16_t)(soundPlasma - soundMove) >> 1;
-    sampleData[15 + 7].length = (uint16_t)(soundMove - soundShock) >> 1;
-    sampleData[15 + 8].length = (uint16_t)(soundPistol - soundPlasma) >> 1;
-    sampleData[15 + 9].length = (uint16_t)(soundItemFound - soundPistol) >> 1;
-    sampleData[15 + 10].length = (uint16_t)(soundError - soundItemFound) >> 1;
-    sampleData[15 + 11].length = (uint16_t)(soundCycleWeapon - soundError) >> 1;
-    sampleData[15 + 12].length = (uint16_t)(soundCycleItem - soundCycleWeapon) >> 1;
-    sampleData[15 + 13].length = (uint16_t)(soundDoor - soundCycleItem) >> 1;
-    sampleData[15 + 14].length = (uint16_t)(soundMenuBeep - soundDoor) >> 1;
-    sampleData[15 + 15].length = (uint16_t)(soundShortBeep - soundMenuBeep) >> 1;
+    putWord((uint8_t*)&sampleData[15 + 0].length, 0, (uint16_t)(squareWave - soundShortBeep) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 2].length, 0, (uint16_t)(soundEMP - soundMedkit) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 3].length, 0, (uint16_t)(soundMagnet - soundEMP) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 4].length, 0, (uint16_t)(soundShock - soundMagnet) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 5].length, 0, (uint16_t)(soundMove - soundShock) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 6].length, 0, (uint16_t)(soundPlasma - soundMove) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 7].length, 0, (uint16_t)(soundMove - soundShock) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 8].length, 0, (uint16_t)(soundPistol - soundPlasma) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 9].length, 0, (uint16_t)(soundItemFound - soundPistol) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 10].length, 0, (uint16_t)(soundError - soundItemFound) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 11].length, 0, (uint16_t)(soundCycleWeapon - soundError) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 12].length, 0, (uint16_t)(soundCycleItem - soundCycleWeapon) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 13].length, 0, (uint16_t)(soundDoor - soundCycleItem) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 14].length, 0, (uint16_t)(soundMenuBeep - soundDoor) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 15].length, 0, (uint16_t)(soundShortBeep - soundMenuBeep) >> 1);
     for (int i = 0; i < 16; i++) {
         sampleData[15 + i].volume = 64;
     }
-    */
 }
 #endif
 
@@ -752,7 +823,6 @@ void PlatformSDL::pauseModule()
     mt_speed = 0;
     mt_music();
     mt_Enable = false;
-/*
     if (mt_chan1temp.n_start < soundExplosion || mt_chan1temp.n_start >= squareWave) {
         channel0.volume = 0;
     }
@@ -765,7 +835,6 @@ void PlatformSDL::pauseModule()
     if (mt_chan4temp.n_start < soundExplosion || mt_chan4temp.n_start >= squareWave) {
         channel3.volume = 0;
     }
-*/
 }
 
 void PlatformSDL::stopModule()
@@ -783,13 +852,13 @@ void PlatformSDL::playSample(uint8_t sample)
         effectChannel &= 3;
     }
 
-    input->note = 0x1000 + 320;
+    putWord((uint8_t*)&input->note, 0, 0x1000 + 320);
     if (sample < 16) {
-        input->cmd = sample << 12;
+        putWord((uint8_t*)&input->cmd, 0, sample << 12);
     } else if (sample == 16) {
-        input->cmd = 1 << 12;
+        putWord((uint8_t*)&input->cmd, 0, 1 << 12);
     } else {
-        input->cmd = 15 << 12;
+        putWord((uint8_t*)&input->cmd, 0, 15 << 12);
     }
 }
 

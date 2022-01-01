@@ -132,10 +132,15 @@ void mt_init(uint8_t* songData)
         }
     }
 
-    for (int sample = 0, sampleLengthOffset = 42, sampleStart = ((lastPattern + 1) << 10) + 1084; sample < 31; sample++, sampleLengthOffset += 30) {
-        putWord(mt_SongDataPtr, sampleStart, 0);
+    for (int sample = 0, sampleDataOffset = 20, sampleStart = ((lastPattern + 1) << 10) + 1084; sample < 15; sample++, sampleDataOffset += 30) {
+        if (getWord(mt_SongDataPtr, sampleDataOffset + 28) == 0) {
+            putWord(mt_SongDataPtr, sampleDataOffset + 28, 1);
+        }
+        if (getWord(mt_SongDataPtr, sampleDataOffset + 28) == 1) {
+            putWord(mt_SongDataPtr, sampleStart, 0);
+        }
         mt_SampleStarts[sample] = (int8_t*)(mt_SongDataPtr + sampleStart);
-        sampleStart += getWord(mt_SongDataPtr, sampleLengthOffset) * 2;
+        sampleStart += getWord(mt_SongDataPtr, sampleDataOffset + 22) * 2;
     }
 
     ciaapra = true;
@@ -220,10 +225,30 @@ void mt_GetNewNote()
 {
     int pattpo = 952;
     int patternOffset = (mt_SongDataPtr[pattpo + mt_SongPos] << 10) + mt_PatternPos;
-    mt_PlayVoice(channel0, mt_chan1temp, patternOffset);
-    mt_PlayVoice(channel1, mt_chan2temp, patternOffset + 4);
-    mt_PlayVoice(channel2, mt_chan3temp, patternOffset + 8);
-    mt_PlayVoice(channel3, mt_chan4temp, patternOffset + 12);
+    if (mt_chan1input.note != 0) {
+        mt_PlayVoice(channel0, mt_chan1temp, (uint8_t*)&mt_chan1input, 0);
+        mt_chan1input.note = 0;
+    } else {
+        mt_PlayVoice(channel0, mt_chan1temp, mt_SongDataPtr + 1084, patternOffset);
+    }
+    if (mt_chan2input.note != 0) {
+        mt_PlayVoice(channel1, mt_chan2temp, (uint8_t*)&mt_chan2input, 0);
+        mt_chan2input.note = 0;
+    } else {
+        mt_PlayVoice(channel1, mt_chan2temp, mt_SongDataPtr + 1084, patternOffset + 4);
+    }
+    if (mt_chan3input.note != 0) {
+        mt_PlayVoice(channel2, mt_chan3temp, (uint8_t*)&mt_chan3input, 0);
+        mt_chan3input.note = 0;
+    } else {
+        mt_PlayVoice(channel2, mt_chan3temp, mt_SongDataPtr + 1084, patternOffset + 8);
+    }
+    if (mt_chan4input.note != 0) {
+        mt_PlayVoice(channel3, mt_chan4temp, (uint8_t*)&mt_chan4input, 0);
+        mt_chan4input.note = 0;
+    } else {
+        mt_PlayVoice(channel3, mt_chan4temp, mt_SongDataPtr + 1084, patternOffset + 12);
+    }
     channel3.data = mt_chan4temp.n_loopstart;
     channel3.length = mt_chan4temp.n_replen;
     channel2.data = mt_chan3temp.n_loopstart;
@@ -234,15 +259,14 @@ void mt_GetNewNote()
     channel0.length = mt_chan1temp.n_replen;
 }
 
-void mt_PlayVoice(AudioChannel& channel, ChanTemp& mt_chantemp, int patternOffset)
+void mt_PlayVoice(AudioChannel& channel, ChanTemp& mt_chantemp, uint8_t* patternData, int patternOffset)
 {
     int sampledata = 12;
-    int patterndata = 1084;
     if (mt_chantemp.n_note == 0 && mt_chantemp.n_cmd.word == 0) {
         mt_PerNop(channel, mt_chantemp);
     }
-    mt_chantemp.n_note = getWord(mt_SongDataPtr, patterndata + patternOffset);
-    mt_chantemp.n_cmd.word = getWord(mt_SongDataPtr, patterndata + patternOffset + 2);
+    mt_chantemp.n_note = getWord(patternData, patternOffset);
+    mt_chantemp.n_cmd.word = getWord(patternData, patternOffset + 2);
     int instrument = ((mt_chantemp.n_cmd.word & 0xf000) >> 12) | ((mt_chantemp.n_note & 0xf000) >> 8);
     if (instrument != 0) {
         int instrumentOffset = sampledata + 30 * instrument;

@@ -68,6 +68,11 @@ struct ChanInput {
     uint16_t cmd;
 };
 
+void putLong(uint8_t* array, uint32_t offset, uint32_t value);
+void putWord(uint8_t* array, uint32_t offset, uint32_t value);
+uint32_t getLong(uint8_t* array, uint32_t offset);
+uint16_t getWord(uint8_t* array, uint32_t offset);
+
 extern AudioChannel channel0;
 extern AudioChannel channel1;
 extern AudioChannel channel2;
@@ -81,7 +86,7 @@ extern void mt_start();
 extern void mt_music();
 extern void mt_NoNewAllChannels();
 extern void mt_GetNewNote();
-extern void mt_PlayVoice(AudioChannel& channel, ChanTemp& mt_chantemp, int patternOffset);
+extern void mt_PlayVoice(AudioChannel& channel, ChanTemp& mt_chantemp, uint8_t* patternData, int patternOffset);
 extern void mt_NextPosition();
 extern void mt_NoNewPosYet();
 extern void mt_CheckEfx(AudioChannel& channel, ChanTemp& mt_chantemp);

@@ -99,6 +99,23 @@ private:
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     uint8_t* moduleData;
     Module loadedModule;
+    int8_t* sampleData;
+    int8_t* soundExplosion;
+    int8_t* soundMedkit;
+    int8_t* soundEMP;
+    int8_t* soundMagnet;
+    int8_t* soundShock;
+    int8_t* soundMove;
+    int8_t* soundPlasma;
+    int8_t* soundPistol;
+    int8_t* soundItemFound;
+    int8_t* soundError;
+    int8_t* soundCycleWeapon;
+    int8_t* soundCycleItem;
+    int8_t* soundDoor;
+    int8_t* soundMenuBeep;
+    int8_t* soundShortBeep;
+    int8_t* squareWave;
     uint8_t effectChannel;
 #else
     float audioAngle;
