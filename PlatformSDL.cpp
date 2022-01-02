@@ -44,24 +44,6 @@ static int8_t animTileMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
-static uint32_t palette[16] = {
-    0x000000,
-    0xffffff,
-    0x445577,
-    0x778899,
-    0xaabbcc,
-    0x003399,
-    0x3366bb,
-    0x00aaff,
-    0x556600,
-    0x779900,
-    0xaadd00,
-    0x774400,
-    0xbb7700,
-    0xffcc00,
-    0xeeaa99,
-    0xee0000
-};
 #ifdef PLATFORM_IMAGE_SUPPORT
 static const char* imageFilenames[] = {
     "introscreen.png",
@@ -136,6 +118,25 @@ PlatformSDL::PlatformSDL() :
     window(0),
     windowSurface(0),
     fontSurface(0),
+#ifdef PLATFORM_IMAGE_BASED_TILES
+    tileSurface(0),
+#endif
+#ifdef PLATFORM_IMAGE_SUPPORT
+    imageSurfaces(),
+    itemsSurface(0),
+    keysSurface(0),
+    healthSurface(0),
+    facesSurface(0),
+    animTilesSurface(0),
+    palette(0),
+#ifdef PLATFORM_SPRITE_SUPPORT
+    spritesSurface(0),
+#endif
+#endif
+#ifdef PLATFORM_CURSOR_SUPPORT
+    cursorSurface(0),
+    cursorRect({0}),
+#endif
     framesPerSecond_(50),
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     moduleData(new uint8_t[LARGEST_MODULE_SIZE]),
@@ -497,6 +498,8 @@ void PlatformSDL::displayImage(Image image)
     rect.h = PLATFORM_SCREEN_HEIGHT;
     SDL_FillRect(windowSurface, &rect, 0xff000000);
     SDL_BlitSurface(imageSurfaces[image], &rect, windowSurface, &rect);
+
+    palette = imageSurfaces[image]->format->palette;
 }
 #endif
 
@@ -832,7 +835,7 @@ void PlatformSDL::writeToScreenMemory(address_t address, uint8_t value, uint8_t 
     destinationRect.y = ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset;
     destinationRect.w = 8;
     destinationRect.h = 8;
-    SDL_SetSurfaceColorMod(fontSurface, palette[color] >> 16, (palette[color] >> 8) & 0xff, palette[color] & 0xff);
+    SDL_SetSurfaceColorMod(fontSurface, palette->colors[color].r, palette->colors[color].g, palette->colors[color].b);
     SDL_BlitSurface(fontSurface, &sourceRect, windowSurface, &destinationRect);
 }
 

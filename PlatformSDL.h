@@ -89,6 +89,7 @@ private:
     SDL_Surface* healthSurface;
     SDL_Surface* facesSurface;
     SDL_Surface* animTilesSurface;
+    SDL_Palette* palette;
 #ifdef PLATFORM_SPRITE_SUPPORT
     SDL_Surface* spritesSurface;
 #endif
