@@ -17,7 +17,9 @@ public:
     virtual int framesPerSecond();
     virtual void chrout(uint8_t);
     virtual uint8_t readKeyboard();
+    virtual void keyRepeat();
     virtual void clearKeyBuffer();
+    virtual bool isKeyOrJoystickPressed(bool gamepad);
     virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
     virtual uint8_t* loadTileset(const char* filename);
 #ifdef PLATFORM_IMAGE_SUPPORT
@@ -124,6 +126,9 @@ private:
 #endif
     uint16_t interruptIntervalInSamples;
     uint16_t samplesSinceInterrupt;
+    uint8_t keyToReturn;
+    uint8_t downKey;
+    uint8_t shift;
 };
 
 #endif

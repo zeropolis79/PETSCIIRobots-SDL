@@ -109,16 +109,16 @@ static uint8_t standardControls[] = {
     SDL_SCANCODE_S, // FIRE DOWN
     SDL_SCANCODE_A, // FIRE LEFT
     SDL_SCANCODE_D, // FIRE RIGHT
-    SDL_SCANCODE_COMMA, // CYCLE WEAPONS
-    SDL_SCANCODE_PERIOD, // CYCLE ITEMS
+    SDL_SCANCODE_F1, // CYCLE WEAPONS
+    SDL_SCANCODE_F2, // CYCLE ITEMS
     SDL_SCANCODE_SPACE, // USE ITEM
     SDL_SCANCODE_Z, // SEARCH OBEJCT
     SDL_SCANCODE_M, // MOVE OBJECT
     SDL_SCANCODE_TAB, // LIVE MAP
-    SDL_SCANCODE_GRAVE, // LIVE MAP ROBOTS
+    SDL_SCANCODE_TAB + 0x80, // LIVE MAP ROBOTS
     SDL_SCANCODE_ESCAPE, // PAUSE
-    SDL_SCANCODE_F1, // MUSIC
-    SDL_SCANCODE_F12, // CHEAT
+    SDL_SCANCODE_F6, // MUSIC
+    SDL_SCANCODE_C + 0x80, // CHEAT
     SDL_SCANCODE_UP, // CURSOR UP
     SDL_SCANCODE_DOWN, // CURSOR DOWN
     SDL_SCANCODE_LEFT, // CURSOR LEFT
@@ -148,7 +148,10 @@ PlatformSDL::PlatformSDL() :
     audioVolume(INT16_MAX >> 4),
 #endif
     interruptIntervalInSamples(0),
-    samplesSinceInterrupt(0)
+    samplesSinceInterrupt(0),
+    keyToReturn(0xff),
+    downKey(0xff),
+    shift(0)
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         fprintf(stderr, "Error initializing SDL: %s\n", SDL_GetError());
@@ -406,20 +409,57 @@ uint8_t PlatformSDL::readKeyboard()
         case SDL_QUIT:
             quit = true;
             break;
-        case SDL_KEYDOWN:
-            return event.key.keysym.scancode > 0 ? event.key.keysym.scancode : 0xff;
+        case SDL_KEYUP:
+        case SDL_KEYDOWN: {
+            bool keyDown = event.type == SDL_KEYDOWN;
+            uint8_t keyCode = event.key.keysym.scancode & 0x7f;
+            uint8_t keyCodeWithShift = keyCode | shift;
+
+            if (event.key.keysym.scancode == SDL_SCANCODE_LSHIFT || event.key.keysym.scancode == SDL_SCANCODE_RSHIFT) {
+                if (keyDown) {
+                    shift = 0x80;
+                    downKey |= 0x80;
+                } else {
+                    shift = 0x00;
+                    if (downKey != 0xff) {
+                        downKey &= 0x7f;
+                    }
+                }
+            } else if (keyDown) {
+                if (downKey != keyCodeWithShift && !event.key.repeat) {
+                    downKey = keyCodeWithShift;
+                    keyToReturn = downKey;
+                }
+            } else if (downKey == keyCodeWithShift) {
+                downKey = 0xff;
+            }
+        }
         default:
             break;
         }
     }
 
-    return 0;
+    uint8_t result = keyToReturn;
+    keyToReturn = 0xff;
+    return result;
+}
+
+void PlatformSDL::keyRepeat()
+{
+    keyToReturn = downKey;
 }
 
 void PlatformSDL::clearKeyBuffer()
 {
     SDL_Event event;
     while (SDL_PollEvent(&event));
+    keyToReturn = 0xff;
+    downKey = 0xff;
+}
+
+bool PlatformSDL::isKeyOrJoystickPressed(bool gamepad)
+{
+    return downKey != 0xff;
 }
 
 uint32_t PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)
@@ -455,6 +495,7 @@ void PlatformSDL::displayImage(Image image)
     rect.y = 0;
     rect.w = PLATFORM_SCREEN_WIDTH;
     rect.h = PLATFORM_SCREEN_HEIGHT;
+    SDL_FillRect(windowSurface, &rect, 0xff000000);
     SDL_BlitSurface(imageSurfaces[image], &rect, windowSurface, &rect);
 }
 #endif
