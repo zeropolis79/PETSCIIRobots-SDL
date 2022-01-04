@@ -491,13 +491,46 @@ uint8_t* PlatformSDL::loadTileset(const char* filename)
 #ifdef PLATFORM_IMAGE_SUPPORT
 void PlatformSDL::displayImage(Image image)
 {
-    SDL_Rect rect;
-    rect.x = 0;
-    rect.y = 0;
-    rect.w = PLATFORM_SCREEN_WIDTH;
-    rect.h = PLATFORM_SCREEN_HEIGHT;
-    SDL_FillRect(windowSurface, &rect, 0xff000000);
-    SDL_BlitSurface(imageSurfaces[image], &rect, windowSurface, &rect);
+    SDL_Rect clearRect = { 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_WIDTH };
+    SDL_FillRect(windowSurface, &clearRect, 0xff000000);
+
+    if (image == ImageGame) {
+        SDL_Rect sourceRect = { 320 - 56, 0, 56, 128 };
+        SDL_Rect destinationRect = { PLATFORM_SCREEN_WIDTH - 56, 0, 56, 128 };
+        SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+
+        sourceRect.y = 128;
+        for (destinationRect.y = 128; destinationRect.y < (PLATFORM_SCREEN_HEIGHT - 32); destinationRect.y += 40) {
+            sourceRect.h = MIN(40, PLATFORM_SCREEN_HEIGHT - 32 - destinationRect.y);
+            destinationRect.h = sourceRect.h;
+            SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+        }
+
+        sourceRect.y = 168;
+        destinationRect.y = PLATFORM_SCREEN_HEIGHT - 32;
+        SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+
+        sourceRect.x = 0;
+        sourceRect.y = 168;
+        sourceRect.w = 104;
+        sourceRect.h = 8;
+        destinationRect.x = 0;
+        destinationRect.y = PLATFORM_SCREEN_HEIGHT - 32;
+        destinationRect.w = sourceRect.w;
+        destinationRect.h = sourceRect.h;
+        SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+
+        sourceRect.x = 104;
+        for (destinationRect.x = 104; destinationRect.x < (PLATFORM_SCREEN_WIDTH - 56); destinationRect.x += 160) {
+            sourceRect.w = MIN(160, PLATFORM_SCREEN_WIDTH - 56 - destinationRect.x);
+            destinationRect.w = sourceRect.w;
+            SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+        }
+    } else {
+        SDL_Rect sourceRect = { 0, 0, 320, 200 };
+        SDL_Rect destinationRect = { 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT };
+        SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+    }
 
     palette = imageSurfaces[image]->format->palette;
 }

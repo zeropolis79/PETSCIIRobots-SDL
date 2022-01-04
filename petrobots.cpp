@@ -1978,12 +1978,12 @@ void DISPLAY_GAME_SCREEN()
 #ifdef PLATFORM_IMAGE_SUPPORT
     platform->displayImage(Platform::ImageGame);
 
-    writeToScreenMemory(SCREEN_HEIGHT_IN_CHARACTERS * SCREEN_WIDTH_IN_CHARACTERS - 6, 0x71, 15);
-    writeToScreenMemory(SCREEN_HEIGHT_IN_CHARACTERS * SCREEN_WIDTH_IN_CHARACTERS - 5, 0x71, 15);
-    writeToScreenMemory(SCREEN_HEIGHT_IN_CHARACTERS * SCREEN_WIDTH_IN_CHARACTERS - 4, 0x71, 12);
-    writeToScreenMemory(SCREEN_HEIGHT_IN_CHARACTERS * SCREEN_WIDTH_IN_CHARACTERS - 3, 0x71, 12);
-    writeToScreenMemory(SCREEN_HEIGHT_IN_CHARACTERS * SCREEN_WIDTH_IN_CHARACTERS - 2, 0x71, 9);
-    writeToScreenMemory(SCREEN_HEIGHT_IN_CHARACTERS * SCREEN_WIDTH_IN_CHARACTERS - 1, 0x71, 9);
+    writeToScreenMemory(25 * SCREEN_WIDTH_IN_CHARACTERS - 6, 0x71, 15);
+    writeToScreenMemory(25 * SCREEN_WIDTH_IN_CHARACTERS - 5, 0x71, 15);
+    writeToScreenMemory(25 * SCREEN_WIDTH_IN_CHARACTERS - 4, 0x71, 12);
+    writeToScreenMemory(25 * SCREEN_WIDTH_IN_CHARACTERS - 3, 0x71, 12);
+    writeToScreenMemory(25 * SCREEN_WIDTH_IN_CHARACTERS - 2, 0x71, 9);
+    writeToScreenMemory(25 * SCREEN_WIDTH_IN_CHARACTERS - 1, 0x71, 9);
 #else
     DECOMPRESS_SCREEN(SCR_TEXT);
 #endif
@@ -2093,18 +2093,18 @@ void DISPLAY_PLAYER_HEALTH()
     TEMP_A = UNIT_HEALTH[0] >> 1; // No index needed because it is the player, divide by two
     int Y = 0;
     while (Y != TEMP_A) {
-        writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y++, 0x66); // GRAY BLOCK
+        writeToScreenMemory(24 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y++, 0x66); // GRAY BLOCK
     }
     if (UNIT_HEALTH[0] & 0x01) {
-        writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y++, 0x5C); // HALF GRAY BLOCK
+        writeToScreenMemory(24 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y++, 0x5C); // HALF GRAY BLOCK
     }
     while (Y != 6) {
-        writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y++, 0x20); // SPACE
+        writeToScreenMemory(24 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y++, 0x20); // SPACE
     }
 
 #ifdef PLATFORM_IMAGE_SUPPORT
     int health = 5 - MIN(TEMP_A, 5);
-    platform->renderHealth(health, PLATFORM_SCREEN_WIDTH - 48, PLATFORM_SCREEN_HEIGHT - 69 + (health >> 1));
+    platform->renderHealth(health, PLATFORM_SCREEN_WIDTH - 48, 131 + (health >> 1));
 #endif
 }
 
