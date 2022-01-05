@@ -154,6 +154,12 @@ int main(int argc, char *argv[])
     convertToPETSCII(CONTROLTEXT);
     convertToPETSCII(CINEMA_MESSAGE);
 
+#if (MAP_WINDOW_SIZE != 77)
+    for (int i = 0; i < PLATFORM_MAP_WINDOW_TILES_HEIGHT; i++) {
+        MAP_CHART[i] = i * 3 * SCREEN_WIDTH_IN_CHARACTERS;
+    }
+#endif
+
     platform->stopNote(); // RESET SOUND TO ZERO
 #ifdef PLATFORM_STDOUT_MESSAGES
     DISPLAY_LOAD_MESSAGE1();
@@ -1646,20 +1652,20 @@ void DRAW_MAP_WINDOW()
                     switch (TILE) {
                     case 20: {
                         platform->waitForScreenMemoryAccess();
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 41, CINEMA_MESSAGE[CINEMA_STATE], 1, 0);
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 42, CINEMA_MESSAGE[CINEMA_STATE + 1], 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + SCREEN_WIDTH_IN_CHARACTERS + 1, CINEMA_MESSAGE[CINEMA_STATE], 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + SCREEN_WIDTH_IN_CHARACTERS + 2, CINEMA_MESSAGE[CINEMA_STATE + 1], 1, 0);
                         break;
                     }
                     case 21: {
                         platform->waitForScreenMemoryAccess();
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 40, CINEMA_MESSAGE[CINEMA_STATE + 2], 1, 0);
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 41, CINEMA_MESSAGE[CINEMA_STATE + 3], 1, 0);
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 42, CINEMA_MESSAGE[CINEMA_STATE + 4], 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + SCREEN_WIDTH_IN_CHARACTERS + 0, CINEMA_MESSAGE[CINEMA_STATE + 2], 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + SCREEN_WIDTH_IN_CHARACTERS + 1, CINEMA_MESSAGE[CINEMA_STATE + 3], 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + SCREEN_WIDTH_IN_CHARACTERS + 2, CINEMA_MESSAGE[CINEMA_STATE + 4], 1, 0);
                         break;
                     }
                     case 22: {
                         platform->waitForScreenMemoryAccess();
-                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + 40, CINEMA_MESSAGE[CINEMA_STATE + 5], 1, 0);
+                        platform->writeToScreenMemory(MAP_CHART[TEMP_Y] + TEMP_X + TEMP_X + TEMP_X + SCREEN_WIDTH_IN_CHARACTERS + 0, CINEMA_MESSAGE[CINEMA_STATE + 5], 1, 0);
                         break;
                     }
                     default:
@@ -2850,9 +2856,14 @@ void SET_DIFF_HARD()
 
 // This chart contains the left-most staring position for each
 // row of tiles on the map-editor. 7 Rows.
-uint16_t MAP_CHART[] = {
+uint16_t MAP_CHART[PLATFORM_MAP_WINDOW_TILES_HEIGHT]
+#if (MAP_WINDOW_SIZE == 77)
+ = {
     0x000, 0x078, 0x0F0, 0x168, 0x1E0, 0x258, 0x2D0
-};
+}
+#endif
+;
+
 
 void EMP_FLASH()
 {

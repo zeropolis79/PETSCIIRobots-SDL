@@ -329,7 +329,7 @@ void SET_DIFF_LEVEL();
 void SET_DIFF_EASY();
 void SET_DIFF_HARD();
 
-extern uint16_t MAP_CHART[];
+extern uint16_t MAP_CHART[PLATFORM_MAP_WINDOW_TILES_HEIGHT];
 
 void EMP_FLASH();
 void ANIMATE_WATER();
