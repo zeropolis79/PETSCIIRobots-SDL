@@ -3182,7 +3182,7 @@ void PET_SCREEN_SHAKE()
     }
 #ifndef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
     platform->renderFrame(true);
-    platform->copyRect(8, 0, 0, 0, MAP_WINDOW_WIDTH, MAP_WINDOW_HEIGHT);
+    platform->copyRect(8, 0, 0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32);
     platform->renderFrame(true);
 #ifdef OPTIMIZED_MAP_RENDERING
     INVALIDATE_PREVIOUS_MAP();
