@@ -2476,9 +2476,9 @@ void GAME_OVER()
         BACKGROUND_TASKS();
     }
     for (int X = 0; X != 11; X++) {
-        writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS + 11 + X, GAMEOVER1[X]);
-        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS + 11 + X, GAMEOVER2[X]);
-        writeToScreenMemory(11 * SCREEN_WIDTH_IN_CHARACTERS + 11 + X, GAMEOVER3[X]);
+        writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS + (SCREEN_WIDTH_IN_CHARACTERS - 7 - 11) / 2 + X, GAMEOVER1[X]);
+        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS + (SCREEN_WIDTH_IN_CHARACTERS - 7 - 11) / 2 + X, GAMEOVER2[X]);
+        writeToScreenMemory(11 * SCREEN_WIDTH_IN_CHARACTERS + (SCREEN_WIDTH_IN_CHARACTERS - 7 - 11) / 2 + X, GAMEOVER3[X]);
     }
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
