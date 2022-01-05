@@ -3181,7 +3181,9 @@ void PET_SCREEN_SHAKE()
         return;
     }
 #ifndef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
+    platform->renderFrame(true);
     platform->copyRect(8, 0, 0, 0, MAP_WINDOW_WIDTH, MAP_WINDOW_HEIGHT);
+    platform->renderFrame(true);
 #ifdef OPTIMIZED_MAP_RENDERING
     INVALIDATE_PREVIOUS_MAP();
 #endif
