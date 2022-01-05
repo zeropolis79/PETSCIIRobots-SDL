@@ -2004,7 +2004,7 @@ void DISPLAY_INTRO_SCREEN()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
     uint8_t* row = SCREEN_MEMORY + MENU_CHART[0];
-    for (int Y = 0, i = 0; Y < 4; Y++, row += SCREEN_WIDTH_IN_CHARACTERS) {
+    for (int Y = 0, i = 0; Y < PLATFORM_INTRO_OPTIONS; Y++, row += SCREEN_WIDTH_IN_CHARACTERS) {
         for (int X = 0; X < 10; X++, i++) {
             row[X] = INTRO_OPTIONS[i];
         }
@@ -2649,7 +2649,7 @@ void INTRO_SCREEN()
         uint16_t B = platform->readJoystick(false);
         if (A != 0xff || B != 0) {
             if (A == KEY_CONFIG[KEY_CURSOR_DOWN] || A == KEY_CONFIG[KEY_MOVE_DOWN] || (B & Platform::JoystickDown)) { // CURSOR DOWN
-                if (MENUY != 3) {
+                if (MENUY != (PLATFORM_INTRO_OPTIONS - 1)) {
                     REVERSE_MENU_OPTION(false);
                     MENUY++;
                     REVERSE_MENU_OPTION(true);
