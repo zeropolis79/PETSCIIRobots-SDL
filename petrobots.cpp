@@ -231,7 +231,11 @@ uint8_t PLASMA_ACT = 0; // 0=No plasma fire active 1=plasma fire active
 uint8_t RANDOM = 0; // used for random number generation
 uint8_t BORDER = 0; // Used for border flash timing
 uint8_t SCREEN_SHAKE = 0; // 1=shake 0=no shake
+#if (PLATFORM_INTRO_OPTIONS == 4)
 uint8_t CONTROL = 0; // 0=keyboard 1=custom keys 2=snes
+#else
+uint8_t CONTROL = 2; // 0=keyboard 1=custom keys 2=snes
+#endif
 uint16_t BORDER_COLOR = 0xf00; // Used for border flash coloring
 #ifdef _AMIGA
 char INTRO_MESSAGE[] = "welcome to amiga-robots!\xff"
