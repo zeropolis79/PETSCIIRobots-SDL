@@ -3169,7 +3169,7 @@ void SET_CUSTOM_KEYS()
 #else
             DECWRITE(destination);
 #endif
-            destination += 40;
+            destination += SCREEN_WIDTH_IN_CHARACTERS;
             TEMP_A++;
             platform->renderFrame();
         }
