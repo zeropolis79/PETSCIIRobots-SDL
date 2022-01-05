@@ -2599,9 +2599,9 @@ void SCROLL_INFO()
         writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS + X, 32); // BOTTOM ROW
     }
     */
-    platform->copyRect(0, PLATFORM_SCREEN_HEIGHT - 16, 0, PLATFORM_SCREEN_HEIGHT - 24, MAP_WINDOW_WIDTH, 16);
+    platform->copyRect(0, PLATFORM_SCREEN_HEIGHT - 16, 0, PLATFORM_SCREEN_HEIGHT - 24, PLATFORM_SCREEN_WIDTH - 56, 16);
     // NOW CLEAR BOTTOM ROW
-    platform->clearRect(0, PLATFORM_SCREEN_HEIGHT - 8, MAP_WINDOW_WIDTH, 8);
+    platform->clearRect(0, PLATFORM_SCREEN_HEIGHT - 8, PLATFORM_SCREEN_WIDTH - 56, 8);
     platform->renderFrame(true);
 }
 

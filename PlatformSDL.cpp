@@ -507,7 +507,9 @@ void PlatformSDL::displayImage(Image image)
         }
 
         sourceRect.y = 168;
+        sourceRect.h = 32;
         destinationRect.y = PLATFORM_SCREEN_HEIGHT - 32;
+        destinationRect.h = 32;
         SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
 
         sourceRect.x = 0;
@@ -615,8 +617,11 @@ void PlatformSDL::updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTile
 }
 #endif
 
+SDL_Rect clipRect = { 0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32 };
+
 void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent)
 {
+    SDL_SetClipRect(windowSurface, &clipRect);
     if (transparent) {
 #ifdef PLATFORM_SPRITE_SUPPORT
         if (tileSpriteMap[tile] >= 0) {
@@ -657,10 +662,12 @@ void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t varia
     SDL_SetSurfaceBlendMode(tileSurfaces[tile], transparent ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
     SDL_BlitSurface(tileSurfaces[tile], &sourceRect, windowSurface, &destinationRect);
 #endif
+    SDL_SetClipRect(windowSurface, 0);
 }
 
 void PlatformSDL::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t backgroundVariant, uint8_t foregroundVariant)
 {
+    SDL_SetClipRect(windowSurface, &clipRect);
     SDL_Surface* backgroundSurface = tileSurface;
 #ifdef PLATFORM_IMAGE_BASED_TILES
     if (animTileMap[backgroundTile] >= 0) {
@@ -696,11 +703,13 @@ void PlatformSDL::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, ui
 #ifdef PLATFORM_IMAGE_BASED_TILES
     }
 #endif
+    SDL_SetClipRect(windowSurface, 0);
 }
 
 #ifdef PLATFORM_SPRITE_SUPPORT
 void PlatformSDL::renderSprite(uint8_t sprite, uint16_t x, uint16_t y)
 {
+    SDL_SetClipRect(windowSurface, &clipRect);
     SDL_Rect sourceRect, destinationRect;
     sourceRect.x = 0;
     sourceRect.y = sprite * 24;
@@ -711,12 +720,14 @@ void PlatformSDL::renderSprite(uint8_t sprite, uint16_t x, uint16_t y)
     destinationRect.w = 24;
     destinationRect.h = 24;
     SDL_BlitSurface(spritesSurface, &sourceRect, windowSurface, &destinationRect);
+    SDL_SetClipRect(windowSurface, 0);
 }
 #endif
 
 #ifdef PLATFORM_IMAGE_BASED_TILES
 void PlatformSDL::renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y)
 {
+    SDL_SetClipRect(windowSurface, &clipRect);
     SDL_Rect sourceRect, destinationRect;
     sourceRect.x = 0;
     sourceRect.y = animTile * 24;
@@ -727,6 +738,7 @@ void PlatformSDL::renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y)
     destinationRect.w = 24;
     destinationRect.h = 24;
     SDL_BlitSurface(animTilesSurface, &sourceRect, windowSurface, &destinationRect);
+    SDL_SetClipRect(windowSurface, 0);
 }
 #endif
 
