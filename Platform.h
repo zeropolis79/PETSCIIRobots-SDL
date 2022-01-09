@@ -11,7 +11,9 @@ typedef long int32_t;
 typedef unsigned char uint8_t;
 typedef unsigned short uint16_t;
 typedef unsigned long uint32_t;
+#ifndef __cplusplus
 typedef unsigned char bool;
+#endif
 #define true 1
 #define false 0
 #define INT32_MAX 0x7fffffff
@@ -37,6 +39,9 @@ typedef uint32_t address_t;
 class Platform {
 public:
     Platform();
+#ifndef _AMIGA
+    virtual ~Platform();
+#endif
 
     enum Image {
         ImageIntro,

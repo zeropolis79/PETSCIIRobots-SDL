@@ -5,6 +5,12 @@ Platform::Platform() :
 {
 }
 
+#ifndef _AMIGA
+Platform::~Platform()
+{
+}
+#endif
+
 void Platform::show()
 {
 }

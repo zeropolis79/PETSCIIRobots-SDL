@@ -10,7 +10,7 @@
 class PlatformSDL : public Platform {
 public:
     PlatformSDL();
-    ~PlatformSDL();
+    virtual ~PlatformSDL();
 
     virtual uint8_t* standardControls() const;
     virtual void setInterrupt(void (*interrupt)(void));

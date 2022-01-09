@@ -137,7 +137,7 @@ PlatformSDL::PlatformSDL() :
     cursorSurface(0),
     cursorRect({0}),
 #endif
-    framesPerSecond_(50),
+    framesPerSecond_(60),
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     moduleData(new uint8_t[LARGEST_MODULE_SIZE]),
     loadedModule(ModuleSoundFX),
