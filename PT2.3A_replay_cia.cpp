@@ -98,7 +98,7 @@ AudioChannel channel2(2);
 AudioChannel channel3(3);
 void processAudio(int16_t* outputBuffer, uint32_t outputLength, uint32_t sampleRate)
 {
-    for (int sample = 0; sample < outputLength; sample++) {
+    for (uint32_t sample = 0; sample < outputLength; sample++) {
         ciatar -= 709378.92 / sampleRate;
         if (ciatar < 0) {
             ciatar += ciataw;
@@ -563,7 +563,7 @@ void mt_Vibrato2(AudioChannel& channel, ChanTemp& mt_chantemp)
     uint8_t depth = mt_chantemp.n_vibratocmd & 0x0f;
     value = (value * depth) / 128;
     channel.period =
-        mt_chantemp.n_period + (mt_chantemp.n_vibratopos < 128 ? value : -value);
+        mt_chantemp.n_period + (mt_chantemp.n_vibratopos >= 0 ? value : -value);
     mt_chantemp.n_vibratopos =
         (mt_chantemp.n_vibratopos + ((mt_chantemp.n_vibratocmd >> 2) & 0x003c)) &
         0xff;
@@ -668,7 +668,7 @@ void mt_PositionJump(AudioChannel& channel, ChanTemp& mt_chantemp)
 {
     mt_SongPos = mt_chantemp.n_cmd.byte[0] - 1;
     mt_PBreakPos = 0;
-    mt_PosJumpFlag = -1;
+    mt_PosJumpFlag = 0xff;
 }
 
 void mt_VolumeChange(AudioChannel& channel, ChanTemp& mt_chantemp)
@@ -681,7 +681,7 @@ void mt_PatternBreak(AudioChannel& channel, ChanTemp& mt_chantemp)
 {
     int position = (mt_chantemp.n_cmd.byte[0] >> 4) * 10 + (mt_chantemp.n_cmd.byte[0] & 0x0f);
     mt_PBreakPos = position <= 63 ? position : 0;
-    mt_PosJumpFlag = -1;
+    mt_PosJumpFlag = 0xff;
 }
 
 void mt_SetSpeed(AudioChannel& channel, ChanTemp& mt_chantemp)
@@ -794,7 +794,7 @@ void mt_JumpLoop(AudioChannel& channel, ChanTemp& mt_chantemp)
             mt_chantemp.n_loopcount = count;
         }
         mt_PBreakPos = mt_chantemp.n_pattpos;
-        mt_PBreakFlag = -1;
+        mt_PBreakFlag = 0xff;
     } else {
         mt_chantemp.n_pattpos = mt_PatternPos >> 4;
     }

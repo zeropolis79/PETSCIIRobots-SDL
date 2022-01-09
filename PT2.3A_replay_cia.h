@@ -50,7 +50,7 @@ struct ChanTemp {
     uint8_t n_toneportspeed;
     uint16_t n_wantedperiod;
     uint8_t n_vibratocmd;
-    uint8_t n_vibratopos;
+    int8_t n_vibratopos;
     uint8_t n_tremolocmd;
     uint8_t n_tremolopos;
     uint8_t n_wavecontrol;
