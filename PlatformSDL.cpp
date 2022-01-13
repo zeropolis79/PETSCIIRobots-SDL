@@ -491,7 +491,7 @@ uint8_t* PlatformSDL::loadTileset(const char* filename)
 #ifdef PLATFORM_IMAGE_SUPPORT
 void PlatformSDL::displayImage(Image image)
 {
-    SDL_Rect clearRect = { 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_WIDTH };
+    SDL_Rect clearRect = { 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT };
     SDL_FillRect(windowSurface, &clearRect, 0xff000000);
 
     if (image == ImageGame) {
