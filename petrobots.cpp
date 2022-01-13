@@ -2,12 +2,14 @@
  * PETSCII Robots (Portable version)
  * by David Murray 2020
  * dfwgreencars@gmail.com
- * ported by Vesa Halttunen 2021
+ * ported by Vesa Halttunen 2021-2022
  * vesuri@jormas.com
  */
 
-#ifdef _AMIGA
+#if defined(_AMIGA)
 #include "PlatformAmiga.h"
+#elif defined(_PSP)
+#include "PlatformPSP.h"
 #else
 #include "PlatformSDL.h"
 #endif

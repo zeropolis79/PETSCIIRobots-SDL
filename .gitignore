@@ -10,3 +10,8 @@ DecompressData
 PETSCIIRobots.slave
 *.lha
 *.adf
+*.psp
+petrobots.map
+petrobots.prx
+PathDefs
+eboot.pbp
