@@ -419,41 +419,19 @@ void PlatformPSP::displayImage(Image image)
     this->clearRect(0, 0, PLATFORM_SCREEN_WIDTH - 1, PLATFORM_SCREEN_HEIGHT - 1);
 
     if (image == ImageGame) {
-        /*
-        SDL_Rect sourceRect = { 320 - 56, 0, 56, 128 };
-        SDL_Rect destinationRect = { PLATFORM_SCREEN_WIDTH - 56, 0, 56, 128 };
-        SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+        drawRectangle(images[image], 0xffffffff, 320 - 56, 0, PLATFORM_SCREEN_WIDTH - 56, 0, 56, 128);
 
-        sourceRect.y = 128;
-        for (destinationRect.y = 128; destinationRect.y < (PLATFORM_SCREEN_HEIGHT - 32); destinationRect.y += 40) {
-            sourceRect.h = MIN(40, PLATFORM_SCREEN_HEIGHT - 32 - destinationRect.y);
-            destinationRect.h = sourceRect.h;
-            SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+        for (int y = 128; y < (PLATFORM_SCREEN_HEIGHT - 32); y += 40) {
+            drawRectangle(images[image], 0xffffffff, 320 - 56, 128, PLATFORM_SCREEN_WIDTH - 56, y, 56, MIN(40, PLATFORM_SCREEN_HEIGHT - 32 - y));
         }
 
-        sourceRect.y = 168;
-        sourceRect.h = 32;
-        destinationRect.y = PLATFORM_SCREEN_HEIGHT - 32;
-        destinationRect.h = 32;
-        SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+        drawRectangle(images[image], 0xffffffff, 320 - 56, 168, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32, 56, 32);
 
-        sourceRect.x = 0;
-        sourceRect.y = 168;
-        sourceRect.w = 104;
-        sourceRect.h = 8;
-        destinationRect.x = 0;
-        destinationRect.y = PLATFORM_SCREEN_HEIGHT - 32;
-        destinationRect.w = sourceRect.w;
-        destinationRect.h = sourceRect.h;
-        SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+        drawRectangle(images[image], 0xffffffff, 0, 168, 0, PLATFORM_SCREEN_HEIGHT - 32, 104, 8);
 
-        sourceRect.x = 104;
-        for (destinationRect.x = 104; destinationRect.x < (PLATFORM_SCREEN_WIDTH - 56); destinationRect.x += 160) {
-            sourceRect.w = MIN(160, PLATFORM_SCREEN_WIDTH - 56 - destinationRect.x);
-            destinationRect.w = sourceRect.w;
-            SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+        for (int x = 104; x < (PLATFORM_SCREEN_WIDTH - 56); x += 160) {
+            drawRectangle(images[image], 0xffffffff, 104, 168, x, PLATFORM_SCREEN_HEIGHT - 32, MIN(160, PLATFORM_SCREEN_WIDTH - 56 - x), 8);
         }
-        */
     } else {
         drawRectangle(images[image], 0xffffffff, 0, 0, 0, 0, images[image][0], images[image][1]);
 
