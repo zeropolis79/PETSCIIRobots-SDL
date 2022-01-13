@@ -239,10 +239,14 @@ uint8_t CONTROL = 0; // 0=keyboard 1=custom keys 2=snes
 uint8_t CONTROL = 2; // 0=keyboard 1=custom keys 2=snes
 #endif
 uint16_t BORDER_COLOR = 0xf00; // Used for border flash coloring
-#ifdef _AMIGA
+#if defined(_AMIGA)
 char INTRO_MESSAGE[] = "welcome to amiga-robots!\xff"
                        "by david murray 2021\xff"
                        "amiga port by vesa halttunen";
+#elif defined(_PSP)
+char INTRO_MESSAGE[] = "welcome to psp-robots!\xff"
+                       "by david murray 2021\xff"
+                       "psp port by vesa halttunen";
 #else
 char INTRO_MESSAGE[] = "welcome to sdl-robots!\xff"
                        "by david murray 2021\xff"
