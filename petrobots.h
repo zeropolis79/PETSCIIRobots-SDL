@@ -41,6 +41,18 @@ extern uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[MAP_WINDOW_SIZE];
 extern uint8_t KEY_CONFIG[26];
 
 // MAP FILES CONSIST OF EVERYTHING FROM THIS POINT ON
+#ifdef _PSP
+extern uint8_t MAP_DATA[8960];
+extern uint8_t* UNIT_TYPE;
+extern uint8_t* UNIT_LOC_X;
+extern uint8_t* UNIT_LOC_Y;
+extern uint8_t* UNIT_A;
+extern uint8_t* UNIT_B;
+extern uint8_t* UNIT_C;
+extern uint8_t* UNIT_D;
+extern int8_t* UNIT_HEALTH;
+extern uint8_t* MAP;
+#else
 extern uint8_t UNIT_TYPE[64];  // Unit type 0=none (64 bytes)  
 extern uint8_t UNIT_LOC_X[64]; // Unit X location (64 bytes)
 extern uint8_t UNIT_LOC_Y[64]; // Unit X location (64 bytes)
@@ -50,6 +62,7 @@ extern uint8_t UNIT_C[64];
 extern uint8_t UNIT_D[64];
 extern int8_t UNIT_HEALTH[64];    // Unit health (0 to 11) (64 bytes)
 extern uint8_t MAP[8 * 1024];      // Location of MAP (8K)
+#endif
 // END OF MAP FILE
 
 extern uint8_t TILE;           // The tile number to be plotted

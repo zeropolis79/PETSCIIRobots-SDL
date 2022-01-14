@@ -35,6 +35,7 @@ extern uint32_t font[];
 extern uint32_t introScreen[];
 extern uint32_t gameScreen[];
 extern uint32_t gameOver[];
+extern uint8_t levelA[];
 
 uint32_t* images[] = { introScreen, gameScreen, gameOver };
 
@@ -406,7 +407,17 @@ uint16_t PlatformPSP::readJoystick(bool gamepad)
 
 uint32_t PlatformPSP::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)
 {
-    return 0;
+    uint8_t* source = 0;
+    if (strcmp(filename, "level-A") == 0) {
+        source = levelA;
+    }
+
+    if (source) {
+        memcpy(destination, source + offset, size);
+        return size;
+    } else {
+        return 0;
+    }
 }
 
 uint8_t* PlatformPSP::loadTileset(const char* filename)
