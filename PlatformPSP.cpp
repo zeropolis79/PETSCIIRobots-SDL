@@ -32,6 +32,7 @@ static int cacheSize = 0;
 #endif
 
 extern uint32_t font[];
+extern uint32_t tiles[];
 extern uint32_t introScreen[];
 extern uint32_t gameScreen[];
 extern uint32_t gameOver[];
@@ -205,8 +206,8 @@ PlatformPSP::PlatformPSP() :
     sceGuViewport(2048, 2048, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT);
     sceGuDepthRange(100, 65535);
 
-    sceGuScissor(0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT);
-    sceGuEnable(SCEGU_SCISSOR_TEST);
+    sceGuScissor(0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32);
+    sceGuDisable(SCEGU_SCISSOR_TEST);
     sceGuDisable(SCEGU_CLIP_PLANE);
 
     sceGuDepthFunc(SCEGU_LEQUAL);
@@ -458,6 +459,25 @@ void PlatformPSP::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
 
 void PlatformPSP::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent)
 {
+    sceGuEnable(SCEGU_SCISSOR_TEST);
+
+    /*
+    if (transparent) {
+        if (tileSpriteMap[tile] >= 0) {
+            renderSprite(tileSpriteMap[tile] + variant, x, y);
+            return;
+        }
+    } else {
+        if (animTileMap[tile] >= 0) {
+            renderAnimTile(animTileMap[tile] + variant, x, y);
+            return;
+        }
+    }
+    */
+
+    drawRectangle(tiles, 0xffffffff, (tile & 15) * 24, (tile >> 4) * 24, x, y, 24, 24);
+
+    sceGuDisable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)

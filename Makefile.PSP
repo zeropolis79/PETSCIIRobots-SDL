@@ -6,7 +6,7 @@ CXX=psp-g++
 BIN2ELF=binary2elf
 
 DEBUGFLAGS =	-g
-CXXFLAGS =	$(DEBUGFLAGS) -Wall -fmessage-length=0 -Iinclude -I$(INCDIR) -D_PSP -DPLATFORM_SCREEN_WIDTH=480 -DPLATFORM_SCREEN_HEIGHT=272 -DPLATFORM_MAP_WINDOW_TILES_WIDTH=18 -DPLATFORM_MAP_WINDOW_TILES_HEIGHT=10 -DPLATFORM_INTRO_OPTIONS=3 -DPLATFORM_MODULE_BASED_AUDIO -DPLATFORM_TILE_BASED_RENDERING -DPLATFORM_IMAGE_BASED_TILES -DPLATFORM_IMAGE_SUPPORT -DPLATFORM_SPRITE_SUPPORT -DPLATFORM_COLOR_SUPPORT -DPLATFORM_CURSOR_SUPPORT -DOPTIMIZED_MAP_RENDERING
+CXXFLAGS =	$(DEBUGFLAGS) -Wall -fmessage-length=0 -Iinclude -I$(INCDIR) -D_PSP -DPLATFORM_SCREEN_WIDTH=480 -DPLATFORM_SCREEN_HEIGHT=272 -DPLATFORM_MAP_WINDOW_TILES_WIDTH=18 -DPLATFORM_MAP_WINDOW_TILES_HEIGHT=10 -DPLATFORM_INTRO_OPTIONS=3 -DPLATFORM_MODULE_BASED_AUDIO -DPLATFORM_TILE_BASED_RENDERING -DPLATFORM_IMAGE_BASED_TILES -DPLATFORM_IMAGE_SUPPORT -DPLATFORM_SPRITE_SUPPORT -DPLATFORM_COLOR_SUPPORT -DPLATFORM_CURSOR_SUPPORT
 LDFLAGS =	-L$(LIBDIR) -Wl,-Map,petrobots.map
 SOURCES =	petrobots.o Platform.o PlatformPSP.o PT2.3A_replay_cia.o
 
@@ -18,7 +18,7 @@ LOADLIBES +=$(LIBDIR)/utility_stub.a
 LOADLIBES +=$(LIBDIR)/libdeflt.a
 LOADLIBES +=$(LIBDIR)/impose_stub.a
 
-OBJECTS=$(SOURCES:.cpp=.o) c64font.o introscreen.o gamescreen.o gameover.o levelA.o
+OBJECTS=$(SOURCES:.cpp=.o) C64Font.o Tiles.o IntroScreen.o GameScreen.o GameOver.o LevelA.o
 
 EXECUTABLE=petrobots
 
@@ -33,20 +33,23 @@ $(EXECUTABLE).elf: $(OBJECTS)
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 
-c64font.o: c64font.psp
-	$(BIN2ELF) --PSP -s font -e fontEnd c64font.psp c64font.o
+C64Font.o: c64font.psp
+	$(BIN2ELF) --PSP -s font -e fontEnd c64font.psp C64Font.o
 
-introscreen.o: introscreen.psp
-	$(BIN2ELF) --PSP -s introScreen -e introScreenEnd introscreen.psp introscreen.o
+Tiles.o: tiles.psp
+	$(BIN2ELF) --PSP -s tiles -e tilesEnd tiles.psp Tiles.o
 
-gamescreen.o: gamescreen.psp
-	$(BIN2ELF) --PSP -s gameScreen -e gameScreenEnd gamescreen.psp gamescreen.o
+IntroScreen.o: introscreen.psp
+	$(BIN2ELF) --PSP -s introScreen -e introScreenEnd introscreen.psp IntroScreen.o
 
-gameover.o: gameover.psp
-	$(BIN2ELF) --PSP -s gameOver -e gameOverEnd gameover.psp gameover.o
+GameScreen.o: gamescreen.psp
+	$(BIN2ELF) --PSP -s gameScreen -e gameScreenEnd gamescreen.psp GameScreen.o
 
-levelA.o: level-A
-	$(BIN2ELF) --PSP -s levelA -e levelAEnd level-A levelA.o
+GameOver.o: gameover.psp
+	$(BIN2ELF) --PSP -s gameOver -e gameOverEnd gameover.psp GameOver.o
+
+LevelA.o: level-A
+	$(BIN2ELF) --PSP -s levelA -e levelAEnd level-A LevelA.o
 
 clean:
 	rm -f $(OBJECTS) *.gcda *.gcno
