@@ -1,0 +1,57 @@
+SDK_TOP=/usr/local/psp/devkit
+INCDIR=$(SDK_TOP)/include
+LIBDIR=$(SDK_TOP)/lib
+
+CXX=psp-g++
+BIN2ELF=binary2elf
+
+DEBUGFLAGS =	-g
+CXXFLAGS =	$(DEBUGFLAGS) -Wall -fmessage-length=0 -Iinclude -I$(INCDIR) -D_PSP -DPLATFORM_SCREEN_WIDTH=480 -DPLATFORM_SCREEN_HEIGHT=272 -DPLATFORM_MAP_WINDOW_TILES_WIDTH=18 -DPLATFORM_MAP_WINDOW_TILES_HEIGHT=10 -DPLATFORM_INTRO_OPTIONS=3 -DPLATFORM_MODULE_BASED_AUDIO -DPLATFORM_TILE_BASED_RENDERING -DPLATFORM_IMAGE_BASED_TILES -DPLATFORM_IMAGE_SUPPORT -DPLATFORM_SPRITE_SUPPORT -DPLATFORM_COLOR_SUPPORT -DPLATFORM_CURSOR_SUPPORT -DOPTIMIZED_MAP_RENDERING
+LDFLAGS =	-L$(LIBDIR) -Wl,-Map,petrobots.map
+SOURCES =	petrobots.o Platform.o PlatformPSP.o PT2.3A_replay_cia.o
+
+LIBS =		-lgum_vfpu -lgu -lm -lwave -lsas_weak -lfpu -lvfpu
+LOADLIBES =	$(LIBDIR)/ctrl_stub.a
+LOADLIBES +=$(LIBDIR)/display_stub.a
+LOADLIBES +=$(LIBDIR)/ge_user_stub.a
+LOADLIBES +=$(LIBDIR)/utility_stub.a
+LOADLIBES +=$(LIBDIR)/libdeflt.a
+LOADLIBES +=$(LIBDIR)/impose_stub.a
+
+OBJECTS=$(SOURCES:.cpp=.o) c64font.o introscreen.o gamescreen.o gameover.o levelA.o
+
+EXECUTABLE=petrobots
+
+all: $(SOURCES) $(EXECUTABLE).prx
+
+$(EXECUTABLE).prx: $(OBJECTS)
+	$(LINK.cpp) $^ $(LIBS) $(LOADLIBES) -startfiles -o $@
+
+$(EXECUTABLE).elf: $(OBJECTS)
+	$(LINK.cpp) $^ $(LIBS) $(LOADLIBES) -zgenelf -o $@
+
+.cpp.o:
+	$(CXX) $(CXXFLAGS) -c $< -o $@
+
+c64font.o: c64font.psp
+	$(BIN2ELF) --PSP -s font -e fontEnd c64font.psp c64font.o
+
+introscreen.o: introscreen.psp
+	$(BIN2ELF) --PSP -s introScreen -e introScreenEnd introscreen.psp introscreen.o
+
+gamescreen.o: gamescreen.psp
+	$(BIN2ELF) --PSP -s gameScreen -e gameScreenEnd gamescreen.psp gamescreen.o
+
+gameover.o: gameover.psp
+	$(BIN2ELF) --PSP -s gameOver -e gameOverEnd gameover.psp gameover.o
+
+levelA.o: level-A
+	$(BIN2ELF) --PSP -s levelA -e levelAEnd level-A levelA.o
+
+clean:
+	rm -f $(OBJECTS) *.gcda *.gcno
+
+#----------- rules --------------
+-include PathDefs
+PathDefs:
+	psp-path-setup > PathDefs || (rm -f PathDefs ; exit 1)
