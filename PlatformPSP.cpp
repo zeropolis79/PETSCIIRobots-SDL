@@ -241,9 +241,6 @@ PlatformPSP::PlatformPSP() :
     sceGuFinish();
     sceGuSync(SCEGU_SYNC_FINISH, SCEGU_SYNC_WAIT);
 
-    sceDisplayWaitVblankStart();
-    sceGuSwapBuffers();
-
     sceGuStart(SCEGU_IMMEDIATE, displayList, DISPLAYLIST_SIZE * sizeof(int));
 
     platform = this;
@@ -482,6 +479,9 @@ void PlatformPSP::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t varia
 
 void PlatformPSP::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
 {
+    sceGuEnable(SCEGU_TEXTURE);
+//    sceGuCopyImage(SCEGU_PF8888, sourceX, sourceY, width, height, SCEGU_VRAM_WIDTH, SCEGU_VRAM_BP32_0, destinationX, destinationY, SCEGU_VRAM_WIDTH, SCEGU_VRAM_BP32_0);
+    sceGuFlush();
 }
 
 void PlatformPSP::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
