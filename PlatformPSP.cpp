@@ -45,6 +45,12 @@ extern uint8_t moduleSoundFX[];
 extern uint8_t moduleSoundFXEnd[];
 extern uint8_t moduleMetalHeads[];
 extern uint8_t moduleMetalHeadsEnd[];
+extern uint8_t moduleWin[];
+extern uint8_t moduleWinEnd[];
+extern uint8_t moduleLose[];
+extern uint8_t moduleLoseEnd[];
+extern uint8_t moduleMetallicBopAmiga[];
+extern uint8_t moduleMetallicBopAmigaEnd[];
 extern int8_t soundExplosion[];
 extern int8_t soundExplosionEnd[];
 extern int8_t soundMedkit[];
@@ -553,11 +559,15 @@ struct FilenameMapping {
     uint32_t size;
 };
 
-#define FILENAME_MAPPINGS 2
+#define FILENAME_MAPPINGS 6
 
 static FilenameMapping filenameMappings[FILENAME_MAPPINGS] = {
     { "level-A", levelA, levelAEnd - levelA },
-    { "mod.metal heads", moduleMetalHeads, moduleMetalHeadsEnd - moduleMetalHeads }
+    { "mod.soundfx", moduleSoundFX, moduleSoundFXEnd - moduleSoundFX },
+    { "mod.metal heads", moduleMetalHeads, moduleMetalHeadsEnd - moduleMetalHeads },
+    { "mod.win", moduleWin, moduleWinEnd - moduleWin },
+    { "mod.lose", moduleLose, moduleLoseEnd - moduleLose },
+    { "mod.metallic bop amiga", moduleMetallicBopAmiga, moduleMetallicBopAmigaEnd - moduleMetallicBopAmiga }
 };
 
 uint32_t PlatformPSP::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)

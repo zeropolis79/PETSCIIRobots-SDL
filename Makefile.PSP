@@ -18,7 +18,7 @@ LOADLIBES +=$(LIBDIR)/utility_stub.a
 LOADLIBES +=$(LIBDIR)/libdeflt.a
 LOADLIBES +=$(LIBDIR)/impose_stub.a
 
-OBJECTS=$(SOURCES:.cpp=.o) C64Font.o Tiles.o IntroScreen.o GameScreen.o GameOver.o LevelA.o ModuleMetalHeads.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
+OBJECTS=$(SOURCES:.cpp=.o) C64Font.o Tiles.o IntroScreen.o GameScreen.o GameOver.o LevelA.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
 
 EXECUTABLE=petrobots
 
@@ -44,8 +44,16 @@ GameOver.o: gameover.psp
 	$(BIN2ELF) --PSP -s gameOver -e gameOverEnd gameover.psp GameOver.o
 LevelA.o: level-A
 	$(BIN2ELF) --PSP -s levelA -e levelAEnd level-A LevelA.o
+ModuleSoundFX.o: mod.soundfx
+	$(BIN2ELF) --PSP -s moduleSoundFX -e moduleSoundFXEnd mod.soundfx ModuleSoundFX.o
 ModuleMetalHeads.o: mod.metal\ heads
 	$(BIN2ELF) --PSP -s moduleMetalHeads -e moduleMetalHeadsEnd "mod.metal heads" ModuleMetalHeads.o
+ModuleWin.o: mod.win
+	$(BIN2ELF) --PSP -s moduleWin -e moduleWinEnd mod.win ModuleWin.o
+ModuleLose.o: mod.lose
+	$(BIN2ELF) --PSP -s moduleLose -e moduleLoseEnd mod.lose ModuleLose.o
+ModuleMetallicBopAmiga.o: mod.metallic\ bop\ amiga
+	$(BIN2ELF) --PSP -s moduleMetallicBopAmiga -e moduleMetallicBopAmigaEnd "mod.metallic bop amiga" ModuleMetallicBopAmiga.o
 SoundExplosion.o: sounds_dsbarexp.raw
 	$(BIN2ELF) --PSP -s soundExplosion -e soundExplosionEnd sounds_dsbarexp.raw SoundExplosion.o
 SoundMedkit.o: SOUND_MEDKIT.raw
