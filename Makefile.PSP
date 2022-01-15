@@ -18,7 +18,7 @@ LOADLIBES +=$(LIBDIR)/utility_stub.a
 LOADLIBES +=$(LIBDIR)/libdeflt.a
 LOADLIBES +=$(LIBDIR)/impose_stub.a
 
-OBJECTS=$(SOURCES:.cpp=.o) C64Font.o Tiles.o IntroScreen.o GameScreen.o GameOver.o LevelA.o
+OBJECTS=$(SOURCES:.cpp=.o) C64Font.o Tiles.o IntroScreen.o GameScreen.o GameOver.o LevelA.o ModuleMetalHeads.o
 
 EXECUTABLE=petrobots
 
@@ -50,6 +50,9 @@ GameOver.o: gameover.psp
 
 LevelA.o: level-A
 	$(BIN2ELF) --PSP -s levelA -e levelAEnd level-A LevelA.o
+
+ModuleMetalHeads.o: mod.metal\ heads
+	$(BIN2ELF) --PSP -s moduleMetalHeads -e moduleMetalHeadsEnd "mod.metal heads" ModuleMetalHeads.o
 
 clean:
 	rm -f $(OBJECTS) *.gcda *.gcno

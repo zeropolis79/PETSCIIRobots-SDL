@@ -6,7 +6,7 @@
 struct AudioChannel {
 public:
     AudioChannel(uint8_t id);
-    int16_t process(uint32_t sampleRate);
+    void process(int16_t* buffer, uint32_t samples, uint32_t sampleRate, bool add);
     void start();
     void stop();
 

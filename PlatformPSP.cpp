@@ -6,11 +6,13 @@
 #include <errno.h>
 #include <fatms.h>
 #include <libgu.h>
+#include <libwave.h>
 #include <displaysvc.h>
 #include <ctrlsvc.h>
 #include <libfpu.h>
 #include <impose.h>
 #include <utility/utility_common.h>
+#include <psperror.h>
 #include <malloc.h>
 #include "PT2.3A_replay_cia.h"
 #include "PlatformPSP.h"
@@ -19,6 +21,7 @@ SCE_MODULE_INFO(petrobots, 0, 1, 0 );
 int sce_newlib_heap_kb_size = 18430;
 unsigned int sce_user_main_thread_stack_kb_size = 16;
 unsigned int sce_user_main_thread_attribute = SCE_KERNEL_TH_USE_VFPU;
+static const SceChar8 *SOUND_THREAD_NAME = "Sound";
 
 #define DISPLAYLIST_SIZE (1179648/sizeof(int))
 #define CACHE_SIZE 131072
@@ -26,10 +29,10 @@ unsigned int sce_user_main_thread_attribute = SCE_KERNEL_TH_USE_VFPU;
 static char cache[CACHE_SIZE];
 static int cacheSize = 0;
 
-#ifdef PLATFORM_MODULE_BASED_AUDIO
 #define LARGEST_MODULE_SIZE 105654
 #define TOTAL_SAMPLE_SIZE 75755
-#endif
+#define AUDIO_BUFFER_SIZE 1024
+#define SAMPLERATE 44100
 
 extern uint32_t font[];
 extern uint32_t tiles[];
@@ -37,10 +40,12 @@ extern uint32_t introScreen[];
 extern uint32_t gameScreen[];
 extern uint32_t gameOver[];
 extern uint8_t levelA[];
+extern uint8_t levelAEnd[];
+extern uint8_t moduleMetalHeads[];
+extern uint8_t moduleMetalHeadsEnd[];
 
 uint32_t* images[] = { introScreen, gameScreen, gameOver };
 
-#ifdef PLATFORM_SPRITE_SUPPORT
 static int8_t tileSpriteMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -59,7 +64,6 @@ static int8_t tileSpriteMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, 76, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
-#endif
 static int8_t animTileMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
@@ -78,14 +82,11 @@ static int8_t animTileMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
-#ifdef PLATFORM_IMAGE_SUPPORT
 static const char* imageFilenames[] = {
     "introscreen.png",
     "gamescreen.png",
     "gameover.png"
 };
-#endif
-#ifdef PLATFORM_MODULE_BASED_AUDIO
 static const char* moduleFilenames[] = {
     "mod.soundfx",
     "mod.metal heads",
@@ -114,7 +115,6 @@ static const char* sampleFilenames[] = {
     "SOUND_BEEP.raw",
     "SquareWave.raw"
 };
-#endif
 
 static uint8_t standardControls[] = {
     0, // MOVE UP orig: 56 (8)
@@ -159,6 +159,17 @@ void debug(const char* message, ...)
 PlatformPSP::PlatformPSP() :
     interrupt(0),
     framesPerSecond_(60),
+    moduleData(new uint8_t[LARGEST_MODULE_SIZE]),
+    loadedModule(ModuleSoundFX),
+    sampleData(new int8_t[TOTAL_SAMPLE_SIZE]),
+    effectChannel(0),
+    audioBuffer(new int16_t[AUDIO_BUFFER_SIZE]),
+    audioOutputBuffer(new SceShort16[AUDIO_BUFFER_SIZE * 2 * 2]),
+    audioOutputBufferOffset(0),
+    audioThreadId(0),
+    interruptIntervalInSamples(SAMPLERATE / 60),
+    samplesSinceInterrupt(SAMPLERATE / 60),
+    displayList(new int[DISPLAYLIST_SIZE]),
     joystickStateToReturn(0),
     joystickState(0),
     pendingState(0)
@@ -191,8 +202,17 @@ PlatformPSP::PlatformPSP() :
 
     sceCtrlSetSamplingMode(SCE_CTRL_MODE_DIGITALONLY);
 
-    // Initialize graphics
-    displayList = new int[DISPLAYLIST_SIZE];
+    if (sceWaveInit() != SCE_OK) {
+        debug("Couldn't initialize libwave\n");
+    }
+
+    int ret = sceWaveAudioSetFormat(0, SCE_WAVE_AUDIO_FMT_S16_STEREO);
+    if (ret != SCE_OK && ret != (int)SCE_AUDIO_ERROR_OUTPUT_BUSY) {
+        debug("Couldn't set audio format\n");
+    }
+
+    sceWaveAudioSetSample(0, AUDIO_BUFFER_SIZE);
+    sceWaveAudioSetVolume(0, SCE_WAVE_AUDIO_VOL_MAX, SCE_WAVE_AUDIO_VOL_MAX);
 
     sceGuInit();
 
@@ -246,7 +266,9 @@ PlatformPSP::PlatformPSP() :
     platform = this;
 
     PlatformPSP* p = this;
-    sceKernelStartThread(sceKernelCreateThread("update_thread", CallbackThread, 0x11, 2048, 0, NULL), sizeof(PlatformPSP*), &p);
+    audioThreadId = sceKernelCreateThread(SOUND_THREAD_NAME, audioThread, SCE_KERNEL_USER_HIGHEST_PRIORITY, 1024, 0, NULL);
+    sceKernelStartThread(audioThreadId, sizeof(PlatformPSP *), &p);
+    sceKernelStartThread(sceKernelCreateThread("update_thread", callbackThread, 0x11, 2048, 0, NULL), sizeof(PlatformPSP*), &p);
 }
 
 PlatformPSP::~PlatformPSP()
@@ -255,15 +277,25 @@ PlatformPSP::~PlatformPSP()
     sceGuSync(SCEGU_SYNC_FINISH, SCEGU_SYNC_WAIT);
     sceGuTerm();
 
+    if (audioThreadId != -1) {
+        sceKernelWaitThreadEnd(audioThreadId, NULL);
+    }
+
+    sceWaveExit();
+
     delete[] displayList;
+    delete[] audioOutputBuffer;
+    delete[] audioBuffer;
+    delete[] sampleData;
+    delete[] moduleData;
 
     sceKernelExitGame();
 }
 
-int PlatformPSP::CallbackThread(SceSize args, void* argp)
+int PlatformPSP::callbackThread(SceSize args, void* argp)
 {
     PlatformPSP* platform = *((PlatformPSP**)argp);
-    sceKernelRegisterExitCallback(sceKernelCreateCallback("Exit Callback", ExitCallback, platform));
+    sceKernelRegisterExitCallback(sceKernelCreateCallback("Exit Callback", exitCallback, platform));
 
     // Display callback notifications
     while (!platform->quit) {
@@ -273,10 +305,54 @@ int PlatformPSP::CallbackThread(SceSize args, void* argp)
     return 0;
 }
 
-int PlatformPSP::ExitCallback(int arg1, int arg2, void* common)
+int PlatformPSP::exitCallback(int arg1, int arg2, void* common)
 {
     PlatformPSP* platform = (PlatformPSP*)common;
     platform->quit = true;
+
+    return 0;
+}
+
+SceInt32 PlatformPSP::audioThread(SceSize args, SceVoid *argb)
+{
+    PlatformPSP* platform = *((PlatformPSP**)argb);
+
+    // Render loop
+    while (!platform->quit) {
+        int16_t *bufferPosition = platform->audioBuffer;
+        for (int samplesLeft = AUDIO_BUFFER_SIZE; samplesLeft > 0;) {
+            // Number of samples to process before VBI
+            int samplesToProcess = platform->samplesSinceInterrupt + samplesLeft >= platform->interruptIntervalInSamples ? platform->interruptIntervalInSamples - platform->samplesSinceInterrupt : samplesLeft;
+
+            // Process each audio channel
+            processAudio(bufferPosition, samplesToProcess, SAMPLERATE);
+            bufferPosition += samplesToProcess;
+
+            // Run the vertical blank interupt if required
+            platform->samplesSinceInterrupt += samplesToProcess;
+            if (platform->samplesSinceInterrupt >= platform->interruptIntervalInSamples) {
+                if (platform->interrupt) {
+                    (*platform->interrupt)();
+                }
+                platform->samplesSinceInterrupt -= platform->interruptIntervalInSamples;
+            }
+
+            // Samples left
+            samplesLeft -= samplesToProcess;
+        }
+
+        // Render to the actual output buffer
+        for (int i = 0; i < AUDIO_BUFFER_SIZE; i++) {
+            platform->audioOutputBuffer[platform->audioOutputBufferOffset + i * 2] = platform->audioBuffer[i];
+            platform->audioOutputBuffer[platform->audioOutputBufferOffset + i * 2 + 1] = platform->audioBuffer[i];
+        }
+
+        // Queue the output buffer for playback
+        sceWaveAudioWriteBlocking(0, SCE_WAVE_AUDIO_VOL_MAX, SCE_WAVE_AUDIO_VOL_MAX, platform->audioOutputBuffer + platform->audioOutputBufferOffset);
+
+        // Write the next data to the other part of the output buffer
+        platform->audioOutputBufferOffset ^= AUDIO_BUFFER_SIZE * 2;
+    }
 
     return 0;
 }
@@ -305,6 +381,68 @@ void PlatformPSP::drawRectangle(uint32_t* texture, uint32_t color, uint16_t tx, 
     sceKernelDcacheWritebackRange(data, cacheSize - oldCacheSize);
     sceGuDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_TEXTURE_USHORT | SCEGU_VERTEX_SHORT | SCEGU_THROUGH, 2, 0, data);
 }
+
+void PlatformPSP::undeltaSamples(uint8_t* module, uint32_t moduleSize)
+{
+    uint8_t numPatterns = 0;
+    for (int i = 0; i < module[950]; i++) {
+        numPatterns = MAX(numPatterns, module[952 + i]);
+    }
+    numPatterns++;
+
+    int8_t* samplesStart = (int8_t*)(module + 1084 + (numPatterns << 10));
+    int8_t* samplesEnd = (int8_t*)(module + moduleSize);
+
+    int8_t sample = 0;
+    for (int8_t* sampleData = samplesStart; sampleData < samplesEnd; sampleData++) {
+        int8_t delta = *sampleData;
+        sample += delta;
+        *sampleData = sample;
+    }
+}
+
+void PlatformPSP::setSampleData(uint8_t* module)
+{
+    /*
+    mt_SampleStarts[15 + 0] = soundExplosion;
+    mt_SampleStarts[15 + 1] = soundShortBeep;
+    mt_SampleStarts[15 + 2] = soundMedkit;
+    mt_SampleStarts[15 + 3] = soundEMP;
+    mt_SampleStarts[15 + 4] = soundMagnet;
+    mt_SampleStarts[15 + 5] = soundShock;
+    mt_SampleStarts[15 + 6] = soundMove;
+    mt_SampleStarts[15 + 7] = soundShock;
+    mt_SampleStarts[15 + 8] = soundPlasma;
+    mt_SampleStarts[15 + 9] = soundPistol;
+    mt_SampleStarts[15 + 10] = soundItemFound;
+    mt_SampleStarts[15 + 11] = soundError;
+    mt_SampleStarts[15 + 12] = soundCycleWeapon;
+    mt_SampleStarts[15 + 13] = soundCycleItem;
+    mt_SampleStarts[15 + 14] = soundDoor;
+    mt_SampleStarts[15 + 15] = soundMenuBeep;
+
+    SampleData* sampleData = (SampleData*)(module + 20);
+    putWord((uint8_t*)&sampleData[15 + 0].length, 0, (uint16_t)(squareWave - soundShortBeep) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 2].length, 0, (uint16_t)(soundEMP - soundMedkit) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 3].length, 0, (uint16_t)(soundMagnet - soundEMP) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 4].length, 0, (uint16_t)(soundShock - soundMagnet) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 5].length, 0, (uint16_t)(soundMove - soundShock) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 6].length, 0, (uint16_t)(soundPlasma - soundMove) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 7].length, 0, (uint16_t)(soundMove - soundShock) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 8].length, 0, (uint16_t)(soundPistol - soundPlasma) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 9].length, 0, (uint16_t)(soundItemFound - soundPistol) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 10].length, 0, (uint16_t)(soundError - soundItemFound) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 11].length, 0, (uint16_t)(soundCycleWeapon - soundError) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 12].length, 0, (uint16_t)(soundCycleItem - soundCycleWeapon) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 13].length, 0, (uint16_t)(soundDoor - soundCycleItem) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 14].length, 0, (uint16_t)(soundMenuBeep - soundDoor) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 15].length, 0, (uint16_t)(soundShortBeep - soundMenuBeep) >> 1);
+    for (int i = 0; i < 16; i++) {
+        sampleData[15 + i].volume = 64;
+    }
+    */
+}
+
 uint8_t* PlatformPSP::standardControls() const
 {
     return ::standardControls;
@@ -403,19 +541,30 @@ uint16_t PlatformPSP::readJoystick(bool gamepad)
     return result;
 }
 
+struct FilenameMapping {
+    const char* filename;
+    uint8_t* data;
+    uint32_t size;
+};
+
+#define FILENAME_MAPPINGS 2
+
+static FilenameMapping filenameMappings[FILENAME_MAPPINGS] = {
+    { "level-A", levelA, levelAEnd - levelA },
+    { "mod.metal heads", moduleMetalHeads, moduleMetalHeadsEnd - moduleMetalHeads }
+};
+
 uint32_t PlatformPSP::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)
 {
-    uint8_t* source = 0;
-    if (strcmp(filename, "level-A") == 0) {
-        source = levelA;
+    for (int i = 0; i < FILENAME_MAPPINGS; i++) {
+        if (strcmp(filename, filenameMappings[i].filename) == 0) {
+            uint32_t availableSize = MIN(size, filenameMappings[i].size - offset);
+            memcpy(destination, filenameMappings[i].data + offset, availableSize);
+            return availableSize;
+        }
     }
 
-    if (source) {
-        memcpy(destination, source + offset, size);
-        return size;
-    } else {
-        return 0;
-    }
+    return 0;
 }
 
 uint8_t* PlatformPSP::loadTileset(const char* filename)
@@ -511,6 +660,86 @@ void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value)
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
     drawRectangle(font, color == 14 ? 0xffffffff : 0xff55bb77, (value >> 2) & 0x0010, (value << 3) & 0xfff8, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
+}
+
+void PlatformPSP::loadModule(Module module)
+{
+    if (loadedModule != module) {
+        uint32_t moduleSize;
+        moduleSize = load(moduleFilenames[module], moduleData, LARGEST_MODULE_SIZE, 0);
+        undeltaSamples(moduleData, moduleSize);
+        setSampleData(moduleData);
+        loadedModule = module;
+    }
+}
+
+void PlatformPSP::playModule(Module module)
+{
+    stopModule();
+    stopSample();
+
+    loadModule(module);
+    mt_init(moduleData);
+
+    mt_Enable = true;
+}
+
+void PlatformPSP::pauseModule()
+{
+    mt_speed = 0;
+    mt_music();
+    mt_Enable = false;
+    /*
+    if (mt_chan1temp.n_start < soundExplosion || mt_chan1temp.n_start >= squareWave) {
+        channel0.volume = 0;
+    }
+    if (mt_chan2temp.n_start < soundExplosion || mt_chan2temp.n_start >= squareWave) {
+        channel1.volume = 0;
+    }
+    if (mt_chan3temp.n_start < soundExplosion || mt_chan3temp.n_start >= squareWave) {
+        channel2.volume = 0;
+    }
+    if (mt_chan4temp.n_start < soundExplosion || mt_chan4temp.n_start >= squareWave) {
+        channel3.volume = 0;
+    }
+    */
+}
+
+void PlatformPSP::stopModule()
+{
+    mt_end();
+}
+
+void PlatformPSP::playSample(uint8_t sample)
+{
+    ChanInput* input = loadedModule == ModuleIntro ? &mt_chan2input : &mt_chan4input;
+    if (loadedModule == ModuleSoundFX) {
+        input = &mt_chan1input + (effectChannel < 2 ? effectChannel : (5 - effectChannel));
+
+        effectChannel++;
+        effectChannel &= 3;
+    }
+
+    putWord((uint8_t*)&input->note, 0, 0x1000 + 320);
+    if (sample < 16) {
+        putWord((uint8_t*)&input->cmd, 0, sample << 12);
+    } else if (sample == 16) {
+        putWord((uint8_t*)&input->cmd, 0, 1 << 12);
+    } else {
+        putWord((uint8_t*)&input->cmd, 0, 15 << 12);
+    }
+}
+
+void PlatformPSP::stopSample()
+{
+    mt_chan1input.note = 0;
+    mt_chan1input.cmd = 0;
+    mt_chan2input.note = 0;
+    mt_chan2input.cmd = 0;
+    mt_chan3input.note = 0;
+    mt_chan3input.cmd = 0;
+    mt_chan4input.note = 0;
+    mt_chan4input.cmd = 0;
 }
 
 void PlatformPSP::renderFrame(bool waitForNextFrame)

@@ -4,6 +4,7 @@
 #define PlatformClass PlatformPSP
 
 #include <kerneltypes.h>
+#include <psptypes.h>
 #include "Platform.h"
 
 extern void debug(const char *message, ...);
@@ -30,15 +31,50 @@ public:
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     virtual void writeToScreenMemory(address_t address, uint8_t value);
     virtual void writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset);
+    virtual void loadModule(Module module);
+    virtual void playModule(Module module);
+    virtual void pauseModule();
+    virtual void stopModule();
+    virtual void playSample(uint8_t sample);
+    virtual void stopSample();
     virtual void renderFrame(bool waitForNextFrame);
 
 private:
-    static int CallbackThread(SceSize args, void* argp);
-    static int ExitCallback(int arg1, int arg2, void* common);
+    static int callbackThread(SceSize args, void* argp);
+    static int exitCallback(int arg1, int arg2, void* common);
+    static SceInt32 audioThread(SceSize args, SceVoid *argb);
     void drawRectangle(uint32_t* texture, uint32_t color, uint16_t tx, uint16_t ty, uint16_t x, uint16_t y, uint16_t width, uint16_t height);
+    void undeltaSamples(uint8_t* module, uint32_t moduleSize);
+    void setSampleData(uint8_t* module);
 
     void (*interrupt)(void);
     int framesPerSecond_;
+    uint8_t* moduleData;
+    Module loadedModule;
+    int8_t* sampleData;
+    int8_t* soundExplosion;
+    int8_t* soundMedkit;
+    int8_t* soundEMP;
+    int8_t* soundMagnet;
+    int8_t* soundShock;
+    int8_t* soundMove;
+    int8_t* soundPlasma;
+    int8_t* soundPistol;
+    int8_t* soundItemFound;
+    int8_t* soundError;
+    int8_t* soundCycleWeapon;
+    int8_t* soundCycleItem;
+    int8_t* soundDoor;
+    int8_t* soundMenuBeep;
+    int8_t* soundShortBeep;
+    int8_t* squareWave;
+    uint8_t effectChannel;
+    int16_t *audioBuffer;
+    SceShort16 *audioOutputBuffer;
+    uint32_t audioOutputBufferOffset;
+    SceUID audioThreadId;
+    uint16_t interruptIntervalInSamples;
+    uint16_t samplesSinceInterrupt;
     int* displayList;
     uint16_t joystickStateToReturn;
     uint16_t joystickState;

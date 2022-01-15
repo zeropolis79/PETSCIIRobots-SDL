@@ -61,19 +61,34 @@ AudioChannel::AudioChannel(uint8_t id) :
 {
 }
 
-int16_t AudioChannel::process(uint32_t sampleRate) {
+void AudioChannel::process(int16_t* buffer, uint32_t samples, uint32_t sampleRate, bool add) {
     if (!data || !dmacon) {
-        return 0;
+        return;
     }
 
-    int16_t output = 32 * dmaStart[(int)dmaCurrent] * volume / 64;
-    dmaCurrent += 7093789.2 / period / sampleRate / 2;
-    if (dmaCurrent >= dmaEnd) {
-        dmaStart = data;
-        dmaCurrent -= dmaEnd;
-        dmaEnd = length * 2;
+    float dmaPerSample = 7093789.2 / period / sampleRate / 2;
+
+    if (add) {
+        for (uint32_t i = 0; i < samples; i++) {
+            *buffer++ += 32 * dmaStart[(int)dmaCurrent] * volume / 64;
+            dmaCurrent += dmaPerSample;
+            if (dmaCurrent >= dmaEnd) {
+                dmaStart = data;
+                dmaCurrent -= dmaEnd;
+                dmaEnd = length * 2;
+            }
+        }
+    } else {
+        for (uint32_t i = 0; i < samples; i++) {
+            *buffer++ = 32 * dmaStart[(int)dmaCurrent] * volume / 64;
+            dmaCurrent += dmaPerSample;
+            if (dmaCurrent >= dmaEnd) {
+                dmaStart = data;
+                dmaCurrent -= dmaEnd;
+                dmaEnd = length * 2;
+            }
+        }
     }
-    return output;
 }
 
 void AudioChannel::start() {
@@ -91,23 +106,36 @@ void AudioChannel::stop() {
 
 bool ciaapra = false;
 float ciatar = 0;
-float ciataw = 0;
+float ciataw = 14187;
 AudioChannel channel0(0);
 AudioChannel channel1(1);
 AudioChannel channel2(2);
 AudioChannel channel3(3);
 void processAudio(int16_t* outputBuffer, uint32_t outputLength, uint32_t sampleRate)
 {
-    for (uint32_t sample = 0; sample < outputLength; sample++) {
-        ciatar -= 709378.92 / sampleRate;
+    float timerAdvancePerSample = 709378.92 / (float)sampleRate;
+
+    int16_t *bufferPosition = outputBuffer;
+    for (uint32_t samplesLeft = outputLength; samplesLeft > 0;) {
+        // Number of samples to process before interrupt
+        uint32_t samplesToProcess = MIN((uint32_t)(ciatar / timerAdvancePerSample) + 1, samplesLeft);
+
+        // Process each audio channel
+        channel0.process(bufferPosition, samplesToProcess, sampleRate, false);
+        channel1.process(bufferPosition, samplesToProcess, sampleRate, true);
+        channel2.process(bufferPosition, samplesToProcess, sampleRate, true);
+        channel3.process(bufferPosition, samplesToProcess, sampleRate, true);
+        bufferPosition += samplesToProcess;
+
+        // Run the vertical blank interupt if required
+        ciatar -= samplesToProcess * timerAdvancePerSample;
         if (ciatar < 0) {
             ciatar += ciataw;
             mt_music();
         }
-        outputBuffer[sample] = channel0.process(sampleRate) +
-            channel1.process(sampleRate) +
-            channel2.process(sampleRate) +
-            channel3.process(sampleRate);
+
+        // Samples left
+        samplesLeft -= samplesToProcess;
     }
 };
 
