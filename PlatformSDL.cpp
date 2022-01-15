@@ -361,7 +361,8 @@ void PlatformSDL::setSampleData(uint8_t* module)
     mt_SampleStarts[15 + 15] = soundMenuBeep;
 
     SampleData* sampleData = (SampleData*)(module + 20);
-    putWord((uint8_t*)&sampleData[15 + 0].length, 0, (uint16_t)(squareWave - soundShortBeep) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 0].length, 0, (uint16_t)(soundMedkit - soundExplosion) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 1].length, 0, (uint16_t)(squareWave - soundShortBeep) >> 1);
     putWord((uint8_t*)&sampleData[15 + 2].length, 0, (uint16_t)(soundEMP - soundMedkit) >> 1);
     putWord((uint8_t*)&sampleData[15 + 3].length, 0, (uint16_t)(soundMagnet - soundEMP) >> 1);
     putWord((uint8_t*)&sampleData[15 + 4].length, 0, (uint16_t)(soundShock - soundMagnet) >> 1);
@@ -892,8 +893,7 @@ void PlatformSDL::writeToScreenMemory(address_t address, uint8_t value, uint8_t 
 void PlatformSDL::loadModule(Module module)
 {
     if (loadedModule != module) {
-        uint32_t moduleSize;
-        moduleSize = load(moduleFilenames[module], moduleData, LARGEST_MODULE_SIZE, 0);
+        uint32_t moduleSize = load(moduleFilenames[module], moduleData, LARGEST_MODULE_SIZE, 0);
         undeltaSamples(moduleData, moduleSize);
         setSampleData(moduleData);
         loadedModule = module;

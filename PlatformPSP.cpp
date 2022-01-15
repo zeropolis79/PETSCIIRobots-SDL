@@ -41,8 +41,40 @@ extern uint32_t gameScreen[];
 extern uint32_t gameOver[];
 extern uint8_t levelA[];
 extern uint8_t levelAEnd[];
+extern uint8_t moduleSoundFX[];
+extern uint8_t moduleSoundFXEnd[];
 extern uint8_t moduleMetalHeads[];
 extern uint8_t moduleMetalHeadsEnd[];
+extern int8_t soundExplosion[];
+extern int8_t soundExplosionEnd[];
+extern int8_t soundMedkit[];
+extern int8_t soundMedkitEnd[];
+extern int8_t soundEMP[];
+extern int8_t soundEMPEnd[];
+extern int8_t soundMagnet[];
+extern int8_t soundMagnetEnd[];
+extern int8_t soundShock[];
+extern int8_t soundShockEnd[];
+extern int8_t soundMove[];
+extern int8_t soundMoveEnd[];
+extern int8_t soundPlasma[];
+extern int8_t soundPlasmaEnd[];
+extern int8_t soundPistol[];
+extern int8_t soundPistolEnd[];
+extern int8_t soundItemFound[];
+extern int8_t soundItemFoundEnd[];
+extern int8_t soundError[];
+extern int8_t soundErrorEnd[];
+extern int8_t soundCycleWeapon[];
+extern int8_t soundCycleWeaponEnd[];
+extern int8_t soundCycleItem[];
+extern int8_t soundCycleItemEnd[];
+extern int8_t soundDoor[];
+extern int8_t soundDoorEnd[];
+extern int8_t soundMenuBeep[];
+extern int8_t soundMenuBeepEnd[];
+extern int8_t soundShortBeep[];
+extern int8_t soundShortBeepEnd[];
 
 uint32_t* images[] = { introScreen, gameScreen, gameOver };
 
@@ -82,11 +114,6 @@ static int8_t animTileMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
-static const char* imageFilenames[] = {
-    "introscreen.png",
-    "gamescreen.png",
-    "gameover.png"
-};
 static const char* moduleFilenames[] = {
     "mod.soundfx",
     "mod.metal heads",
@@ -96,24 +123,6 @@ static const char* moduleFilenames[] = {
     "mod.get psyched",
     "mod.robot attack",
     "mod.rushin in"
-};
-static const char* sampleFilenames[] = {
-    "sounds_dsbarexp.raw",
-    "SOUND_MEDKIT.raw",
-    "SOUND_EMP.raw",
-    "SOUND_MAGNET2.raw",
-    "SOUND_SHOCK.raw",
-    "SOUND_MOVE.raw",
-    "SOUND_PLASMA_FASTER.raw",
-    "sounds_dspistol.raw",
-    "SOUND_FOUND_ITEM.raw",
-    "SOUND_ERROR.raw",
-    "SOUND_CYCLE_WEAPON.raw",
-    "SOUND_CYCLE_ITEM.raw",
-    "SOUND_DOOR_FASTER.raw",
-    "SOUND_BEEP2.raw",
-    "SOUND_BEEP.raw",
-    "SquareWave.raw"
 };
 
 static uint8_t standardControls[] = {
@@ -161,7 +170,6 @@ PlatformPSP::PlatformPSP() :
     framesPerSecond_(60),
     moduleData(new uint8_t[LARGEST_MODULE_SIZE]),
     loadedModule(ModuleSoundFX),
-    sampleData(new int8_t[TOTAL_SAMPLE_SIZE]),
     effectChannel(0),
     audioBuffer(new int16_t[AUDIO_BUFFER_SIZE]),
     audioOutputBuffer(new SceShort16[AUDIO_BUFFER_SIZE * 2 * 2]),
@@ -286,7 +294,6 @@ PlatformPSP::~PlatformPSP()
     delete[] displayList;
     delete[] audioOutputBuffer;
     delete[] audioBuffer;
-    delete[] sampleData;
     delete[] moduleData;
 
     sceKernelExitGame();
@@ -403,7 +410,6 @@ void PlatformPSP::undeltaSamples(uint8_t* module, uint32_t moduleSize)
 
 void PlatformPSP::setSampleData(uint8_t* module)
 {
-    /*
     mt_SampleStarts[15 + 0] = soundExplosion;
     mt_SampleStarts[15 + 1] = soundShortBeep;
     mt_SampleStarts[15 + 2] = soundMedkit;
@@ -422,25 +428,25 @@ void PlatformPSP::setSampleData(uint8_t* module)
     mt_SampleStarts[15 + 15] = soundMenuBeep;
 
     SampleData* sampleData = (SampleData*)(module + 20);
-    putWord((uint8_t*)&sampleData[15 + 0].length, 0, (uint16_t)(squareWave - soundShortBeep) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 2].length, 0, (uint16_t)(soundEMP - soundMedkit) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 3].length, 0, (uint16_t)(soundMagnet - soundEMP) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 4].length, 0, (uint16_t)(soundShock - soundMagnet) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 5].length, 0, (uint16_t)(soundMove - soundShock) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 6].length, 0, (uint16_t)(soundPlasma - soundMove) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 7].length, 0, (uint16_t)(soundMove - soundShock) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 8].length, 0, (uint16_t)(soundPistol - soundPlasma) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 9].length, 0, (uint16_t)(soundItemFound - soundPistol) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 10].length, 0, (uint16_t)(soundError - soundItemFound) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 11].length, 0, (uint16_t)(soundCycleWeapon - soundError) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 12].length, 0, (uint16_t)(soundCycleItem - soundCycleWeapon) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 13].length, 0, (uint16_t)(soundDoor - soundCycleItem) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 14].length, 0, (uint16_t)(soundMenuBeep - soundDoor) >> 1);
-    putWord((uint8_t*)&sampleData[15 + 15].length, 0, (uint16_t)(soundShortBeep - soundMenuBeep) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 0].length, 0, (uint16_t)(soundExplosionEnd - soundExplosion) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 1].length, 0, (uint16_t)(soundShortBeepEnd - soundShortBeep) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 2].length, 0, (uint16_t)(soundMedkitEnd - soundMedkit) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 3].length, 0, (uint16_t)(soundEMPEnd - soundEMP) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 4].length, 0, (uint16_t)(soundMagnetEnd - soundMagnet) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 5].length, 0, (uint16_t)(soundShockEnd - soundShock) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 6].length, 0, (uint16_t)(soundMoveEnd - soundMove) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 7].length, 0, (uint16_t)(soundShockEnd - soundShock) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 8].length, 0, (uint16_t)(soundPlasmaEnd - soundPlasma) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 9].length, 0, (uint16_t)(soundPistolEnd - soundPistol) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 10].length, 0, (uint16_t)(soundItemFoundEnd - soundItemFound) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 11].length, 0, (uint16_t)(soundErrorEnd - soundError) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 12].length, 0, (uint16_t)(soundCycleWeaponEnd - soundCycleWeapon) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 13].length, 0, (uint16_t)(soundCycleItemEnd - soundCycleItem) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 14].length, 0, (uint16_t)(soundDoorEnd - soundDoor) >> 1);
+    putWord((uint8_t*)&sampleData[15 + 15].length, 0, (uint16_t)(soundMenuBeepEnd - soundMenuBeep) >> 1);
     for (int i = 0; i < 16; i++) {
         sampleData[15 + i].volume = 64;
     }
-    */
 }
 
 uint8_t* PlatformPSP::standardControls() const
@@ -665,8 +671,7 @@ void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value, uint8_t 
 void PlatformPSP::loadModule(Module module)
 {
     if (loadedModule != module) {
-        uint32_t moduleSize;
-        moduleSize = load(moduleFilenames[module], moduleData, LARGEST_MODULE_SIZE, 0);
+        uint32_t moduleSize = load(moduleFilenames[module], moduleData, LARGEST_MODULE_SIZE, 0);
         undeltaSamples(moduleData, moduleSize);
         setSampleData(moduleData);
         loadedModule = module;
@@ -689,20 +694,18 @@ void PlatformPSP::pauseModule()
     mt_speed = 0;
     mt_music();
     mt_Enable = false;
-    /*
-    if (mt_chan1temp.n_start < soundExplosion || mt_chan1temp.n_start >= squareWave) {
+    if (mt_chan1temp.n_start < soundExplosion || mt_chan1temp.n_start >= soundExplosionEnd) {
         channel0.volume = 0;
     }
-    if (mt_chan2temp.n_start < soundExplosion || mt_chan2temp.n_start >= squareWave) {
+    if (mt_chan2temp.n_start < soundExplosion || mt_chan2temp.n_start >= soundExplosionEnd) {
         channel1.volume = 0;
     }
-    if (mt_chan3temp.n_start < soundExplosion || mt_chan3temp.n_start >= squareWave) {
+    if (mt_chan3temp.n_start < soundExplosion || mt_chan3temp.n_start >= soundExplosionEnd) {
         channel2.volume = 0;
     }
-    if (mt_chan4temp.n_start < soundExplosion || mt_chan4temp.n_start >= squareWave) {
+    if (mt_chan4temp.n_start < soundExplosion || mt_chan4temp.n_start >= soundExplosionEnd) {
         channel3.volume = 0;
     }
-    */
 }
 
 void PlatformPSP::stopModule()

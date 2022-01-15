@@ -18,7 +18,7 @@ LOADLIBES +=$(LIBDIR)/utility_stub.a
 LOADLIBES +=$(LIBDIR)/libdeflt.a
 LOADLIBES +=$(LIBDIR)/impose_stub.a
 
-OBJECTS=$(SOURCES:.cpp=.o) C64Font.o Tiles.o IntroScreen.o GameScreen.o GameOver.o LevelA.o ModuleMetalHeads.o
+OBJECTS=$(SOURCES:.cpp=.o) C64Font.o Tiles.o IntroScreen.o GameScreen.o GameOver.o LevelA.o ModuleMetalHeads.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
 
 EXECUTABLE=petrobots
 
@@ -32,27 +32,50 @@ $(EXECUTABLE).elf: $(OBJECTS)
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
-
 C64Font.o: c64font.psp
 	$(BIN2ELF) --PSP -s font -e fontEnd c64font.psp C64Font.o
-
 Tiles.o: tiles.psp
 	$(BIN2ELF) --PSP -s tiles -e tilesEnd tiles.psp Tiles.o
-
 IntroScreen.o: introscreen.psp
 	$(BIN2ELF) --PSP -s introScreen -e introScreenEnd introscreen.psp IntroScreen.o
-
 GameScreen.o: gamescreen.psp
 	$(BIN2ELF) --PSP -s gameScreen -e gameScreenEnd gamescreen.psp GameScreen.o
-
 GameOver.o: gameover.psp
 	$(BIN2ELF) --PSP -s gameOver -e gameOverEnd gameover.psp GameOver.o
-
 LevelA.o: level-A
 	$(BIN2ELF) --PSP -s levelA -e levelAEnd level-A LevelA.o
-
 ModuleMetalHeads.o: mod.metal\ heads
 	$(BIN2ELF) --PSP -s moduleMetalHeads -e moduleMetalHeadsEnd "mod.metal heads" ModuleMetalHeads.o
+SoundExplosion.o: sounds_dsbarexp.raw
+	$(BIN2ELF) --PSP -s soundExplosion -e soundExplosionEnd sounds_dsbarexp.raw SoundExplosion.o
+SoundMedkit.o: SOUND_MEDKIT.raw
+	$(BIN2ELF) --PSP -s soundMedkit -e soundMedkitEnd SOUND_MEDKIT.raw SoundMedkit.o
+SoundEMP.o: SOUND_EMP.raw
+	$(BIN2ELF) --PSP -s soundEMP -e soundEMPEnd SOUND_EMP.raw SoundEMP.o
+SoundMagnet.o: SOUND_MAGNET2.raw
+	$(BIN2ELF) --PSP -s soundMagnet -e soundMagnetEnd SOUND_MAGNET2.raw SoundMagnet.o
+SoundShock.o: SOUND_SHOCK.raw
+	$(BIN2ELF) --PSP -s soundShock -e soundShockEnd SOUND_SHOCK.raw SoundShock.o
+SoundMove.o: SOUND_MOVE.raw
+	$(BIN2ELF) --PSP -s soundMove -e soundMoveEnd SOUND_MOVE.raw SoundMove.o
+SoundPlasma.o: SOUND_PLASMA_FASTER.raw
+	$(BIN2ELF) --PSP -s soundPlasma -e soundPlasmaEnd SOUND_PLASMA_FASTER.raw SoundPlasma.o
+SoundPistol.o: sounds_dspistol.raw
+	$(BIN2ELF) --PSP -s soundPistol -e soundPistolEnd sounds_dspistol.raw SoundPistol.o
+SoundItemFound.o: SOUND_FOUND_ITEM.raw
+	$(BIN2ELF) --PSP -s soundItemFound -e soundItemFoundEnd SOUND_FOUND_ITEM.raw SoundItemFound.o
+SoundError.o: SOUND_ERROR.raw
+	$(BIN2ELF) --PSP -s soundError -e soundErrorEnd SOUND_ERROR.raw SoundError.o
+SoundCycleWeapon.o: SOUND_CYCLE_WEAPON.raw
+	$(BIN2ELF) --PSP -s soundCycleWeapon -e soundCycleWeaponEnd SOUND_CYCLE_WEAPON.raw SoundCycleWeapon.o
+SoundCycleItem.o: SOUND_CYCLE_ITEM.raw
+	$(BIN2ELF) --PSP -s soundCycleItem -e soundCycleItemEnd SOUND_CYCLE_ITEM.raw SoundCycleItem.o
+SoundDoor.o: SOUND_DOOR_FASTER.raw
+	$(BIN2ELF) --PSP -s soundDoor -e soundDoorEnd SOUND_DOOR_FASTER.raw SoundDoor.o
+SoundMenuBeep.o: SOUND_BEEP2.raw
+	$(BIN2ELF) --PSP -s soundMenuBeep -e soundMenuBeepEnd SOUND_BEEP2.raw SoundMenuBeep.o
+SoundShortBeep.o: SOUND_BEEP.raw
+	$(BIN2ELF) --PSP -s soundShortBeep -e soundShortBeepEnd SOUND_BEEP.raw SoundShortBeep.o
 
 clean:
 	rm -f $(OBJECTS) *.gcda *.gcno

@@ -226,7 +226,7 @@ void mt_music()
             mt_PattDelTime2 -= 1;
             if (mt_PattDelTime2 != 0) {
                 mt_PatternPos -= 16;
-            }   
+            }
         }
         if (mt_PBreakFlag != 0) {
             mt_PBreakFlag = 0;
