@@ -18,7 +18,7 @@ LOADLIBES +=$(LIBDIR)/utility_stub.a
 LOADLIBES +=$(LIBDIR)/libdeflt.a
 LOADLIBES +=$(LIBDIR)/impose_stub.a
 
-OBJECTS=$(SOURCES:.cpp=.o) Tileset.o C64Font.o Tiles.o IntroScreen.o GameScreen.o GameOver.o LevelA.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
+OBJECTS=$(SOURCES:.cpp=.o) Tileset.o C64Font.o Tiles.o Sprites.o IntroScreen.o GameScreen.o GameOver.o LevelA.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
 
 EXECUTABLE=petrobots
 
@@ -38,6 +38,8 @@ C64Font.o: c64font.psp
 	$(BIN2ELF) --PSP -s font -e fontEnd c64font.psp C64Font.o
 Tiles.o: tiles.psp
 	$(BIN2ELF) --PSP -s tiles -e tilesEnd tiles.psp Tiles.o
+Sprites.o: sprites.psp
+	$(BIN2ELF) --PSP -s sprites -e spritesEnd sprites.psp Sprites.o
 IntroScreen.o: introscreen.psp
 	$(BIN2ELF) --PSP -s introScreen -e introScreenEnd introscreen.psp IntroScreen.o
 GameScreen.o: gamescreen.psp

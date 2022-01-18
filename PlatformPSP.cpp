@@ -37,6 +37,7 @@ static int cacheSize = 0;
 extern uint8_t tileset[];
 extern uint32_t font[];
 extern uint32_t tiles[];
+extern uint32_t sprites[];
 extern uint32_t introScreen[];
 extern uint32_t gameScreen[];
 extern uint32_t gameOver[];
@@ -624,21 +625,53 @@ void PlatformPSP::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t varia
 {
     sceGuEnable(SCEGU_SCISSOR_TEST);
 
-    /*
     if (transparent) {
         if (tileSpriteMap[tile] >= 0) {
             renderSprite(tileSpriteMap[tile] + variant, x, y);
             return;
         }
     } else {
+    /*
         if (animTileMap[tile] >= 0) {
             renderAnimTile(animTileMap[tile] + variant, x, y);
             return;
         }
-    }
     */
+    }
 
     drawRectangle(tiles, 0xffffffff, (tile & 15) * 24, (tile >> 4) * 24, x, y, 24, 24);
+
+    sceGuDisable(SCEGU_SCISSOR_TEST);
+}
+
+void PlatformPSP::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t backgroundVariant, uint8_t foregroundVariant)
+{
+    sceGuEnable(SCEGU_SCISSOR_TEST);
+
+    uint32_t* backgroundTexture = tiles;
+    /*
+    if (animTileMap[backgroundTile] >= 0) {
+        backgroundTile = animTileMap[backgroundTile] + backgroundVariant;
+        backgroundTexture = animTiles;
+    }
+    */
+    if (tileSpriteMap[foregroundTile] >= 0) {
+        uint8_t sprite = tileSpriteMap[foregroundTile] + foregroundVariant;
+        drawRectangle(backgroundTexture, 0xffffffff, (backgroundTile & 15) * 24, (backgroundTile >> 4) * 24, x, y, 24, 24);
+        drawRectangle(sprites, 0xffffffff, (sprite / 21) * 24, (sprite % 21) * 24, x, y, 24, 24);
+    } else {
+        drawRectangle(backgroundTexture, 0xffffffff, (backgroundTile & 15) * 24, (backgroundTile >> 4) * 24, x, y, 24, 24);
+        drawRectangle(tiles, 0xffffffff, (foregroundTile & 15) * 24, (foregroundTile >> 4) * 24, x, y, 24, 24);
+    }
+
+    sceGuDisable(SCEGU_SCISSOR_TEST);
+}
+
+void PlatformPSP::renderSprite(uint8_t sprite, uint16_t x, uint16_t y)
+{
+    sceGuEnable(SCEGU_SCISSOR_TEST);
+
+    drawRectangle(sprites, 0xffffffff, (sprite / 21) * 24, (sprite % 21) * 24, x, y, 24, 24);
 
     sceGuDisable(SCEGU_SCISSOR_TEST);
 }
