@@ -63,6 +63,11 @@ AudioChannel::AudioChannel(uint8_t id) :
 
 void AudioChannel::process(int16_t* buffer, uint32_t samples, uint32_t sampleRate, bool add) {
     if (!data || !dmacon) {
+        if (!add) {
+            for (uint32_t i = 0; i < samples; i++) {
+                *buffer++ = 0;
+            }
+        }
         return;
     }
 
