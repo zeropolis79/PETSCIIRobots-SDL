@@ -34,6 +34,7 @@ static int cacheSize = 0;
 #define AUDIO_BUFFER_SIZE 1024
 #define SAMPLERATE 44100
 
+extern uint8_t tileset[];
 extern uint32_t font[];
 extern uint32_t tiles[];
 extern uint32_t introScreen[];
@@ -585,7 +586,7 @@ uint32_t PlatformPSP::load(const char* filename, uint8_t* destination, uint32_t 
 
 uint8_t* PlatformPSP::loadTileset(const char* filename)
 {
-    return 0;
+    return tileset;
 }
 
 void PlatformPSP::displayImage(Image image)

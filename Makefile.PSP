@@ -18,7 +18,7 @@ LOADLIBES +=$(LIBDIR)/utility_stub.a
 LOADLIBES +=$(LIBDIR)/libdeflt.a
 LOADLIBES +=$(LIBDIR)/impose_stub.a
 
-OBJECTS=$(SOURCES:.cpp=.o) C64Font.o Tiles.o IntroScreen.o GameScreen.o GameOver.o LevelA.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
+OBJECTS=$(SOURCES:.cpp=.o) Tileset.o C64Font.o Tiles.o IntroScreen.o GameScreen.o GameOver.o LevelA.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
 
 EXECUTABLE=petrobots
 
@@ -32,6 +32,8 @@ $(EXECUTABLE).elf: $(OBJECTS)
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
+Tileset.o: tileset.amiga
+	$(BIN2ELF) --PSP -s tileset -e tilesetEnd tileset.amiga Tileset.o
 C64Font.o: c64font.psp
 	$(BIN2ELF) --PSP -s font -e fontEnd c64font.psp C64Font.o
 Tiles.o: tiles.psp
