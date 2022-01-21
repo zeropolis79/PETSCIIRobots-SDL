@@ -36,9 +36,13 @@ static int cacheSize = 0;
 
 extern uint8_t tileset[];
 extern uint32_t font[];
+extern uint32_t faces[];
 extern uint32_t tiles[];
 extern uint32_t sprites[];
 extern uint32_t animTiles[];
+extern uint32_t items[];
+extern uint32_t keys[];
+extern uint32_t health[];
 extern uint32_t introScreen[];
 extern uint32_t gameScreen[];
 extern uint32_t gameOver[];
@@ -679,6 +683,26 @@ void PlatformPSP::renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y)
     drawRectangle(animTiles, 0xffffffff, (animTile >> 4) * 24, (animTile & 15) * 24, x, y, 24, 24);
 
     sceGuDisable(SCEGU_SCISSOR_TEST);
+}
+
+void PlatformPSP::renderItem(uint8_t item, uint16_t x, uint16_t y)
+{
+    drawRectangle(items, 0xffffffff, 0, item * 21, x, y, 48, 21);
+}
+
+void PlatformPSP::renderKey(uint8_t key, uint16_t x, uint16_t y)
+{
+    drawRectangle(keys, 0xffffffff, 0, key * 14, x, y, 16, 14);
+}
+
+void PlatformPSP::renderHealth(uint8_t amount, uint16_t x, uint16_t y)
+{
+    drawRectangle(health, 0xffffffff, 0, amount * 51, x, y, 48, 51);
+}
+
+void PlatformPSP::renderFace(uint8_t face, uint16_t x, uint16_t y)
+{
+    drawRectangle(faces, 0xffffffff, 0, face * 24, x, y, 16, 24);
 }
 
 void PlatformPSP::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
