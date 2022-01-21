@@ -6,7 +6,7 @@ CXX=psp-g++
 BIN2ELF=binary2elf
 
 DEBUGFLAGS =	-g
-CXXFLAGS =	$(DEBUGFLAGS) -Wall -fmessage-length=0 -Iinclude -I$(INCDIR) -D_PSP -DPLATFORM_SCREEN_WIDTH=480 -DPLATFORM_SCREEN_HEIGHT=272 -DPLATFORM_MAP_WINDOW_TILES_WIDTH=18 -DPLATFORM_MAP_WINDOW_TILES_HEIGHT=10 -DPLATFORM_INTRO_OPTIONS=3 -DPLATFORM_MODULE_BASED_AUDIO -DPLATFORM_TILE_BASED_RENDERING -DPLATFORM_IMAGE_BASED_TILES -DPLATFORM_IMAGE_SUPPORT -DPLATFORM_SPRITE_SUPPORT -DPLATFORM_COLOR_SUPPORT -DPLATFORM_CURSOR_SUPPORT
+CXXFLAGS =	$(DEBUGFLAGS) -Wall -fmessage-length=0 -Iinclude -I$(INCDIR) -D_PSP -DPLATFORM_SCREEN_WIDTH=480 -DPLATFORM_SCREEN_HEIGHT=272 -DPLATFORM_MAP_WINDOW_TILES_WIDTH=18 -DPLATFORM_MAP_WINDOW_TILES_HEIGHT=10 -DPLATFORM_INTRO_OPTIONS=3 -DPLATFORM_MODULE_BASED_AUDIO -DPLATFORM_TILE_BASED_RENDERING -DPLATFORM_IMAGE_BASED_TILES -DPLATFORM_IMAGE_SUPPORT -DPLATFORM_SPRITE_SUPPORT -DPLATFORM_COLOR_SUPPORT -DPLATFORM_CURSOR_SUPPORT -DOPTIMIZED_MAP_RENDERING
 LDFLAGS =	-L$(LIBDIR) -Wl,-Map,petrobots.map
 SOURCES =	petrobots.o Platform.o PlatformPSP.o PT2.3A_replay_cia.o
 
@@ -18,7 +18,7 @@ LOADLIBES +=$(LIBDIR)/utility_stub.a
 LOADLIBES +=$(LIBDIR)/libdeflt.a
 LOADLIBES +=$(LIBDIR)/impose_stub.a
 
-OBJECTS=$(SOURCES:.cpp=.o) Tileset.o C64Font.o Tiles.o Sprites.o IntroScreen.o GameScreen.o GameOver.o LevelA.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
+OBJECTS=$(SOURCES:.cpp=.o) Tileset.o C64Font.o Tiles.o AnimTiles.o Sprites.o IntroScreen.o GameScreen.o GameOver.o LevelA.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
 
 EXECUTABLE=petrobots
 
@@ -38,6 +38,8 @@ C64Font.o: c64font.psp
 	$(BIN2ELF) --PSP -s font -e fontEnd c64font.psp C64Font.o
 Tiles.o: tiles.psp
 	$(BIN2ELF) --PSP -s tiles -e tilesEnd tiles.psp Tiles.o
+AnimTiles.o: animtiles.psp
+	$(BIN2ELF) --PSP -s animTiles -e animTilesEnd animtiles.psp AnimTiles.o
 Sprites.o: sprites.psp
 	$(BIN2ELF) --PSP -s sprites -e spritesEnd sprites.psp Sprites.o
 IntroScreen.o: introscreen.psp

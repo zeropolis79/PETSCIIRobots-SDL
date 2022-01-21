@@ -48,6 +48,7 @@ private:
     void undeltaSamples(uint8_t* module, uint32_t moduleSize);
     void setSampleData(uint8_t* module);
     void renderSprite(uint8_t sprite, uint16_t x, uint16_t y);
+    void renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y);
 
     void (*interrupt)(void);
     int framesPerSecond_;
