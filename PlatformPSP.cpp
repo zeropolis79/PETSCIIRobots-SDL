@@ -259,8 +259,8 @@ PlatformPSP::PlatformPSP() :
     sceGuTexScale(1.0f, 1.0f);
     sceGuTexOffset(0.0f, 0.0f);
     sceGuTexWrap(SCEGU_CLAMP, SCEGU_CLAMP);
-    sceGuTexMapMode(SCEGU_UV_MAP, 0, 1);
     sceGuTexFilter(SCEGU_NEAREST, SCEGU_NEAREST);
+    sceGuTexMode(SCEGU_PF8888, 0, 0, SCEGU_TEXBUF_NORMAL);
     sceGuModelColor(0x00000000, 0xffffffff, 0xffffffff, 0xffffffff);
 
     sceGuFrontFace(SCEGU_CW);
@@ -375,8 +375,7 @@ SceInt32 PlatformPSP::audioThread(SceSize args, SceVoid *argb)
 void PlatformPSP::drawRectangle(uint32_t* texture, uint32_t color, uint16_t tx, uint16_t ty, uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 {
     sceGuEnable(SCEGU_TEXTURE);
-    sceGuTexImage(0, texture[2], texture[3], texture[2], texture + 5);
-    sceGuTexMode(SCEGU_PF8888, 0, 0, SCEGU_TEXBUF_NORMAL);
+    sceGuTexImage(0, texture[2], texture[3], texture[2], texture + 4);
     sceGuColor(color);
 
     int oldCacheSize = cacheSize;
