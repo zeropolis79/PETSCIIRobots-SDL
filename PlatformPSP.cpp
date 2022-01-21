@@ -733,12 +733,12 @@ void PlatformPSP::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t hei
 
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value)
 {
-    drawRectangle(font, 0xff55bb77, (value >> 2) & 0x0010, (value << 3) & 0xfff8, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, (address / SCREEN_WIDTH_IN_CHARACTERS) << 3, 8, 8);
+    drawRectangle(font, 0xff55bb77, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, (address / SCREEN_WIDTH_IN_CHARACTERS) << 3, 8, 8);
 }
 
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
-    drawRectangle(font, color == 14 ? 0xffffffff : 0xff55bb77, (value >> 2) & 0x0010, (value << 3) & 0xfff8, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
+    drawRectangle(font, color == 14 ? 0xffffffff : 0xff55bb77, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
 }
 
 void PlatformPSP::loadModule(Module module)
