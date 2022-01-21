@@ -178,6 +178,44 @@ void debug(const char* message, ...)
     va_end(argList);
 }
 
+uint32_t paletteIntro[] = {
+    0xff000000,
+    0xff443300,
+    0xff775533,
+    0xff997755,
+    0xffccaa88,
+    0xff882222,
+    0xffcc7766,
+    0xffee8888,
+    0xffaa5577,
+    0xff3311aa,
+    0xff6644cc,
+    0xff4488ee,
+    0xff33bbee,
+    0xff88eeee,
+    0xffeeeeee,
+    0xff55bb77
+};
+
+uint32_t paletteGame[] = {
+    0xff000000,
+    0xffffffff,
+    0xff775544,
+    0xff998877,
+    0xffccbbaa,
+    0xff993300,
+    0xffbb6633,
+    0xffffaa00,
+    0xff006655,
+    0xff009977,
+    0xff00ddaa,
+    0xff004477,
+    0xff0077bb,
+    0xff00ccff,
+    0xff99aaee,
+    0xff0000ee
+};
+
 PlatformPSP::PlatformPSP() :
     interrupt(0),
     framesPerSecond_(60),
@@ -193,7 +231,8 @@ PlatformPSP::PlatformPSP() :
     displayList(new int[DISPLAYLIST_SIZE]),
     joystickStateToReturn(0),
     joystickState(0),
-    pendingState(0)
+    pendingState(0),
+    palette(paletteIntro)
 {
     // Increase thread priority
     sceKernelChangeThreadPriority(SCE_KERNEL_TH_SELF, 40);
@@ -599,6 +638,8 @@ void PlatformPSP::displayImage(Image image)
     this->clearRect(0, 0, PLATFORM_SCREEN_WIDTH - 1, PLATFORM_SCREEN_HEIGHT - 1);
 
     if (image == ImageGame) {
+        palette = paletteGame;
+
         drawRectangle(images[image], 0xffffffff, 320 - 56, 0, PLATFORM_SCREEN_WIDTH - 56, 0, 56, 128);
 
         for (int y = 128; y < (PLATFORM_SCREEN_HEIGHT - 32); y += 40) {
@@ -613,6 +654,8 @@ void PlatformPSP::displayImage(Image image)
             drawRectangle(images[image], 0xffffffff, 104, 168, x, PLATFORM_SCREEN_HEIGHT - 32, MIN(160, PLATFORM_SCREEN_WIDTH - 56 - x), 8);
         }
     } else {
+        palette = paletteIntro;
+
         drawRectangle(images[image], 0xffffffff, 0, 0, 0, 0, images[image][0], images[image][1]);
 
         if (image == ImageIntro) {
@@ -738,7 +781,7 @@ void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value)
 
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
-    drawRectangle(font, color == 14 ? 0xffffffff : 0xff55bb77, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
+    drawRectangle(font, palette[color], (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
 }
 
 void PlatformPSP::loadModule(Module module)
