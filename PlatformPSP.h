@@ -32,6 +32,8 @@ public:
     virtual void renderKey(uint8_t key, uint16_t x, uint16_t y);
     virtual void renderHealth(uint8_t health, uint16_t x, uint16_t y);
     virtual void renderFace(uint8_t face, uint16_t x, uint16_t y);
+    virtual void showCursor(uint16_t x, uint16_t y);
+    virtual void hideCursor();
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     virtual void writeToScreenMemory(address_t address, uint8_t value);
@@ -70,6 +72,9 @@ private:
     uint16_t joystickStateToReturn;
     uint16_t joystickState;
     uint32_t* palette;
+    uint32_t* cursor;
+    int16_t cursorX;
+    int16_t cursorY;
 };
 
 #endif

@@ -233,7 +233,10 @@ PlatformPSP::PlatformPSP() :
     displayList(new int[DISPLAYLIST_SIZE]),
     joystickStateToReturn(0),
     joystickState(0),
-    palette(paletteIntro)
+    palette(paletteIntro),
+    cursor(new uint32_t[32 * 28]),
+    cursorX(-1),
+    cursorY(-1)
 {
     // Increase thread priority
     sceKernelChangeThreadPriority(SCE_KERNEL_TH_SELF, 40);
@@ -324,6 +327,7 @@ PlatformPSP::~PlatformPSP()
 
     sceWaveExit();
 
+    delete[] cursor;
     delete[] displayList;
     delete[] audioOutputBuffer;
     delete[] audioBuffer;
@@ -399,26 +403,43 @@ SceInt32 PlatformPSP::audioThread(SceSize args, SceVoid *argb)
 
 void PlatformPSP::drawRectangle(uint32_t* texture, uint32_t color, uint16_t tx, uint16_t ty, uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 {
-    sceGuEnable(SCEGU_TEXTURE);
-    sceGuTexImage(0, texture[2], texture[3], texture[2], texture + 4);
+    if (texture) {
+        sceGuEnable(SCEGU_TEXTURE);
+        sceGuTexImage(0, texture[2], texture[3], texture[2], texture + 4);
+    } else {
+        sceGuDisable(SCEGU_TEXTURE);
+    }
     sceGuColor(color);
 
     int oldCacheSize = cacheSize;
     uint16_t* data = (uint16_t*)(cache + cacheSize);
-    data[0 * 5 + 0] = tx;
-    data[0 * 5 + 1] = ty;
-    data[0 * 5 + 2] = x;
-    data[0 * 5 + 3] = y;
-    data[0 * 5 + 4] = 0;
-    data[1 * 5 + 0] = tx + width;
-    data[1 * 5 + 1] = ty + height;
-    data[1 * 5 + 2] = x + width;
-    data[1 * 5 + 3] = y + height;
-    data[1 * 5 + 4] = 0;
-    cacheSize += 2 * 5 * sizeof(uint16_t);
+    if (texture) {
+        data[0 * 5 + 0] = tx;
+        data[0 * 5 + 1] = ty;
+        data[0 * 5 + 2] = x;
+        data[0 * 5 + 3] = y;
+        data[0 * 5 + 4] = 0;
+        data[1 * 5 + 0] = tx + width;
+        data[1 * 5 + 1] = ty + height;
+        data[1 * 5 + 2] = x + width;
+        data[1 * 5 + 3] = y + height;
+        data[1 * 5 + 4] = 0;
+        cacheSize += 2 * 5 * sizeof(uint16_t);
 
-    sceKernelDcacheWritebackRange(data, cacheSize - oldCacheSize);
-    sceGuDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_TEXTURE_USHORT | SCEGU_VERTEX_SHORT | SCEGU_THROUGH, 2, 0, data);
+        sceKernelDcacheWritebackRange(data, cacheSize - oldCacheSize);
+        sceGuDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_TEXTURE_USHORT | SCEGU_VERTEX_SHORT | SCEGU_THROUGH, 2, 0, data);
+    } else {
+        data[0 * 3 + 0] = x;
+        data[0 * 3 + 1] = y;
+        data[0 * 3 + 2] = 0;
+        data[1 * 3 + 0] = x + width;
+        data[1 * 3 + 1] = y + height;
+        data[1 * 3 + 2] = 0;
+        cacheSize += 2 * 3 * sizeof(uint16_t);
+
+        sceKernelDcacheWritebackRange(data, cacheSize - oldCacheSize);
+        sceGuDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_VERTEX_SHORT | SCEGU_THROUGH, 2, 0, data);
+    }
 }
 
 void PlatformPSP::undeltaSamples(uint8_t* module, uint32_t moduleSize)
@@ -722,30 +743,32 @@ void PlatformPSP::renderFace(uint8_t face, uint16_t x, uint16_t y)
     drawRectangle(faces, 0xffffffff, 0, face * 24, x, y, 16, 24);
 }
 
+void PlatformPSP::showCursor(uint16_t x, uint16_t y)
+{
+    if (cursorX != -1) {
+        sceGuCopyImage(SCEGU_PF8888, 0, 0, 28, 28, 32, cursor, cursorX, cursorY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_0);
+    }
+    cursorX = x * 24 - 2;
+    cursorY = y * 24 -2;
+    sceGuCopyImage(SCEGU_PF8888, cursorX, cursorY, 28, 28, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_0, 0, 0, 32, cursor);
+}
+
+void PlatformPSP::hideCursor()
+{
+    if (cursorX != -1) {
+        sceGuCopyImage(SCEGU_PF8888, 0, 0, 28, 28, 32, cursor, cursorX, cursorY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_0);
+        cursorX = -1;
+    }
+}
+
 void PlatformPSP::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
 {
-    sceGuEnable(SCEGU_TEXTURE);
     sceGuCopyImage(SCEGU_PF8888, sourceX, sourceY, width, height, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_0, destinationX, destinationY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_0);
-    sceGuFlush();
 }
 
 void PlatformPSP::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 {
-    sceGuDisable(SCEGU_TEXTURE);
-    sceGuColor(0xff000000);
-
-    int oldCacheSize = cacheSize;
-    uint16_t* data = (uint16_t*)(cache + cacheSize);
-    data[0 * 3 + 0] = x;
-    data[0 * 3 + 1] = y;
-    data[0 * 3 + 2] = 0;
-    data[1 * 3 + 0] = data[0] + width;
-    data[1 * 3 + 1] = data[1] + height;
-    data[1 * 3 + 2] = 0;
-    cacheSize += 2 * 3 * sizeof(uint16_t);
-
-    sceKernelDcacheWritebackRange(data, cacheSize - oldCacheSize);
-    sceGuDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_VERTEX_SHORT | SCEGU_THROUGH, 2, 0, data);
+    drawRectangle(0, 0xff000000, 0, 0, x, y, width, height);
 }
 
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value)
@@ -837,6 +860,13 @@ void PlatformPSP::stopSample()
 
 void PlatformPSP::renderFrame(bool waitForNextFrame)
 {
+    if (cursorX != -1) {
+        drawRectangle(0, 0xffffffff, 0, 0, cursorX, cursorY, 28, 2);
+        drawRectangle(0, 0xffffffff, 0, 0, cursorX, cursorY + 2, 2, 24);
+        drawRectangle(0, 0xffffffff, 0, 0, cursorX + 26, cursorY + 2, 2, 24);
+        drawRectangle(0, 0xffffffff, 0, 0, cursorX, cursorY + 26, 28, 2);
+    }
+
     sceGuFinish();
     sceGuSync(SCEGU_SYNC_FINISH, SCEGU_SYNC_WAIT);
 
