@@ -5,6 +5,7 @@
 #include <cstdarg>
 #include <errno.h>
 #include <fatms.h>
+#include <geman.h>
 #include <libgu.h>
 #include <libwave.h>
 #include <displaysvc.h>
@@ -217,6 +218,7 @@ uint32_t paletteGame[] = {
 };
 
 PlatformPSP::PlatformPSP() :
+    eDRAMAddress((uint8_t*)sceGeEdramGetAddr()),
     interrupt(0),
     framesPerSecond_(60),
     moduleData(new uint8_t[LARGEST_MODULE_SIZE]),
@@ -723,7 +725,7 @@ void PlatformPSP::renderFace(uint8_t face, uint16_t x, uint16_t y)
 void PlatformPSP::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
 {
     sceGuEnable(SCEGU_TEXTURE);
-//    sceGuCopyImage(SCEGU_PF8888, sourceX, sourceY, width, height, SCEGU_VRAM_WIDTH, SCEGU_VRAM_BP32_0, destinationX, destinationY, SCEGU_VRAM_WIDTH, SCEGU_VRAM_BP32_0);
+    sceGuCopyImage(SCEGU_PF8888, sourceX, sourceY, width, height, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_0, destinationX, destinationY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_0);
     sceGuFlush();
 }
 
