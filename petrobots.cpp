@@ -579,10 +579,12 @@ void MAIN_GAME_LOOP()
                         TOGGLE_MUSIC();
                         CLEAR_KEY_BUFFER();
                     }
+#ifdef GAMEPAD_CD32
                     if (B == Platform::JoystickPlay) {
                         USE_ITEM();
                         KEYTIMER = 15;
                     }
+#endif
                 } else {
                     if (B & Platform::JoystickGreen) {
                         FIRE_LEFT();
@@ -608,6 +610,12 @@ void MAIN_GAME_LOOP()
                         MOVE_OBJECT();
                         KEYTIMER = 15;
                     }
+#ifndef GAMEPAD_CD32
+                    if (B == Platform::JoystickExtra) {
+                        USE_ITEM();
+                        KEYTIMER = 15;
+                    }
+#endif
                 }
             } else {
                 if (B & Platform::JoystickBlue) {
@@ -2764,7 +2772,11 @@ void CYCLE_CONTROLS()
 
 char CONTROLTEXT[] = "standard  "
                      "custom    "
+#ifdef GAMEPAD_CD32
                      "cd32 pad  ";
+#else
+                     "snes pad  ";
+#endif
 uint8_t CONTROLSTART[] = { 0, 10, 20 };
 
 void CYCLE_MAP()

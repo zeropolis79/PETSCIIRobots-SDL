@@ -231,7 +231,6 @@ PlatformPSP::PlatformPSP() :
     displayList(new int[DISPLAYLIST_SIZE]),
     joystickStateToReturn(0),
     joystickState(0),
-    pendingState(0),
     palette(paletteIntro)
 {
     // Increase thread priority
@@ -573,23 +572,16 @@ uint16_t PlatformPSP::readJoystick(bool gamepad)
             state |= JoystickForward;
         }
         if (ct.Buttons & SCE_CTRL_START) {
+            state |= JoystickExtra;
+        }
+        if (ct.Buttons & SCE_CTRL_SELECT) {
             state |= JoystickPlay;
         }
     }
 
     if (joystickState != state) {
-        if (joystickState == 0) {
-            pendingState = state == JoystickPlay ? JoystickPlay : 0;
-        } else if (state != 0) {
-            pendingState &= state == JoystickPlay ? JoystickPlay : 0;
-        }
-
-        // Return Play button press only when released
-        if (state != 0) {
-            joystickStateToReturn = state != (gamepad ? JoystickPlay : JoystickBlue) ? state : 0;
-        } else {
-            joystickStateToReturn = pendingState ? pendingState : state;
-        }
+        // Don't return Play button press
+        joystickStateToReturn = state != JoystickPlay ? state : 0;
         joystickState = state;
     }
 

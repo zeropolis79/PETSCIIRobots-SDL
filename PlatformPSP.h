@@ -68,7 +68,6 @@ private:
     int* displayList;
     uint16_t joystickStateToReturn;
     uint16_t joystickState;
-    uint16_t pendingState;
     uint32_t* palette;
 };
 

@@ -71,7 +71,8 @@ public:
         JoystickBitYellow,
         JoystickBitPlay,
         JoystickBitReverse,
-        JoystickBitForward
+        JoystickBitForward,
+        JoystickBitExtra
     };
 
     enum JoystickMask {
@@ -85,7 +86,8 @@ public:
         JoystickYellow = (1 << JoystickBitYellow),
         JoystickPlay = (1 << JoystickBitPlay),
         JoystickReverse = (1 << JoystickBitReverse),
-        JoystickForward = (1 << JoystickBitForward)
+        JoystickForward = (1 << JoystickBitForward),
+        JoystickExtra = (1 << JoystickBitExtra)
     };
 
     virtual uint8_t* standardControls() const = 0;
