@@ -236,26 +236,6 @@ PlatformPSP::PlatformPSP() :
     // Increase thread priority
     sceKernelChangeThreadPriority(SCE_KERNEL_TH_SELF, 40);
 
-    // Disable all exceptions
-    unsigned int FCR31 = sceFpuGetFCR31();
-    FCR31 &= ~(SCE_ALLEGREX_FCR31_ENABLES_V |
-                       SCE_ALLEGREX_FCR31_ENABLES_Z |
-                       SCE_ALLEGREX_FCR31_ENABLES_O |
-                       SCE_ALLEGREX_FCR31_ENABLES_U |
-                       SCE_ALLEGREX_FCR31_ENABLES_I |
-                       SCE_ALLEGREX_FCR31_CAUSE_E |
-                       SCE_ALLEGREX_FCR31_CAUSE_V |
-                       SCE_ALLEGREX_FCR31_CAUSE_Z |
-                       SCE_ALLEGREX_FCR31_CAUSE_O |
-                       SCE_ALLEGREX_FCR31_CAUSE_U |
-                       SCE_ALLEGREX_FCR31_CAUSE_I |
-                       SCE_ALLEGREX_FCR31_FLAGS_V |
-                       SCE_ALLEGREX_FCR31_FLAGS_Z |
-                       SCE_ALLEGREX_FCR31_FLAGS_O |
-                       SCE_ALLEGREX_FCR31_FLAGS_U |
-                       SCE_ALLEGREX_FCR31_FLAGS_I);
-    sceFpuSetFCR31(FCR31);
-
     // Set the impose language
     sceImposeSetLanguageMode(SCE_UTILITY_LANG_ENGLISH, SCE_UTILITY_CTRL_ASSIGN_CROSS_IS_ENTER);
 
