@@ -10,7 +10,7 @@ CXXFLAGS =	$(DEBUGFLAGS) -Wall -fmessage-length=0 -Iinclude -I$(INCDIR) -D_PSP -
 LDFLAGS =	-L$(LIBDIR) -Wl,-Map,petrobots.map
 SOURCES =	petrobots.o Platform.o PlatformPSP.o PT2.3A_replay_cia.o
 
-LIBS =		-lgu -lm -lwave
+LIBS =		-lgu -lgum -lm -lwave
 LOADLIBES =	$(LIBDIR)/ctrl_stub.a
 LOADLIBES +=$(LIBDIR)/display_stub.a
 LOADLIBES +=$(LIBDIR)/ge_user_stub.a

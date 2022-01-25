@@ -7,6 +7,7 @@
 #include <fatms.h>
 #include <geman.h>
 #include <libgu.h>
+#include <libgum.h>
 #include <libwave.h>
 #include <displaysvc.h>
 #include <ctrlsvc.h>
@@ -27,6 +28,7 @@ static const SceChar8 *SOUND_THREAD_NAME = "Sound";
 #define DISPLAYLIST_SIZE (1179648/sizeof(int))
 #define CACHE_SIZE 131072
 
+static ScePspFMatrix4 matrix_stack[8 + 8 + 32 + 0];
 static char cache[CACHE_SIZE];
 static int cacheSize = 0;
 
@@ -300,6 +302,18 @@ PlatformPSP::PlatformPSP() :
     sceGuBlendFunc(SCEGU_ADD, SCEGU_SRC_ALPHA, SCEGU_ONE_MINUS_SRC_ALPHA, 0, 0);
     sceGuTexFunc(SCEGU_TEX_MODULATE, SCEGU_RGBA);
 
+    sceGumSetMatrixStack(matrix_stack, 8, 8, 32, 0);
+    sceGumMatrixMode(SCEGU_MATRIX_WORLD);
+    sceGumLoadIdentity();
+    sceGumMatrixMode(SCEGU_MATRIX_VIEW);
+    sceGumLoadIdentity();
+    sceGumMatrixMode(SCEGU_MATRIX_TEXTURE);
+    sceGumLoadIdentity();
+    sceGumMatrixMode(SCEGU_MATRIX_PROJECTION);
+    sceGumLoadIdentity();
+    sceGumOrtho(0, SCEGU_SCR_WIDTH, 0, SCEGU_SCR_HEIGHT, -1.0f, 1.0f);
+    sceGumMatrixMode(SCEGU_MATRIX_WORLD);
+
     sceGuDisplay(SCEGU_DISPLAY_ON);
 
     sceGuFinish();
@@ -412,33 +426,33 @@ void PlatformPSP::drawRectangle(uint32_t* texture, uint32_t color, uint16_t tx, 
     sceGuColor(color);
 
     int oldCacheSize = cacheSize;
-    uint16_t* data = (uint16_t*)(cache + cacheSize);
+    float* data = (float*)(cache + cacheSize);
     if (texture) {
-        data[0 * 5 + 0] = tx;
-        data[0 * 5 + 1] = ty;
+        data[0 * 5 + 0] = tx / (float)texture[2];
+        data[0 * 5 + 1] = ty / (float)texture[3];
         data[0 * 5 + 2] = x;
-        data[0 * 5 + 3] = y;
+        data[0 * 5 + 3] = SCEGU_SCR_HEIGHT - y;
         data[0 * 5 + 4] = 0;
-        data[1 * 5 + 0] = tx + width;
-        data[1 * 5 + 1] = ty + height;
+        data[1 * 5 + 0] = (tx + width) / (float)texture[2];
+        data[1 * 5 + 1] = (ty + height) / (float)texture[3];
         data[1 * 5 + 2] = x + width;
-        data[1 * 5 + 3] = y + height;
+        data[1 * 5 + 3] = SCEGU_SCR_HEIGHT - (y + height);
         data[1 * 5 + 4] = 0;
-        cacheSize += 2 * 5 * sizeof(uint16_t);
+        cacheSize += 2 * 5 * sizeof(float);
 
         sceKernelDcacheWritebackRange(data, cacheSize - oldCacheSize);
-        sceGuDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_TEXTURE_USHORT | SCEGU_VERTEX_SHORT | SCEGU_THROUGH, 2, 0, data);
+        sceGumDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_TEXTURE_FLOAT | SCEGU_VERTEX_FLOAT, 2, 0, data);
     } else {
         data[0 * 3 + 0] = x;
-        data[0 * 3 + 1] = y;
+        data[0 * 3 + 1] = SCEGU_SCR_HEIGHT - y;
         data[0 * 3 + 2] = 0;
         data[1 * 3 + 0] = x + width;
-        data[1 * 3 + 1] = y + height;
+        data[1 * 3 + 1] = SCEGU_SCR_HEIGHT - (y + height);
         data[1 * 3 + 2] = 0;
-        cacheSize += 2 * 3 * sizeof(uint16_t);
+        cacheSize += 2 * 3 * sizeof(float);
 
         sceKernelDcacheWritebackRange(data, cacheSize - oldCacheSize);
-        sceGuDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_VERTEX_SHORT | SCEGU_THROUGH, 2, 0, data);
+        sceGumDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_VERTEX_FLOAT, 2, 0, data);
     }
 }
 
