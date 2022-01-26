@@ -324,8 +324,8 @@ PlatformPSP::PlatformPSP() :
     sceGuViewport(2048, 2048, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT);
     sceGuDepthRange(100, 65535);
 
-    sceGuScissor(0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32);
-    sceGuDisable(SCEGU_SCISSOR_TEST);
+    sceGuScissor(0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT);
+    sceGuEnable(SCEGU_SCISSOR_TEST);
     sceGuDisable(SCEGU_CLIP_PLANE);
 
     sceGuDepthFunc(SCEGU_LEQUAL);
@@ -711,9 +711,11 @@ uint8_t* PlatformPSP::loadTileset(const char* filename)
 
 void PlatformPSP::displayImage(Image image)
 {
-	sceGumLoadIdentity();
+    sceGumLoadIdentity();
     scaleX = 1.0f;
     scaleY = 1.0f;
+
+    sceGuScissor(0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT);
 
     this->clearRect(0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT);
 
@@ -733,6 +735,8 @@ void PlatformPSP::displayImage(Image image)
         for (int x = 104; x < (PLATFORM_SCREEN_WIDTH - 56); x += 160) {
             drawRectangle(0xffffffff, images[image], 104, 168, x, PLATFORM_SCREEN_HEIGHT - 32, MIN(160, PLATFORM_SCREEN_WIDTH - 56 - x), 8);
         }
+
+        sceGuScissor(0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32);
     } else {
         palette = paletteIntro;
 
@@ -759,8 +763,6 @@ void PlatformPSP::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
 
 void PlatformPSP::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent)
 {
-    sceGuEnable(SCEGU_SCISSOR_TEST);
-
     if (transparent) {
         if (tileSpriteMap[tile] >= 0) {
             renderSprite(tileSpriteMap[tile] + variant, x, y);
@@ -774,14 +776,10 @@ void PlatformPSP::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t varia
     }
 
     drawRectangle(0xffffffff, tiles, (tile & 15) * 24, (tile >> 4) * 24, x, y, 24, 24);
-
-    sceGuDisable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t backgroundVariant, uint8_t foregroundVariant)
 {
-    sceGuEnable(SCEGU_SCISSOR_TEST);
-
     if (animTileMap[backgroundTile] >= 0) {
         backgroundTile = animTileMap[backgroundTile] + backgroundVariant;
         drawRectangle(0xffffffff, animTiles, (backgroundTile >> 4) * 24, (backgroundTile & 15) * 24, x, y, 24, 24);
@@ -795,41 +793,43 @@ void PlatformPSP::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, ui
     } else {
         drawRectangle(0xffffffff, tiles, (foregroundTile & 15) * 24, (foregroundTile >> 4) * 24, x, y, 24, 24);
     }
-
-    sceGuDisable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::renderSprite(uint8_t sprite, uint16_t x, uint16_t y)
 {
-    sceGuEnable(SCEGU_SCISSOR_TEST);
-
     drawRectangle(0xffffffff, sprites, (sprite >> 4) * 24, (sprite & 15) * 24, x, y, 24, 24);
-
-    sceGuDisable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y)
 {
-    sceGuEnable(SCEGU_SCISSOR_TEST);
-
     drawRectangle(0xffffffff, animTiles, (animTile >> 4) * 24, (animTile & 15) * 24, x, y, 24, 24);
-
-    sceGuDisable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::renderItem(uint8_t item, uint16_t x, uint16_t y)
 {
+    sceGuDisable(SCEGU_SCISSOR_TEST);
+
     drawRectangle(0xffffffff, items, 0, item * 21, x, y, 48, 21);
+
+    sceGuEnable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::renderKey(uint8_t key, uint16_t x, uint16_t y)
 {
+    sceGuDisable(SCEGU_SCISSOR_TEST);
+
     drawRectangle(0xffffffff, keys, 0, key * 14, x, y, 16, 14);
+
+    sceGuEnable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::renderHealth(uint8_t amount, uint16_t x, uint16_t y)
 {
+    sceGuDisable(SCEGU_SCISSOR_TEST);
+
     drawRectangle(0xffffffff, health, 0, amount * 51, x, y, 48, 51);
+
+    sceGuEnable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::renderFace(uint8_t face, uint16_t x, uint16_t y)
@@ -857,12 +857,20 @@ void PlatformPSP::hideCursor()
 
 void PlatformPSP::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
 {
+    sceGuDisable(SCEGU_SCISSOR_TEST);
+
     sceGuCopyImage(SCEGU_PF8888, sourceX, sourceY, width, height, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, destinationX, destinationY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2);
+
+    sceGuEnable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 {
+    sceGuDisable(SCEGU_SCISSOR_TEST);
+
     drawRectangle(0xff000000, 0, 0, 0, x, y, width, height);
+
+    sceGuEnable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::startFadeScreen(uint16_t color, uint16_t intensity)
@@ -897,6 +905,12 @@ void PlatformPSP::stopFadeScreen()
 
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value)
 {
+    sceGuDisable(SCEGU_SCISSOR_TEST);
+
+    if (scaleX == 1.0f && (address % SCREEN_WIDTH_IN_CHARACTERS) == (SCREEN_WIDTH_IN_CHARACTERS - 7)) {
+        return;
+    }
+
     if (value > 127) {
         value &= 127;
         drawRectangle(0xff55bb77, 0, 0, 0, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, (address / SCREEN_WIDTH_IN_CHARACTERS) << 3, 8, 8);
@@ -906,10 +920,18 @@ void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value)
         drawRectangle(0xff55bb77, font, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, (address / SCREEN_WIDTH_IN_CHARACTERS) << 3, 8, 8);
         sceGuEnable(SCEGU_BLEND);
     }
+
+    sceGuEnable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
+    sceGuDisable(SCEGU_SCISSOR_TEST);
+
+    if (scaleX == 1.0f && (address % SCREEN_WIDTH_IN_CHARACTERS) == (SCREEN_WIDTH_IN_CHARACTERS - 7)) {
+        return;
+    }
+
     if (value > 127) {
         value &= 127;
         drawRectangle(palette[color], 0, 0, 0, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
@@ -919,6 +941,8 @@ void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value, uint8_t 
         drawRectangle(palette[color], font, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
         sceGuEnable(SCEGU_BLEND);
     }
+
+    sceGuEnable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::loadModule(Module module)
@@ -1013,4 +1037,5 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
 
     sceGuStart(SCEGU_IMMEDIATE, displayList, DISPLAYLIST_SIZE * sizeof(int));
     sceGuDrawBuffer(SCEGU_PF8888, SCEGU_VRAM_BP32_2, SCEGU_VRAM_WIDTH);
+    sceGuEnable(SCEGU_SCISSOR_TEST);
 }

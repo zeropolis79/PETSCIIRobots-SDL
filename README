@@ -105,5 +105,4 @@ psp_boot_packager c param.sfo "petrobots.prx" eboot.pbp
 PSP TODO
 --------
 - make ISO with icon
-- clip when rendering cinema tile
 - implement live map
