@@ -94,3 +94,20 @@ In order to fit the game on one disk, assets had to be compressed. A hand writte
 When the game was mostly complete otherwise, it was time to implement the live map. While simple in principle, Amiga does not make the implementation trivial due to its planar graphics. Instead of modifying a single byte to modify the color of a single pixel, one bit in four different bytes needs to be modified, making single pixel modifications very slow. Various chunky to planar implementations were looked into, but ultimately a custom 68000 assembler chunky to planar routine was written for drawing the entire map and an another custom implementation for manipulating the pixels relevant for each unit. The end result was a map performant enough to be usable also on 68000 systems.
 
 Last but not least joystick support was implemented. Most Amiga games only support a single button Atari style joystick. However, there are Amiga games that do support the 7 button Amiga CD32 gamepad either natively or via patches, so it made sense to add support for such a pad as well. In this mode all the game commands are available through the gamepad. Getting this code right required digging up some obscure information from forum discussions and such. Atari style joysticks can also have two buttons, so support for the second button was added to the joystick mode. This way most of the game commands are available using such a joystick as well. While not optimal, at least the game is now fully playable using a traditional joystick.
+
+PSP version
+-----------
+make -f Makefile.PSP
+mksfo petrobots param.sfo
+psp-prx-strip -v "petrobots.prx"
+psp_boot_packager c param.sfo "petrobots.prx" eboot.pbp
+
+PSP TODO
+--------
+- clear first two words of sound FX samples to avoid beeping loop
+- play sound FX samples on at least 2 discrete channels
+- center player on screen when choosing elevator floor
+- implement reverse text rendering
+- make ISO with icon
+- clip when rendering cinema tile
+- implement live map
