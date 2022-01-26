@@ -275,6 +275,23 @@ PlatformPSP::PlatformPSP() :
     fadeIntensity(0),
     swapBuffers(false)
 {
+    // Clear the first two bytes of effect samples to enable the 2-byte no-loop loop
+    *((uint16_t*)soundExplosion) = 0;
+    *((uint16_t*)soundMedkit) = 0;
+    *((uint16_t*)soundEMP) = 0;
+    *((uint16_t*)soundMagnet) = 0;
+    *((uint16_t*)soundShock) = 0;
+    *((uint16_t*)soundMove) = 0;
+    *((uint16_t*)soundPlasma) = 0;
+    *((uint16_t*)soundPistol) = 0;
+    *((uint16_t*)soundItemFound) = 0;
+    *((uint16_t*)soundError) = 0;
+    *((uint16_t*)soundCycleWeapon) = 0;
+    *((uint16_t*)soundCycleItem) = 0;
+    *((uint16_t*)soundDoor) = 0;
+    *((uint16_t*)soundMenuBeep) = 0;
+    *((uint16_t*)soundShortBeep) = 0;
+
     // Increase thread priority
     sceKernelChangeThreadPriority(SCE_KERNEL_TH_SELF, 40);
 
