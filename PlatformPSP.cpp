@@ -238,7 +238,9 @@ PlatformPSP::PlatformPSP() :
     palette(paletteIntro),
     cursor(new uint32_t[32 * 28]),
     cursorX(-1),
-    cursorY(-1)
+    cursorY(-1),
+    scaleX(1.0f),
+    scaleY(1.0f)
 {
     // Increase thread priority
     sceKernelChangeThreadPriority(SCE_KERNEL_TH_SELF, 40);
@@ -431,12 +433,12 @@ void PlatformPSP::drawRectangle(uint32_t* texture, uint32_t color, uint16_t tx, 
         data[0 * 5 + 0] = tx / (float)texture[2];
         data[0 * 5 + 1] = ty / (float)texture[3];
         data[0 * 5 + 2] = x;
-        data[0 * 5 + 3] = SCEGU_SCR_HEIGHT - y;
+        data[0 * 5 + 3] = (SCEGU_SCR_HEIGHT / scaleY) - y;
         data[0 * 5 + 4] = 0;
         data[1 * 5 + 0] = (tx + width) / (float)texture[2];
         data[1 * 5 + 1] = (ty + height) / (float)texture[3];
         data[1 * 5 + 2] = x + width;
-        data[1 * 5 + 3] = SCEGU_SCR_HEIGHT - (y + height);
+        data[1 * 5 + 3] = (SCEGU_SCR_HEIGHT / scaleY) - (y + height);
         data[1 * 5 + 4] = 0;
         cacheSize += 2 * 5 * sizeof(float);
 
@@ -444,10 +446,10 @@ void PlatformPSP::drawRectangle(uint32_t* texture, uint32_t color, uint16_t tx, 
         sceGumDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_TEXTURE_FLOAT | SCEGU_VERTEX_FLOAT, 2, 0, data);
     } else {
         data[0 * 3 + 0] = x;
-        data[0 * 3 + 1] = SCEGU_SCR_HEIGHT - y;
+        data[0 * 3 + 1] = (SCEGU_SCR_HEIGHT / scaleY) - y;
         data[0 * 3 + 2] = 0;
         data[1 * 3 + 0] = x + width;
-        data[1 * 3 + 1] = SCEGU_SCR_HEIGHT - (y + height);
+        data[1 * 3 + 1] = (SCEGU_SCR_HEIGHT / scaleY) - (y + height);
         data[1 * 3 + 2] = 0;
         cacheSize += 2 * 3 * sizeof(float);
 
@@ -644,10 +646,14 @@ uint8_t* PlatformPSP::loadTileset(const char* filename)
 
 void PlatformPSP::displayImage(Image image)
 {
+	sceGumLoadIdentity();
+
     this->clearRect(0, 0, PLATFORM_SCREEN_WIDTH - 1, PLATFORM_SCREEN_HEIGHT - 1);
 
     if (image == ImageGame) {
         palette = paletteGame;
+        scaleX = 1.0f;
+        scaleY = 1.0f;
 
         drawRectangle(images[image], 0xffffffff, 320 - 56, 0, PLATFORM_SCREEN_WIDTH - 56, 0, 56, 128);
 
@@ -664,6 +670,14 @@ void PlatformPSP::displayImage(Image image)
         }
     } else {
         palette = paletteIntro;
+        scaleX = SCEGU_SCR_WIDTH / 320.0f;
+        scaleY = SCEGU_SCR_HEIGHT / 200.0f;
+
+		ScePspFVector3 vec;
+		vec.x = scaleX;
+		vec.y = scaleY;
+		vec.z = 1.0f;
+		sceGumScale(&vec);
 
         drawRectangle(images[image], 0xffffffff, 0, 0, 0, 0, images[image][0], images[image][1]);
 

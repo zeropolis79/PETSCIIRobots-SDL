@@ -75,6 +75,8 @@ private:
     uint32_t* cursor;
     int16_t cursorX;
     int16_t cursorY;
+    float scaleX;
+    float scaleY;
 };
 
 #endif
