@@ -3149,10 +3149,17 @@ void ELEVATOR_FIND_XY()
     for (int X = 32; X != 48; X++) { // start of doors
         if (UNIT_TYPE[X] == 19) { // elevator
             if (UNIT_C[X] == ELEVATOR_CURRENT_FLOOR) {
+#if (MAP_WINDOW_SIZE == 77)
                 UNIT_LOC_X[0] = UNIT_LOC_X[X]; // player location = new elevator location
                 MAP_WINDOW_X = UNIT_LOC_X[X] - 5;
                 UNIT_LOC_Y[0] = UNIT_LOC_Y[X] - 1; // player location = new elevator location
                 MAP_WINDOW_Y = UNIT_LOC_Y[X] - 4;
+#else
+                UNIT_LOC_X[0] = UNIT_LOC_X[X]; // player location = new elevator location
+                MAP_WINDOW_X = MIN(MAX(UNIT_LOC_X[X] - PLATFORM_MAP_WINDOW_TILES_WIDTH / 2, 0), 128 - PLATFORM_MAP_WINDOW_TILES_WIDTH);
+                UNIT_LOC_Y[0] = UNIT_LOC_Y[X] - 1; // player location = new elevator location
+                MAP_WINDOW_Y = MIN(MAX(UNIT_LOC_Y[X] - PLATFORM_MAP_WINDOW_TILES_HEIGHT / 2 - 1, 0), 64 - PLATFORM_MAP_WINDOW_TILES_HEIGHT);
+#endif
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
                 if (LIVE_MAP_ON == 0) {
 #endif
