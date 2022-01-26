@@ -116,6 +116,10 @@ AudioChannel channel0(0);
 AudioChannel channel1(1);
 AudioChannel channel2(2);
 AudioChannel channel3(3);
+AudioChannel channel4(4);
+AudioChannel channel5(5);
+AudioChannel channel6(6);
+AudioChannel channel7(7);
 void processAudio(int16_t* outputBuffer, uint32_t outputLength, uint32_t sampleRate)
 {
     float timerAdvancePerSample = 709378.92 / (float)sampleRate;
@@ -130,6 +134,10 @@ void processAudio(int16_t* outputBuffer, uint32_t outputLength, uint32_t sampleR
         channel1.process(bufferPosition, samplesToProcess, sampleRate, true);
         channel2.process(bufferPosition, samplesToProcess, sampleRate, true);
         channel3.process(bufferPosition, samplesToProcess, sampleRate, true);
+        channel4.process(bufferPosition, samplesToProcess, sampleRate, true);
+        channel5.process(bufferPosition, samplesToProcess, sampleRate, true);
+        channel6.process(bufferPosition, samplesToProcess, sampleRate, true);
+        channel7.process(bufferPosition, samplesToProcess, sampleRate, true);
         bufferPosition += samplesToProcess;
 
         // Run the vertical blank interupt if required
@@ -194,10 +202,18 @@ void mt_end()
     channel1.volume = 0;
     channel2.volume = 0;
     channel3.volume = 0;
+    channel4.volume = 0;
+    channel5.volume = 0;
+    channel6.volume = 0;
+    channel7.volume = 0;
     channel0.dmacon = false;
     channel1.dmacon = false;
     channel2.dmacon = false;
     channel3.dmacon = false;
+    channel4.dmacon = false;
+    channel5.dmacon = false;
+    channel6.dmacon = false;
+    channel7.dmacon = false;
 }
 
 void mt_start()
@@ -252,36 +268,44 @@ void mt_NoNewAllChannels()
     mt_CheckEfx(channel1, mt_chan2temp);
     mt_CheckEfx(channel2, mt_chan3temp);
     mt_CheckEfx(channel3, mt_chan4temp);
+    mt_CheckEfx(channel4, mt_chan5temp);
+    mt_CheckEfx(channel5, mt_chan6temp);
+    mt_CheckEfx(channel6, mt_chan7temp);
+    mt_CheckEfx(channel7, mt_chan8temp);
 }
 
 void mt_GetNewNote()
 {
     int pattpo = 952;
     int patternOffset = (mt_SongDataPtr[pattpo + mt_SongPos] << 10) + mt_PatternPos;
-    if (mt_chan1input.note != 0) {
-        mt_PlayVoice(channel0, mt_chan1temp, (uint8_t*)&mt_chan1input, 0);
-        mt_chan1input.note = 0;
-    } else {
-        mt_PlayVoice(channel0, mt_chan1temp, mt_SongDataPtr + 1084, patternOffset);
+    mt_PlayVoice(channel0, mt_chan1temp, mt_SongDataPtr + 1084, patternOffset);
+    mt_PlayVoice(channel1, mt_chan2temp, mt_SongDataPtr + 1084, patternOffset + 4);
+    mt_PlayVoice(channel2, mt_chan3temp, mt_SongDataPtr + 1084, patternOffset + 8);
+    mt_PlayVoice(channel3, mt_chan4temp, mt_SongDataPtr + 1084, patternOffset + 12);
+    if (mt_chaninputs[0].note != 0) {
+        mt_PlayVoice(channel4, mt_chan5temp, (uint8_t*)&mt_chaninputs[0], 0);
+        mt_chaninputs[0].note = 0;
     }
-    if (mt_chan2input.note != 0) {
-        mt_PlayVoice(channel1, mt_chan2temp, (uint8_t*)&mt_chan2input, 0);
-        mt_chan2input.note = 0;
-    } else {
-        mt_PlayVoice(channel1, mt_chan2temp, mt_SongDataPtr + 1084, patternOffset + 4);
+    if (mt_chaninputs[1].note != 0) {
+        mt_PlayVoice(channel5, mt_chan6temp, (uint8_t*)&mt_chaninputs[1], 0);
+        mt_chaninputs[1].note = 0;
     }
-    if (mt_chan3input.note != 0) {
-        mt_PlayVoice(channel2, mt_chan3temp, (uint8_t*)&mt_chan3input, 0);
-        mt_chan3input.note = 0;
-    } else {
-        mt_PlayVoice(channel2, mt_chan3temp, mt_SongDataPtr + 1084, patternOffset + 8);
+    if (mt_chaninputs[2].note != 0) {
+        mt_PlayVoice(channel6, mt_chan7temp, (uint8_t*)&mt_chaninputs[2], 0);
+        mt_chaninputs[2].note = 0;
     }
-    if (mt_chan4input.note != 0) {
-        mt_PlayVoice(channel3, mt_chan4temp, (uint8_t*)&mt_chan4input, 0);
-        mt_chan4input.note = 0;
-    } else {
-        mt_PlayVoice(channel3, mt_chan4temp, mt_SongDataPtr + 1084, patternOffset + 12);
+    if (mt_chaninputs[3].note != 0) {
+        mt_PlayVoice(channel7, mt_chan8temp, (uint8_t*)&mt_chaninputs[3], 0);
+        mt_chaninputs[3].note = 0;
     }
+    channel7.data = mt_chan8temp.n_loopstart;
+    channel7.length = mt_chan8temp.n_replen;
+    channel6.data = mt_chan7temp.n_loopstart;
+    channel6.length = mt_chan7temp.n_replen;
+    channel5.data = mt_chan6temp.n_loopstart;
+    channel5.length = mt_chan6temp.n_replen;
+    channel4.data = mt_chan5temp.n_loopstart;
+    channel4.length = mt_chan5temp.n_replen;
     channel3.data = mt_chan4temp.n_loopstart;
     channel3.length = mt_chan4temp.n_replen;
     channel2.data = mt_chan3temp.n_loopstart;
@@ -1606,6 +1630,10 @@ ChanTemp mt_chan1temp;
 ChanTemp mt_chan2temp;
 ChanTemp mt_chan3temp;
 ChanTemp mt_chan4temp;
+ChanTemp mt_chan5temp;
+ChanTemp mt_chan6temp;
+ChanTemp mt_chan7temp;
+ChanTemp mt_chan8temp;
 
 int8_t* mt_SampleStarts[31] = {0};
 
@@ -1621,8 +1649,5 @@ uint8_t mt_PattDelTime = 0;
 uint8_t mt_PattDelTime2 = 0;
 bool mt_Enable = false;
 uint16_t mt_PatternPos = 0;
-ChanInput mt_chan1input;
-ChanInput mt_chan2input;
-ChanInput mt_chan3input;
-ChanInput mt_chan4input;
+ChanInput mt_chaninputs[4];
 /* End of File */

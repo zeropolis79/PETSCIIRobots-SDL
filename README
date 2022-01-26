@@ -104,7 +104,6 @@ psp_boot_packager c param.sfo "petrobots.prx" eboot.pbp
 
 PSP TODO
 --------
-- play sound FX samples on at least 2 discrete channels
 - center player on screen when choosing elevator floor
 - implement reverse text rendering
 - make ISO with icon

@@ -931,18 +931,10 @@ void PlatformPSP::pauseModule()
     mt_speed = 0;
     mt_music();
     mt_Enable = false;
-    if (mt_chan1temp.n_start < soundExplosion || mt_chan1temp.n_start >= soundExplosionEnd) {
-        channel0.volume = 0;
-    }
-    if (mt_chan2temp.n_start < soundExplosion || mt_chan2temp.n_start >= soundExplosionEnd) {
-        channel1.volume = 0;
-    }
-    if (mt_chan3temp.n_start < soundExplosion || mt_chan3temp.n_start >= soundExplosionEnd) {
-        channel2.volume = 0;
-    }
-    if (mt_chan4temp.n_start < soundExplosion || mt_chan4temp.n_start >= soundExplosionEnd) {
-        channel3.volume = 0;
-    }
+    channel0.volume = 0;
+    channel1.volume = 0;
+    channel2.volume = 0;
+    channel3.volume = 0;
 }
 
 void PlatformPSP::stopModule()
@@ -952,13 +944,10 @@ void PlatformPSP::stopModule()
 
 void PlatformPSP::playSample(uint8_t sample)
 {
-    ChanInput* input = loadedModule == ModuleIntro ? &mt_chan2input : &mt_chan4input;
-    if (loadedModule == ModuleSoundFX) {
-        input = &mt_chan1input + (effectChannel < 2 ? effectChannel : (5 - effectChannel));
+    ChanInput* input = &mt_chaninputs[effectChannel < 2 ? effectChannel : (5 - effectChannel)];
 
-        effectChannel++;
-        effectChannel &= 3;
-    }
+    effectChannel++;
+    effectChannel &= 3;
 
     putWord((uint8_t*)&input->note, 0, 0x1000 + 320);
     if (sample < 16) {
@@ -972,14 +961,10 @@ void PlatformPSP::playSample(uint8_t sample)
 
 void PlatformPSP::stopSample()
 {
-    mt_chan1input.note = 0;
-    mt_chan1input.cmd = 0;
-    mt_chan2input.note = 0;
-    mt_chan2input.cmd = 0;
-    mt_chan3input.note = 0;
-    mt_chan3input.cmd = 0;
-    mt_chan4input.note = 0;
-    mt_chan4input.cmd = 0;
+    for (int i = 0; i < 4; i++) {
+        mt_chaninputs[i].note = 0;
+        mt_chaninputs[i].cmd = 0;
+    }
 }
 
 void PlatformPSP::renderFrame(bool waitForNextFrame)

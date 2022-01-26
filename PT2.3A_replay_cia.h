@@ -77,6 +77,10 @@ extern AudioChannel channel0;
 extern AudioChannel channel1;
 extern AudioChannel channel2;
 extern AudioChannel channel3;
+extern AudioChannel channel4;
+extern AudioChannel channel5;
+extern AudioChannel channel6;
+extern AudioChannel channel7;
 extern void processAudio(int16_t* outputBuffer, uint32_t outputLength, uint32_t sampleRate);
 
 extern void mt_init(uint8_t* songData);
@@ -138,6 +142,10 @@ extern ChanTemp mt_chan1temp;
 extern ChanTemp mt_chan2temp;
 extern ChanTemp mt_chan3temp;
 extern ChanTemp mt_chan4temp;
+extern ChanTemp mt_chan5temp;
+extern ChanTemp mt_chan6temp;
+extern ChanTemp mt_chan7temp;
+extern ChanTemp mt_chan8temp;
 extern int8_t* mt_SampleStarts[31];
 extern uint8_t* mt_SongDataPtr;
 extern uint8_t mt_speed;
@@ -151,9 +159,6 @@ extern uint8_t mt_PattDelTime;
 extern uint8_t mt_PattDelTime2;
 extern bool mt_Enable;
 extern uint16_t mt_PatternPos;
-extern ChanInput mt_chan1input;
-extern ChanInput mt_chan2input;
-extern ChanInput mt_chan3input;
-extern ChanInput mt_chan4input;
+extern ChanInput mt_chaninputs[4];
 
 #endif
