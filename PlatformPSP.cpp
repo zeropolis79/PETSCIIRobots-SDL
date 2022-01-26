@@ -897,12 +897,28 @@ void PlatformPSP::stopFadeScreen()
 
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value)
 {
-    drawRectangle(0xff55bb77, font, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, (address / SCREEN_WIDTH_IN_CHARACTERS) << 3, 8, 8);
+    if (value > 127) {
+        value &= 127;
+        drawRectangle(0xff55bb77, 0, 0, 0, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, (address / SCREEN_WIDTH_IN_CHARACTERS) << 3, 8, 8);
+        drawRectangle(0xff000000, font, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, (address / SCREEN_WIDTH_IN_CHARACTERS) << 3, 8, 8);
+    } else {
+        sceGuDisable(SCEGU_BLEND);
+        drawRectangle(0xff55bb77, font, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, (address / SCREEN_WIDTH_IN_CHARACTERS) << 3, 8, 8);
+        sceGuEnable(SCEGU_BLEND);
+    }
 }
 
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
-    drawRectangle(palette[color], font, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
+    if (value > 127) {
+        value &= 127;
+        drawRectangle(palette[color], 0, 0, 0, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
+        drawRectangle(0xff000000, font, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
+    } else {
+        sceGuDisable(SCEGU_BLEND);
+        drawRectangle(palette[color], font, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
+        sceGuEnable(SCEGU_BLEND);
+    }
 }
 
 void PlatformPSP::loadModule(Module module)
