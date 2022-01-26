@@ -650,13 +650,13 @@ uint8_t* PlatformPSP::loadTileset(const char* filename)
 void PlatformPSP::displayImage(Image image)
 {
 	sceGumLoadIdentity();
+    scaleX = 1.0f;
+    scaleY = 1.0f;
 
     this->clearRect(0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT);
 
     if (image == ImageGame) {
         palette = paletteGame;
-        scaleX = 1.0f;
-        scaleY = 1.0f;
 
         drawRectangle(0xffffffff, images[image], 320 - 56, 0, PLATFORM_SCREEN_WIDTH - 56, 0, 56, 128);
 
@@ -673,6 +673,7 @@ void PlatformPSP::displayImage(Image image)
         }
     } else {
         palette = paletteIntro;
+
         scaleX = SCEGU_SCR_WIDTH / 320.0f;
         scaleY = SCEGU_SCR_HEIGHT / 200.0f;
 
