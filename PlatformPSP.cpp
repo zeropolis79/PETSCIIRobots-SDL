@@ -85,6 +85,12 @@ extern uint8_t moduleLose[];
 extern uint8_t moduleLoseEnd[];
 extern uint8_t moduleMetallicBopAmiga[];
 extern uint8_t moduleMetallicBopAmigaEnd[];
+extern uint8_t moduleGetPsyched[];
+extern uint8_t moduleGetPsychedEnd[];
+extern uint8_t moduleRobotAttack[];
+extern uint8_t moduleRobotAttackEnd[];
+extern uint8_t moduleRushinIn[];
+extern uint8_t moduleRushinInEnd[];
 extern int8_t soundExplosion[];
 extern int8_t soundExplosionEnd[];
 extern int8_t soundMedkit[];
@@ -642,7 +648,7 @@ struct FilenameMapping {
     uint32_t size;
 };
 
-#define FILENAME_MAPPINGS 18
+#define FILENAME_MAPPINGS 21
 
 static FilenameMapping filenameMappings[FILENAME_MAPPINGS] = {
     { "level-A", levelA, levelAEnd - levelA },
@@ -662,7 +668,10 @@ static FilenameMapping filenameMappings[FILENAME_MAPPINGS] = {
     { "mod.metal heads", moduleMetalHeads, moduleMetalHeadsEnd - moduleMetalHeads },
     { "mod.win", moduleWin, moduleWinEnd - moduleWin },
     { "mod.lose", moduleLose, moduleLoseEnd - moduleLose },
-    { "mod.metallic bop amiga", moduleMetallicBopAmiga, moduleMetallicBopAmigaEnd - moduleMetallicBopAmiga }
+    { "mod.metallic bop amiga", moduleMetallicBopAmiga, moduleMetallicBopAmigaEnd - moduleMetallicBopAmiga },
+    { "mod.get psyched", moduleGetPsyched, moduleGetPsychedEnd - moduleGetPsyched },
+    { "mod.robot attack", moduleRobotAttack, moduleRobotAttackEnd - moduleRobotAttack },
+    { "mod.rushin in", moduleRushinIn, moduleRushinInEnd - moduleRushinIn }
 };
 
 uint32_t PlatformPSP::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)

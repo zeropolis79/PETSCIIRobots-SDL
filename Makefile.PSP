@@ -17,7 +17,7 @@ LOADLIBES +=$(LIBDIR)/ge_user_stub.a
 LOADLIBES +=$(LIBDIR)/utility_stub.a
 LOADLIBES +=$(LIBDIR)/impose_stub.a
 
-OBJECTS=$(SOURCES:.cpp=.o) Tileset.o C64Font.o Faces.o Tiles.o AnimTiles.o Sprites.o Items.o Keys.o Health.o IntroScreen.o GameScreen.o GameOver.o LevelA.o LevelB.o LevelC.o LevelD.o LevelE.o LevelF.o LevelG.o LevelH.o LevelI.o LevelJ.o LevelK.o LevelL.o LevelM.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
+OBJECTS=$(SOURCES:.cpp=.o) Tileset.o C64Font.o Faces.o Tiles.o AnimTiles.o Sprites.o Items.o Keys.o Health.o IntroScreen.o GameScreen.o GameOver.o LevelA.o LevelB.o LevelC.o LevelD.o LevelE.o LevelF.o LevelG.o LevelH.o LevelI.o LevelJ.o LevelK.o LevelL.o LevelM.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o ModuleGetPsyched.o ModuleRobotAttack.o ModuleRushinIn.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
 
 EXECUTABLE=petrobots
 
@@ -91,6 +91,12 @@ ModuleLose.o: mod.lose
 	$(BIN2ELF) --PSP -s moduleLose -e moduleLoseEnd mod.lose ModuleLose.o
 ModuleMetallicBopAmiga.o: mod.metallic\ bop\ amiga
 	$(BIN2ELF) --PSP -s moduleMetallicBopAmiga -e moduleMetallicBopAmigaEnd "mod.metallic bop amiga" ModuleMetallicBopAmiga.o
+ModuleGetPsyched.o: mod.get\ psyched
+	$(BIN2ELF) --PSP -s moduleGetPsyched -e moduleGetPsychedEnd "mod.get psyched" ModuleGetPsyched.o
+ModuleRobotAttack.o: mod.robot\ attack
+	$(BIN2ELF) --PSP -s moduleRobotAttack -e moduleRobotAttackEnd "mod.robot attack" ModuleRobotAttack.o
+ModuleRushinIn.o: mod.rushin\ in
+	$(BIN2ELF) --PSP -s moduleRushinIn -e moduleRushinInEnd "mod.rushin in" ModuleRushinIn.o
 SoundExplosion.o: sounds_dsbarexp.raw
 	$(BIN2ELF) --PSP -s soundExplosion -e soundExplosionEnd sounds_dsbarexp.raw SoundExplosion.o
 SoundMedkit.o: SOUND_MEDKIT.raw
