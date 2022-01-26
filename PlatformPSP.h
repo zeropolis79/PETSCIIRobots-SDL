@@ -77,6 +77,7 @@ private:
     int16_t cursorY;
     float scaleX;
     float scaleY;
+    bool swapBuffers;
 };
 
 #endif

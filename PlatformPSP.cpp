@@ -240,7 +240,8 @@ PlatformPSP::PlatformPSP() :
     cursorX(-1),
     cursorY(-1),
     scaleX(1.0f),
-    scaleY(1.0f)
+    scaleY(1.0f),
+    swapBuffers(false)
 {
     // Increase thread priority
     sceKernelChangeThreadPriority(SCE_KERNEL_TH_SELF, 40);
@@ -266,7 +267,7 @@ PlatformPSP::PlatformPSP() :
 
     sceGuStart(SCEGU_IMMEDIATE, displayList, DISPLAYLIST_SIZE * sizeof(int));
 
-    sceGuDrawBuffer(SCEGU_PF8888, SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
+    sceGuDrawBuffer(SCEGU_PF8888, SCEGU_VRAM_BP32_2, SCEGU_VRAM_WIDTH);
     sceGuDispBuffer(SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, SCEGU_VRAM_BP32_0, SCEGU_VRAM_WIDTH);
     sceGuDepthBuffer(SCEGU_VRAM_BP32_2, SCEGU_VRAM_WIDTH);
 
@@ -774,24 +775,24 @@ void PlatformPSP::renderFace(uint8_t face, uint16_t x, uint16_t y)
 void PlatformPSP::showCursor(uint16_t x, uint16_t y)
 {
     if (cursorX != -1) {
-        sceGuCopyImage(SCEGU_PF8888, 0, 0, 28, 28, 32, cursor, cursorX, cursorY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_1);
+        sceGuCopyImage(SCEGU_PF8888, 0, 0, 28, 28, 32, cursor, cursorX, cursorY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2);
     }
     cursorX = x * 24 - 2;
     cursorY = y * 24 -2;
-    sceGuCopyImage(SCEGU_PF8888, cursorX, cursorY, 28, 28, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_1, 0, 0, 32, cursor);
+    sceGuCopyImage(SCEGU_PF8888, cursorX, cursorY, 28, 28, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, 0, 0, 32, cursor);
 }
 
 void PlatformPSP::hideCursor()
 {
     if (cursorX != -1) {
-        sceGuCopyImage(SCEGU_PF8888, 0, 0, 28, 28, 32, cursor, cursorX, cursorY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_1);
+        sceGuCopyImage(SCEGU_PF8888, 0, 0, 28, 28, 32, cursor, cursorX, cursorY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2);
         cursorX = -1;
     }
 }
 
 void PlatformPSP::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
 {
-    sceGuCopyImage(SCEGU_PF8888, sourceX, sourceY, width, height, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_1, destinationX, destinationY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_1);
+    sceGuCopyImage(SCEGU_PF8888, sourceX, sourceY, width, height, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, destinationX, destinationY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2);
 }
 
 void PlatformPSP::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
@@ -895,15 +896,16 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
         drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY + 26, 28, 2);
     }
 
-    sceGuCopyImage(SCEGU_PF8888, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_1, 0, 0, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_0);
+    sceGuCopyImage(SCEGU_PF8888, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, 0, 0, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)(swapBuffers ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1));
+    sceGuDrawBuffer(SCEGU_PF8888, swapBuffers ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
     sceGuFinish();
     sceGuSync(SCEGU_SYNC_FINISH, SCEGU_SYNC_WAIT);
 
-    if (waitForNextFrame) {
-        sceDisplayWaitVblankStart();
-    }
+    sceGuSwapBuffers();
+    swapBuffers = !swapBuffers;
 
     cacheSize = 0;
 
     sceGuStart(SCEGU_IMMEDIATE, displayList, DISPLAYLIST_SIZE * sizeof(int));
+    sceGuDrawBuffer(SCEGU_PF8888, SCEGU_VRAM_BP32_2, SCEGU_VRAM_WIDTH);
 }
