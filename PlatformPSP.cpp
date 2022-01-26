@@ -417,7 +417,7 @@ SceInt32 PlatformPSP::audioThread(SceSize args, SceVoid *argb)
     return 0;
 }
 
-void PlatformPSP::drawRectangle(uint32_t* texture, uint32_t color, uint16_t tx, uint16_t ty, uint16_t x, uint16_t y, uint16_t width, uint16_t height)
+void PlatformPSP::drawRectangle(uint32_t color, uint32_t* texture, uint16_t tx, uint16_t ty, uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 {
     if (texture) {
         sceGuEnable(SCEGU_TEXTURE);
@@ -655,18 +655,18 @@ void PlatformPSP::displayImage(Image image)
         scaleX = 1.0f;
         scaleY = 1.0f;
 
-        drawRectangle(images[image], 0xffffffff, 320 - 56, 0, PLATFORM_SCREEN_WIDTH - 56, 0, 56, 128);
+        drawRectangle(0xffffffff, images[image], 320 - 56, 0, PLATFORM_SCREEN_WIDTH - 56, 0, 56, 128);
 
         for (int y = 128; y < (PLATFORM_SCREEN_HEIGHT - 32); y += 40) {
-            drawRectangle(images[image], 0xffffffff, 320 - 56, 128, PLATFORM_SCREEN_WIDTH - 56, y, 56, MIN(40, PLATFORM_SCREEN_HEIGHT - 32 - y));
+            drawRectangle(0xffffffff, images[image], 320 - 56, 128, PLATFORM_SCREEN_WIDTH - 56, y, 56, MIN(40, PLATFORM_SCREEN_HEIGHT - 32 - y));
         }
 
-        drawRectangle(images[image], 0xffffffff, 320 - 56, 168, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32, 56, 32);
+        drawRectangle(0xffffffff, images[image], 320 - 56, 168, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32, 56, 32);
 
-        drawRectangle(images[image], 0xffffffff, 0, 168, 0, PLATFORM_SCREEN_HEIGHT - 32, 104, 8);
+        drawRectangle(0xffffffff, images[image], 0, 168, 0, PLATFORM_SCREEN_HEIGHT - 32, 104, 8);
 
         for (int x = 104; x < (PLATFORM_SCREEN_WIDTH - 56); x += 160) {
-            drawRectangle(images[image], 0xffffffff, 104, 168, x, PLATFORM_SCREEN_HEIGHT - 32, MIN(160, PLATFORM_SCREEN_WIDTH - 56 - x), 8);
+            drawRectangle(0xffffffff, images[image], 104, 168, x, PLATFORM_SCREEN_HEIGHT - 32, MIN(160, PLATFORM_SCREEN_WIDTH - 56 - x), 8);
         }
     } else {
         palette = paletteIntro;
@@ -679,7 +679,7 @@ void PlatformPSP::displayImage(Image image)
 		vec.z = 1.0f;
 		sceGumScale(&vec);
 
-        drawRectangle(images[image], 0xffffffff, 0, 0, 0, 0, images[image][0], images[image][1]);
+        drawRectangle(0xffffffff, images[image], 0, 0, 0, 0, images[image][0], images[image][1]);
 
         if (image == ImageIntro) {
             this->clearRect(32, 36, 80, 8);
@@ -707,7 +707,7 @@ void PlatformPSP::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t varia
         }
     }
 
-    drawRectangle(tiles, 0xffffffff, (tile & 15) * 24, (tile >> 4) * 24, x, y, 24, 24);
+    drawRectangle(0xffffffff, tiles, (tile & 15) * 24, (tile >> 4) * 24, x, y, 24, 24);
 
     sceGuDisable(SCEGU_SCISSOR_TEST);
 }
@@ -718,16 +718,16 @@ void PlatformPSP::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, ui
 
     if (animTileMap[backgroundTile] >= 0) {
         backgroundTile = animTileMap[backgroundTile] + backgroundVariant;
-        drawRectangle(animTiles, 0xffffffff, (backgroundTile >> 4) * 24, (backgroundTile & 15) * 24, x, y, 24, 24);
+        drawRectangle(0xffffffff, animTiles, (backgroundTile >> 4) * 24, (backgroundTile & 15) * 24, x, y, 24, 24);
     } else {
-        drawRectangle(tiles, 0xffffffff, (backgroundTile & 15) * 24, (backgroundTile >> 4) * 24, x, y, 24, 24);
+        drawRectangle(0xffffffff, tiles, (backgroundTile & 15) * 24, (backgroundTile >> 4) * 24, x, y, 24, 24);
     }
 
     if (tileSpriteMap[foregroundTile] >= 0) {
         uint8_t sprite = tileSpriteMap[foregroundTile] + foregroundVariant;
-        drawRectangle(sprites, 0xffffffff, (sprite >> 4) * 24, (sprite & 15) * 24, x, y, 24, 24);
+        drawRectangle(0xffffffff, sprites, (sprite >> 4) * 24, (sprite & 15) * 24, x, y, 24, 24);
     } else {
-        drawRectangle(tiles, 0xffffffff, (foregroundTile & 15) * 24, (foregroundTile >> 4) * 24, x, y, 24, 24);
+        drawRectangle(0xffffffff, tiles, (foregroundTile & 15) * 24, (foregroundTile >> 4) * 24, x, y, 24, 24);
     }
 
     sceGuDisable(SCEGU_SCISSOR_TEST);
@@ -737,7 +737,7 @@ void PlatformPSP::renderSprite(uint8_t sprite, uint16_t x, uint16_t y)
 {
     sceGuEnable(SCEGU_SCISSOR_TEST);
 
-    drawRectangle(sprites, 0xffffffff, (sprite >> 4) * 24, (sprite & 15) * 24, x, y, 24, 24);
+    drawRectangle(0xffffffff, sprites, (sprite >> 4) * 24, (sprite & 15) * 24, x, y, 24, 24);
 
     sceGuDisable(SCEGU_SCISSOR_TEST);
 }
@@ -746,29 +746,29 @@ void PlatformPSP::renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y)
 {
     sceGuEnable(SCEGU_SCISSOR_TEST);
 
-    drawRectangle(animTiles, 0xffffffff, (animTile >> 4) * 24, (animTile & 15) * 24, x, y, 24, 24);
+    drawRectangle(0xffffffff, animTiles, (animTile >> 4) * 24, (animTile & 15) * 24, x, y, 24, 24);
 
     sceGuDisable(SCEGU_SCISSOR_TEST);
 }
 
 void PlatformPSP::renderItem(uint8_t item, uint16_t x, uint16_t y)
 {
-    drawRectangle(items, 0xffffffff, 0, item * 21, x, y, 48, 21);
+    drawRectangle(0xffffffff, items, 0, item * 21, x, y, 48, 21);
 }
 
 void PlatformPSP::renderKey(uint8_t key, uint16_t x, uint16_t y)
 {
-    drawRectangle(keys, 0xffffffff, 0, key * 14, x, y, 16, 14);
+    drawRectangle(0xffffffff, keys, 0, key * 14, x, y, 16, 14);
 }
 
 void PlatformPSP::renderHealth(uint8_t amount, uint16_t x, uint16_t y)
 {
-    drawRectangle(health, 0xffffffff, 0, amount * 51, x, y, 48, 51);
+    drawRectangle(0xffffffff, health, 0, amount * 51, x, y, 48, 51);
 }
 
 void PlatformPSP::renderFace(uint8_t face, uint16_t x, uint16_t y)
 {
-    drawRectangle(faces, 0xffffffff, 0, face * 24, x, y, 16, 24);
+    drawRectangle(0xffffffff, faces, 0, face * 24, x, y, 16, 24);
 }
 
 void PlatformPSP::showCursor(uint16_t x, uint16_t y)
@@ -796,17 +796,17 @@ void PlatformPSP::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinat
 
 void PlatformPSP::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
 {
-    drawRectangle(0, 0xff000000, 0, 0, x, y, width, height);
+    drawRectangle(0xff000000, 0, 0, 0, x, y, width, height);
 }
 
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value)
 {
-    drawRectangle(font, 0xff55bb77, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, (address / SCREEN_WIDTH_IN_CHARACTERS) << 3, 8, 8);
+    drawRectangle(0xff55bb77, font, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, (address / SCREEN_WIDTH_IN_CHARACTERS) << 3, 8, 8);
 }
 
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset)
 {
-    drawRectangle(font, palette[color], (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
+    drawRectangle(palette[color], font, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, ((address / SCREEN_WIDTH_IN_CHARACTERS) << 3) + yOffset, 8, 8);
 }
 
 void PlatformPSP::loadModule(Module module)
@@ -889,10 +889,10 @@ void PlatformPSP::stopSample()
 void PlatformPSP::renderFrame(bool waitForNextFrame)
 {
     if (cursorX != -1) {
-        drawRectangle(0, 0xffffffff, 0, 0, cursorX, cursorY, 28, 2);
-        drawRectangle(0, 0xffffffff, 0, 0, cursorX, cursorY + 2, 2, 24);
-        drawRectangle(0, 0xffffffff, 0, 0, cursorX + 26, cursorY + 2, 2, 24);
-        drawRectangle(0, 0xffffffff, 0, 0, cursorX, cursorY + 26, 28, 2);
+        drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY, 28, 2);
+        drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY + 2, 2, 24);
+        drawRectangle(0xffffffff, 0, 0, 0, cursorX + 26, cursorY + 2, 2, 24);
+        drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY + 26, 28, 2);
     }
 
     sceGuCopyImage(SCEGU_PF8888, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_1, 0, 0, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_0);
