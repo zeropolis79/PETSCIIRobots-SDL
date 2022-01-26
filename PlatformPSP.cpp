@@ -241,6 +241,8 @@ PlatformPSP::PlatformPSP() :
     cursorY(-1),
     scaleX(1.0f),
     scaleY(1.0f),
+    fadeBaseColor(0),
+    fadeIntensity(0),
     swapBuffers(false)
 {
     // Increase thread priority
@@ -649,7 +651,7 @@ void PlatformPSP::displayImage(Image image)
 {
 	sceGumLoadIdentity();
 
-    this->clearRect(0, 0, PLATFORM_SCREEN_WIDTH - 1, PLATFORM_SCREEN_HEIGHT - 1);
+    this->clearRect(0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT);
 
     if (image == ImageGame) {
         palette = paletteGame;
@@ -800,6 +802,36 @@ void PlatformPSP::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t hei
     drawRectangle(0xff000000, 0, 0, 0, x, y, width, height);
 }
 
+void PlatformPSP::startFadeScreen(uint16_t color, uint16_t intensity)
+{
+	uint32_t r = (color & 0xf00) >> 8;
+	uint32_t g = (color & 0x0f0) << 4;
+	uint32_t b = (color & 0x00f) << 16;
+	uint32_t bgr = r |  g | b;
+	fadeBaseColor = bgr | (bgr << 4);
+	fadeIntensity = intensity;
+}
+
+void PlatformPSP::fadeScreen(uint16_t intensity, bool immediate)
+{
+    if (fadeIntensity != intensity) {
+        if (immediate) {
+			fadeIntensity = intensity;
+        } else {
+            int16_t fadeDelta = intensity > fadeIntensity ? 1 : -1;
+            do {
+                fadeIntensity += fadeDelta;
+                this->renderFrame(true);
+            } while (fadeIntensity != intensity);
+        }
+    }
+}
+
+void PlatformPSP::stopFadeScreen()
+{
+	fadeIntensity = 15;
+}
+
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value)
 {
     drawRectangle(0xff55bb77, font, (value >> 3) & 0x8, (value << 3) & 0x1ff, (address % SCREEN_WIDTH_IN_CHARACTERS) << 3, (address / SCREEN_WIDTH_IN_CHARACTERS) << 3, 8, 8);
@@ -898,8 +930,17 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
 
     sceGuCopyImage(SCEGU_PF8888, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, 0, 0, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)(swapBuffers ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1));
     sceGuDrawBuffer(SCEGU_PF8888, swapBuffers ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
+	if (fadeIntensity != 15) {
+		uint32_t intensity = (15 - fadeIntensity) << 24;
+		uint32_t abgr = intensity | (intensity << 4) | fadeBaseColor;
+		drawRectangle(abgr, 0, 0, 0, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT);
+	}
     sceGuFinish();
     sceGuSync(SCEGU_SYNC_FINISH, SCEGU_SYNC_WAIT);
+
+	if (fadeIntensity != 15) {
+        sceDisplayWaitVblankStart();
+    }
 
     sceGuSwapBuffers();
     swapBuffers = !swapBuffers;

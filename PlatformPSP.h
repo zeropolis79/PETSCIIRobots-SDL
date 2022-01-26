@@ -36,6 +36,9 @@ public:
     virtual void hideCursor();
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
+    virtual void startFadeScreen(uint16_t color, uint16_t intensity);
+    virtual void fadeScreen(uint16_t intensity, bool immediate);
+    virtual void stopFadeScreen();
     virtual void writeToScreenMemory(address_t address, uint8_t value);
     virtual void writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset);
     virtual void loadModule(Module module);
@@ -77,6 +80,8 @@ private:
     int16_t cursorY;
     float scaleX;
     float scaleY;
+    uint32_t fadeBaseColor;
+    uint16_t fadeIntensity;
     bool swapBuffers;
 };
 
