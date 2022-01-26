@@ -17,7 +17,7 @@ LOADLIBES +=$(LIBDIR)/ge_user_stub.a
 LOADLIBES +=$(LIBDIR)/utility_stub.a
 LOADLIBES +=$(LIBDIR)/impose_stub.a
 
-OBJECTS=$(SOURCES:.cpp=.o) Tileset.o C64Font.o Faces.o Tiles.o AnimTiles.o Sprites.o Items.o Keys.o Health.o IntroScreen.o GameScreen.o GameOver.o LevelA.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
+OBJECTS=$(SOURCES:.cpp=.o) Tileset.o C64Font.o Faces.o Tiles.o AnimTiles.o Sprites.o Items.o Keys.o Health.o IntroScreen.o GameScreen.o GameOver.o LevelA.o LevelB.o LevelC.o LevelD.o LevelE.o LevelF.o LevelG.o LevelH.o LevelI.o LevelJ.o LevelK.o LevelL.o LevelM.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
 
 EXECUTABLE=petrobots
 
@@ -57,6 +57,30 @@ GameOver.o: gameover.psp
 	$(BIN2ELF) --PSP -s gameOver -e gameOverEnd gameover.psp GameOver.o
 LevelA.o: level-A
 	$(BIN2ELF) --PSP -s levelA -e levelAEnd level-A LevelA.o
+LevelB.o: level-B
+	$(BIN2ELF) --PSP -s levelB -e levelBEnd level-B LevelB.o
+LevelC.o: level-C
+	$(BIN2ELF) --PSP -s levelC -e levelCEnd level-C LevelC.o
+LevelD.o: level-D
+	$(BIN2ELF) --PSP -s levelD -e levelDEnd level-D LevelD.o
+LevelE.o: level-E
+	$(BIN2ELF) --PSP -s levelE -e levelEEnd level-E LevelE.o
+LevelF.o: level-F
+	$(BIN2ELF) --PSP -s levelF -e levelFEnd level-F LevelF.o
+LevelG.o: level-G
+	$(BIN2ELF) --PSP -s levelG -e levelGEnd level-G LevelG.o
+LevelH.o: level-H
+	$(BIN2ELF) --PSP -s levelH -e levelHEnd level-H LevelH.o
+LevelI.o: level-I
+	$(BIN2ELF) --PSP -s levelI -e levelIEnd level-I LevelI.o
+LevelJ.o: level-J
+	$(BIN2ELF) --PSP -s levelJ -e levelJEnd level-J LevelJ.o
+LevelK.o: level-K
+	$(BIN2ELF) --PSP -s levelK -e levelKEnd level-K LevelK.o
+LevelL.o: level-L
+	$(BIN2ELF) --PSP -s levelL -e levelLEnd level-L LevelL.o
+LevelM.o: level-M
+	$(BIN2ELF) --PSP -s levelM -e levelMEnd level-M LevelM.o
 ModuleSoundFX.o: mod.soundfx
 	$(BIN2ELF) --PSP -s moduleSoundFX -e moduleSoundFXEnd mod.soundfx ModuleSoundFX.o
 ModuleMetalHeads.o: mod.metal\ heads

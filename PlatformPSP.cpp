@@ -51,6 +51,30 @@ extern uint32_t gameScreen[];
 extern uint32_t gameOver[];
 extern uint8_t levelA[];
 extern uint8_t levelAEnd[];
+extern uint8_t levelB[];
+extern uint8_t levelBEnd[];
+extern uint8_t levelC[];
+extern uint8_t levelCEnd[];
+extern uint8_t levelD[];
+extern uint8_t levelDEnd[];
+extern uint8_t levelE[];
+extern uint8_t levelEEnd[];
+extern uint8_t levelF[];
+extern uint8_t levelFEnd[];
+extern uint8_t levelG[];
+extern uint8_t levelGEnd[];
+extern uint8_t levelH[];
+extern uint8_t levelHEnd[];
+extern uint8_t levelI[];
+extern uint8_t levelIEnd[];
+extern uint8_t levelJ[];
+extern uint8_t levelJEnd[];
+extern uint8_t levelK[];
+extern uint8_t levelKEnd[];
+extern uint8_t levelL[];
+extern uint8_t levelLEnd[];
+extern uint8_t levelM[];
+extern uint8_t levelMEnd[];
 extern uint8_t moduleSoundFX[];
 extern uint8_t moduleSoundFXEnd[];
 extern uint8_t moduleMetalHeads[];
@@ -618,10 +642,22 @@ struct FilenameMapping {
     uint32_t size;
 };
 
-#define FILENAME_MAPPINGS 6
+#define FILENAME_MAPPINGS 18
 
 static FilenameMapping filenameMappings[FILENAME_MAPPINGS] = {
     { "level-A", levelA, levelAEnd - levelA },
+    { "level-B", levelB, levelBEnd - levelB },
+    { "level-C", levelC, levelCEnd - levelC },
+    { "level-D", levelD, levelDEnd - levelD },
+    { "level-E", levelE, levelEEnd - levelE },
+    { "level-F", levelF, levelFEnd - levelF },
+    { "level-G", levelG, levelGEnd - levelG },
+    { "level-H", levelH, levelHEnd - levelH },
+    { "level-I", levelI, levelIEnd - levelI },
+    { "level-J", levelJ, levelJEnd - levelJ },
+    { "level-K", levelK, levelKEnd - levelK },
+    { "level-L", levelL, levelLEnd - levelL },
+    { "level-M", levelM, levelMEnd - levelM },
     { "mod.soundfx", moduleSoundFX, moduleSoundFXEnd - moduleSoundFX },
     { "mod.metal heads", moduleMetalHeads, moduleMetalHeadsEnd - moduleMetalHeads },
     { "mod.win", moduleWin, moduleWinEnd - moduleWin },
