@@ -1777,7 +1777,7 @@ void TOGGLE_LIVE_MAP()
     if (LIVE_MAP_ON != 1) {
         LIVE_MAP_ON = 1;
 
-        platform->clearRect(0, 0, MAP_WINDOW_WIDTH, MAP_WINDOW_HEIGHT);
+        platform->clearRect(0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32);
         platform->renderLiveMap(MAP);
     } else {
         LIVE_MAP_ON = 0;

@@ -25,8 +25,8 @@ unsigned int sce_user_main_thread_stack_kb_size = 16;
 unsigned int sce_user_main_thread_attribute = SCE_KERNEL_TH_USE_VFPU;
 static const SceChar8 *SOUND_THREAD_NAME = "Sound";
 
-#define DISPLAYLIST_SIZE (1179648/sizeof(int))
-#define CACHE_SIZE 131072
+#define DISPLAYLIST_SIZE (327680 / sizeof(int))
+#define CACHE_SIZE 229376
 
 static ScePspFMatrix4 matrix_stack[8 + 8 + 32 + 0];
 static char cache[CACHE_SIZE];
@@ -248,6 +248,35 @@ uint32_t paletteGame[] = {
     0xff99aaee,
     0xff0000ee
 };
+
+#define LIVE_MAP_ORIGIN_X ((PLATFORM_SCREEN_WIDTH - 56 - 128 * 3) / 2)
+#define LIVE_MAP_ORIGIN_Y ((PLATFORM_SCREEN_HEIGHT - 32 - 64 * 3) / 2)
+
+uint8_t tileLiveMap[] = {
+     0,13, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1,13, 1,
+     1, 1, 1, 1, 1, 1, 1, 2, 8, 1, 1, 1, 1, 6,14,14,
+    15,13,14,15,15,13, 5,15, 6,13,13,12, 6,13,13,12,
+     1, 1, 1,12, 1, 9, 9, 6, 1, 9,15, 6,10,10, 1, 1,
+     1, 1, 7,13, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+     4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4, 4,
+     2, 2,13,13,13,13,13,13, 1, 1, 1,13, 4, 4, 4, 0,
+     1, 1, 4,13, 4, 4, 4, 1, 1, 1, 2, 2, 2, 2, 2, 2,
+     1, 1,13,10, 1, 1,13, 9, 1, 1, 4, 5,13,13,13, 4,
+     1, 1, 1, 1,15, 5,15,15, 1, 1, 6, 6,15,15, 6, 5,
+     2, 2, 2, 5,13,13, 1, 7, 5, 3, 1, 7, 4, 4, 4,13,
+     1, 1, 1, 1, 1, 4, 4, 2, 3, 3, 3, 1, 3, 2, 3, 3,
+     3, 3, 3, 1, 4, 4, 9, 9, 4, 4, 2, 2, 5,11,12,12,
+     8, 8, 8, 9, 3, 3, 2,10, 1, 1, 1, 9, 1, 1, 1,10,
+     1, 1, 1,13, 8, 8,13,13, 8, 8,13,13, 3, 3,13,13,
+    13,13, 5,13,13,13,13,13,13,13,13,13,13,13,13,13
+};
+uint8_t liveMapToPlane1[256];
+uint8_t liveMapToPlane2[256];
+uint8_t liveMapToPlane3[256];
+uint8_t liveMapToPlane4[256];
+uint8_t unitTypes[48];
+uint8_t unitX[48];
+uint8_t unitY[48];
 
 PlatformPSP::PlatformPSP() :
     eDRAMAddress((uint8_t*)sceGeEdramGetAddr()),
@@ -835,6 +864,58 @@ void PlatformPSP::renderHealth(uint8_t amount, uint16_t x, uint16_t y)
 void PlatformPSP::renderFace(uint8_t face, uint16_t x, uint16_t y)
 {
     drawRectangle(0xffffffff, faces, 0, face * 24, x, y, 16, 24);
+}
+
+void PlatformPSP::renderLiveMap(uint8_t* map)
+{
+    for (int y = 0; y < 64; y++) {
+        for (int x = 0; x < 128; x++) {
+            drawRectangle(palette[tileLiveMap[*map++]], 0, 0, 0, LIVE_MAP_ORIGIN_X + x * 3, LIVE_MAP_ORIGIN_Y + y * 3, 3, 3);
+        }
+    }
+    for (int i = 0; i < 48; i++) {
+        unitTypes[i] = 255;
+    }
+}
+
+void PlatformPSP::renderLiveMapTile(uint8_t* map, uint8_t x, uint8_t y)
+{
+    drawRectangle(palette[tileLiveMap[map[(y << 7) + x]]], 0, 0, 0, LIVE_MAP_ORIGIN_X + x * 3, LIVE_MAP_ORIGIN_Y + y * 3, 3, 3);
+}
+
+void PlatformPSP::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots)
+{
+    for (int i = 0; i < 48; i++) {
+        if ((i < 28 || unitTypes[i] == 22) && (unitX[i] != ::unitX[i] || unitY[i] != ::unitY[i] || (i > 0 && (!showRobots || unitTypes[i] == 22 || unitTypes[i] != ::unitTypes[i])) || (i == 0 && playerColor != ::unitTypes[i]))) {
+            // Remove old dot if any
+            if (::unitTypes[i] != 255) {
+                int x = ::unitX[i];
+                int y = ::unitY[i];
+                drawRectangle(palette[tileLiveMap[map[(y << 7) + x]]], 0, 0, 0, LIVE_MAP_ORIGIN_X + x * 3, LIVE_MAP_ORIGIN_Y + y * 3, 3, 3);
+
+                if (i > 0 && !showRobots) {
+                    ::unitTypes[i] = 255;
+                }
+            }
+
+            if (i == 0 ||
+                (unitTypes[i] == 22 && (unitX[i] != unitX[0] || unitY[i] != unitY[0])) ||
+                (showRobots &&
+                 (unitTypes[i] == 1 ||
+                 (unitTypes[i] >= 2 && unitTypes[i] <= 5) ||
+                 (unitTypes[i] >= 17 && unitTypes[i] <= 18) ||
+                 unitTypes[i] == 9))) {
+                // Render new dot
+                int x = unitX[i];
+                int y = unitY[i];
+                drawRectangle(palette[(i > 0 || playerColor == 1) ? 1 : 0], 0, 0, 0, LIVE_MAP_ORIGIN_X + x * 3, LIVE_MAP_ORIGIN_Y + y * 3, 3, 3);
+
+                ::unitTypes[i] = i == 0 ? playerColor : unitTypes[i];
+                ::unitX[i] = unitX[i];
+                ::unitY[i] = unitY[i];
+            }
+        }
+    }
 }
 
 void PlatformPSP::showCursor(uint16_t x, uint16_t y)

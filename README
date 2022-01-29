@@ -105,4 +105,3 @@ psp_boot_packager c param.sfo "petrobots.prx" eboot.pbp
 PSP TODO
 --------
 - make ISO with icon
-- implement live map
