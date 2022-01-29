@@ -25,8 +25,8 @@ unsigned int sce_user_main_thread_stack_kb_size = 16;
 unsigned int sce_user_main_thread_attribute = SCE_KERNEL_TH_USE_VFPU;
 static const SceChar8 *SOUND_THREAD_NAME = "Sound";
 
-#define DISPLAYLIST_SIZE (327680 / sizeof(int))
-#define CACHE_SIZE 229376
+#define DISPLAYLIST_SIZE (409600 / sizeof(int))
+#define CACHE_SIZE 344064
 
 static ScePspFMatrix4 matrix_stack[8 + 8 + 32 + 0];
 static char cache[CACHE_SIZE];
@@ -868,19 +868,77 @@ void PlatformPSP::renderFace(uint8_t face, uint16_t x, uint16_t y)
 
 void PlatformPSP::renderLiveMap(uint8_t* map)
 {
-    for (int y = 0; y < 64; y++) {
-        for (int x = 0; x < 128; x++) {
-            drawRectangle(palette[tileLiveMap[*map++]], 0, 0, 0, LIVE_MAP_ORIGIN_X + x * 3, LIVE_MAP_ORIGIN_Y + y * 3, 3, 3);
+    sceGuEnable(SCEGU_TEXTURE);
+    sceGuTexFilter(SCEGU_LINEAR, SCEGU_LINEAR);
+
+    for (int mapY = 0; mapY < 64; mapY++) {
+        for (int mapX = 0; mapX < 128; mapX++) {
+            int tile = *map++;
+            int x = LIVE_MAP_ORIGIN_X + mapX * 3;
+            int y = LIVE_MAP_ORIGIN_Y + mapY * 3;
+            int tx = (tile & 15) * 24;
+            int ty = (tile >> 4) * 24;
+
+            sceGuTexImage(0, tiles[2], tiles[3], tiles[2], tiles + 4);
+            sceGuColor(0xffffffff);
+
+            int oldCacheSize = cacheSize;
+            float* data = (float*)(cache + cacheSize);
+            data[0 * 5 + 0] = tx / (float)tiles[2];
+            data[0 * 5 + 1] = ty / (float)tiles[3];
+            data[0 * 5 + 2] = x;
+            data[0 * 5 + 3] = (SCEGU_SCR_HEIGHT / scaleY) - y;
+            data[0 * 5 + 4] = 0;
+            data[1 * 5 + 0] = (tx + 24) / (float)tiles[2];
+            data[1 * 5 + 1] = (ty + 24) / (float)tiles[3];
+            data[1 * 5 + 2] = x + 3;
+            data[1 * 5 + 3] = (SCEGU_SCR_HEIGHT / scaleY) - (y + 3);
+            data[1 * 5 + 4] = 0;
+            cacheSize += 2 * 5 * sizeof(float);
+
+            sceKernelDcacheWritebackRange(data, cacheSize - oldCacheSize);
+            sceGumDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_TEXTURE_FLOAT | SCEGU_VERTEX_FLOAT, 2, 0, data);
         }
     }
     for (int i = 0; i < 48; i++) {
         unitTypes[i] = 255;
     }
+
+    sceGuTexFilter(SCEGU_NEAREST, SCEGU_NEAREST);
 }
 
-void PlatformPSP::renderLiveMapTile(uint8_t* map, uint8_t x, uint8_t y)
+void PlatformPSP::renderLiveMapTile(uint8_t* map, uint8_t mapX, uint8_t mapY)
 {
-    drawRectangle(palette[tileLiveMap[map[(y << 7) + x]]], 0, 0, 0, LIVE_MAP_ORIGIN_X + x * 3, LIVE_MAP_ORIGIN_Y + y * 3, 3, 3);
+    sceGuEnable(SCEGU_TEXTURE);
+    sceGuTexFilter(SCEGU_LINEAR, SCEGU_LINEAR);
+
+    int tile = map[(mapY << 7) + mapX];
+    int x = LIVE_MAP_ORIGIN_X + mapX * 3;
+    int y = LIVE_MAP_ORIGIN_Y + mapY * 3;
+    int tx = (tile & 15) * 24;
+    int ty = (tile >> 4) * 24;
+
+    sceGuTexImage(0, tiles[2], tiles[3], tiles[2], tiles + 4);
+    sceGuColor(0xffffffff);
+
+    int oldCacheSize = cacheSize;
+    float* data = (float*)(cache + cacheSize);
+    data[0 * 5 + 0] = tx / (float)tiles[2];
+    data[0 * 5 + 1] = ty / (float)tiles[3];
+    data[0 * 5 + 2] = x;
+    data[0 * 5 + 3] = (SCEGU_SCR_HEIGHT / scaleY) - y;
+    data[0 * 5 + 4] = 0;
+    data[1 * 5 + 0] = (tx + 24) / (float)tiles[2];
+    data[1 * 5 + 1] = (ty + 24) / (float)tiles[3];
+    data[1 * 5 + 2] = x + 3;
+    data[1 * 5 + 3] = (SCEGU_SCR_HEIGHT / scaleY) - (y + 3);
+    data[1 * 5 + 4] = 0;
+    cacheSize += 2 * 5 * sizeof(float);
+
+    sceKernelDcacheWritebackRange(data, cacheSize - oldCacheSize);
+    sceGumDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_TEXTURE_FLOAT | SCEGU_VERTEX_FLOAT, 2, 0, data);
+
+    sceGuTexFilter(SCEGU_NEAREST, SCEGU_NEAREST);
 }
 
 void PlatformPSP::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots)
@@ -889,9 +947,7 @@ void PlatformPSP::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* 
         if ((i < 28 || unitTypes[i] == 22) && (unitX[i] != ::unitX[i] || unitY[i] != ::unitY[i] || (i > 0 && (!showRobots || unitTypes[i] == 22 || unitTypes[i] != ::unitTypes[i])) || (i == 0 && playerColor != ::unitTypes[i]))) {
             // Remove old dot if any
             if (::unitTypes[i] != 255) {
-                int x = ::unitX[i];
-                int y = ::unitY[i];
-                drawRectangle(palette[tileLiveMap[map[(y << 7) + x]]], 0, 0, 0, LIVE_MAP_ORIGIN_X + x * 3, LIVE_MAP_ORIGIN_Y + y * 3, 3, 3);
+                renderLiveMapTile(map, ::unitX[i], ::unitY[i]);
 
                 if (i > 0 && !showRobots) {
                     ::unitTypes[i] = 255;
