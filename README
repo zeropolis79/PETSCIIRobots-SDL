@@ -104,4 +104,14 @@ psp_boot_packager c param.sfo "petrobots.prx" eboot.pbp
 
 PSP TODO
 --------
-- make ISO with icon
+- change application ID in PARAM.SFO
+- increase sound volume
+- improve ICON0.PNG and PIC1.PNG
+- native resolution intro screen and game over screen
+
+TODO
+----
+- Add screen and map size getters in Program to allow actual screen size to be determined on startup
+- Add Amiga monitor support
+- Add Amiga command line argument / tooltype support
+- Render live map to a separate Amiga screen
