@@ -2500,6 +2500,9 @@ void DISPLAY_KEYS()
 
 void GAME_OVER()
 {
+#ifndef _AMIGA // for binary compatibility with the 1.0 release
+    platform->renderFrame();
+#endif
     // stop game clock
     CLOCK_ACTIVE = 0;
     // disable music
