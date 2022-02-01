@@ -289,8 +289,8 @@ PlatformPSP::PlatformPSP() :
     audioOutputBuffer(new SceShort16[AUDIO_BUFFER_SIZE * 2 * 2]),
     audioOutputBufferOffset(0),
     audioThreadId(0),
-    interruptIntervalInSamples(SAMPLERATE / 60),
-    samplesSinceInterrupt(SAMPLERATE / 60),
+    interruptIntervalInSamples(SAMPLERATE / framesPerSecond_),
+    samplesSinceInterrupt(SAMPLERATE / framesPerSecond_),
     displayList(new int[DISPLAYLIST_SIZE]),
     joystickStateToReturn(0),
     joystickState(0),
@@ -302,7 +302,8 @@ PlatformPSP::PlatformPSP() :
     scaleY(1.0f),
     fadeBaseColor(0),
     fadeIntensity(0),
-    swapBuffers(false)
+    drawToBuffer0(false),
+    isDirty(false)
 {
     // Clear the first two bytes of effect samples to enable the 2-byte no-loop loop
     *((uint16_t*)soundExplosion) = 0;
@@ -535,6 +536,8 @@ void PlatformPSP::drawRectangle(uint32_t color, uint32_t* texture, uint16_t tx, 
         sceKernelDcacheWritebackRange(data, cacheSize - oldCacheSize);
         sceGumDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_VERTEX_FLOAT, 2, 0, data);
     }
+
+    isDirty = true;
 }
 
 void PlatformPSP::undeltaSamples(uint8_t* module, uint32_t moduleSize)
@@ -905,6 +908,8 @@ void PlatformPSP::renderLiveMap(uint8_t* map)
     }
 
     sceGuTexFilter(SCEGU_NEAREST, SCEGU_NEAREST);
+
+    isDirty = true;
 }
 
 void PlatformPSP::renderLiveMapTile(uint8_t* map, uint8_t mapX, uint8_t mapY)
@@ -939,6 +944,8 @@ void PlatformPSP::renderLiveMapTile(uint8_t* map, uint8_t mapX, uint8_t mapY)
     sceGumDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_TEXTURE_FLOAT | SCEGU_VERTEX_FLOAT, 2, 0, data);
 
     sceGuTexFilter(SCEGU_NEAREST, SCEGU_NEAREST);
+
+    isDirty = true;
 }
 
 void PlatformPSP::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots)
@@ -972,6 +979,8 @@ void PlatformPSP::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* 
             }
         }
     }
+
+    isDirty = true;
 }
 
 void PlatformPSP::showCursor(uint16_t x, uint16_t y)
@@ -982,6 +991,8 @@ void PlatformPSP::showCursor(uint16_t x, uint16_t y)
     cursorX = x * 24 - 2;
     cursorY = y * 24 -2;
     sceGuCopyImage(SCEGU_PF8888, cursorX, cursorY, 28, 28, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, 0, 0, 32, cursor);
+
+    isDirty = true;
 }
 
 void PlatformPSP::hideCursor()
@@ -989,6 +1000,8 @@ void PlatformPSP::hideCursor()
     if (cursorX != -1) {
         sceGuCopyImage(SCEGU_PF8888, 0, 0, 28, 28, 32, cursor, cursorX, cursorY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2);
         cursorX = -1;
+
+        isDirty = true;
     }
 }
 
@@ -999,6 +1012,8 @@ void PlatformPSP::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinat
     sceGuCopyImage(SCEGU_PF8888, sourceX, sourceY, width, height, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, destinationX, destinationY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2);
 
     sceGuEnable(SCEGU_SCISSOR_TEST);
+
+    isDirty = true;
 }
 
 void PlatformPSP::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
@@ -1008,6 +1023,8 @@ void PlatformPSP::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t hei
     drawRectangle(0xff000000, 0, 0, 0, x, y, width, height);
 
     sceGuEnable(SCEGU_SCISSOR_TEST);
+
+    isDirty = true;
 }
 
 void PlatformPSP::startFadeScreen(uint16_t color, uint16_t intensity)
@@ -1018,6 +1035,8 @@ void PlatformPSP::startFadeScreen(uint16_t color, uint16_t intensity)
     uint32_t bgr = r |  g | b;
     fadeBaseColor = bgr | (bgr << 4);
     fadeIntensity = intensity;
+
+    isDirty = true;
 }
 
 void PlatformPSP::fadeScreen(uint16_t intensity, bool immediate)
@@ -1025,10 +1044,15 @@ void PlatformPSP::fadeScreen(uint16_t intensity, bool immediate)
     if (fadeIntensity != intensity) {
         if (immediate) {
             fadeIntensity = intensity;
-        } else {
+
+            isDirty = true;
+         } else {
             int16_t fadeDelta = intensity > fadeIntensity ? 1 : -1;
             do {
                 fadeIntensity += fadeDelta;
+
+                isDirty = true;
+
                 this->renderFrame(true);
             } while (fadeIntensity != intensity);
         }
@@ -1038,6 +1062,7 @@ void PlatformPSP::fadeScreen(uint16_t intensity, bool immediate)
 void PlatformPSP::stopFadeScreen()
 {
     fadeIntensity = 15;
+    isDirty = true;
 }
 
 void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value)
@@ -1146,6 +1171,10 @@ void PlatformPSP::stopSample()
 
 void PlatformPSP::renderFrame(bool waitForNextFrame)
 {
+    if (!isDirty) {
+        return;
+    }
+
     if (cursorX != -1) {
         drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY, 28, 2);
         drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY + 2, 2, 24);
@@ -1153,8 +1182,8 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
         drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY + 26, 28, 2);
     }
 
-    sceGuCopyImage(SCEGU_PF8888, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, 0, 0, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)(swapBuffers ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1));
-    sceGuDrawBuffer(SCEGU_PF8888, swapBuffers ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
+    sceGuCopyImage(SCEGU_PF8888, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, 0, 0, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)(drawToBuffer0 ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1));
+    sceGuDrawBuffer(SCEGU_PF8888, drawToBuffer0 ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
     if (fadeIntensity != 15) {
         sceGuDisable(SCEGU_SCISSOR_TEST);
 
@@ -1166,9 +1195,9 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
     sceGuSync(SCEGU_SYNC_FINISH, SCEGU_SYNC_WAIT);
 
 //    if (waitForNextFrame) {
-        sceGuDispBuffer(SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, swapBuffers ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
+        sceGuDispBuffer(SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, drawToBuffer0 ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
         sceDisplayWaitVblankStart();
-        swapBuffers = !swapBuffers;
+        drawToBuffer0 = !drawToBuffer0;
 //    }
 
     cacheSize = 0;
@@ -1176,4 +1205,6 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
     sceGuStart(SCEGU_IMMEDIATE, displayList, DISPLAYLIST_SIZE * sizeof(int));
     sceGuDrawBuffer(SCEGU_PF8888, SCEGU_VRAM_BP32_2, SCEGU_VRAM_WIDTH);
     sceGuEnable(SCEGU_SCISSOR_TEST);
+
+    isDirty = false;
 }

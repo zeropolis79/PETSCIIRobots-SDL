@@ -85,7 +85,8 @@ private:
     float scaleY;
     uint32_t fadeBaseColor;
     uint16_t fadeIntensity;
-    bool swapBuffers;
+    bool drawToBuffer0;
+    bool isDirty;
 };
 
 #endif
