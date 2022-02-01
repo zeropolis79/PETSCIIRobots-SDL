@@ -1156,6 +1156,8 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
     sceGuCopyImage(SCEGU_PF8888, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, 0, 0, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)(swapBuffers ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1));
     sceGuDrawBuffer(SCEGU_PF8888, swapBuffers ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
     if (fadeIntensity != 15) {
+        sceGuDisable(SCEGU_SCISSOR_TEST);
+
         uint32_t intensity = (15 - fadeIntensity) << 24;
         uint32_t abgr = intensity | (intensity << 4) | fadeBaseColor;
         drawRectangle(abgr, 0, 0, 0, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT);
