@@ -91,7 +91,7 @@ uint8_t* UNIT_D = MAP_DATA + 6 * 64;
 int8_t* UNIT_HEALTH = (int8_t*)MAP_DATA + 7 * 64;
 uint8_t* MAP = MAP_DATA + 8 * 64 + 256;
 #else
-uint8_t UNIT_TYPE[64];  // Unit type 0=none (64 bytes)	
+uint8_t UNIT_TYPE[64];  // Unit type 0=none (64 bytes)
 uint8_t UNIT_LOC_X[64]; // Unit X location (64 bytes)
 uint8_t UNIT_LOC_Y[64]; // Unit X location (64 bytes)
 uint8_t UNIT_A[64];
