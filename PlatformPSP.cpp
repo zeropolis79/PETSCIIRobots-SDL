@@ -1163,11 +1163,11 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
     sceGuFinish();
     sceGuSync(SCEGU_SYNC_FINISH, SCEGU_SYNC_WAIT);
 
-    if (waitForNextFrame) {
+//    if (waitForNextFrame) {
         sceGuDispBuffer(SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, swapBuffers ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
         sceDisplayWaitVblankStart();
         swapBuffers = !swapBuffers;
-    }
+//    }
 
     cacheSize = 0;
 
