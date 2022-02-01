@@ -2523,6 +2523,9 @@ void GAME_OVER()
         writeToScreenMemory(((SCREEN_HEIGHT_IN_CHARACTERS - 3 - 3) / 2 + 1) * SCREEN_WIDTH_IN_CHARACTERS + (SCREEN_WIDTH_IN_CHARACTERS - 7 - 11) / 2 + X, GAMEOVER2[X]);
         writeToScreenMemory(((SCREEN_HEIGHT_IN_CHARACTERS - 3 - 3) / 2 + 2) * SCREEN_WIDTH_IN_CHARACTERS + (SCREEN_WIDTH_IN_CHARACTERS - 7 - 11) / 2 + X, GAMEOVER3[X]);
     }
+#ifndef _AMIGA // for binary compatibility with the 1.0 release
+    platform->renderFrame();
+#endif
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     platform->stopModule();
