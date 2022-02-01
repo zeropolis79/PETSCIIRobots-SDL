@@ -330,11 +330,11 @@ void DISPLAY_LOAD_MESSAGE2()
 {
     int Y;
     for (Y = 0; Y != 12; Y++) {
-        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS + Y, LOAD_MSG2[Y]);
+        writeToScreenMemory((PLATFORM_SCREEN_HEIGHT - 32) / 2 / 8 * SCREEN_WIDTH_IN_CHARACTERS + (PLATFORM_SCREEN_WIDTH - 320) / 2 / 8 + Y, LOAD_MSG2[Y]);
     }
     char* name = CALC_MAP_NAME();
     for (Y = 0; Y != 16; Y++) {
-        writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS + 12 + Y, name[Y]);
+        writeToScreenMemory((PLATFORM_SCREEN_HEIGHT - 32) / 2 / 8 * SCREEN_WIDTH_IN_CHARACTERS + (PLATFORM_SCREEN_WIDTH - 320) / 2 / 8 + 12 + Y, name[Y]);
     }
 }
 
