@@ -1229,18 +1229,17 @@ void SEARCH_OBJECT()
         }
         // Now check if there is an object there.
         PRINT_INFO(MSG_SEARCHING);
-#ifndef _AMIGA // for binary compatibility with the 1.0 release
-        platform->renderFrame();
-#endif
         for (SEARCHBAR = 0; SEARCHBAR != 8; SEARCHBAR++) {
             for (BGTIMER2 = 18; BGTIMER2 != 0;) { // delay time between search periods
+#ifndef _AMIGA // for binary compatibility with the 1.0 release
+                if (BGTIMER1 != 1) {
+                    platform->renderFrame(true);
+                }
+#endif
                 PET_SCREEN_SHAKE();
                 BACKGROUND_TASKS();
             }
             writeToScreenMemory((SCREEN_HEIGHT_IN_CHARACTERS - 1) * SCREEN_WIDTH_IN_CHARACTERS + 9 + SEARCHBAR, 46); // PERIOD
-#ifndef _AMIGA // for binary compatibility with the 1.0 release
-            platform->renderFrame();
-#endif
         }
 #ifdef PLATFORM_CURSOR_SUPPORT
         platform->hideCursor();
@@ -2518,6 +2517,11 @@ void GAME_OVER()
         KEYTIMER = 100;
     }
     while (KEYTIMER != 0) {
+#ifndef _AMIGA // for binary compatibility with the 1.0 release
+        if (BGTIMER1 != 1) {
+            platform->renderFrame(true);
+        }
+#endif
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
     }
@@ -3486,7 +3490,9 @@ void BACKGROUND_TASKS()
             REDRAW_WINDOW = 0;
             DRAW_MAP_WINDOW();
         }
+#ifdef _AMIGA // for binary compatibility with the 1.0 release
         platform->renderFrame();
+#endif
     }
     // Now check to see if it is time to run background tasks
     if (BGTIMER1 != 1) {
