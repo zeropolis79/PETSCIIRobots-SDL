@@ -21,13 +21,15 @@ OBJECTS=$(SOURCES:.cpp=.o) Tileset.o C64Font.o Faces.o Tiles.o AnimTiles.o Sprit
 
 EXECUTABLE=petrobots
 
-all: $(SOURCES) $(EXECUTABLE).prx
+all: $(SOURCES) $(EXECUTABLE).prx eboot.pbp
 
 $(EXECUTABLE).prx: $(OBJECTS)
 	$(LINK.cpp) $^ $(LIBS) $(LOADLIBES) -startfiles -o $@
 
-$(EXECUTABLE).elf: $(OBJECTS)
-	$(LINK.cpp) $^ $(LIBS) $(LOADLIBES) -zgenelf -o $@
+eboot.pbp: $(EXECUTABLE).prx
+	psp-prx-strip -v $(EXECUTABLE).prx
+	PrxEncrypter $(EXECUTABLE).prx encrypted.prx
+	pack-pbp eboot.pbp PSP/PARAM.SFO PSP/ICON0.PNG /dev/null PSP/PIC0.PNG PSP/PIC1.PNG /dev/null encrypted.prx /dev/null
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c $< -o $@
@@ -128,8 +130,11 @@ SoundMenuBeep.o: SOUND_BEEP2.raw
 SoundShortBeep.o: SOUND_BEEP.raw
 	$(BIN2ELF) --PSP -s soundShortBeep -e soundShortBeepEnd SOUND_BEEP.raw SoundShortBeep.o
 
+install: eboot.pbp
+	cp -v eboot.pbp /run/media/vesuri/disk/psp/game/petrobots/
+
 clean:
-	rm -f $(OBJECTS) *.gcda *.gcno
+	rm -f $(OBJECTS) *.gcda *.gcno *.prx eboot.pbp
 
 #----------- rules --------------
 -include PathDefs
