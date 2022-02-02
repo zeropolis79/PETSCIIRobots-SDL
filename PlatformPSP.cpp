@@ -295,7 +295,6 @@ PlatformPSP::PlatformPSP() :
     joystickStateToReturn(0),
     joystickState(0),
     palette(paletteIntro),
-    cursor(new uint32_t[32 * 28]),
     cursorX(-1),
     cursorY(-1),
     scaleX(1.0f),
@@ -423,7 +422,6 @@ PlatformPSP::~PlatformPSP()
 
     sceWaveExit();
 
-    delete[] cursor;
     delete[] displayList;
     delete[] audioOutputBuffer;
     delete[] audioBuffer;
@@ -988,12 +986,8 @@ void PlatformPSP::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* 
 
 void PlatformPSP::showCursor(uint16_t x, uint16_t y)
 {
-    if (cursorX != -1) {
-        sceGuCopyImage(SCEGU_PF8888, 0, 0, 28, 28, 32, cursor, cursorX, cursorY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2);
-    }
     cursorX = x * 24 - 2;
     cursorY = y * 24 -2;
-    sceGuCopyImage(SCEGU_PF8888, cursorX, cursorY, 28, 28, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, 0, 0, 32, cursor);
 
     isDirty = true;
 }
@@ -1001,7 +995,6 @@ void PlatformPSP::showCursor(uint16_t x, uint16_t y)
 void PlatformPSP::hideCursor()
 {
     if (cursorX != -1) {
-        sceGuCopyImage(SCEGU_PF8888, 0, 0, 28, 28, 32, cursor, cursorX, cursorY, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2);
         cursorX = -1;
 
         isDirty = true;
@@ -1178,6 +1171,10 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
         return;
     }
 
+    sceGuCopyImage(SCEGU_PF8888, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, 0, 0, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)(drawToBuffer0 ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1));
+    sceGuDrawBuffer(SCEGU_PF8888, drawToBuffer0 ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
+    sceGuDisable(SCEGU_SCISSOR_TEST);
+
     if (cursorX != -1) {
         drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY, 28, 2);
         drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY + 2, 2, 24);
@@ -1185,11 +1182,7 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
         drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY + 26, 28, 2);
     }
 
-    sceGuCopyImage(SCEGU_PF8888, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, 0, 0, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)(drawToBuffer0 ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1));
-    sceGuDrawBuffer(SCEGU_PF8888, drawToBuffer0 ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
     if (fadeIntensity != 15) {
-        sceGuDisable(SCEGU_SCISSOR_TEST);
-
         uint32_t intensity = (15 - fadeIntensity) << 24;
         uint32_t abgr = intensity | (intensity << 4) | fadeBaseColor;
         drawRectangle(abgr, 0, 0, 0, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT);

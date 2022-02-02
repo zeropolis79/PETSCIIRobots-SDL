@@ -78,7 +78,6 @@ private:
     uint16_t joystickStateToReturn;
     uint16_t joystickState;
     uint32_t* palette;
-    uint32_t* cursor;
     int16_t cursorX;
     int16_t cursorY;
     float scaleX;
