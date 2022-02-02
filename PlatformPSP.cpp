@@ -483,8 +483,11 @@ SceInt32 PlatformPSP::audioThread(SceSize args, SceVoid *argb)
 
         // Render to the actual output buffer
         for (int i = 0; i < AUDIO_BUFFER_SIZE; i++) {
-            platform->audioOutputBuffer[platform->audioOutputBufferOffset + i * 2] = platform->audioBuffer[i];
-            platform->audioOutputBuffer[platform->audioOutputBufferOffset + i * 2 + 1] = platform->audioBuffer[i];
+            int16_t sample = platform->audioBuffer[i];
+            sample = sample < -8192 ? INT16_MIN :
+                    (sample >= 8192 ? INT16_MAX : (sample << 2));
+            platform->audioOutputBuffer[platform->audioOutputBufferOffset + i * 2] = sample;
+            platform->audioOutputBuffer[platform->audioOutputBufferOffset + i * 2 + 1] = sample;
         }
 
         // Queue the output buffer for playback
