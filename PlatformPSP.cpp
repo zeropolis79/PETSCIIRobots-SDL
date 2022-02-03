@@ -868,6 +868,11 @@ void PlatformPSP::renderFace(uint8_t face, uint16_t x, uint16_t y)
 
 void PlatformPSP::renderLiveMap(uint8_t* map)
 {
+    clearRect(0, 0, PLATFORM_SCREEN_WIDTH - 56, LIVE_MAP_ORIGIN_Y);
+    clearRect(0, LIVE_MAP_ORIGIN_Y, LIVE_MAP_ORIGIN_X, PLATFORM_SCREEN_HEIGHT - 32 - 2 * LIVE_MAP_ORIGIN_Y);
+    clearRect(PLATFORM_SCREEN_WIDTH - 56 - LIVE_MAP_ORIGIN_X, LIVE_MAP_ORIGIN_Y, LIVE_MAP_ORIGIN_X, PLATFORM_SCREEN_HEIGHT - 32 - 2 * LIVE_MAP_ORIGIN_Y);
+    clearRect(0, PLATFORM_SCREEN_HEIGHT - 32 - LIVE_MAP_ORIGIN_Y, PLATFORM_SCREEN_WIDTH - 56, LIVE_MAP_ORIGIN_Y);
+
     sceGuEnable(SCEGU_TEXTURE);
     sceGuTexFilter(SCEGU_LINEAR, SCEGU_LINEAR);
     sceGuTexImage(0, tiles[2], tiles[3], tiles[2], tiles + 4);
