@@ -104,7 +104,6 @@ psp_boot_packager c param.sfo "petrobots.prx" eboot.pbp
 
 PSP TODO
 --------
-- change application ID in PARAM.SFO
 - native resolution intro screen and game over screen
 
 TODO
