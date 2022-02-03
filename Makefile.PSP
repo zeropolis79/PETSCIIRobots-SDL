@@ -132,6 +132,7 @@ SoundShortBeep.o: SOUND_BEEP.raw
 
 install: eboot.pbp
 	cp -v eboot.pbp /run/media/vesuri/disk/psp/game/petrobots/
+	umount /run/media/vesuri/disk
 
 clean:
 	rm -f $(OBJECTS) *.gcda *.gcno *.prx eboot.pbp
