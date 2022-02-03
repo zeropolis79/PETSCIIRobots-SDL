@@ -34,7 +34,7 @@ static int cacheSize = 0;
 
 #define LARGEST_MODULE_SIZE 105654
 #define TOTAL_SAMPLE_SIZE 75755
-#define AUDIO_BUFFER_SIZE 1024
+#define AUDIO_BUFFER_SIZE 256
 #define SAMPLERATE 44100
 
 extern uint8_t tileset[];
@@ -289,8 +289,6 @@ PlatformPSP::PlatformPSP() :
     audioOutputBuffer(new SceShort16[AUDIO_BUFFER_SIZE * 2 * 2]),
     audioOutputBufferOffset(0),
     audioThreadId(0),
-    interruptIntervalInSamples(SAMPLERATE / framesPerSecond_),
-    samplesSinceInterrupt(SAMPLERATE / framesPerSecond_),
     displayList(new int[DISPLAYLIST_SIZE]),
     joystickStateToReturn(0),
     joystickState(0),
@@ -408,6 +406,7 @@ PlatformPSP::PlatformPSP() :
     audioThreadId = sceKernelCreateThread(SOUND_THREAD_NAME, audioThread, SCE_KERNEL_USER_HIGHEST_PRIORITY, 1024, 0, NULL);
     sceKernelStartThread(audioThreadId, sizeof(PlatformPSP *), &p);
     sceKernelStartThread(sceKernelCreateThread("update_thread", callbackThread, 0x11, 2048, 0, NULL), sizeof(PlatformPSP*), &p);
+    sceDisplaySetVblankCallback(0, vblankHandler, p);
 }
 
 PlatformPSP::~PlatformPSP()
@@ -415,6 +414,8 @@ PlatformPSP::~PlatformPSP()
     sceGuFinish();
     sceGuSync(SCEGU_SYNC_FINISH, SCEGU_SYNC_WAIT);
     sceGuTerm();
+
+    sceDisplaySetVblankCallback(0, 0, 0);
 
     if (audioThreadId != -1) {
         sceKernelWaitThreadEnd(audioThreadId, NULL);
@@ -457,27 +458,8 @@ SceInt32 PlatformPSP::audioThread(SceSize args, SceVoid *argb)
 
     // Render loop
     while (!platform->quit) {
-        int16_t *bufferPosition = platform->audioBuffer;
-        for (int samplesLeft = AUDIO_BUFFER_SIZE; samplesLeft > 0;) {
-            // Number of samples to process before VBI
-            int samplesToProcess = platform->samplesSinceInterrupt + samplesLeft >= platform->interruptIntervalInSamples ? platform->interruptIntervalInSamples - platform->samplesSinceInterrupt : samplesLeft;
-
-            // Process each audio channel
-            processAudio(bufferPosition, samplesToProcess, SAMPLERATE);
-            bufferPosition += samplesToProcess;
-
-            // Run the vertical blank interupt if required
-            platform->samplesSinceInterrupt += samplesToProcess;
-            if (platform->samplesSinceInterrupt >= platform->interruptIntervalInSamples) {
-                if (platform->interrupt) {
-                    (*platform->interrupt)();
-                }
-                platform->samplesSinceInterrupt -= platform->interruptIntervalInSamples;
-            }
-
-            // Samples left
-            samplesLeft -= samplesToProcess;
-        }
+        // Process each audio channel
+        processAudio(platform->audioBuffer, AUDIO_BUFFER_SIZE, SAMPLERATE);
 
         // Render to the actual output buffer
         for (int i = 0; i < AUDIO_BUFFER_SIZE; i++) {
@@ -496,6 +478,15 @@ SceInt32 PlatformPSP::audioThread(SceSize args, SceVoid *argb)
     }
 
     return 0;
+}
+
+void PlatformPSP::vblankHandler(int idx, void* cookie)
+{
+    PlatformPSP* platform = (PlatformPSP*)cookie;
+
+    if (idx == 0 && platform->interrupt) {
+        (*platform->interrupt)();
+    }
 }
 
 void PlatformPSP::drawRectangle(uint32_t color, uint32_t* texture, uint16_t tx, uint16_t ty, uint16_t x, uint16_t y, uint16_t width, uint16_t height)
@@ -1191,7 +1182,7 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
     sceGuSync(SCEGU_SYNC_FINISH, SCEGU_SYNC_WAIT);
 
     sceGuDispBuffer(SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, drawToBuffer0 ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
-    sceDisplayWaitVblankStart();
+    sceDisplayWaitVblankStartCB();
     drawToBuffer0 = !drawToBuffer0;
 
     cacheSize = 0;

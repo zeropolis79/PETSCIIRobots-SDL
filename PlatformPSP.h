@@ -55,7 +55,8 @@ public:
 private:
     static int callbackThread(SceSize args, void* argp);
     static int exitCallback(int arg1, int arg2, void* common);
-    static SceInt32 audioThread(SceSize args, SceVoid *argb);
+    static SceInt32 audioThread(SceSize args, SceVoid* argb);
+    static void vblankHandler(int idx, void* cookie);
     void drawRectangle(uint32_t color, uint32_t* texture, uint16_t tx, uint16_t ty, uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     void undeltaSamples(uint8_t* module, uint32_t moduleSize);
     void setSampleData(uint8_t* module);
@@ -72,8 +73,6 @@ private:
     SceShort16 *audioOutputBuffer;
     uint32_t audioOutputBufferOffset;
     SceUID audioThreadId;
-    uint16_t interruptIntervalInSamples;
-    uint16_t samplesSinceInterrupt;
     int* displayList;
     uint16_t joystickStateToReturn;
     uint16_t joystickState;
