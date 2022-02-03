@@ -783,10 +783,6 @@ void PlatformPSP::displayImage(Image image)
         sceGumScale(&vec);
 
         drawRectangle(0xffffffff, images[image], 0, 0, 0, 0, images[image][0], images[image][1]);
-
-        if (image == ImageIntro) {
-            this->clearRect(32, 36, 80, 8);
-        }
     }
 }
 
