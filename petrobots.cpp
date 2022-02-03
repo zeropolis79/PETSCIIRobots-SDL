@@ -3490,9 +3490,7 @@ void BACKGROUND_TASKS()
             REDRAW_WINDOW = 0;
             DRAW_MAP_WINDOW();
         }
-#ifdef _AMIGA // for binary compatibility with the 1.0 release
         platform->renderFrame();
-#endif
     }
     // Now check to see if it is time to run background tasks
     if (BGTIMER1 != 1) {
