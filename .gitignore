@@ -11,7 +11,7 @@ PETSCIIRobots.slave
 *.lha
 *.adf
 *.psp
-petrobots.map
-petrobots.prx
+*.prx
+*.map
 PathDefs
 eboot.pbp
