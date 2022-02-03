@@ -870,7 +870,12 @@ void PlatformPSP::renderLiveMap(uint8_t* map)
 {
     sceGuEnable(SCEGU_TEXTURE);
     sceGuTexFilter(SCEGU_LINEAR, SCEGU_LINEAR);
+    sceGuTexImage(0, tiles[2], tiles[3], tiles[2], tiles + 4);
+    sceGuColor(0xffffffff);
 
+    int oldCacheSize = cacheSize;
+    float* dataStart = (float*)(cache + cacheSize);
+    float* data = dataStart;
     for (int mapY = 0; mapY < 64; mapY++) {
         for (int mapX = 0; mapX < 128; mapX++) {
             int tile = *map++;
@@ -879,27 +884,25 @@ void PlatformPSP::renderLiveMap(uint8_t* map)
             int tx = (tile & 15) * 24;
             int ty = (tile >> 4) * 24;
 
-            sceGuTexImage(0, tiles[2], tiles[3], tiles[2], tiles + 4);
-            sceGuColor(0xffffffff);
+            *data++ = tx / (float)tiles[2];
+            *data++ = ty / (float)tiles[3];
+            *data++ = x;
+            *data++ = (SCEGU_SCR_HEIGHT / scaleY) - y;
+            *data++ = 0;
 
-            int oldCacheSize = cacheSize;
-            float* data = (float*)(cache + cacheSize);
-            data[0 * 5 + 0] = tx / (float)tiles[2];
-            data[0 * 5 + 1] = ty / (float)tiles[3];
-            data[0 * 5 + 2] = x;
-            data[0 * 5 + 3] = (SCEGU_SCR_HEIGHT / scaleY) - y;
-            data[0 * 5 + 4] = 0;
-            data[1 * 5 + 0] = (tx + 24) / (float)tiles[2];
-            data[1 * 5 + 1] = (ty + 24) / (float)tiles[3];
-            data[1 * 5 + 2] = x + 3;
-            data[1 * 5 + 3] = (SCEGU_SCR_HEIGHT / scaleY) - (y + 3);
-            data[1 * 5 + 4] = 0;
-            cacheSize += 2 * 5 * sizeof(float);
-
-            sceKernelDcacheWritebackRange(data, cacheSize - oldCacheSize);
-            sceGumDrawArray(SCEGU_PRIM_RECTANGLES, SCEGU_TEXTURE_FLOAT | SCEGU_VERTEX_FLOAT, 2, 0, data);
+            *data++ = (tx + 24) / (float)tiles[2];
+            *data++ = (ty + 24) / (float)tiles[3];
+            *data++ = x + 3;
+            *data++ = (SCEGU_SCR_HEIGHT / scaleY) - (y + 3);
+            *data++ = 0;
         }
     }
+
+    cacheSize += 64 * 128 * 2 * 5 * sizeof(float);
+
+    sceKernelDcacheWritebackRange(dataStart, cacheSize - oldCacheSize);
+    sceGumDrawArrayN(SCEGU_PRIM_RECTANGLES, SCEGU_TEXTURE_FLOAT | SCEGU_VERTEX_FLOAT, 2, 64 * 128, 0, dataStart);
+
     for (int i = 0; i < 48; i++) {
         unitTypes[i] = 255;
     }
