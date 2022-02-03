@@ -84,6 +84,7 @@ private:
     uint32_t fadeBaseColor;
     uint16_t fadeIntensity;
     bool drawToBuffer0;
+    bool swapBuffers;
     bool isDirty;
 };
 

@@ -300,6 +300,7 @@ PlatformPSP::PlatformPSP() :
     fadeBaseColor(0),
     fadeIntensity(0),
     drawToBuffer0(false),
+    swapBuffers(false),
     isDirty(false)
 {
     // Clear the first two bytes of effect samples to enable the 2-byte no-loop loop
@@ -484,8 +485,16 @@ void PlatformPSP::vblankHandler(int idx, void* cookie)
 {
     PlatformPSP* platform = (PlatformPSP*)cookie;
 
-    if (idx == 0 && platform->interrupt) {
-        (*platform->interrupt)();
+    if (idx == 0) {
+        if (platform->swapBuffers) {
+            sceDisplaySetFrameBuf(platform->eDRAMAddress + (uint32_t)(platform->drawToBuffer0 ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1), 512, SCE_DISPLAY_PIXEL_RGBA8888, SCE_DISPLAY_UPDATETIMING_NEXTHSYNC);
+            platform->drawToBuffer0 = !platform->drawToBuffer0;
+            platform->swapBuffers = false;
+        }
+
+        if (platform->interrupt) {
+            (*platform->interrupt)();
+        }
     }
 }
 
@@ -1162,6 +1171,8 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
         return;
     }
 
+    while (swapBuffers);
+
     sceGuCopyImage(SCEGU_PF8888, 0, 0, SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)SCEGU_VRAM_BP32_2, 0, 0, SCEGU_VRAM_WIDTH, eDRAMAddress + (uint32_t)(drawToBuffer0 ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1));
     sceGuDrawBuffer(SCEGU_PF8888, drawToBuffer0 ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
     sceGuDisable(SCEGU_SCISSOR_TEST);
@@ -1181,10 +1192,7 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
     sceGuFinish();
     sceGuSync(SCEGU_SYNC_FINISH, SCEGU_SYNC_WAIT);
 
-    sceGuDispBuffer(SCEGU_SCR_WIDTH, SCEGU_SCR_HEIGHT, drawToBuffer0 ? SCEGU_VRAM_BP32_0 : SCEGU_VRAM_BP32_1, SCEGU_VRAM_WIDTH);
-    sceDisplayWaitVblankStartCB();
-    drawToBuffer0 = !drawToBuffer0;
-
+    swapBuffers = true;
     cacheSize = 0;
 
     sceGuStart(SCEGU_IMMEDIATE, displayList, DISPLAYLIST_SIZE * sizeof(int));
