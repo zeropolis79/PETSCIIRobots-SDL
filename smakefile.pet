@@ -16,10 +16,10 @@ ungzip.o: ungzip.s
 Palette.o: Palette.cpp
 Tileset.o: tileset.pet
     Bin2Hunk tileset.pet Tileset.o NAME _tileset HUNK data
-PETFont.o: PETFont.raw
-    Bin2Hunk PETFont.raw PETFont.o NAME _fontPlanes HUNK data
-SquareWave.o: SquareWave.raw
-    Bin2Hunk SquareWave.raw SquareWave.o NAME _squareWave CHIP
+PETFont.o: Amiga/PETFont.raw
+    Bin2Hunk Amiga/PETFont.raw PETFont.o NAME _fontPlanes HUNK data
+SquareWave.o: Amiga/SquareWave.raw
+    Bin2Hunk Amiga/SquareWave.raw SquareWave.o NAME _squareWave CHIP
 
 clean:
     delete $(OBJECTS) PETRobots PETRobots.lnk

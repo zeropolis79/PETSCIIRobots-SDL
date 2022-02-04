@@ -22,24 +22,24 @@ Palette.o: Palette.cpp
 PT2.3F_replay_cia.o: PT2.3F_replay_cia.s
 Tileset.o: tileset.amiga
     Bin2Hunk tileset.amiga Tileset.o NAME _tileset HUNK data
-C64Font.o: C64Font.raw
-    Bin2Hunk C64Font.raw C64Font.o NAME _fontPlanes HUNK data
-Faces.o: Faces.raw
-    Bin2Hunk Faces.raw Faces.o NAME _facesPlanes CHIP
-Tiles.o: Tiles.raw
-    Bin2Hunk Tiles.raw Tiles.o NAME _tilesPlanes CHIP
-AnimTiles.o: AnimTiles.raw
-    Bin2Hunk AnimTiles.raw AnimTiles.o NAME _animTilesPlanes CHIP
-Sprites.o: Sprites.raw
-    Bin2Hunk Sprites.raw Sprites.o NAME _spritesPlanes CHIP
-SpritesMask.o: SpritesMask.raw
-    Bin2Hunk SpritesMask.raw SpritesMask.o NAME _spritesMask CHIP
-Items.o: Items.raw
-    Bin2Hunk Items.raw Items.o NAME _itemsPlanes CHIP
-Keys.o: Keys.raw
-    Bin2Hunk Keys.raw Keys.o NAME _keysPlanes HUNK data
-Health.o: Health.raw
-    Bin2Hunk Health.raw Health.o NAME _healthPlanes CHIP
+C64Font.o: Amiga/C64Font.raw
+    Bin2Hunk Amiga/C64Font.raw C64Font.o NAME _fontPlanes HUNK data
+Faces.o: Amiga/Faces.raw
+    Bin2Hunk Amiga/Faces.raw Faces.o NAME _facesPlanes CHIP
+Tiles.o: Amiga/Tiles.raw
+    Bin2Hunk Amiga/Tiles.raw Tiles.o NAME _tilesPlanes CHIP
+AnimTiles.o: Amiga/AnimTiles.raw
+    Bin2Hunk Amiga/AnimTiles.raw AnimTiles.o NAME _animTilesPlanes CHIP
+Sprites.o: Amiga/Sprites.raw
+    Bin2Hunk Amiga/Sprites.raw Sprites.o NAME _spritesPlanes CHIP
+SpritesMask.o: Amiga/SpritesMask.raw
+    Bin2Hunk Amiga/SpritesMask.raw SpritesMask.o NAME _spritesMask CHIP
+Items.o: Amiga/Items.raw
+    Bin2Hunk Amiga/Items.raw Items.o NAME _itemsPlanes CHIP
+Keys.o: Amiga/Keys.raw
+    Bin2Hunk Amiga/Keys.raw Keys.o NAME _keysPlanes HUNK data
+Health.o: Amiga/Health.raw
+    Bin2Hunk Amiga/Health.raw Health.o NAME _healthPlanes CHIP
 SoundFXModule.o: Music/mod.soundfx
     Bin2Hunk Music/mod.soundfx SoundFXModule.o NAME _soundFXModule CHIP
 SoundExplosion.o: Sounds/sounds_dsbarexp.raw
@@ -72,8 +72,8 @@ SoundMenuBeep.o: Sounds/SOUND_BEEP2.raw
     Bin2Hunk Sounds/SOUND_BEEP2.raw SoundMenuBeep.o NAME _soundMenuBeep CHIP
 SoundShortBeep.o: Sounds/SOUND_BEEP.raw
     Bin2Hunk Sounds/SOUND_BEEP.raw SoundShortBeep.o NAME _soundShortBeep CHIP
-SquareWave.o: SquareWave.raw
-    Bin2Hunk SquareWave.raw SquareWave.o NAME _squareWave CHIP
+SquareWave.o: Amiga/SquareWave.raw
+    Bin2Hunk Amiga/SquareWave.raw SquareWave.o NAME _squareWave CHIP
 DecompressData.o: DecompressData.c
 
 clean:
