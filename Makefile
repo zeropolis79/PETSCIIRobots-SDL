@@ -10,13 +10,16 @@ SOURCES := petrobots.cpp Platform.cpp PlatformSDL.cpp PT2.3A_replay_cia.cpp
 OBJECTS := $(SOURCES:.cpp=.o)
 TARGET := petrobots
 
-all: $(TARGET)
+all: $(TARGET) setup
 
 .cpp.o:
 	$(CXX) $(CXXFLAGS) -c -o $@ $<
 
 $(TARGET): $(OBJECTS)
 	$(CXX) $(CXXFLAGS) -o $@ $^ $(LDFLAGS)
+
+setup:
+	SDL/setup.sh
 
 clean:
 	rm -f $(OBJECTS) $(TARGET)
