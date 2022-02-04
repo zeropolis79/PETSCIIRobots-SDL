@@ -99,36 +99,36 @@ ModuleRobotAttack.o: Music/mod.robot\ attack
 	$(BIN2ELF) --PSP -s moduleRobotAttack -e moduleRobotAttackEnd "Music/mod.robot attack" ModuleRobotAttack.o
 ModuleRushinIn.o: Music/mod.rushin\ in
 	$(BIN2ELF) --PSP -s moduleRushinIn -e moduleRushinInEnd "Music/mod.rushin in" ModuleRushinIn.o
-SoundExplosion.o: sounds_dsbarexp.raw
-	$(BIN2ELF) --PSP -s soundExplosion -e soundExplosionEnd sounds_dsbarexp.raw SoundExplosion.o
-SoundMedkit.o: SOUND_MEDKIT.raw
-	$(BIN2ELF) --PSP -s soundMedkit -e soundMedkitEnd SOUND_MEDKIT.raw SoundMedkit.o
-SoundEMP.o: SOUND_EMP.raw
-	$(BIN2ELF) --PSP -s soundEMP -e soundEMPEnd SOUND_EMP.raw SoundEMP.o
-SoundMagnet.o: SOUND_MAGNET2.raw
-	$(BIN2ELF) --PSP -s soundMagnet -e soundMagnetEnd SOUND_MAGNET2.raw SoundMagnet.o
-SoundShock.o: SOUND_SHOCK.raw
-	$(BIN2ELF) --PSP -s soundShock -e soundShockEnd SOUND_SHOCK.raw SoundShock.o
-SoundMove.o: SOUND_MOVE.raw
-	$(BIN2ELF) --PSP -s soundMove -e soundMoveEnd SOUND_MOVE.raw SoundMove.o
-SoundPlasma.o: SOUND_PLASMA_FASTER.raw
-	$(BIN2ELF) --PSP -s soundPlasma -e soundPlasmaEnd SOUND_PLASMA_FASTER.raw SoundPlasma.o
-SoundPistol.o: sounds_dspistol.raw
-	$(BIN2ELF) --PSP -s soundPistol -e soundPistolEnd sounds_dspistol.raw SoundPistol.o
-SoundItemFound.o: SOUND_FOUND_ITEM.raw
-	$(BIN2ELF) --PSP -s soundItemFound -e soundItemFoundEnd SOUND_FOUND_ITEM.raw SoundItemFound.o
-SoundError.o: SOUND_ERROR.raw
-	$(BIN2ELF) --PSP -s soundError -e soundErrorEnd SOUND_ERROR.raw SoundError.o
-SoundCycleWeapon.o: SOUND_CYCLE_WEAPON.raw
-	$(BIN2ELF) --PSP -s soundCycleWeapon -e soundCycleWeaponEnd SOUND_CYCLE_WEAPON.raw SoundCycleWeapon.o
-SoundCycleItem.o: SOUND_CYCLE_ITEM.raw
-	$(BIN2ELF) --PSP -s soundCycleItem -e soundCycleItemEnd SOUND_CYCLE_ITEM.raw SoundCycleItem.o
-SoundDoor.o: SOUND_DOOR_FASTER.raw
-	$(BIN2ELF) --PSP -s soundDoor -e soundDoorEnd SOUND_DOOR_FASTER.raw SoundDoor.o
-SoundMenuBeep.o: SOUND_BEEP2.raw
-	$(BIN2ELF) --PSP -s soundMenuBeep -e soundMenuBeepEnd SOUND_BEEP2.raw SoundMenuBeep.o
-SoundShortBeep.o: SOUND_BEEP.raw
-	$(BIN2ELF) --PSP -s soundShortBeep -e soundShortBeepEnd SOUND_BEEP.raw SoundShortBeep.o
+SoundExplosion.o: Sounds/sounds_dsbarexp.raw
+	$(BIN2ELF) --PSP -s soundExplosion -e soundExplosionEnd Sounds/sounds_dsbarexp.raw SoundExplosion.o
+SoundMedkit.o: Sounds/SOUND_MEDKIT.raw
+	$(BIN2ELF) --PSP -s soundMedkit -e soundMedkitEnd Sounds/SOUND_MEDKIT.raw SoundMedkit.o
+SoundEMP.o: Sounds/SOUND_EMP.raw
+	$(BIN2ELF) --PSP -s soundEMP -e soundEMPEnd Sounds/SOUND_EMP.raw SoundEMP.o
+SoundMagnet.o: Sounds/SOUND_MAGNET2.raw
+	$(BIN2ELF) --PSP -s soundMagnet -e soundMagnetEnd Sounds/SOUND_MAGNET2.raw SoundMagnet.o
+SoundShock.o: Sounds/SOUND_SHOCK.raw
+	$(BIN2ELF) --PSP -s soundShock -e soundShockEnd Sounds/SOUND_SHOCK.raw SoundShock.o
+SoundMove.o: Sounds/SOUND_MOVE.raw
+	$(BIN2ELF) --PSP -s soundMove -e soundMoveEnd Sounds/SOUND_MOVE.raw SoundMove.o
+SoundPlasma.o: Sounds/SOUND_PLASMA_FASTER.raw
+	$(BIN2ELF) --PSP -s soundPlasma -e soundPlasmaEnd Sounds/SOUND_PLASMA_FASTER.raw SoundPlasma.o
+SoundPistol.o: Sounds/sounds_dspistol.raw
+	$(BIN2ELF) --PSP -s soundPistol -e soundPistolEnd Sounds/sounds_dspistol.raw SoundPistol.o
+SoundItemFound.o: Sounds/SOUND_FOUND_ITEM.raw
+	$(BIN2ELF) --PSP -s soundItemFound -e soundItemFoundEnd Sounds/SOUND_FOUND_ITEM.raw SoundItemFound.o
+SoundError.o: Sounds/SOUND_ERROR.raw
+	$(BIN2ELF) --PSP -s soundError -e soundErrorEnd Sounds/SOUND_ERROR.raw SoundError.o
+SoundCycleWeapon.o: Sounds/SOUND_CYCLE_WEAPON.raw
+	$(BIN2ELF) --PSP -s soundCycleWeapon -e soundCycleWeaponEnd Sounds/SOUND_CYCLE_WEAPON.raw SoundCycleWeapon.o
+SoundCycleItem.o: Sounds/SOUND_CYCLE_ITEM.raw
+	$(BIN2ELF) --PSP -s soundCycleItem -e soundCycleItemEnd Sounds/SOUND_CYCLE_ITEM.raw SoundCycleItem.o
+SoundDoor.o: Sounds/SOUND_DOOR_FASTER.raw
+	$(BIN2ELF) --PSP -s soundDoor -e soundDoorEnd Sounds/SOUND_DOOR_FASTER.raw SoundDoor.o
+SoundMenuBeep.o: Sounds/SOUND_BEEP2.raw
+	$(BIN2ELF) --PSP -s soundMenuBeep -e soundMenuBeepEnd Sounds/SOUND_BEEP2.raw SoundMenuBeep.o
+SoundShortBeep.o: Sounds/SOUND_BEEP.raw
+	$(BIN2ELF) --PSP -s soundShortBeep -e soundShortBeepEnd Sounds/SOUND_BEEP.raw SoundShortBeep.o
 
 install: eboot.pbp
 	cp -v eboot.pbp /run/media/vesuri/disk/psp/game/petrobots/
