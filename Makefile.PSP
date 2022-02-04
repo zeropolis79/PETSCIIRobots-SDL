@@ -83,22 +83,22 @@ LevelL.o: level-L
 	$(BIN2ELF) --PSP -s levelL -e levelLEnd level-L LevelL.o
 LevelM.o: level-M
 	$(BIN2ELF) --PSP -s levelM -e levelMEnd level-M LevelM.o
-ModuleSoundFX.o: mod.soundfx
-	$(BIN2ELF) --PSP -s moduleSoundFX -e moduleSoundFXEnd mod.soundfx ModuleSoundFX.o
-ModuleMetalHeads.o: mod.metal\ heads
-	$(BIN2ELF) --PSP -s moduleMetalHeads -e moduleMetalHeadsEnd "mod.metal heads" ModuleMetalHeads.o
-ModuleWin.o: mod.win
-	$(BIN2ELF) --PSP -s moduleWin -e moduleWinEnd mod.win ModuleWin.o
-ModuleLose.o: mod.lose
-	$(BIN2ELF) --PSP -s moduleLose -e moduleLoseEnd mod.lose ModuleLose.o
-ModuleMetallicBopAmiga.o: mod.metallic\ bop\ amiga
-	$(BIN2ELF) --PSP -s moduleMetallicBopAmiga -e moduleMetallicBopAmigaEnd "mod.metallic bop amiga" ModuleMetallicBopAmiga.o
-ModuleGetPsyched.o: mod.get\ psyched
-	$(BIN2ELF) --PSP -s moduleGetPsyched -e moduleGetPsychedEnd "mod.get psyched" ModuleGetPsyched.o
-ModuleRobotAttack.o: mod.robot\ attack
-	$(BIN2ELF) --PSP -s moduleRobotAttack -e moduleRobotAttackEnd "mod.robot attack" ModuleRobotAttack.o
-ModuleRushinIn.o: mod.rushin\ in
-	$(BIN2ELF) --PSP -s moduleRushinIn -e moduleRushinInEnd "mod.rushin in" ModuleRushinIn.o
+ModuleSoundFX.o: Music/mod.soundfx
+	$(BIN2ELF) --PSP -s moduleSoundFX -e moduleSoundFXEnd Music/mod.soundfx ModuleSoundFX.o
+ModuleMetalHeads.o: Music/mod.metal\ heads
+	$(BIN2ELF) --PSP -s moduleMetalHeads -e moduleMetalHeadsEnd "Music/mod.metal heads" ModuleMetalHeads.o
+ModuleWin.o: Music/mod.win
+	$(BIN2ELF) --PSP -s moduleWin -e moduleWinEnd Music/mod.win ModuleWin.o
+ModuleLose.o: Music/mod.lose
+	$(BIN2ELF) --PSP -s moduleLose -e moduleLoseEnd Music/mod.lose ModuleLose.o
+ModuleMetallicBopAmiga.o: Music/mod.metallic\ bop\ amiga
+	$(BIN2ELF) --PSP -s moduleMetallicBopAmiga -e moduleMetallicBopAmigaEnd "Music/mod.metallic bop amiga" ModuleMetallicBopAmiga.o
+ModuleGetPsyched.o: Music/mod.get\ psyched
+	$(BIN2ELF) --PSP -s moduleGetPsyched -e moduleGetPsychedEnd "Music/mod.get psyched" ModuleGetPsyched.o
+ModuleRobotAttack.o: Music/mod.robot\ attack
+	$(BIN2ELF) --PSP -s moduleRobotAttack -e moduleRobotAttackEnd "Music/mod.robot attack" ModuleRobotAttack.o
+ModuleRushinIn.o: Music/mod.rushin\ in
+	$(BIN2ELF) --PSP -s moduleRushinIn -e moduleRushinInEnd "Music/mod.rushin in" ModuleRushinIn.o
 SoundExplosion.o: sounds_dsbarexp.raw
 	$(BIN2ELF) --PSP -s soundExplosion -e soundExplosionEnd sounds_dsbarexp.raw SoundExplosion.o
 SoundMedkit.o: SOUND_MEDKIT.raw

@@ -40,8 +40,8 @@ Keys.o: Keys.raw
     Bin2Hunk Keys.raw Keys.o NAME _keysPlanes HUNK data
 Health.o: Health.raw
     Bin2Hunk Health.raw Health.o NAME _healthPlanes CHIP
-SoundFXModule.o: mod.soundfx
-    Bin2Hunk mod.soundfx SoundFXModule.o NAME _soundFXModule CHIP
+SoundFXModule.o: Music/mod.soundfx
+    Bin2Hunk Music/mod.soundfx SoundFXModule.o NAME _soundFXModule CHIP
 SoundExplosion.o: sounds_dsbarexp.raw
     Bin2Hunk sounds_dsbarexp.raw SoundExplosion.o NAME _soundExplosion CHIP
 SoundMedkit.o: SOUND_MEDKIT.raw
