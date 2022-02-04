@@ -35,54 +35,54 @@ eboot.pbp: $(EXECUTABLE).prx
 	$(CXX) $(CXXFLAGS) -c $< -o $@
 Tileset.o: tileset.amiga
 	$(BIN2ELF) --PSP -s tileset -e tilesetEnd tileset.amiga Tileset.o
-C64Font.o: c64font.psp
-	$(BIN2ELF) --PSP -s font -e fontEnd c64font.psp C64Font.o
-Faces.o: faces.psp
-	$(BIN2ELF) --PSP -s faces -e facesEnd faces.psp Faces.o
-Tiles.o: tiles.psp
-	$(BIN2ELF) --PSP -s tiles -e tilesEnd tiles.psp Tiles.o
-AnimTiles.o: animtiles.psp
-	$(BIN2ELF) --PSP -s animTiles -e animTilesEnd animtiles.psp AnimTiles.o
-Sprites.o: sprites.psp
-	$(BIN2ELF) --PSP -s sprites -e spritesEnd sprites.psp Sprites.o
-Items.o: items.psp
-	$(BIN2ELF) --PSP -s items -e itemsEnd items.psp Items.o
-Keys.o: keys.psp
-	$(BIN2ELF) --PSP -s keys -e keysEnd keys.psp Keys.o
-Health.o: health.psp
-	$(BIN2ELF) --PSP -s health -e healthEnd health.psp Health.o
-IntroScreen.o: introscreen.psp
-	$(BIN2ELF) --PSP -s introScreen -e introScreenEnd introscreen.psp IntroScreen.o
-GameScreen.o: gamescreen.psp
-	$(BIN2ELF) --PSP -s gameScreen -e gameScreenEnd gamescreen.psp GameScreen.o
-GameOver.o: gameover.psp
-	$(BIN2ELF) --PSP -s gameOver -e gameOverEnd gameover.psp GameOver.o
-LevelA.o: level-A
-	$(BIN2ELF) --PSP -s levelA -e levelAEnd level-A LevelA.o
-LevelB.o: level-B
-	$(BIN2ELF) --PSP -s levelB -e levelBEnd level-B LevelB.o
-LevelC.o: level-C
-	$(BIN2ELF) --PSP -s levelC -e levelCEnd level-C LevelC.o
-LevelD.o: level-D
-	$(BIN2ELF) --PSP -s levelD -e levelDEnd level-D LevelD.o
-LevelE.o: level-E
-	$(BIN2ELF) --PSP -s levelE -e levelEEnd level-E LevelE.o
-LevelF.o: level-F
-	$(BIN2ELF) --PSP -s levelF -e levelFEnd level-F LevelF.o
-LevelG.o: level-G
-	$(BIN2ELF) --PSP -s levelG -e levelGEnd level-G LevelG.o
-LevelH.o: level-H
-	$(BIN2ELF) --PSP -s levelH -e levelHEnd level-H LevelH.o
-LevelI.o: level-I
-	$(BIN2ELF) --PSP -s levelI -e levelIEnd level-I LevelI.o
-LevelJ.o: level-J
-	$(BIN2ELF) --PSP -s levelJ -e levelJEnd level-J LevelJ.o
-LevelK.o: level-K
-	$(BIN2ELF) --PSP -s levelK -e levelKEnd level-K LevelK.o
-LevelL.o: level-L
-	$(BIN2ELF) --PSP -s levelL -e levelLEnd level-L LevelL.o
-LevelM.o: level-M
-	$(BIN2ELF) --PSP -s levelM -e levelMEnd level-M LevelM.o
+C64Font.o: PSP/c64font.psp
+	$(BIN2ELF) --PSP -s font -e fontEnd PSP/c64font.psp C64Font.o
+Faces.o: PSP/faces.psp
+	$(BIN2ELF) --PSP -s faces -e facesEnd PSP/faces.psp Faces.o
+Tiles.o: PSP/tiles.psp
+	$(BIN2ELF) --PSP -s tiles -e tilesEnd PSP/tiles.psp Tiles.o
+AnimTiles.o: PSP/animtiles.psp
+	$(BIN2ELF) --PSP -s animTiles -e animTilesEnd PSP/animtiles.psp AnimTiles.o
+Sprites.o: PSP/sprites.psp
+	$(BIN2ELF) --PSP -s sprites -e spritesEnd PSP/sprites.psp Sprites.o
+Items.o: PSP/items.psp
+	$(BIN2ELF) --PSP -s items -e itemsEnd PSP/items.psp Items.o
+Keys.o: PSP/keys.psp
+	$(BIN2ELF) --PSP -s keys -e keysEnd PSP/keys.psp Keys.o
+Health.o: PSP/health.psp
+	$(BIN2ELF) --PSP -s health -e healthEnd PSP/health.psp Health.o
+IntroScreen.o: PSP/introscreen.psp
+	$(BIN2ELF) --PSP -s introScreen -e introScreenEnd PSP/introscreen.psp IntroScreen.o
+GameScreen.o: PSP/gamescreen.psp
+	$(BIN2ELF) --PSP -s gameScreen -e gameScreenEnd PSP/gamescreen.psp GameScreen.o
+GameOver.o: PSP/gameover.psp
+	$(BIN2ELF) --PSP -s gameOver -e gameOverEnd PSP/gameover.psp GameOver.o
+LevelA.o: PSP/level-A
+	$(BIN2ELF) --PSP -s levelA -e levelAEnd PSP/level-A LevelA.o
+LevelB.o: PSP/level-B
+	$(BIN2ELF) --PSP -s levelB -e levelBEnd PSP/level-B LevelB.o
+LevelC.o: PSP/level-C
+	$(BIN2ELF) --PSP -s levelC -e levelCEnd PSP/level-C LevelC.o
+LevelD.o: PSP/level-D
+	$(BIN2ELF) --PSP -s levelD -e levelDEnd PSP/level-D LevelD.o
+LevelE.o: PSP/level-E
+	$(BIN2ELF) --PSP -s levelE -e levelEEnd PSP/level-E LevelE.o
+LevelF.o: PSP/level-F
+	$(BIN2ELF) --PSP -s levelF -e levelFEnd PSP/level-F LevelF.o
+LevelG.o: PSP/level-G
+	$(BIN2ELF) --PSP -s levelG -e levelGEnd PSP/level-G LevelG.o
+LevelH.o: PSP/level-H
+	$(BIN2ELF) --PSP -s levelH -e levelHEnd PSP/level-H LevelH.o
+LevelI.o: PSP/level-I
+	$(BIN2ELF) --PSP -s levelI -e levelIEnd PSP/level-I LevelI.o
+LevelJ.o: PSP/level-J
+	$(BIN2ELF) --PSP -s levelJ -e levelJEnd PSP/level-J LevelJ.o
+LevelK.o: PSP/level-K
+	$(BIN2ELF) --PSP -s levelK -e levelKEnd PSP/level-K LevelK.o
+LevelL.o: PSP/level-L
+	$(BIN2ELF) --PSP -s levelL -e levelLEnd PSP/level-L LevelL.o
+LevelM.o: PSP/level-M
+	$(BIN2ELF) --PSP -s levelM -e levelMEnd PSP/level-M LevelM.o
 ModuleSoundFX.o: Music/mod.soundfx
 	$(BIN2ELF) --PSP -s moduleSoundFX -e moduleSoundFXEnd Music/mod.soundfx ModuleSoundFX.o
 ModuleMetalHeads.o: Music/mod.metal\ heads
