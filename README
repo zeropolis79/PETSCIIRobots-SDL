@@ -102,6 +102,24 @@ mksfo petrobots param.sfo
 psp-prx-strip -v "petrobots.prx"
 psp_boot_packager c param.sfo "petrobots.prx" eboot.pbp
 
+PSP requirements
+----------------
+PSP system software 6.35
+
+PSP controls
+------------
+UP/DOWN/LEFT/RIGHT move
+TRIANGLE/CROSS/SQUARE/CIRCLE fire
+L search
+R move
+START use item
+SELECT+L cycle item
+SELECT+R cycle weapon
+SELECT+LEFT live map
+SELECT+DOWN live map robots
+SELECT+CIRCLE pause
+SELECT+CROSS toggle music
+
 PSP TODO
 --------
 - native resolution intro screen and game over screen
