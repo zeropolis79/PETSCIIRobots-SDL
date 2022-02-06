@@ -3261,6 +3261,9 @@ void PET_SCREEN_SHAKE()
         return;
     }
 #ifndef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    if (LIVE_MAP_ON != 1) {
+#endif
     platform->renderFrame(true);
     platform->copyRect(8, 0, 0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32);
     platform->renderFrame(true);
@@ -3268,6 +3271,9 @@ void PET_SCREEN_SHAKE()
     INVALIDATE_PREVIOUS_MAP();
 #endif
     REDRAW_WINDOW = 1;
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    }
+#endif
 #endif
 }
 
