@@ -3257,20 +3257,30 @@ void PET_SCREEN_SHAKE()
         SELECT_TIMEOUT--; // this is to prevent accidental double-taps
     } // on cycle weapons or items.
     PET_BORDER_FLASH();
+#ifdef _AMIGA
     if (SCREEN_SHAKE != 1) {
+#else
+    if (SCREEN_SHAKE == 0) {
+#endif
         return;
     }
 #ifndef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
     if (LIVE_MAP_ON != 1) {
 #endif
-    platform->renderFrame(true);
-    platform->copyRect(8, 0, 0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32);
-    platform->renderFrame(true);
+        if (SCREEN_SHAKE == 1) {
+            platform->copyRect(8, 0, 0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32);
+            platform->renderFrame(true);
+            INVALIDATE_PREVIOUS_MAP();
+        } else if (SCREEN_SHAKE == 3) {
 #ifdef OPTIMIZED_MAP_RENDERING
-    INVALIDATE_PREVIOUS_MAP();
 #endif
-    REDRAW_WINDOW = 1;
+            REDRAW_WINDOW = 1;
+        }
+        SCREEN_SHAKE++;
+        if (SCREEN_SHAKE == 5) {
+            SCREEN_SHAKE = 1;
+        }
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
     }
 #endif
