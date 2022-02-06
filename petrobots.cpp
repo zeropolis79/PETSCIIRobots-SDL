@@ -302,7 +302,17 @@ char MAP_NAMES[] = "01-research lab "
                    "10-death tower  "
                    "11-river death  "
                    "12-bunker       "
-                   "13-castle robot ";
+                   "13-castle robot "
+#ifdef _PSP
+                   "14-rocket center"
+#endif
+                   ;
+#ifdef _PSP
+#define MAP_COUNT 14
+#else
+#define MAP_COUNT 13
+#endif
+
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 uint8_t MUSIC_ON = 1; // 0=off 1=on
 #else
@@ -710,6 +720,9 @@ Platform::Module LEVEL_MUSIC[] = {
     Platform::ModuleInGame3,
     Platform::ModuleInGame4,
     Platform::ModuleInGame1
+#ifdef _PSP
+    ,Platform::ModuleInGame2
+#endif
 };
 #else
 uint8_t LEVEL_MUSIC[] = { 0,1,2,0,1,2,0,1,2,0,1,2,0 };
@@ -2805,7 +2818,7 @@ uint8_t CONTROLSTART[] = { 0, 10, 20 };
 void CYCLE_MAP()
 {
     SELECTED_MAP++;
-    if (SELECTED_MAP == 13) { // Maximum number of maps
+    if (SELECTED_MAP == MAP_COUNT) { // Maximum number of maps
         SELECTED_MAP = 0;
     }
     DISPLAY_MAP_NAME();

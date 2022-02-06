@@ -75,6 +75,8 @@ extern uint8_t levelL[];
 extern uint8_t levelLEnd[];
 extern uint8_t levelM[];
 extern uint8_t levelMEnd[];
+extern uint8_t levelN[];
+extern uint8_t levelNEnd[];
 extern uint8_t moduleSoundFX[];
 extern uint8_t moduleSoundFXEnd[];
 extern uint8_t moduleMetalHeads[];
@@ -698,7 +700,7 @@ struct FilenameMapping {
     uint32_t size;
 };
 
-#define FILENAME_MAPPINGS 21
+#define FILENAME_MAPPINGS 22
 
 static FilenameMapping filenameMappings[FILENAME_MAPPINGS] = {
     { "level-A", levelA, levelAEnd - levelA },
@@ -714,6 +716,7 @@ static FilenameMapping filenameMappings[FILENAME_MAPPINGS] = {
     { "level-K", levelK, levelKEnd - levelK },
     { "level-L", levelL, levelLEnd - levelL },
     { "level-M", levelM, levelMEnd - levelM },
+    { "level-N", levelN, levelNEnd - levelN },
     { "mod.soundfx", moduleSoundFX, moduleSoundFXEnd - moduleSoundFX },
     { "mod.metal heads", moduleMetalHeads, moduleMetalHeadsEnd - moduleMetalHeads },
     { "mod.win", moduleWin, moduleWinEnd - moduleWin },

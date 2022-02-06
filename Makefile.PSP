@@ -17,7 +17,7 @@ LOADLIBES +=$(LIBDIR)/ge_user_stub.a
 LOADLIBES +=$(LIBDIR)/utility_stub.a
 LOADLIBES +=$(LIBDIR)/impose_stub.a
 
-OBJECTS=$(SOURCES:.cpp=.o) Tileset.o C64Font.o Faces.o Tiles.o AnimTiles.o Sprites.o Items.o Keys.o Health.o IntroScreen.o GameScreen.o GameOver.o LevelA.o LevelB.o LevelC.o LevelD.o LevelE.o LevelF.o LevelG.o LevelH.o LevelI.o LevelJ.o LevelK.o LevelL.o LevelM.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o ModuleGetPsyched.o ModuleRobotAttack.o ModuleRushinIn.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
+OBJECTS=$(SOURCES:.cpp=.o) Tileset.o C64Font.o Faces.o Tiles.o AnimTiles.o Sprites.o Items.o Keys.o Health.o IntroScreen.o GameScreen.o GameOver.o LevelA.o LevelB.o LevelC.o LevelD.o LevelE.o LevelF.o LevelG.o LevelH.o LevelI.o LevelJ.o LevelK.o LevelL.o LevelM.o LevelN.o ModuleSoundFX.o ModuleMetalHeads.o ModuleWin.o ModuleLose.o ModuleMetallicBopAmiga.o ModuleGetPsyched.o ModuleRobotAttack.o ModuleRushinIn.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o
 
 EXECUTABLE=petrobots
 
@@ -83,6 +83,8 @@ LevelL.o: PSP/level-L
 	$(BIN2ELF) --PSP -s levelL -e levelLEnd PSP/level-L LevelL.o
 LevelM.o: PSP/level-M
 	$(BIN2ELF) --PSP -s levelM -e levelMEnd PSP/level-M LevelM.o
+LevelN.o: PSP/level-N
+	$(BIN2ELF) --PSP -s levelN -e levelNEnd PSP/level-N LevelN.o
 ModuleSoundFX.o: Music/mod.soundfx
 	$(BIN2ELF) --PSP -s moduleSoundFX -e moduleSoundFXEnd Music/mod.soundfx ModuleSoundFX.o
 ModuleMetalHeads.o: Music/mod.metal\ heads
