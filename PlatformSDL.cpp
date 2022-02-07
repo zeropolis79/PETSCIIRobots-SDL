@@ -136,6 +136,9 @@ PlatformSDL::PlatformSDL() :
 #ifdef PLATFORM_CURSOR_SUPPORT
     cursorSurface(0),
     cursorRect({0}),
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+    cursorShape(ShapeUse),
+#endif
 #endif
     framesPerSecond_(60),
 #ifdef PLATFORM_MODULE_BASED_AUDIO
@@ -828,6 +831,13 @@ void PlatformSDL::hideCursor()
         cursorRect.h = 0;
     }
 }
+
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+void PlatformSDL::setCursorShape(CursorShape shape)
+{
+    cursorShape = shape;
+}
+#endif
 #endif
 
 void PlatformSDL::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
@@ -1017,6 +1027,11 @@ void PlatformSDL::renderFrame(bool)
             { cursorRect.x, cursorRect.y + cursorRect.h - 2, cursorRect.w, 2 }
         };
         SDL_FillRects(windowSurface, rects, 4, 0xffffffff);
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+        if (cursorShape != ShapeUse) {
+            renderSprite(cursorShape == ShapeSearch ? 83 : 84, cursorRect.x + 2, cursorRect.y + 2);
+        }
+#endif
     }
     SDL_UpdateWindowSurface(window);
 }

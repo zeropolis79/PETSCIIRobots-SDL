@@ -817,6 +817,9 @@ void USE_ITEM()
 
 void USE_BOMB()
 {
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+    platform->setCursorShape(Platform::ShapeUse);
+#endif
     USER_SELECT_OBJECT();
     // NOW TEST TO SEE IF THAT SPOT IS OPEN
     if (BOMB_MAGNET_COMMON1()) {
@@ -850,6 +853,9 @@ void USE_MAGNET()
     if (MAGNET_ACT != 0) { // only one magnet active at a time.
         return;
     }
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+    platform->setCursorShape(Platform::ShapeUse);
+#endif
     USER_SELECT_OBJECT();
     // NOW TEST TO SEE IF THAT SPOT IS OPEN
     if (BOMB_MAGNET_COMMON1()) {
@@ -1223,6 +1229,9 @@ uint8_t KEY_FAST = 0; // 0=DEFAULT STATE
 // an object such as a crate, chair, or plant.
 void SEARCH_OBJECT()
 {
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+    platform->setCursorShape(Platform::ShapeSearch);
+#endif
     USER_SELECT_OBJECT();
     REDRAW_WINDOW = 1;
     // first check of object is searchable
@@ -1425,6 +1434,9 @@ void USER_SELECT_OBJECT()
 
 void MOVE_OBJECT()
 {
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+    platform->setCursorShape(Platform::ShapeMove);
+#endif
     USER_SELECT_OBJECT();
     // now test that object to see if it
     // is allowed to be moved.

@@ -297,6 +297,7 @@ PlatformPSP::PlatformPSP() :
     palette(paletteIntro),
     cursorX(-1),
     cursorY(-1),
+    cursorShape(ShapeUse),
     scaleX(1.0f),
     scaleY(1.0f),
     fadeBaseColor(0),
@@ -1008,6 +1009,11 @@ void PlatformPSP::hideCursor()
     }
 }
 
+void PlatformPSP::setCursorShape(CursorShape shape)
+{
+    cursorShape = shape;
+}
+
 void PlatformPSP::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
 {
     sceGuDisable(SCEGU_SCISSOR_TEST);
@@ -1189,6 +1195,9 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
         drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY + 2, 2, 24);
         drawRectangle(0xffffffff, 0, 0, 0, cursorX + 26, cursorY + 2, 2, 24);
         drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY + 26, 28, 2);
+        if (cursorShape != ShapeUse) {
+            renderSprite(cursorShape == ShapeSearch ? 83 : 84, cursorX + 2, cursorY + 2);
+        }
     }
 
     if (fadeIntensity != 15) {

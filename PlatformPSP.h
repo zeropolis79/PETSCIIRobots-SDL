@@ -37,6 +37,7 @@ public:
     virtual void renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots);
     virtual void showCursor(uint16_t x, uint16_t y);
     virtual void hideCursor();
+    virtual void setCursorShape(CursorShape shape);
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     virtual void startFadeScreen(uint16_t color, uint16_t intensity);
@@ -79,6 +80,7 @@ private:
     uint32_t* palette;
     int16_t cursorX;
     int16_t cursorY;
+    CursorShape cursorShape;
     float scaleX;
     float scaleY;
     uint32_t fadeBaseColor;

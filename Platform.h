@@ -90,6 +90,12 @@ public:
         JoystickExtra = (1 << JoystickBitExtra)
     };
 
+    enum CursorShape {
+        ShapeUse,
+        ShapeSearch,
+        ShapeMove
+    };
+
     virtual uint8_t* standardControls() const = 0;
     virtual void setInterrupt(void (*interrupt)(void)) = 0;
     virtual void show();
@@ -116,6 +122,9 @@ public:
     virtual void renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots);
     virtual void showCursor(uint16_t x, uint16_t y);
     virtual void hideCursor();
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+    virtual void setCursorShape(CursorShape shape);
+#endif
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height) = 0;
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) = 0;
     virtual void fillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint8_t color);

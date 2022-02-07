@@ -81,6 +81,12 @@ void Platform::hideCursor()
 {
 }
 
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+void Platform::setCursorShape(CursorShape)
+{
+}
+#endif
+
 void Platform::fillRect(uint16_t, uint16_t, uint16_t, uint16_t, uint8_t)
 {
 }

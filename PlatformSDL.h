@@ -40,6 +40,9 @@ public:
 #ifdef PLATFORM_CURSOR_SUPPORT
     virtual void showCursor(uint16_t x, uint16_t y);
     virtual void hideCursor();
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+    virtual void setCursorShape(CursorShape shape);
+#endif
 #endif
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
@@ -97,6 +100,9 @@ private:
 #ifdef PLATFORM_CURSOR_SUPPORT
     SDL_Surface* cursorSurface;
     SDL_Rect cursorRect;
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+    CursorShape cursorShape;
+#endif
 #endif
     int framesPerSecond_;
 #ifdef PLATFORM_MODULE_BASED_AUDIO
