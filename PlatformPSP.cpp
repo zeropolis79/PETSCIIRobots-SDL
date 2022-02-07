@@ -1196,7 +1196,7 @@ void PlatformPSP::renderFrame(bool waitForNextFrame)
         drawRectangle(0xffffffff, 0, 0, 0, cursorX + 26, cursorY + 2, 2, 24);
         drawRectangle(0xffffffff, 0, 0, 0, cursorX, cursorY + 26, 28, 2);
         if (cursorShape != ShapeUse) {
-            renderSprite(cursorShape == ShapeSearch ? 83 : 84, cursorX + 2, cursorY + 2);
+            renderSprite(cursorShape == ShapeSearch ? 83 : 85, cursorX + 2, cursorY + 2);
         }
     }
 
