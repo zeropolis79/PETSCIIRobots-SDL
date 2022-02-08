@@ -1460,6 +1460,10 @@ void PlatformAmiga::renderItem(uint8_t item, uint16_t x, uint16_t y)
 
 void PlatformAmiga::renderKey(uint8_t key, uint16_t x, uint16_t y)
 {
+    OwnBlitter();
+    WaitBlit();
+    DisownBlitter();
+
     uint16_t* source = (uint16_t*)(keysPlanes + key * 2 * 14 * PLANES);
     uint16_t* dest = (uint16_t*)(screenPlanes + y * SCREEN_WIDTH_IN_BYTES * PLANES + (x >> 3));
     for (int i = 0; i < 14; i++) {
