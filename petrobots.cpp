@@ -1253,11 +1253,9 @@ void SEARCH_OBJECT()
         PRINT_INFO(MSG_SEARCHING);
         for (SEARCHBAR = 0; SEARCHBAR != 8; SEARCHBAR++) {
             for (BGTIMER2 = 18; BGTIMER2 != 0;) { // delay time between search periods
-#ifndef _AMIGA // for binary compatibility with the 1.0 release
                 if (BGTIMER1 != 1) {
                     platform->renderFrame(true);
                 }
-#endif
                 PET_SCREEN_SHAKE();
                 BACKGROUND_TASKS();
             }
@@ -2505,9 +2503,7 @@ void DISPLAY_KEYS()
 
 void GAME_OVER()
 {
-#ifndef _AMIGA // for binary compatibility with the 1.0 release
     platform->renderFrame();
-#endif
     // stop game clock
     CLOCK_ACTIVE = 0;
     // disable music
@@ -2523,11 +2519,9 @@ void GAME_OVER()
         KEYTIMER = 100;
     }
     while (KEYTIMER != 0) {
-#ifndef _AMIGA // for binary compatibility with the 1.0 release
         if (BGTIMER1 != 1) {
             platform->renderFrame(true);
         }
-#endif
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
     }
@@ -2536,9 +2530,7 @@ void GAME_OVER()
         writeToScreenMemory(((SCREEN_HEIGHT_IN_CHARACTERS - 3 - 3) / 2 + 1) * SCREEN_WIDTH_IN_CHARACTERS + (SCREEN_WIDTH_IN_CHARACTERS - 7 - 11) / 2 + X, GAMEOVER2[X]);
         writeToScreenMemory(((SCREEN_HEIGHT_IN_CHARACTERS - 3 - 3) / 2 + 2) * SCREEN_WIDTH_IN_CHARACTERS + (SCREEN_WIDTH_IN_CHARACTERS - 7 - 11) / 2 + X, GAMEOVER3[X]);
     }
-#ifndef _AMIGA // for binary compatibility with the 1.0 release
     platform->renderFrame();
-#endif
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     platform->stopModule();
@@ -3242,11 +3234,7 @@ void PET_SCREEN_SHAKE()
         SELECT_TIMEOUT--; // this is to prevent accidental double-taps
     } // on cycle weapons or items.
     PET_BORDER_FLASH();
-#ifdef _AMIGA
-    if (SCREEN_SHAKE != 1) {
-#else
     if (SCREEN_SHAKE == 0) {
-#endif
         return;
     }
 #ifndef PLATFORM_HARDWARE_BASED_SHAKE_SCREEN
