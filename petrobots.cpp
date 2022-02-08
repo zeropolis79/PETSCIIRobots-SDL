@@ -281,15 +281,8 @@ char MAP_NAMES[] = "01-research lab "
                    "11-river death  "
                    "12-bunker       "
                    "13-castle robot "
-#ifdef _PSP
-                   "14-rocket center"
-#endif
-                   ;
-#ifdef _PSP
+                   "14-rocket center";
 #define MAP_COUNT 14
-#else
-#define MAP_COUNT 13
-#endif
 
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 uint8_t MUSIC_ON = 1; // 0=off 1=on
@@ -697,13 +690,11 @@ Platform::Module LEVEL_MUSIC[] = {
     Platform::ModuleInGame2,
     Platform::ModuleInGame3,
     Platform::ModuleInGame4,
-    Platform::ModuleInGame1
-#ifdef _PSP
-    ,Platform::ModuleInGame2
-#endif
+    Platform::ModuleInGame1,
+    Platform::ModuleInGame2
 };
 #else
-uint8_t LEVEL_MUSIC[] = { 0,1,2,0,1,2,0,1,2,0,1,2,0 };
+uint8_t LEVEL_MUSIC[] = { 0,1,2,0,1,2,0,1,2,0,1,2,0,1 };
 #endif
 
 // TEMP ROUTINE TO GIVE ME ALL ITEMS AND WEAPONS
