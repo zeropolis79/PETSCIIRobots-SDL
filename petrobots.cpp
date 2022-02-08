@@ -79,29 +79,7 @@ enum KEYS {
 };
 
 // MAP FILES CONSIST OF EVERYTHING FROM THIS POINT ON
-#ifdef _PSP
 uint8_t MAP_DATA[8960];
-uint8_t* UNIT_TYPE = MAP_DATA;
-uint8_t* UNIT_LOC_X = MAP_DATA + 1 * 64;
-uint8_t* UNIT_LOC_Y = MAP_DATA + 2 * 64;
-uint8_t* UNIT_A = MAP_DATA + 3 * 64;
-uint8_t* UNIT_B = MAP_DATA + 4 * 64;
-uint8_t* UNIT_C = MAP_DATA + 5 * 64;
-uint8_t* UNIT_D = MAP_DATA + 6 * 64;
-int8_t* UNIT_HEALTH = (int8_t*)MAP_DATA + 7 * 64;
-uint8_t* MAP = MAP_DATA + 8 * 64 + 256;
-#else
-uint8_t UNIT_TYPE[64];  // Unit type 0=none (64 bytes)
-uint8_t UNIT_LOC_X[64]; // Unit X location (64 bytes)
-uint8_t UNIT_LOC_Y[64]; // Unit X location (64 bytes)
-uint8_t UNIT_A[64];
-uint8_t UNIT_B[64];
-uint8_t UNIT_C[64];
-uint8_t UNIT_D[64];
-int8_t UNIT_HEALTH[64];    // Unit health (0 to 11) (64 bytes)
-uint8_t MAP_UNUSED[256];
-uint8_t MAP[8 * 1024];      // Location of MAP (8K)
-#endif
 // END OF MAP FILE
 
 uint8_t TILE;           // The tile number to be plotted

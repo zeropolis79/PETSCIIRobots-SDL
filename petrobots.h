@@ -41,28 +41,16 @@ extern uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[MAP_WINDOW_SIZE];
 extern uint8_t KEY_CONFIG[26];
 
 // MAP FILES CONSIST OF EVERYTHING FROM THIS POINT ON
-#ifdef _PSP
 extern uint8_t MAP_DATA[8960];
-extern uint8_t* UNIT_TYPE;
-extern uint8_t* UNIT_LOC_X;
-extern uint8_t* UNIT_LOC_Y;
-extern uint8_t* UNIT_A;
-extern uint8_t* UNIT_B;
-extern uint8_t* UNIT_C;
-extern uint8_t* UNIT_D;
-extern int8_t* UNIT_HEALTH;
-extern uint8_t* MAP;
-#else
-extern uint8_t UNIT_TYPE[64];  // Unit type 0=none (64 bytes)  
-extern uint8_t UNIT_LOC_X[64]; // Unit X location (64 bytes)
-extern uint8_t UNIT_LOC_Y[64]; // Unit X location (64 bytes)
-extern uint8_t UNIT_A[64];
-extern uint8_t UNIT_B[64];
-extern uint8_t UNIT_C[64];
-extern uint8_t UNIT_D[64];
-extern int8_t UNIT_HEALTH[64];    // Unit health (0 to 11) (64 bytes)
-extern uint8_t MAP[8 * 1024];      // Location of MAP (8K)
-#endif
+#define UNIT_TYPE MAP_DATA  // Unit type 0=none (64 bytes)
+#define UNIT_LOC_X (MAP_DATA + 1 * 64) // Unit X location (64 bytes)
+#define UNIT_LOC_Y (MAP_DATA + 2 * 64) // Unit X location (64 bytes)
+#define UNIT_A (MAP_DATA + 3 * 64)
+#define UNIT_B (MAP_DATA + 4 * 64)
+#define UNIT_C (MAP_DATA + 5 * 64)
+#define UNIT_D (MAP_DATA + 6 * 64)
+#define UNIT_HEALTH ((int8_t*)(MAP_DATA + 7 * 64)) // Unit health (0 to 11) (64 bytes)
+#define MAP (MAP_DATA + 8 * 64 + 256)        // Location of MAP (8K)
 // END OF MAP FILE
 
 extern uint8_t TILE;           // The tile number to be plotted
