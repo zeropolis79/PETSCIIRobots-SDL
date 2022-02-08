@@ -2482,7 +2482,7 @@ void DISPLAY_BLANK_WEAPON()
 void DISPLAY_KEYS()
 {
 #ifdef PLATFORM_IMAGE_SUPPORT
-    platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 106, 48, 14); // ERASE ALL 3 SPOTS
+//    platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 106, 48, 14); // ERASE ALL 3 SPOTS
     if (KEYS & 0x01) { // %00000001 Spade key
         platform->renderKey(0, PLATFORM_SCREEN_WIDTH - 48, 106);
     }
@@ -2493,7 +2493,7 @@ void DISPLAY_KEYS()
         platform->renderKey(2, PLATFORM_SCREEN_WIDTH - 16, 106);
     }
 #else
-    platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 120, 48, 16); // ERASE ALL 3 SPOTS
+//    platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 120, 48, 16); // ERASE ALL 3 SPOTS
     /*
     writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 6, 32); // ERASE ALL 3 SPOTS
     writeToScreenMemory(16 * SCREEN_WIDTH_IN_CHARACTERS - 5, 32);
