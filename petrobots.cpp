@@ -1789,9 +1789,6 @@ void TOGGLE_LIVE_MAP()
     if (LIVE_MAP_ON != 1) {
         LIVE_MAP_ON = 1;
 
-#ifdef _AMIGA // for binary compatibility with the 1.0 release
-        platform->clearRect(0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32);
-#endif
         platform->renderLiveMap(MAP);
     } else {
         LIVE_MAP_ON = 0;

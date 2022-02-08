@@ -268,6 +268,10 @@ static uint8_t standardControls[] = {
     0x36 // NO
 };
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
+#define LIVE_MAP_ORIGIN_X 0
+#define LIVE_MAP_WIDTH (128 * 2)
+#define LIVE_MAP_ORIGIN_Y ((PLATFORM_SCREEN_HEIGHT - 32 - 64 * 2) / 2)
+
 uint8_t tileLiveMap[] = {
      0,13, 1, 1, 1, 1, 1, 1, 1, 5, 1, 1, 1, 1,13, 1,
      1, 1, 1, 1, 1, 1, 1, 2, 8, 1, 1, 1, 1, 6,14,14,
@@ -1492,6 +1496,10 @@ void PlatformAmiga::renderFace(uint8_t face, uint16_t x, uint16_t y)
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
 void PlatformAmiga::renderLiveMap(uint8_t* map)
 {
+    clearRect(0, 0, PLATFORM_SCREEN_WIDTH - 56, LIVE_MAP_ORIGIN_Y);
+    clearRect(LIVE_MAP_WIDTH, LIVE_MAP_ORIGIN_Y, PLATFORM_SCREEN_WIDTH - 56 - LIVE_MAP_WIDTH, PLATFORM_SCREEN_HEIGHT - 32 - 2 * LIVE_MAP_ORIGIN_Y);
+    clearRect(0, PLATFORM_SCREEN_HEIGHT - 32 - LIVE_MAP_ORIGIN_Y, PLATFORM_SCREEN_WIDTH - 56, LIVE_MAP_ORIGIN_Y);
+
     OwnBlitter();
     WaitBlit();
     DisownBlitter();
