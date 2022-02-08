@@ -1339,13 +1339,8 @@ void CALC_COORDINATES()
 void USER_SELECT_OBJECT()
 {
     PLAY_SOUND(16); // beep sound, SOUND PLAY
-#if (MAP_WINDOW_SIZE == 77)
-    CURSOR_X = PLATFORM_MAP_WINDOW_TILES_WIDTH / 2;
-    CURSOR_Y = PLATFORM_MAP_WINDOW_TILES_HEIGHT / 2;
-#else
     CURSOR_X = UNIT_LOC_X[0] - MAP_WINDOW_X;
     CURSOR_Y = UNIT_LOC_Y[0] - MAP_WINDOW_Y;
-#endif
 #ifdef PLATFORM_CURSOR_SUPPORT
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
     if (LIVE_MAP_ON == 0) {
@@ -1561,13 +1556,8 @@ uint8_t MOVTEMP_UY = 0;
 
 void CACULATE_AND_REDRAW()
 {
-#if (MAP_WINDOW_SIZE == 77)
-    MAP_WINDOW_X = UNIT_LOC_X[0] - PLATFORM_MAP_WINDOW_TILES_WIDTH / 2; // no index needed since it's player unit
-    MAP_WINDOW_Y = UNIT_LOC_Y[0] - PLATFORM_MAP_WINDOW_TILES_HEIGHT / 2; // no index needed since it's player unit
-#else
     MAP_WINDOW_X = MIN(MAX(UNIT_LOC_X[0] - PLATFORM_MAP_WINDOW_TILES_WIDTH / 2, 0), 128 - PLATFORM_MAP_WINDOW_TILES_WIDTH); // no index needed since it's player unit
     MAP_WINDOW_Y = MIN(MAX(UNIT_LOC_Y[0] - PLATFORM_MAP_WINDOW_TILES_HEIGHT / 2, 0), 64 - PLATFORM_MAP_WINDOW_TILES_HEIGHT); // no index needed since it's player unit
-#endif
     REDRAW_WINDOW = 1;
 }
 
@@ -1590,11 +1580,7 @@ void MAP_PRE_CALCULATE()
              UNIT_LOC_Y[X] <= (MAP_WINDOW_Y + PLATFORM_MAP_WINDOW_TILES_HEIGHT - 1))) {
             // Unit found in map window, now add that unit's
             // tile to the precalc map.
-#if (MAP_WINDOW_SIZE == 77)
-            int Y = UNIT_LOC_X[X] - MAP_WINDOW_X + PRECALC_ROWS[UNIT_LOC_Y[X] - MAP_WINDOW_Y];
-#else
             int Y = UNIT_LOC_X[X] - MAP_WINDOW_X + (UNIT_LOC_Y[X] - MAP_WINDOW_Y) * PLATFORM_MAP_WINDOW_TILES_WIDTH;
-#endif
             if (UNIT_TILE[X] == 130 || UNIT_TILE[X] == 134) { // is it a bomb, is it a magnet?
                 // What to do in case of bomb or magnet that should
                 // go underneath the unit or robot.
@@ -1610,10 +1596,6 @@ void MAP_PRE_CALCULATE()
     }
 }
 
-#if (MAP_WINDOW_SIZE == 77)
-uint8_t PRECALC_ROWS[] = { 0,11,22,33,44,55,66 };
-#endif
-
 // This routine is where the MAP is displayed on the screen
 #ifdef OPTIMIZED_MAP_RENDERING
 void INVALIDATE_PREVIOUS_MAP()
@@ -1628,13 +1610,8 @@ void DRAW_MAP_WINDOW()
     MAP_PRE_CALCULATE();
     REDRAW_WINDOW = 0;
     MAP_SOURCE = MAP + ((MAP_WINDOW_Y << 7) + MAP_WINDOW_X);
-#if (MAP_WINDOW_SIZE == 77)
-    for (uint8_t TEMP_Y = 0, PRECALC_COUNT = 0; TEMP_Y != PLATFORM_MAP_WINDOW_TILES_HEIGHT; TEMP_Y++, MAP_SOURCE += 128 - PLATFORM_MAP_WINDOW_TILES_WIDTH) {
-        for (uint8_t TEMP_X = 0; TEMP_X != PLATFORM_MAP_WINDOW_TILES_WIDTH; TEMP_X++, MAP_SOURCE++, PRECALC_COUNT++) {
-#else
     for (uint16_t TEMP_Y = 0, PRECALC_COUNT = 0; TEMP_Y != PLATFORM_MAP_WINDOW_TILES_HEIGHT; TEMP_Y++, MAP_SOURCE += 128 - PLATFORM_MAP_WINDOW_TILES_WIDTH, PRECALC_COUNT += PLATFORM_MAP_WINDOW_TILES_WIDTH - PLATFORM_MAP_WINDOW_TILES_WIDTH) {
         for (uint16_t TEMP_X = 0; TEMP_X != PLATFORM_MAP_WINDOW_TILES_WIDTH; TEMP_X++, MAP_SOURCE++, PRECALC_COUNT++) {
-#endif
             // NOW FIGURE OUT WHERE TO PLACE IT ON SCREEN.
             TILE = MAP_SOURCE[0];
             uint8_t VARIANT = 0;
@@ -2943,14 +2920,7 @@ void SET_DIFF_HARD()
 
 // This chart contains the left-most staring position for each
 // row of tiles on the map-editor. 7 Rows.
-uint16_t MAP_CHART[PLATFORM_MAP_WINDOW_TILES_HEIGHT]
-#if (MAP_WINDOW_SIZE == 77)
- = {
-    0x000, 0x078, 0x0F0, 0x168, 0x1E0, 0x258, 0x2D0
-}
-#endif
-;
-
+uint16_t MAP_CHART[PLATFORM_MAP_WINDOW_TILES_HEIGHT];
 
 void EMP_FLASH()
 {
@@ -3201,17 +3171,10 @@ void ELEVATOR_FIND_XY()
     for (int X = 32; X != 48; X++) { // start of doors
         if (UNIT_TYPE[X] == 19) { // elevator
             if (UNIT_C[X] == ELEVATOR_CURRENT_FLOOR) {
-#if (MAP_WINDOW_SIZE == 77)
-                UNIT_LOC_X[0] = UNIT_LOC_X[X]; // player location = new elevator location
-                MAP_WINDOW_X = UNIT_LOC_X[X] - 5;
-                UNIT_LOC_Y[0] = UNIT_LOC_Y[X] - 1; // player location = new elevator location
-                MAP_WINDOW_Y = UNIT_LOC_Y[X] - 4;
-#else
                 UNIT_LOC_X[0] = UNIT_LOC_X[X]; // player location = new elevator location
                 MAP_WINDOW_X = MIN(MAX(UNIT_LOC_X[X] - PLATFORM_MAP_WINDOW_TILES_WIDTH / 2, 0), 128 - PLATFORM_MAP_WINDOW_TILES_WIDTH);
                 UNIT_LOC_Y[0] = UNIT_LOC_Y[X] - 1; // player location = new elevator location
                 MAP_WINDOW_Y = MIN(MAX(UNIT_LOC_Y[X] - PLATFORM_MAP_WINDOW_TILES_HEIGHT / 2 - 1, 0), 64 - PLATFORM_MAP_WINDOW_TILES_HEIGHT);
-#endif
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
                 if (LIVE_MAP_ON == 0) {
 #endif

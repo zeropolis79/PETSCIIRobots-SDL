@@ -231,8 +231,6 @@ extern uint8_t MOVTEMP_UY;
 void CACULATE_AND_REDRAW();
 void MAP_PRE_CALCULATE();
 
-extern uint8_t PRECALC_ROWS[];
-
 #ifdef OPTIMIZED_MAP_RENDERING
 void INVALIDATE_PREVIOUS_MAP();
 #endif
@@ -325,11 +323,7 @@ char* CALC_MAP_NAME();
 void REVERSE_MENU_OPTION(bool reverse);
 
 extern uint8_t MENUY; // CURRENT MENU SELECTION
-#if (MAP_WINDOW_SIZE == 77)
-typedef uint8_t menu_chart_t;
-#else
 typedef uint16_t menu_chart_t;
-#endif
 extern menu_chart_t MENU_CHART[];
 
 void CHANGE_DIFFICULTY_LEVEL();
