@@ -13,16 +13,20 @@ About
 SDL version
 -----------
 brew install sdl2 sdl2_image
+make setup
 make
-./petrobots
+cd SDL
+../petrobots
 
 Amiga version
 -------------
 smake
-amigarobots
+cd Amiga
+/amigarobots
 
 smake -f smakefile.pet
-petrobots
+cd Amiga
+/petrobots
 
 Amiga requirements
 ------------------
