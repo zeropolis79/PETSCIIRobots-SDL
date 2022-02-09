@@ -304,8 +304,8 @@ uint8_t liveMapToPlane3[1];
 #endif
 
 PlatformAmiga::PlatformAmiga() :
-    framesPerSecond_(50),
-    clock(3546895),
+    framesPerSecond_((GfxBase->DisplayFlags & PAL) ? 50 : 60),
+    clock((GfxBase->DisplayFlags & PAL) ? 3546895 : 3579545),
     originalDirectoryLock(-1),
     screenBitmap(new BitMap),
     screen(0),
