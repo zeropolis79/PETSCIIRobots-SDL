@@ -609,6 +609,8 @@ PlatformAmiga::PlatformAmiga() :
     BeginIO((IORequest*)ioAudio);
 
     ioAudio->ioa_Request.io_Command = ADCMD_PERVOL;
+
+    enableLowpassFilter();
 #endif
 
     platform = this;
@@ -627,6 +629,10 @@ PlatformAmiga::~PlatformAmiga()
         }
 #else
         AbortIO((IORequest*)ioAudio);
+
+        if (!filterState) {
+            disableLowpassFilter();
+        }
 #endif
         CloseDevice((IORequest*)ioAudio);
     }
