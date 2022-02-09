@@ -1660,9 +1660,7 @@ void PlatformAmiga::renderFace(uint8_t face, uint16_t x, uint16_t y)
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
 void PlatformAmiga::renderLiveMap(uint8_t* map)
 {
-    clearRect(0, 0, PLATFORM_SCREEN_WIDTH - 56, LIVE_MAP_ORIGIN_Y);
-    clearRect(LIVE_MAP_WIDTH, LIVE_MAP_ORIGIN_Y, PLATFORM_SCREEN_WIDTH - 56 - LIVE_MAP_WIDTH, PLATFORM_SCREEN_HEIGHT - 32 - 2 * LIVE_MAP_ORIGIN_Y);
-    clearRect(0, PLATFORM_SCREEN_HEIGHT - 32 - LIVE_MAP_ORIGIN_Y, PLATFORM_SCREEN_WIDTH - 56, LIVE_MAP_ORIGIN_Y);
+    clearRect(0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32);
 
     OwnBlitter();
     WaitBlit();
