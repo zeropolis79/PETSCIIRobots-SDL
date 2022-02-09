@@ -168,185 +168,161 @@ __chip static SpriteData cursorData2 = {
     { 0, 0 }
 };
 #ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
-static uint16_t cursorUseData1[28][2] = {
-    { 0xffff, 0 },
-    { 0xffff, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xffff, 0 },
-    { 0xffff, 0 }
+static uint16_t cursorUseData1[24] = {
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000
 };
-static uint16_t cursorUseData2[28][2] = {
-    { 0xfff0, 0 },
-    { 0xfff0, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0x0030, 0 },
-    { 0xfff0, 0 },
-    { 0xfff0, 0 }
+static uint16_t cursorUseData2[24] = {
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030
 };
-static uint16_t cursorSearchData1[28][2] = {
-    { 0xffff,0 },
-    { 0xffff,0 },
-    { 0xc000,0 },
-    { 0xc000,0 },
-    { 0xc000,0 },
-    { 0xc000,0 },
-    { 0xc0f8,0 },
-    { 0xc18e,0 },
-    { 0xc303,0 },
-    { 0xc609,0 },
-    { 0xc609,0 },
-    { 0xc601,0 },
-    { 0xc601,0 },
-    { 0xc303,0 },
-    { 0xc303,0 },
-    { 0xc18f,0 },
-    { 0xc0f8,0 },
-    { 0xc000,0 },
-    { 0xc000,0 },
-    { 0xc000,0 },
-    { 0xc000,0 },
-    { 0xc000,0 },
-    { 0xc000,0 },
-    { 0xc000,0 },
-    { 0xc000,0 },
-    { 0xc000,0 },
-    { 0xffff,0 },
-    { 0xffff,0 }
+static uint16_t cursorSearchData1[24] = {
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc0f8,
+    0xc18e,
+    0xc303,
+    0xc609,
+    0xc609,
+    0xc601,
+    0xc601,
+    0xc303,
+    0xc303,
+    0xc18f,
+    0xc0f8,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000,
+    0xc000
 };
-static uint16_t cursorSearchData2[28][2] = {
-    { 0xfff0,0 },
-    { 0xfff0,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0x8030,0 },
-    { 0x8030,0 },
-    { 0x8030,0 },
-    { 0x8030,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0x8030,0 },
-    { 0xc030,0 },
-    { 0x6030,0 },
-    { 0x3030,0 },
-    { 0x1830,0 },
-    { 0x0c30,0 },
-    { 0x0630,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0xfff0,0 },
-    { 0xfff0,0 }
+static uint16_t cursorSearchData2[24] = {
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x8030,
+    0x8030,
+    0x8030,
+    0x8030,
+    0x0030,
+    0x0030,
+    0x8030,
+    0xc030,
+    0x6030,
+    0x3030,
+    0x1830,
+    0x0c30,
+    0x0630,
+    0x0030,
+    0x0030,
+    0x0030,
+    0x0030
 };
-static uint16_t cursorMoveData1[28][2] = {
-    { 0xffff, 0 },
-    { 0xffff, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xc00c, 0 },
-    { 0xc013, 0 },
-    { 0xc072, 0 },
-    { 0xc092, 0 },
-    { 0xc092, 0 },
-    { 0xc092, 0 },
-    { 0xc092, 0 },
-    { 0xc192, 0 },
-    { 0xc292, 0 },
-    { 0xc280, 0 },
-    { 0xc280, 0 },
-    { 0xc280, 0 },
-    { 0xc200, 0 },
-    { 0xc300, 0 },
-    { 0xc100, 0 },
-    { 0xc100, 0 },
-    { 0xc080, 0 },
-    { 0xc080, 0 },
-    { 0xc040, 0 },
-    { 0xc07f, 0 },
-    { 0xc000, 0 },
-    { 0xc000, 0 },
-    { 0xffff, 0 },
-    { 0xffff, 0 }
+static uint16_t cursorMoveData1[24] = {
+    0xc000,
+    0xc000,
+    0xc00c,
+    0xc013,
+    0xc072,
+    0xc092,
+    0xc092,
+    0xc092,
+    0xc092,
+    0xc192,
+    0xc292,
+    0xc280,
+    0xc280,
+    0xc280,
+    0xc200,
+    0xc300,
+    0xc100,
+    0xc100,
+    0xc080,
+    0xc080,
+    0xc040,
+    0xc07f,
+    0xc000,
+    0xc000
 };
-static uint16_t cursorMoveData2[28][2] = {
-    { 0xfff0,0 },
-    { 0xfff0,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0x8030,0 },
-    { 0x4030,0 },
-    { 0x7030,0 },
-    { 0x4830,0 },
-    { 0x4830,0 },
-    { 0x4830,0 },
-    { 0x4830,0 },
-    { 0x4830,0 },
-    { 0x4830,0 },
-    { 0x0830,0 },
-    { 0x0830,0 },
-    { 0x1030,0 },
-    { 0x1030,0 },
-    { 0x1030,0 },
-    { 0x2030,0 },
-    { 0x2030,0 },
-    { 0x4030,0 },
-    { 0x4030,0 },
-    { 0xc030,0 },
-    { 0x0030,0 },
-    { 0x0030,0 },
-    { 0xfff0,0 },
-    { 0xfff0,0 }
+static uint16_t cursorMoveData2[24] = {
+    0x0030,
+    0x0030,
+    0x0030,
+    0x8030,
+    0x4030,
+    0x7030,
+    0x4830,
+    0x4830,
+    0x4830,
+    0x4830,
+    0x4830,
+    0x4830,
+    0x0830,
+    0x0830,
+    0x1030,
+    0x1030,
+    0x1030,
+    0x2030,
+    0x2030,
+    0x4030,
+    0x4030,
+    0xc030,
+    0x0030,
+    0x0030
 };
 #endif
 #endif
@@ -1885,29 +1861,27 @@ void PlatformAmiga::hideCursor()
 #ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
 void PlatformAmiga::setCursorShape(CursorShape shape)
 {
-    uint32_t* source1;
-    uint32_t* source2;
-    uint32_t* dest1 = (uint32_t*)&cursorData1.data;
-    uint32_t* dest2 = (uint32_t*)&cursorData2.data;
+    uint16_t *source1;
+    uint16_t *source2;
 
     switch (shape) {
     case ShapeSearch:
-        source1 = (uint32_t*)&cursorSearchData1;
-        source2 = (uint32_t*)&cursorSearchData2;
+        source1 = cursorSearchData1;
+        source2 = cursorSearchData2;
         break;
     case ShapeMove:
-        source1 = (uint32_t*)&cursorMoveData1;
-        source2 = (uint32_t*)&cursorMoveData2;
+        source1 = cursorMoveData1;
+        source2 = cursorMoveData2;
         break;
     default:
-        source1 = (uint32_t*)&cursorUseData1;
-        source2 = (uint32_t*)&cursorUseData2;
+        source1 = cursorUseData1;
+        source2 = cursorUseData2;
         break;
     }
 
-    for (int i = 0; i < 28; i++) {
-        *dest1++ = *source1++;
-        *dest2++ = *source2++;
+    for (int i = 2; i < 26; i++) {
+        cursorData1.data[i][0] = *source1++;
+        cursorData2.data[i][0] = *source2++;
     }
 }
 #endif
