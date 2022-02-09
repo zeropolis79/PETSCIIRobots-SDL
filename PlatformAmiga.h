@@ -133,7 +133,7 @@ private:
     BitMap* itemsBitMap;
     BitMap* healthBitMap;
 #endif
-#ifdef PLATFORM_SPRITE_SUPPORT
+#ifdef PLATFORM_CURSOR_SUPPORT
     SimpleSprite* cursorSprite1;
     SimpleSprite* cursorSprite2;
 #endif

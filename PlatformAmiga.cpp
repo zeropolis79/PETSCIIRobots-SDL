@@ -331,7 +331,7 @@ PlatformAmiga::PlatformAmiga() :
     itemsBitMap(new BitMap),
     healthBitMap(new BitMap),
 #endif
-#ifdef PLATFORM_SPRITE_SUPPORT
+#ifdef PLATFORM_CURSOR_SUPPORT
     cursorSprite1(new SimpleSprite),
     cursorSprite2(new SimpleSprite),
 #endif
@@ -531,7 +531,7 @@ PlatformAmiga::PlatformAmiga() :
     }
 
     SetPointer(window, pointer, 0, 0, 0, 0);
-#ifdef PLATFORM_SPRITE_SUPPORT
+#ifdef PLATFORM_CURSOR_SUPPORT
     GetSprite(cursorSprite1, 2);
     GetSprite(cursorSprite2, 3);
 #endif
@@ -645,7 +645,7 @@ PlatformAmiga::~PlatformAmiga()
         RemIntServer(INTB_VERTB, verticalBlankInterrupt);
     }
 
-#ifdef PLATFORM_SPRITE_SUPPORT
+#ifdef PLATFORM_CURSOR_SUPPORT
     if (cursorSprite2->num != -1) {
         FreeSprite(cursorSprite2->num);
     }
@@ -679,7 +679,7 @@ PlatformAmiga::~PlatformAmiga()
 
     delete[] loadBuffer;
     delete palette;
-#ifdef PLATFORM_SPRITE_SUPPORT
+#ifdef PLATFORM_CURSOR_SUPPORT
     delete cursorSprite2;
     delete cursorSprite1;
 #endif
@@ -827,7 +827,7 @@ void PlatformAmiga::show()
         }
     }
 
-#ifdef PLATFORM_SPRITE_SUPPORT
+#ifdef PLATFORM_CURSOR_SUPPORT
     if (cursorSprite1->num != -1 && cursorSprite2->num != -1) {
         cursorSprite1->height = 0;
         cursorSprite2->height = 0;
