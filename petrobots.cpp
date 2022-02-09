@@ -2284,8 +2284,7 @@ void DISPLAY_BLANK_ITEM()
 #ifdef PLATFORM_IMAGE_SUPPORT
     platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 48, 48, 40);
 #else
-    platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 56, 48, 32);
-#endif
+    platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 64, 48, 40);
 /*
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
@@ -2295,6 +2294,7 @@ void DISPLAY_BLANK_ITEM()
         writeToScreenMemory(13 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
     }
 */
+#endif
 }
 
 void CYCLE_WEAPON()
