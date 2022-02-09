@@ -167,6 +167,188 @@ __chip static SpriteData cursorData2 = {
     },
     { 0, 0 }
 };
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+static uint16_t cursorUseData1[28][2] = {
+    { 0xffff, 0 },
+    { 0xffff, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xffff, 0 },
+    { 0xffff, 0 }
+};
+static uint16_t cursorUseData2[28][2] = {
+    { 0xfff0, 0 },
+    { 0xfff0, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0x0030, 0 },
+    { 0xfff0, 0 },
+    { 0xfff0, 0 }
+};
+static uint16_t cursorSearchData1[28][2] = {
+    { 0xffff,0 },
+    { 0xffff,0 },
+    { 0xc000,0 },
+    { 0xc000,0 },
+    { 0xc000,0 },
+    { 0xc000,0 },
+    { 0xc0f8,0 },
+    { 0xc18e,0 },
+    { 0xc303,0 },
+    { 0xc609,0 },
+    { 0xc609,0 },
+    { 0xc601,0 },
+    { 0xc601,0 },
+    { 0xc303,0 },
+    { 0xc303,0 },
+    { 0xc18f,0 },
+    { 0xc0f8,0 },
+    { 0xc000,0 },
+    { 0xc000,0 },
+    { 0xc000,0 },
+    { 0xc000,0 },
+    { 0xc000,0 },
+    { 0xc000,0 },
+    { 0xc000,0 },
+    { 0xc000,0 },
+    { 0xc000,0 },
+    { 0xffff,0 },
+    { 0xffff,0 }
+};
+static uint16_t cursorSearchData2[28][2] = {
+    { 0xfff0,0 },
+    { 0xfff0,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0x8030,0 },
+    { 0x8030,0 },
+    { 0x8030,0 },
+    { 0x8030,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0x8030,0 },
+    { 0xc030,0 },
+    { 0x6030,0 },
+    { 0x3030,0 },
+    { 0x1830,0 },
+    { 0x0c30,0 },
+    { 0x0630,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0xfff0,0 },
+    { 0xfff0,0 }
+};
+static uint16_t cursorMoveData1[28][2] = {
+    { 0xffff, 0 },
+    { 0xffff, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xc00c, 0 },
+    { 0xc013, 0 },
+    { 0xc072, 0 },
+    { 0xc092, 0 },
+    { 0xc092, 0 },
+    { 0xc092, 0 },
+    { 0xc092, 0 },
+    { 0xc192, 0 },
+    { 0xc292, 0 },
+    { 0xc280, 0 },
+    { 0xc280, 0 },
+    { 0xc280, 0 },
+    { 0xc200, 0 },
+    { 0xc300, 0 },
+    { 0xc100, 0 },
+    { 0xc100, 0 },
+    { 0xc080, 0 },
+    { 0xc080, 0 },
+    { 0xc040, 0 },
+    { 0xc07f, 0 },
+    { 0xc000, 0 },
+    { 0xc000, 0 },
+    { 0xffff, 0 },
+    { 0xffff, 0 }
+};
+static uint16_t cursorMoveData2[28][2] = {
+    { 0xfff0,0 },
+    { 0xfff0,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0x8030,0 },
+    { 0x4030,0 },
+    { 0x7030,0 },
+    { 0x4830,0 },
+    { 0x4830,0 },
+    { 0x4830,0 },
+    { 0x4830,0 },
+    { 0x4830,0 },
+    { 0x4830,0 },
+    { 0x0830,0 },
+    { 0x0830,0 },
+    { 0x1030,0 },
+    { 0x1030,0 },
+    { 0x1030,0 },
+    { 0x2030,0 },
+    { 0x2030,0 },
+    { 0x4030,0 },
+    { 0x4030,0 },
+    { 0xc030,0 },
+    { 0x0030,0 },
+    { 0x0030,0 },
+    { 0xfff0,0 },
+    { 0xfff0,0 }
+};
+#endif
 #endif
 __chip static uint16_t pointer[4];
 uint16_t addressMap[SCREEN_WIDTH_IN_CHARACTERS * SCREEN_HEIGHT_IN_CHARACTERS];
@@ -1699,6 +1881,36 @@ void PlatformAmiga::hideCursor()
         ChangeSprite(&screen->ViewPort, cursorSprite2, (uint8_t*)&cursorData2);
     }
 }
+
+#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
+void PlatformAmiga::setCursorShape(CursorShape shape)
+{
+    uint32_t* source1;
+    uint32_t* source2;
+    uint32_t* dest1 = (uint32_t*)&cursorData1.data;
+    uint32_t* dest2 = (uint32_t*)&cursorData2.data;
+
+    switch (shape) {
+    case ShapeSearch:
+        source1 = (uint32_t*)&cursorSearchData1;
+        source2 = (uint32_t*)&cursorSearchData2;
+        break;
+    case ShapeMove:
+        source1 = (uint32_t*)&cursorMoveData1;
+        source2 = (uint32_t*)&cursorMoveData2;
+        break;
+    default:
+        source1 = (uint32_t*)&cursorUseData1;
+        source2 = (uint32_t*)&cursorUseData2;
+        break;
+    }
+
+    for (int i = 0; i < 28; i++) {
+        *dest1++ = *source1++;
+        *dest2++ = *source2++;
+    }
+}
+#endif
 #endif
 
 void PlatformAmiga::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height)
