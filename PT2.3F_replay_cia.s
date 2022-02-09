@@ -273,7 +273,7 @@ mtloop2	MOVE.B	(A1)+,D1
 	ADDQ.B	#1,D2
 	
 	; generate mt_SampleStarts list and fix samples
-	LEA	mt_SampleStarts(PC),A1
+	LEA	mt_SampleStarts,A1
 	ASL.L	#8,D2
 	ASL.L	#2,D2
 	ADD.L	#1084,D2
@@ -300,6 +300,10 @@ mtskip2
 
 	; initialize stuff
 	;OR.B	#2,$BFE001
+	move.l	#$00010000,mt_chan1temp+20
+	move.l	#$00020000,mt_chan2temp+20
+	move.l	#$00040000,mt_chan3temp+20
+	move.l	#$00080000,mt_chan4temp+20
 	MOVE.B	#6,mt_speed
 	CLR.B	mt_counter
 	CLR.B	mt_SongPos
@@ -324,8 +328,8 @@ mt_music
 	TST.B	mt_Enable
 	BEQ	mt_exit
 	ADDQ.B	#1,mt_counter
-	MOVE.B	mt_counter(PC),D0
-	CMP.B	mt_speed(PC),D0
+	MOVE.B	mt_counter,D0
+	CMP.B	mt_speed,D0
 	BLO.S	mt_NoNewNote
 	CLR.B	mt_counter
 	TST.B	mt_PattDelTime2
@@ -339,30 +343,30 @@ mt_NoNewNote
 
 mt_NoNewAllChannels
 	LEA	$DFF0A0,A5
-	LEA	mt_chan1temp(PC),A6
+	LEA	mt_chan1temp,A6
 	BSR	mt_CheckEffects
 	LEA	$DFF0B0,A5
-	LEA	mt_chan2temp(PC),A6
+	LEA	mt_chan2temp,A6
 	BSR	mt_CheckEffects
 	LEA	$DFF0C0,A5
-	LEA	mt_chan3temp(PC),A6
+	LEA	mt_chan3temp,A6
 	BSR	mt_CheckEffects
 	LEA	$DFF0D0,A5
-	LEA	mt_chan4temp(PC),A6
+	LEA	mt_chan4temp,A6
 	BRA	mt_CheckEffects
 
 mt_GetNewNote
-	MOVE.L	mt_SongDataPtr(PC),A0
+	MOVE.L	mt_SongDataPtr,A0
 	LEA	12(A0),A3
 	LEA	952(A0),A2	;pattpo
 	LEA	1084(A0),A0	;patterndata
 	MOVEQ	#0,D0
 	MOVEQ	#0,D1
-	MOVE.B	mt_SongPos(PC),D0
+	MOVE.B	mt_SongPos,D0
 	MOVE.B	(A2,D0.W),D1
 	ASL.L	#8,D1
 	ASL.L	#2,D1
-	ADD.W	mt_PatternPos(PC),D1
+	ADD.W	mt_PatternPos,D1
 	CLR.W	mt_DMACONtemp
 
 	LEA	$DFF0A0,A5
@@ -372,7 +376,7 @@ mt_GetNewNote
 	lea	mt_chan1input,a0
 	moveq	#0,d1
 mt_PlayChannel1
-	LEA	mt_chan1temp(PC),A6
+	LEA	mt_chan1temp,A6
 	BSR	mt_PlayVoice
 	MOVEQ	#0,D0
 	MOVE.B	n_volume(A6),D0
@@ -388,7 +392,7 @@ mt_PlayChannel1
 	lea	mt_chan2input,a0
 	moveq	#0,d1
 mt_PlayChannel2
-	LEA	mt_chan2temp(PC),A6
+	LEA	mt_chan2temp,A6
 	BSR	mt_PlayVoice
 	MOVEQ	#0,D0
 	MOVE.B	n_volume(A6),D0
@@ -404,7 +408,7 @@ mt_PlayChannel2
 	lea	mt_chan3input,a0
 	moveq	#0,d1
 mt_PlayChannel3
-	LEA	mt_chan3temp(PC),A6
+	LEA	mt_chan3temp,A6
 	BSR	mt_PlayVoice
 	MOVEQ	#0,D0
 	MOVE.B	n_volume(A6),D0
@@ -419,7 +423,7 @@ mt_PlayChannel3
 	lea	mt_chan4input,a0
 	moveq	#0,d1
 mt_PlayChannel4
-	LEA	mt_chan4temp(PC),A6
+	LEA	mt_chan4temp,A6
 	BSR	mt_PlayVoice
 	MOVEQ	#0,D0
 	MOVE.B	n_volume(A6),D0
@@ -444,7 +448,7 @@ mt_plvskip
 	TST.B	D2
 	BEQ	mt_SetRegs	; Instrument was zero
 	MOVEQ	#0,D3
-	LEA	mt_SampleStarts(PC),A1
+	LEA	mt_SampleStarts,A1
 	MOVE	D2,D4
 	SUBQ.L	#1,D2
 	ASL.L	#2,D2
@@ -561,7 +565,7 @@ waiteol4
 	BEQ.B	waiteol4
 	DBRA	D1,lineloop4
 
-	MOVE.W	mt_DMACONtemp(PC),D0
+	MOVE.W	mt_DMACONtemp,D0
 	OR.W	#$8000,D0		; Set bits
 	MOVE.W	D0,$DFF096
 	
@@ -576,16 +580,16 @@ waiteol5
 	MOVE.L	(SP)+,A0
 	
 	LEA	$DFF000,A5
-	LEA	mt_chan4temp(PC),A6
+	LEA	mt_chan4temp,A6
 	MOVE.L	n_loopstart(A6),$D0(A5)
 	MOVE.W	n_replen(A6),$D4(A5)
-	LEA	mt_chan3temp(PC),A6
+	LEA	mt_chan3temp,A6
 	MOVE.L	n_loopstart(A6),$C0(A5)
 	MOVE.W	n_replen(A6),$C4(A5)
-	LEA	mt_chan2temp(PC),A6
+	LEA	mt_chan2temp,A6
 	MOVE.L	n_loopstart(A6),$B0(A5)
 	MOVE.W	n_replen(A6),$B4(A5)
-	LEA	mt_chan1temp(PC),A6
+	LEA	mt_chan1temp,A6
 	MOVE.L	n_loopstart(A6),$A0(A5)
 	MOVE.W	n_replen(A6),$A4(A5)
 
@@ -604,7 +608,7 @@ mt_dskpa	TST.B	mt_PBreakFlag
 	BEQ.S	mt_nnpysk
 	SF	mt_PBreakFlag
 	MOVEQ	#0,D0
-	MOVE.B	mt_PBreakPos(PC),D0
+	MOVE.B	mt_PBreakPos,D0
 	LSL.W	#4,D0
 	MOVE.W	D0,mt_PatternPos
 	CLR.B	mt_PBreakPos
@@ -613,15 +617,15 @@ mt_nnpysk
 	BLO.S	mt_NoNewPosYet
 mt_NextPosition	
 	MOVEQ	#0,D0
-	MOVE.B	mt_PBreakPos(PC),D0
+	MOVE.B	mt_PBreakPos,D0
 	LSL.W	#4,D0
 	MOVE.W	D0,mt_PatternPos
 	CLR.B	mt_PBreakPos
 	CLR.B	mt_PosJumpFlag
 	ADDQ.B	#1,mt_SongPos
 	AND.B	#$7F,mt_SongPos
-	MOVE.B	mt_SongPos(PC),D1
-	MOVE.L	mt_SongDataPtr(PC),A0
+	MOVE.B	mt_SongPos,D1
+	MOVE.L	mt_SongDataPtr,A0
 	CMP.B	950(A0),D1
 	BLO.S	mt_NoNewPosYet
 	CLR.B	mt_SongPos
@@ -668,7 +672,7 @@ mt_PerNop
 
 mt_Arpeggio
 	MOVEQ	#0,D0
-	MOVE.B	mt_counter(PC),D0
+	MOVE.B	mt_counter,D0
 	DIVS	#3,D0
 	SWAP	D0
 	CMP.W	#1,D0
@@ -718,7 +722,7 @@ mt_FinePortaUp
 mt_PortaUp
 	MOVEQ	#0,D0
 	MOVE.B	n_cmdlo(A6),D0
-	AND.B	mt_LowMask(PC),D0
+	AND.B	mt_LowMask,D0
 	MOVE.B	#$FF,mt_LowMask
 	SUB.W	D0,n_period(A6)
 	MOVE.W	n_period(A6),D0
@@ -740,7 +744,7 @@ mt_FinePortaDown
 mt_PortaDown
 	CLR.W	D0
 	MOVE.B	n_cmdlo(A6),D0
-	AND.B	mt_LowMask(PC),D0
+	AND.B	mt_LowMask,D0
 	MOVE.B	#$FF,mt_LowMask
 	ADD.W	D0,n_period(A6)
 	MOVE.W	n_period(A6),D0
@@ -1173,7 +1177,7 @@ mt_jumpcnt
 	BRA.S	mt_jmploop
 
 mt_SetLoop
-	MOVE.W	mt_PatternPos(PC),D0
+	MOVE.W	mt_PatternPos,D0
 	LSR.W	#4,D0
 	AND.B	#63,D0
 	MOVE.B	D0,n_pattpos(A6)
@@ -1194,13 +1198,13 @@ mt_RetrigNote
 	AND.B	#$0F,D0
 	BEQ.S	mt_rtnend
 	MOVEQ	#0,D1
-	MOVE.B	mt_counter(PC),D1
+	MOVE.B	mt_counter,D1
 	BNE.S	mt_rtnskp
 	MOVE.W	n_note(A6),D1
 	AND.W	#$0FFF,D1
 	BNE.S	mt_rtnend
 	MOVEQ	#0,D1
-	MOVE.B	mt_counter(PC),D1
+	MOVE.B	mt_counter,D1
 mt_rtnskp
 	DIVU	D0,D1
 	SWAP	D1
@@ -1261,7 +1265,7 @@ mt_NoteCut
 	MOVEQ	#0,D0
 	MOVE.B	n_cmdlo(A6),D0
 	AND.B	#$0F,D0
-	CMP.B	mt_counter(PC),D0
+	CMP.B	mt_counter,D0
 	BNE	mt_Return
 	CLR.B	n_volume(A6)
 	RTS
@@ -1410,49 +1414,46 @@ mt_PeriodTable
 	dc.w	431,407,384,363,342,323,305,288,272,256,242,228
 	dc.w	216,203,192,181,171,161,152,144,136,128,121,114,0
 
+	section	__MERGED,bss
+
 _mt_chan1temp:
-mt_chan1temp	dc.l	0,0,0,0,0,$00010000,0,0,0,0
-		dc.w	0
+mt_chan1temp	ds.w	21
 _mt_chan2temp:
-mt_chan2temp	dc.l	0,0,0,0,0,$00020000,0,0,0,0
-		dc.w	0
+mt_chan2temp	ds.w	21
 _mt_chan3temp:
-mt_chan3temp	dc.l	0,0,0,0,0,$00040000,0,0,0,0
-		dc.w	0
+mt_chan3temp	ds.w	21
 _mt_chan4temp:
-mt_chan4temp	dc.l	0,0,0,0,0,$00080000,0,0,0,0
-		dc.w	0
+mt_chan4temp	ds.w	21
 				
 _mt_SampleStarts
 mt_SampleStarts
-	dc.l	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
-	dc.l	0,0,0,0,0,0,0,0,0,0,0,0,0,0,0
+	ds.l	31
 
 _mt_data:
-mt_SongDataPtr	dc.l 0
+mt_SongDataPtr	ds.l 1
 _mt_speed:
-mt_speed	dc.b 6
-mt_counter	dc.b 0
+mt_speed	ds.b 1
+mt_counter	ds.b 1
 _mt_SongPos
-mt_SongPos	dc.b 0
-mt_PBreakPos	dc.b 0
-mt_PosJumpFlag	dc.b 0
-mt_PBreakFlag	dc.b 0
-mt_LowMask	dc.b 0
-mt_PattDelTime	dc.b 0
-mt_PattDelTime2	dc.b 0
+mt_SongPos	ds.b 1
+mt_PBreakPos	ds.b 1
+mt_PosJumpFlag	ds.b 1
+mt_PBreakFlag	ds.b 1
+mt_LowMask	ds.b 1
+mt_PattDelTime	ds.b 1
+mt_PattDelTime2	ds.b 1
 _mt_Enable:
-mt_Enable	dc.b 0
+mt_Enable	ds.b 1
 _mt_PatternPos:
-mt_PatternPos	dc.w 0
-mt_DMACONtemp	dc.w 0
+mt_PatternPos	ds.w 1
+mt_DMACONtemp	ds.w 1
 _mt_chan1input:
-mt_chan1input:	dc.l 0
+mt_chan1input:	ds.l 1
 _mt_chan2input:
-mt_chan2input:	dc.l 0
+mt_chan2input:	ds.l 1
 _mt_chan3input:
-mt_chan3input:	dc.l 0
+mt_chan3input:	ds.l 1
 _mt_chan4input:
-mt_chan4input:	dc.l 0
+mt_chan4input:	ds.l 1
 
 	end
