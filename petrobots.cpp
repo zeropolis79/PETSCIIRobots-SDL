@@ -2585,7 +2585,7 @@ void PRINT_INTRO_MESSAGE()
 // at the bottom left of the screen.  You must first define the 
 // source of the text in $FB. The text should terminate with
 // a null character.
-void PRINT_INFO(const char *text)
+void PRINT_INFO(const char* text)
 {
     SCROLL_INFO(); // New text always causes a scroll
     PRINTX = 0;
