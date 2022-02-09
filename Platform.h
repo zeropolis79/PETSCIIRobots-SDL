@@ -4,6 +4,10 @@
 #define SCREEN_WIDTH_IN_CHARACTERS (PLATFORM_SCREEN_WIDTH / 8)
 #define SCREEN_HEIGHT_IN_CHARACTERS (PLATFORM_SCREEN_HEIGHT / 8)
 
+#ifndef PLATFORM_MAP_COUNT
+#define PLATFORM_MAP_COUNT 14
+#endif
+
 #if __cplusplus < 201103L
 typedef char int8_t;
 typedef short int16_t;

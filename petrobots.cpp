@@ -280,7 +280,6 @@ char MAP_NAMES[] = "01-research lab "
                    "12-bunker       "
                    "13-castle robot "
                    "14-rocket center";
-#define MAP_COUNT 14
 
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 uint8_t MUSIC_ON = 1; // 0=off 1=on
@@ -2763,7 +2762,7 @@ uint8_t CONTROLSTART[] = { 0, 10, 20 };
 void CYCLE_MAP()
 {
     SELECTED_MAP++;
-    if (SELECTED_MAP == MAP_COUNT) { // Maximum number of maps
+    if (SELECTED_MAP == PLATFORM_MAP_COUNT) { // Maximum number of maps
         SELECTED_MAP = 0;
     }
     DISPLAY_MAP_NAME();
