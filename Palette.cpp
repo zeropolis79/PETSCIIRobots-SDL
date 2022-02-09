@@ -47,11 +47,6 @@ void Palette::setPalette(const uint16_t* palette, uint16_t colorCount)
     }
 }
 
-uint16_t Palette::colorCount() const
-{
-    return colorCount_;
-}
-
 void Palette::setFade(uint16_t fade)
 {
     fade_ = fade;

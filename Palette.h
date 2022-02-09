@@ -11,14 +11,10 @@ public:
     ~Palette();
 
     void setPalette(const uint16_t* palette, uint16_t colorCount);
-    __inline uint16_t colorCount() const;
     void setFade(uint16_t fade);
     __inline uint16_t fade() const;
     void setFadeBaseColor(uint16_t fadeBaseColor);
     __inline uint16_t* palette() const;
-
-    uint16_t operator[](int index) { return currentPalette[index]; }
-    const uint16_t operator[](int index) const { return currentPalette[index]; }
 
 private:
     void update();
