@@ -26,11 +26,7 @@ typedef unsigned char bool;
 #include <cstdint>
 #endif
 
-#if (PLATFORM_MAP_WINDOW_TILES_WIDTH == 11 && PLATFORM_MAP_WINDOW_TILES_HEIGHT == 7)
-typedef uint16_t address_t;
-#else
 typedef uint32_t address_t;
-#endif
 
 #define MIN(a, b) (((a) < (b)) ? (a) : (b))
 #define MAX(a, b) (((a) > (b)) ? (a) : (b))
@@ -39,9 +35,7 @@ typedef uint32_t address_t;
 class Platform {
 public:
     Platform();
-#ifndef _AMIGA
     virtual ~Platform();
-#endif
 
     enum Image {
         ImageIntro,
@@ -122,9 +116,7 @@ public:
     virtual void renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots);
     virtual void showCursor(uint16_t x, uint16_t y);
     virtual void hideCursor();
-#ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
     virtual void setCursorShape(CursorShape shape);
-#endif
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height) = 0;
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height) = 0;
     virtual void fillRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height, uint8_t color);
