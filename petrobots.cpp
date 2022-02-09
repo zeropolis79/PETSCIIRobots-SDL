@@ -147,11 +147,9 @@ int main(int argc, char *argv[])
     convertToPETSCII(CONTROLTEXT);
     convertToPETSCII(CINEMA_MESSAGE);
 
-#if (MAP_WINDOW_SIZE != 77)
     for (int i = 0; i < PLATFORM_MAP_WINDOW_TILES_HEIGHT; i++) {
         MAP_CHART[i] = i * 3 * SCREEN_WIDTH_IN_CHARACTERS;
     }
-#endif
 
     platform->stopNote(); // RESET SOUND TO ZERO
 #ifdef PLATFORM_STDOUT_MESSAGES
@@ -3213,10 +3211,10 @@ void PET_SCREEN_SHAKE()
         if (SCREEN_SHAKE == 1) {
             platform->copyRect(8, 0, 0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT - 32);
             platform->renderFrame(true);
-            INVALIDATE_PREVIOUS_MAP();
-        } else if (SCREEN_SHAKE == 3) {
 #ifdef OPTIMIZED_MAP_RENDERING
+            INVALIDATE_PREVIOUS_MAP();
 #endif
+        } else if (SCREEN_SHAKE == 3) {
             REDRAW_WINDOW = 1;
         }
         SCREEN_SHAKE++;
