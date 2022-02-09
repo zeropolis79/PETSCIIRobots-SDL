@@ -31,13 +31,13 @@ slv_keyexit	= $59	; F10
 
 	INCLUDE	"kick13.s"
 
-	dc.b	"$VER: PETSCIIRobots.slave 1.0 (23.12.2021)",0
+	dc.b	"$VER: PETSCIIRobots.slave 1.1 (09.02.2022)",0
 
 slv_CurrentDir:	dc.b	"Data",0
 slv_name:		dc.b	"Attack of the PETSCII Robots",0
 slv_copy:		dc.b	"2021 8-Bit Productions, LLC.",0
 slv_info:		dc.b	"Adapted by Vesa Halttunen",10
-				dc.b	"Version 1.0 (23.12.2021)",0
+				dc.b	"Version 1.1 (09.02.2022)",0
 programName:	dc.b	"AmigaRobots",0
 args:			dc.b	10
 argsEnd:		dc.b	0
@@ -89,8 +89,10 @@ _bootdos:
 
 	add.l	d3,sp
 
-	cmp.w	#$20af,d0
+	cmp.w	#$20af,d0			; version 1.0
 	beq	.checkJSR
+	cmp.w	#$ce1b,d0			; version 1.1
+	beq	.start
 
 .wrongVersion:
 	pea	TDREASON_WRONGVER
@@ -104,6 +106,7 @@ _bootdos:
 	move.l	a4,a1
 	jsr	resload_Patch(a2)
 
+.start:
 	lea	args(pc),a0
 	move.l	4(sp),d0
 	sub.l	#5*4,d0
