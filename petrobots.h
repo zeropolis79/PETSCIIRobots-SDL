@@ -7,18 +7,18 @@
 #define MAP_WINDOW_WIDTH (PLATFORM_MAP_WINDOW_TILES_WIDTH * 24)
 #define MAP_WINDOW_HEIGHT (PLATFORM_MAP_WINDOW_TILES_HEIGHT * 24)
 
-extern uint8_t *DESTRUCT_PATH; // Destruct path array (256 bytes)
-extern uint8_t *TILE_ATTRIB;   // Tile attrib array (256 bytes)
+extern uint8_t* DESTRUCT_PATH; // Destruct path array (256 bytes)
+extern uint8_t* TILE_ATTRIB;   // Tile attrib array (256 bytes)
 #ifndef PLATFORM_SPRITE_SUPPORT
-extern uint8_t *TILE_DATA_TL;  // Tile character top-left (256 bytes)
-extern uint8_t *TILE_DATA_TM;  // Tile character top-middle (256 bytes)
-extern uint8_t *TILE_DATA_TR;  // Tile character top-right (256 bytes)
-extern uint8_t *TILE_DATA_ML;  // Tile character middle-left (256 bytes)
-extern uint8_t *TILE_DATA_MM;  // Tile character middle-middle (256 bytes)
-extern uint8_t *TILE_DATA_MR;  // Tile character middle-right (256 bytes)
-extern uint8_t *TILE_DATA_BL;  // Tile character bottom-left (256 bytes)
-extern uint8_t *TILE_DATA_BM;  // Tile character bottom-middle (256 bytes)
-extern uint8_t *TILE_DATA_BR;  // Tile character bottom-right (256 bytes)
+extern uint8_t* TILE_DATA_TL;  // Tile character top-left (256 bytes)
+extern uint8_t* TILE_DATA_TM;  // Tile character top-middle (256 bytes)
+extern uint8_t* TILE_DATA_TR;  // Tile character top-right (256 bytes)
+extern uint8_t* TILE_DATA_ML;  // Tile character middle-left (256 bytes)
+extern uint8_t* TILE_DATA_MM;  // Tile character middle-middle (256 bytes)
+extern uint8_t* TILE_DATA_MR;  // Tile character middle-right (256 bytes)
+extern uint8_t* TILE_DATA_BL;  // Tile character bottom-left (256 bytes)
+extern uint8_t* TILE_DATA_BM;  // Tile character bottom-middle (256 bytes)
+extern uint8_t* TILE_DATA_BR;  // Tile character bottom-right (256 bytes)
 #endif
 
 // These arrays can go anywhere in RAM
@@ -291,7 +291,7 @@ extern char WIN_MSG[];
 extern char LOS_MSG[];
 
 void PRINT_INTRO_MESSAGE();
-void PRINT_INFO(const char *);
+void PRINT_INFO(const char*);
 
 extern uint8_t PRINTX;
 
