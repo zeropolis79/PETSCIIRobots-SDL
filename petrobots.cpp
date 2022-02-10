@@ -366,6 +366,9 @@ void UPDATE_GAME_CLOCK()
     }
     CYCLES = 0;
     SECONDS++;
+#ifdef INACTIVITY_TIMEOUT
+    INACTIVE_SECONDS++;
+#endif
     if (SECONDS != 60) {
         return;
     }
@@ -384,6 +387,9 @@ uint8_t MINUTES = 0;
 uint8_t SECONDS = 0;
 uint8_t CYCLES = 0;
 uint8_t CLOCK_ACTIVE = 0;
+#ifdef INACTIVITY_TIMEOUT
+uint8_t INACTIVE_SECONDS = 0;
+#endif
 
 // This routine spaces out the timers so that not everything
 // is running out once. It also starts the game_clock.
@@ -401,6 +407,11 @@ void MAIN_GAME_LOOP()
     platform->renderFrame();
     bool done = false;
     while (!done && !platform->quit) {
+#ifdef INACTIVITY_TIMEOUT
+        if (INACTIVE_SECONDS >= INACTIVITY_TIMEOUT) {
+            return;
+        }
+#endif
         if (BGTIMER1 != 1) {
             platform->renderFrame(true);
         }
@@ -415,6 +426,9 @@ void MAIN_GAME_LOOP()
         uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
         // Keyboard controls here.
         if (A != 0xff) {
+#ifdef INACTIVITY_TIMEOUT
+            INACTIVE_SECONDS = 0;
+#endif
             KEYTIMER = 5;
             if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT]) { // CURSOR RIGHT
                 UNIT = 0;
@@ -484,6 +498,9 @@ void MAIN_GAME_LOOP()
         }
         // SNES CONTROLLER starts here
         if (B != 0) {
+#ifdef INACTIVITY_TIMEOUT
+            INACTIVE_SECONDS = 0;
+#endif
             // first we start with the 4 directional buttons.
             if ((CONTROL == 2 && (B & Platform::JoystickPlay) == 0) ||
                 (CONTROL != 2 && (B & Platform::JoystickBlue) == 0)) {
@@ -2636,6 +2653,9 @@ void RESET_KEYS_AMMO()
     SECONDS = 0;
     MINUTES = 0;
     HOURS = 0;
+#ifdef INACTIVITY_TIMEOUT
+    INACTIVE_SECONDS = 0;
+#endif
 }
 
 void INTRO_SCREEN()

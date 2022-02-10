@@ -159,6 +159,9 @@ extern uint8_t MINUTES;
 extern uint8_t SECONDS;
 extern uint8_t CYCLES;
 extern uint8_t CLOCK_ACTIVE;
+#ifdef INACTIVITY_TIMEOUT
+extern uint8_t INACTIVE_SECONDS;
+#endif
 
 void SET_INITIAL_TIMERS();
 void MAIN_GAME_LOOP();
