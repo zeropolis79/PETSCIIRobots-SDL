@@ -222,11 +222,7 @@ uint8_t PLASMA_ACT = 0; // 0=No plasma fire active 1=plasma fire active
 uint8_t RANDOM = 0; // used for random number generation
 uint8_t BORDER = 0; // Used for border flash timing
 uint8_t SCREEN_SHAKE = 0; // 1=shake 0=no shake
-#if (PLATFORM_INTRO_OPTIONS == 4)
-uint8_t CONTROL = 0; // 0=keyboard 1=custom keys 2=snes
-#else
-uint8_t CONTROL = 2; // 0=keyboard 1=custom keys 2=snes
-#endif
+uint8_t CONTROL = PLATFORM_DEFAULT_CONTROL; // 0=keyboard 1=custom keys 2=snes
 uint16_t BORDER_COLOR = 0xf00; // Used for border flash coloring
 #if defined(_AMIGA)
 char INTRO_MESSAGE[] = "welcome to amiga-robots!\xff"
@@ -2285,7 +2281,7 @@ void DISPLAY_BLANK_ITEM()
     platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 48, 48, 40);
 #else
     platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 64, 48, 40);
-/*
+    /*
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(9 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
         writeToScreenMemory(10 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
@@ -2293,7 +2289,7 @@ void DISPLAY_BLANK_ITEM()
         writeToScreenMemory(12 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
         writeToScreenMemory(13 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
     }
-*/
+    */
 #endif
 }
 
@@ -2405,7 +2401,6 @@ void DISPLAY_BLANK_WEAPON()
     platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 8, 48, 32);
 #else
     platform->clearRect(PLATFORM_SCREEN_WIDTH - 48, 16, 48, 32);
-#endif
     /*
     for (int Y = 0; Y != 6; Y++) {
         writeToScreenMemory(2 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
@@ -2415,6 +2410,7 @@ void DISPLAY_BLANK_WEAPON()
         writeToScreenMemory(6 * SCREEN_WIDTH_IN_CHARACTERS - 6 + Y, 32);
     }
     */
+#endif
 }
 
 void DISPLAY_KEYS()

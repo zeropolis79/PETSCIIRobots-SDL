@@ -8,6 +8,14 @@
 #define PLATFORM_MAP_COUNT 14
 #endif
 
+#ifndef PLATFORM_INTRO_OPTIONS
+#define PLATFORM_INTRO_OPTIONS 4
+#endif
+
+#ifndef PLATFORM_DEFAULT_CONTROL
+#define PLATFORM_DEFAULT_CONTROL 0
+#endif
+
 #if __cplusplus < 201103L
 typedef char int8_t;
 typedef short int16_t;
