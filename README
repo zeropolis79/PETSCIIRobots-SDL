@@ -124,13 +124,11 @@ SELECT+DOWN live map robots
 SELECT+CIRCLE pause
 SELECT+CROSS toggle music
 
-PSP TODO
---------
-- native resolution intro screen and game over screen
-
 TODO
 ----
 - Add screen and map size getters in Program to allow actual screen size to be determined on startup
-- Add Amiga monitor support
-- Add Amiga command line argument / tooltype support
+- Amiga PAL screen size support
+- Amiga monitor support
+- Amiga command line argument / tooltype support
 - Render live map to a separate Amiga screen
+- PSP native resolution intro screen and game over screen
