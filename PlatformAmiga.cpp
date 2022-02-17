@@ -56,7 +56,8 @@
 #endif
 #define CHIP_MEMORY_SIZE (SCREEN_PLANES_SIZE + TILES_PLANES_SIZE + TILES_MASK_SIZE + COMBINED_TILE_PLANES_SIZE)
 #ifdef PLATFORM_PRELOAD_SUPPORT
-#define PRELOADED_ASSETS_BUFFER_SIZE (32032 + 32032 + 32032 + 69536 + 33792 + 17184)
+#define PRELOADED_ASSETS_BUFFER_SIZE_MINIMUM (32032 + 32032 + 32032 + 69536 + 33792 + 17184)
+#define PRELOADED_ASSETS_BUFFER_SIZE_ALL (32032 + 32032 + 32032 + 69536 + 33792 + 17184 + 71432 + 103754 + 105654 + 86504)
 #endif
 static const char version[] = "$VER: Attack of the PETSCII Robots 1.1 (2022-02-09)";
 
@@ -864,7 +865,18 @@ void PlatformAmiga::runVerticalBlankInterrupt()
 #ifdef PLATFORM_PRELOAD_SUPPORT
 void PlatformAmiga::preloadAssets()
 {
-    preloadedAssetBuffer = new uint8_t[PRELOADED_ASSETS_BUFFER_SIZE];
+    for (int i = 0; i < 10; i++) {
+        preloadedAssets[i] = 0;
+        preloadedAssetLengths[i] = 0;
+    }
+
+    bool allAssets = true;
+    preloadedAssetBuffer = new uint8_t[PRELOADED_ASSETS_BUFFER_SIZE_ALL];
+
+    if (!preloadedAssetBuffer) {
+        allAssets = false;
+        preloadedAssetBuffer = new uint8_t[PRELOADED_ASSETS_BUFFER_SIZE_MINIMUM];
+    }
 
     if (preloadedAssetBuffer) {
         int asset = 0;
@@ -893,6 +905,24 @@ void PlatformAmiga::preloadAssets()
 
             preloadedAssets[asset] = preloadedAssetBuffer + offset;
             preloadedAssetLengths[asset] = load(moduleFilenames[2], preloadedAssets[asset], 17182, 0);
+            offset += preloadedAssetLengths[asset++];
+
+            if (allAssets) {
+                preloadedAssets[asset] = preloadedAssetBuffer + offset;
+                preloadedAssetLengths[asset] = load(moduleFilenames[3], preloadedAssets[asset], 71432, 0);
+                offset += preloadedAssetLengths[asset++];
+
+                preloadedAssets[asset] = preloadedAssetBuffer + offset;
+                preloadedAssetLengths[asset] = load(moduleFilenames[4], preloadedAssets[asset], 103754, 0);
+                offset += preloadedAssetLengths[asset++];
+
+                preloadedAssets[asset] = preloadedAssetBuffer + offset;
+                preloadedAssetLengths[asset] = load(moduleFilenames[5], preloadedAssets[asset], 105654, 0);
+                offset += preloadedAssetLengths[asset++];
+
+                preloadedAssets[asset] = preloadedAssetBuffer + offset;
+                preloadedAssetLengths[asset] = load(moduleFilenames[6], preloadedAssets[asset], 86504, 0);
+            }
         }
     }
 }
@@ -2052,7 +2082,7 @@ void PlatformAmiga::loadModule(Module module)
     if (loadedModule != module && moduleData) {
         uint32_t moduleSize;
 #ifdef PLATFORM_PRELOAD_SUPPORT
-        if (preloadedAssetBuffer && module < ModuleInGame1) {
+        if (preloadedAssets[module + 2]) {
             moduleSize = preloadedAssetLengths[module + 2];
             uint32_t* source = (uint32_t*)preloadedAssets[module + 2];
             uint32_t* destination = (uint32_t*)moduleData;

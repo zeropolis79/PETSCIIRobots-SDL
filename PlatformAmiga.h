@@ -144,8 +144,8 @@ private:
     uint8_t* loadBuffer;
 #ifdef PLATFORM_PRELOAD_SUPPORT
     uint8_t* preloadedAssetBuffer;
-    uint8_t* preloadedAssets[6];
-    uint32_t preloadedAssetLengths[6];
+    uint8_t* preloadedAssets[10];
+    uint32_t preloadedAssetLengths[10];
 #endif
     uint16_t bplcon1DefaultValue;
     uint8_t shakeStep;
