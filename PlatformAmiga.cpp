@@ -57,7 +57,7 @@
 #define CHIP_MEMORY_SIZE (SCREEN_PLANES_SIZE + TILES_PLANES_SIZE + TILES_MASK_SIZE + COMBINED_TILE_PLANES_SIZE)
 #ifdef PLATFORM_PRELOAD_SUPPORT
 #define PRELOADED_ASSETS_BUFFER_SIZE_MINIMUM (32032 + 32032 + 32032 + 69536 + 33792 + 17184)
-#define PRELOADED_ASSETS_BUFFER_SIZE_ALL (32032 + 32032 + 32032 + 69536 + 33792 + 17184 + 71432 + 103754 + 105654 + 86504)
+#define PRELOADED_ASSETS_BUFFER_SIZE_ALL (32032 + 32032 + 32032 + 69536 + 33792 + 17184 + 71432 + 103754 + 105654 + 86504 + 14 * 8960)
 #endif
 static const char version[] = "$VER: Attack of the PETSCII Robots 1.1 (2022-02-09)";
 
@@ -866,7 +866,7 @@ void PlatformAmiga::runVerticalBlankInterrupt()
 #ifdef PLATFORM_PRELOAD_SUPPORT
 void PlatformAmiga::preloadAssets()
 {
-    for (int i = 0; i < 10; i++) {
+    for (int i = 0; i < 24; i++) {
         preloadedAssets[i] = 0;
         preloadedAssetLengths[i] = 0;
     }
@@ -924,6 +924,13 @@ void PlatformAmiga::preloadAssets()
                 preloadedAssets[asset] = preloadedAssetBuffer + offset;
                 preloadedAssetLengths[asset] = load(moduleFilenames[6], preloadedAssets[asset], 86504);
                 offset += preloadedAssetLengths[asset++];
+
+                for (i = 0; i < 14; i++) {
+                    MAPNAME[6] = 'a' + i;
+                    preloadedAssets[asset] = preloadedAssetBuffer + offset;
+                    preloadedAssetLengths[asset] = load(MAPNAME, preloadedAssets[asset], 8960);
+                    offset += preloadedAssetLengths[asset++];
+                }
             }
         }
     }
@@ -1261,6 +1268,23 @@ void PlatformAmiga::loadMap(Map map, uint8_t* destination)
 {
     MAPNAME[6] = 'a' + map;
 
+#ifdef PLATFORM_PRELOAD_SUPPORT
+    if (preloadedAssets[10 + map]) {
+        uint32_t* source = (uint32_t*)preloadedAssets[10 + map];
+        uint32_t* dest = (uint32_t*)destination;
+        uint32_t* end = (uint32_t*)(destination + preloadedAssetLengths[10 + map]);
+        while (dest < end) {
+            *dest++ = *source++;
+            *dest++ = *source++;
+            *dest++ = *source++;
+            *dest++ = *source++;
+            *dest++ = *source++;
+            *dest++ = *source++;
+            *dest++ = *source++;
+            *dest++ = *source++;
+        }
+    } else
+#endif
     load(MAPNAME, destination, 8960);
 }
 
