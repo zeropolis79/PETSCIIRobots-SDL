@@ -59,7 +59,7 @@
 #define PRELOADED_ASSETS_BUFFER_SIZE_MINIMUM (32032 + 32032 + 32032 + 69536 + 33792 + 17184)
 #define PRELOADED_ASSETS_BUFFER_SIZE_ALL (32032 + 32032 + 32032 + 69536 + 33792 + 17184 + 71432 + 103754 + 105654 + 86504 + 14 * 8960)
 #endif
-static const char version[] = "$VER: Attack of the PETSCII Robots 1.1 (2022-02-09)";
+static const char version[] = "$VER: Attack of the PETSCII Robots 1.2 (2022-02-18)";
 
 struct SpriteData {
     uint16_t posctl[2];
