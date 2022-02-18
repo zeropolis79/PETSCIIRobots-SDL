@@ -20,8 +20,8 @@ public:
     virtual void keyRepeat();
     virtual void clearKeyBuffer();
     virtual bool isKeyOrJoystickPressed(bool gamepad);
-    virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset);
-    virtual uint8_t* loadTileset(const char* filename);
+    virtual void loadMap(Map map, uint8_t* destination);
+    virtual uint8_t* loadTileset();
 #ifdef PLATFORM_IMAGE_SUPPORT
     virtual void displayImage(Image image);
 #endif
@@ -63,6 +63,7 @@ public:
     virtual void renderFrame(bool waitForNextFrame);
 
 private:
+    uint32_t load(const char* filename, uint8_t* destination, uint32_t size);
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     void undeltaSamples(uint8_t* module, uint32_t moduleSize);
     void setSampleData(uint8_t* module);

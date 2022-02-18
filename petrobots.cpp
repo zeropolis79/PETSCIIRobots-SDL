@@ -196,12 +196,7 @@ void INIT_GAME()
     MAIN_GAME_LOOP();
 }
 
-#ifdef PLATFORM_BUILTIN_TILESET
-#define TILENAME 0
-#else
-#define TILENAME "tileset.pet"
-#endif
-char MAPNAME[] = "level-a";
+//char MAPNAME[] = "level-a";
 #ifdef PLATFORM_STDOUT_MESSAGES
 const char* LOADMSG1 = "loading tiles...\x0d";
 #endif
@@ -1973,7 +1968,7 @@ void DECWRITE(uint16_t destination, uint8_t color)
 // The following routine loads the tileset from disk
 void TILE_LOAD_ROUTINE()
 {
-    uint8_t* tileset = platform->loadTileset(TILENAME);
+    uint8_t* tileset = platform->loadTileset();
     DESTRUCT_PATH = tileset + 2 + 0 * 256;
     TILE_ATTRIB = tileset + 2 + 1 * 256;
 #ifdef PLATFORM_SPRITE_SUPPORT
@@ -1995,7 +1990,7 @@ void TILE_LOAD_ROUTINE()
 // The following routine loads the map from disk
 void MAP_LOAD_ROUTINE()
 {
-    platform->load(MAPNAME, UNIT_TYPE, 8960);
+    platform->loadMap((Platform::Map)SELECTED_MAP, UNIT_TYPE);
 }
 
 void DISPLAY_GAME_SCREEN()
@@ -2795,7 +2790,7 @@ void DISPLAY_MAP_NAME()
 #endif
     }
     // now set the mapname for the filesystem load
-    MAPNAME[6] = SELECTED_MAP + 65;
+//    MAPNAME[6] = SELECTED_MAP + 65;
 }
 
 char* CALC_MAP_NAME()

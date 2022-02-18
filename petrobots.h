@@ -85,7 +85,7 @@ extern bool quit;
 
 void INIT_GAME();
 
-extern char MAPNAME[];
+//extern char MAPNAME[];
 extern const char* LOADMSG1;
 extern uint8_t KEYS; // bit0=spade bit2=heart bit3=star
 extern uint8_t AMMO_PISTOL; // how much ammo for the pistol

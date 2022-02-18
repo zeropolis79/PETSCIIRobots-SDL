@@ -6,7 +6,7 @@ CXX=psp-g++
 BIN2ELF=binary2elf
 
 DEBUGFLAGS =	-g
-CXXFLAGS =	$(DEBUGFLAGS) -Wall -fmessage-length=0 -Iinclude -I$(INCDIR) -D_PSP -DPLATFORM_SCREEN_WIDTH=480 -DPLATFORM_SCREEN_HEIGHT=272 -DPLATFORM_MAP_WINDOW_TILES_WIDTH=18 -DPLATFORM_MAP_WINDOW_TILES_HEIGHT=10 -DPLATFORM_INTRO_OPTIONS=3 -DPLATFORM_DEFAULT_CONTROL=2 -DPLATFORM_MODULE_BASED_AUDIO -DPLATFORM_TILE_BASED_RENDERING -DPLATFORM_IMAGE_BASED_TILES -DPLATFORM_IMAGE_SUPPORT -DPLATFORM_SPRITE_SUPPORT -DPLATFORM_COLOR_SUPPORT -DPLATFORM_CURSOR_SUPPORT -DPLATFORM_CURSOR_SHAPE_SUPPORT -DPLATFORM_FADE_SUPPORT -DPLATFORM_LIVE_MAP_SUPPORT -DPLATFORM_BUILTIN_TILESET -DOPTIMIZED_MAP_RENDERING
+CXXFLAGS =	$(DEBUGFLAGS) -Wall -fmessage-length=0 -Iinclude -I$(INCDIR) -D_PSP -DPLATFORM_SCREEN_WIDTH=480 -DPLATFORM_SCREEN_HEIGHT=272 -DPLATFORM_MAP_WINDOW_TILES_WIDTH=18 -DPLATFORM_MAP_WINDOW_TILES_HEIGHT=10 -DPLATFORM_INTRO_OPTIONS=3 -DPLATFORM_DEFAULT_CONTROL=2 -DPLATFORM_MODULE_BASED_AUDIO -DPLATFORM_TILE_BASED_RENDERING -DPLATFORM_IMAGE_BASED_TILES -DPLATFORM_IMAGE_SUPPORT -DPLATFORM_SPRITE_SUPPORT -DPLATFORM_COLOR_SUPPORT -DPLATFORM_CURSOR_SUPPORT -DPLATFORM_CURSOR_SHAPE_SUPPORT -DPLATFORM_FADE_SUPPORT -DPLATFORM_LIVE_MAP_SUPPORT -DOPTIMIZED_MAP_RENDERING
 LDFLAGS =	-L$(LIBDIR) -Wl,-Map,petrobots.map
 SOURCES =	petrobots.o Platform.o PlatformPSP.o PT2.3A_replay_cia.o
 
@@ -57,34 +57,34 @@ GameScreen.o: PSP/gamescreen.psp
 	$(BIN2ELF) --PSP -s gameScreen -e gameScreenEnd PSP/gamescreen.psp GameScreen.o
 GameOver.o: PSP/gameover.psp
 	$(BIN2ELF) --PSP -s gameOver -e gameOverEnd PSP/gameover.psp GameOver.o
-LevelA.o: PSP/level-A
-	$(BIN2ELF) --PSP -s levelA -e levelAEnd PSP/level-A LevelA.o
-LevelB.o: PSP/level-B
-	$(BIN2ELF) --PSP -s levelB -e levelBEnd PSP/level-B LevelB.o
-LevelC.o: PSP/level-C
-	$(BIN2ELF) --PSP -s levelC -e levelCEnd PSP/level-C LevelC.o
-LevelD.o: PSP/level-D
-	$(BIN2ELF) --PSP -s levelD -e levelDEnd PSP/level-D LevelD.o
-LevelE.o: PSP/level-E
-	$(BIN2ELF) --PSP -s levelE -e levelEEnd PSP/level-E LevelE.o
-LevelF.o: PSP/level-F
-	$(BIN2ELF) --PSP -s levelF -e levelFEnd PSP/level-F LevelF.o
-LevelG.o: PSP/level-G
-	$(BIN2ELF) --PSP -s levelG -e levelGEnd PSP/level-G LevelG.o
-LevelH.o: PSP/level-H
-	$(BIN2ELF) --PSP -s levelH -e levelHEnd PSP/level-H LevelH.o
-LevelI.o: PSP/level-I
-	$(BIN2ELF) --PSP -s levelI -e levelIEnd PSP/level-I LevelI.o
-LevelJ.o: PSP/level-J
-	$(BIN2ELF) --PSP -s levelJ -e levelJEnd PSP/level-J LevelJ.o
-LevelK.o: PSP/level-K
-	$(BIN2ELF) --PSP -s levelK -e levelKEnd PSP/level-K LevelK.o
-LevelL.o: PSP/level-L
-	$(BIN2ELF) --PSP -s levelL -e levelLEnd PSP/level-L LevelL.o
-LevelM.o: PSP/level-M
-	$(BIN2ELF) --PSP -s levelM -e levelMEnd PSP/level-M LevelM.o
-LevelN.o: PSP/level-N
-	$(BIN2ELF) --PSP -s levelN -e levelNEnd PSP/level-N LevelN.o
+LevelA.o: PSP/level-a
+	$(BIN2ELF) --PSP -s levelA -e levelAEnd PSP/level-a LevelA.o
+LevelB.o: PSP/level-b
+	$(BIN2ELF) --PSP -s levelB -e levelBEnd PSP/level-b LevelB.o
+LevelC.o: PSP/level-c
+	$(BIN2ELF) --PSP -s levelC -e levelCEnd PSP/level-c LevelC.o
+LevelD.o: PSP/level-d
+	$(BIN2ELF) --PSP -s levelD -e levelDEnd PSP/level-d LevelD.o
+LevelE.o: PSP/level-e
+	$(BIN2ELF) --PSP -s levelE -e levelEEnd PSP/level-e LevelE.o
+LevelF.o: PSP/level-f
+	$(BIN2ELF) --PSP -s levelF -e levelFEnd PSP/level-f LevelF.o
+LevelG.o: PSP/level-g
+	$(BIN2ELF) --PSP -s levelG -e levelGEnd PSP/level-g LevelG.o
+LevelH.o: PSP/level-h
+	$(BIN2ELF) --PSP -s levelH -e levelHEnd PSP/level-h LevelH.o
+LevelI.o: PSP/level-i
+	$(BIN2ELF) --PSP -s levelI -e levelIEnd PSP/level-i LevelI.o
+LevelJ.o: PSP/level-j
+	$(BIN2ELF) --PSP -s levelJ -e levelJEnd PSP/level-j LevelJ.o
+LevelK.o: PSP/level-k
+	$(BIN2ELF) --PSP -s levelK -e levelKEnd PSP/level-k LevelK.o
+LevelL.o: PSP/level-l
+	$(BIN2ELF) --PSP -s levelL -e levelLEnd PSP/level-l LevelL.o
+LevelM.o: PSP/level-m
+	$(BIN2ELF) --PSP -s levelM -e levelMEnd PSP/level-m LevelM.o
+LevelN.o: PSP/level-n
+	$(BIN2ELF) --PSP -s levelN -e levelNEnd PSP/level-n LevelN.o
 ModuleSoundFX.o: Music/mod.soundfx
 	$(BIN2ELF) --PSP -s moduleSoundFX -e moduleSoundFXEnd Music/mod.soundfx ModuleSoundFX.o
 ModuleMetalHeads.o: Music/mod.metal\ heads

@@ -22,8 +22,8 @@ public:
     virtual void clearKeyBuffer();
     virtual bool isKeyOrJoystickPressed(bool gamepad);
     virtual uint16_t readJoystick(bool gamepad);
-    virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset = 0);
-    virtual uint8_t* loadTileset(const char* filename);
+    virtual void loadMap(Map map, uint8_t* destination);
+    virtual uint8_t* loadTileset();
     virtual void displayImage(Image image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes);
     virtual void renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant = 0, bool transparent = false);
@@ -58,6 +58,7 @@ private:
     static int exitCallback(int arg1, int arg2, void* common);
     static SceInt32 audioThread(SceSize args, SceVoid* argb);
     static void vblankHandler(int idx, void* cookie);
+    uint32_t load(const char* filename, uint8_t* destination, uint32_t size);
     void drawRectangle(uint32_t color, uint32_t* texture, uint16_t tx, uint16_t ty, uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     void undeltaSamples(uint8_t* module, uint32_t moduleSize);
     void setSampleData(uint8_t* module);

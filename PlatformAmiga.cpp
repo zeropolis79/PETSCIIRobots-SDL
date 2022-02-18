@@ -373,6 +373,7 @@ static uint16_t blackPalette[16] = { 0 };
 #else
 static uint16_t blackPalette[16] = { 0x000, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0, 0x0f0 };
 #endif
+static char MAPNAME[] = "level-a";
 #ifdef PLATFORM_IMAGE_SUPPORT
 static const char* imageFilenames[] = {
     "IntroScreen.raw",
@@ -883,45 +884,46 @@ void PlatformAmiga::preloadAssets()
         uint32_t offset = 0;
 
         preloadedAssets[asset] = preloadedAssetBuffer + offset;
-        preloadedAssetLengths[asset] = load(imageFilenames[0], preloadedAssets[asset], 32032, 0);
+        preloadedAssetLengths[asset] = load(imageFilenames[0], preloadedAssets[asset], 32032);
         offset += preloadedAssetLengths[asset++];
 
         preloadedAssets[asset] = preloadedAssetBuffer + offset;
-        preloadedAssetLengths[asset] = load(imageFilenames[1], preloadedAssets[asset], 32032, 0);
+        preloadedAssetLengths[asset] = load(imageFilenames[1], preloadedAssets[asset], 32032);
         offset += preloadedAssetLengths[asset++];
 
         preloadedAssets[asset] = preloadedAssetBuffer + offset;
-        preloadedAssetLengths[asset] = load(imageFilenames[2], preloadedAssets[asset], 32032, 0);
+        preloadedAssetLengths[asset] = load(imageFilenames[2], preloadedAssets[asset], 32032);
         offset += preloadedAssetLengths[asset++];
 
         if (moduleData) {
             preloadedAssets[asset] = preloadedAssetBuffer + offset;
-            preloadedAssetLengths[asset] = load(moduleFilenames[0], preloadedAssets[asset], 69536, 0);
+            preloadedAssetLengths[asset] = load(moduleFilenames[0], preloadedAssets[asset], 69536);
             offset += preloadedAssetLengths[asset++];
 
             preloadedAssets[asset] = preloadedAssetBuffer + offset;
-            preloadedAssetLengths[asset] = load(moduleFilenames[1], preloadedAssets[asset], 33792, 0);
+            preloadedAssetLengths[asset] = load(moduleFilenames[1], preloadedAssets[asset], 33792);
             offset += preloadedAssetLengths[asset++];
 
             preloadedAssets[asset] = preloadedAssetBuffer + offset;
-            preloadedAssetLengths[asset] = load(moduleFilenames[2], preloadedAssets[asset], 17182, 0);
+            preloadedAssetLengths[asset] = load(moduleFilenames[2], preloadedAssets[asset], 17182);
             offset += preloadedAssetLengths[asset++];
 
             if (allAssets) {
                 preloadedAssets[asset] = preloadedAssetBuffer + offset;
-                preloadedAssetLengths[asset] = load(moduleFilenames[3], preloadedAssets[asset], 71432, 0);
+                preloadedAssetLengths[asset] = load(moduleFilenames[3], preloadedAssets[asset], 71432);
                 offset += preloadedAssetLengths[asset++];
 
                 preloadedAssets[asset] = preloadedAssetBuffer + offset;
-                preloadedAssetLengths[asset] = load(moduleFilenames[4], preloadedAssets[asset], 103754, 0);
+                preloadedAssetLengths[asset] = load(moduleFilenames[4], preloadedAssets[asset], 103754);
                 offset += preloadedAssetLengths[asset++];
 
                 preloadedAssets[asset] = preloadedAssetBuffer + offset;
-                preloadedAssetLengths[asset] = load(moduleFilenames[5], preloadedAssets[asset], 105654, 0);
+                preloadedAssetLengths[asset] = load(moduleFilenames[5], preloadedAssets[asset], 105654);
                 offset += preloadedAssetLengths[asset++];
 
                 preloadedAssets[asset] = preloadedAssetBuffer + offset;
-                preloadedAssetLengths[asset] = load(moduleFilenames[6], preloadedAssets[asset], 86504, 0);
+                preloadedAssetLengths[asset] = load(moduleFilenames[6], preloadedAssets[asset], 86504);
+                offset += preloadedAssetLengths[asset++];
             }
         }
     }
@@ -1198,7 +1200,7 @@ uint16_t PlatformAmiga::readJoystick(bool gamepad)
     return result;
 }
 
-uint32_t PlatformAmiga::load(const char* name, uint8_t* destination, uint32_t size, uint32_t offset)
+uint32_t PlatformAmiga::load(const char* name, uint8_t* destination, uint32_t size)
 {
     char filename[LONGEST_FILENAME + 1];
     char* c = filename;
@@ -1246,9 +1248,6 @@ uint32_t PlatformAmiga::load(const char* name, uint8_t* destination, uint32_t si
 
     BPTR file = Open((char*)filename, MODE_OLDFILE);
     if (file) {
-        if (offset > 0) {
-            Seek(file, offset, OFFSET_BEGINNING);
-        }
         bytesRead = Read(file, destination, size);
         Close(file);
     }
@@ -1258,7 +1257,14 @@ uint32_t PlatformAmiga::load(const char* name, uint8_t* destination, uint32_t si
     return bytesRead;
 }
 
-uint8_t* PlatformAmiga::loadTileset(const char* filename)
+void PlatformAmiga::loadMap(Map map, uint8_t* destination)
+{
+    MAPNAME[6] = 'a' + map;
+
+    load(MAPNAME, destination, 8960);
+}
+
+uint8_t* PlatformAmiga::loadTileset()
 {
     return tileset;
 }
@@ -1283,7 +1289,7 @@ void PlatformAmiga::displayImage(Image image)
         }
     } else
 #endif
-        load(imageFilenames[image], screenPlanes, SCREEN_SIZE * PLANES + (2 << PLANES), 0);
+        load(imageFilenames[image], screenPlanes, SCREEN_SIZE * PLANES + (2 << PLANES));
 
     palette->setPalette((uint16_t*)(screenPlanes + SCREEN_SIZE * PLANES), (1 << PLANES));
 }
@@ -2105,7 +2111,7 @@ void PlatformAmiga::loadModule(Module module)
             }
         } else
 #endif
-        moduleSize = load(moduleFilenames[module - 1], moduleData, LARGEST_MODULE_SIZE, 0);
+        moduleSize = load(moduleFilenames[module - 1], moduleData, LARGEST_MODULE_SIZE);
         undeltaSamples(moduleData, moduleSize);
         setSampleData(moduleData);
         loadedModule = module;

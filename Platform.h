@@ -49,6 +49,23 @@ public:
     Platform();
     virtual ~Platform();
 
+    enum Map {
+        Map01,
+        Map02,
+        Map03,
+        Map04,
+        Map05,
+        Map06,
+        Map07,
+        Map08,
+        Map09,
+        Map10,
+        Map11,
+        Map12,
+        Map13,
+        Map14
+    };
+
     enum Image {
         ImageIntro,
         ImageGame,
@@ -112,8 +129,8 @@ public:
     virtual void clearKeyBuffer() = 0;
     virtual bool isKeyOrJoystickPressed(bool gamepad);
     virtual uint16_t readJoystick(bool gamepad);
-    virtual uint32_t load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset = 0) = 0;
-    virtual uint8_t* loadTileset(const char* filename) = 0;
+    virtual void loadMap(Map map, uint8_t* destination) = 0;
+    virtual uint8_t* loadTileset() = 0;
     virtual void displayImage(Image image);
     virtual void generateTiles(uint8_t* tileData, uint8_t* tileAttributes) = 0;
     virtual void updateTiles(uint8_t* tileData, uint8_t* tiles, uint8_t numTiles);

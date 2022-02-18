@@ -44,6 +44,7 @@ static int8_t animTileMap[256] = {
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1,
     -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1, -1
 };
+static char MAPNAME[] = "level-a";
 #ifdef PLATFORM_IMAGE_SUPPORT
 static const char* imageFilenames[] = {
     "introscreen.png",
@@ -217,37 +218,37 @@ PlatformSDL::PlatformSDL() :
     int sample = 0;
     int8_t* destination = sampleData;
     soundExplosion = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundMedkit = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundEMP = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundMagnet = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundShock = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundMove = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundPlasma = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundPistol = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundItemFound = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundError = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundCycleWeapon = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundCycleItem = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundDoor = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundMenuBeep = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     soundShortBeep = destination;
-    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    destination += load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
     squareWave = destination;
-    load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE, 0);
+    load(sampleFilenames[sample++], (uint8_t*)destination, TOTAL_SAMPLE_SIZE);
 
     // Clear the first two bytes of effect samples to enable the 2-byte no-loop loop
     *((uint16_t*)soundExplosion) = 0;
@@ -467,16 +468,12 @@ bool PlatformSDL::isKeyOrJoystickPressed(bool gamepad)
     return downKey != 0xff;
 }
 
-uint32_t PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)
+uint32_t PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t size)
 {
     uint32_t bytesRead = 0;
 
     FILE* file = fopen(filename, "r");
     if (file) {
-        if (offset > 0) {
-            fseek(file, offset, SEEK_SET);
-        }
-
         bytesRead = fread(destination, 1, size, file);
 
         fclose(file);
@@ -485,10 +482,17 @@ uint32_t PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t 
     return bytesRead;
 }
 
-uint8_t* PlatformSDL::loadTileset(const char* filename)
+void PlatformSDL::loadMap(Map map, uint8_t* destination)
+{
+    MAPNAME[6] = 'a' + map;
+
+    load(MAPNAME, destination, 8960);
+}
+
+uint8_t* PlatformSDL::loadTileset()
 {
     uint8_t* tileset = new uint8_t[2818];
-    load("tileset.amiga", tileset, 2818, 0);
+    load("tileset.amiga", tileset, 2818);
     return tileset;
 }
 
@@ -903,7 +907,7 @@ void PlatformSDL::writeToScreenMemory(address_t address, uint8_t value, uint8_t 
 void PlatformSDL::loadModule(Module module)
 {
     if (loadedModule != module) {
-        uint32_t moduleSize = load(moduleFilenames[module], moduleData, LARGEST_MODULE_SIZE, 0);
+        uint32_t moduleSize = load(moduleFilenames[module], moduleData, LARGEST_MODULE_SIZE);
         undeltaSamples(moduleData, moduleSize);
         setSampleData(moduleData);
         loadedModule = module;

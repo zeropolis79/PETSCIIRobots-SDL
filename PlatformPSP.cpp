@@ -728,12 +728,12 @@ static FilenameMapping filenameMappings[FILENAME_MAPPINGS] = {
     { "mod.rushin in", moduleRushinIn, moduleRushinInEnd - moduleRushinIn }
 };
 
-uint32_t PlatformPSP::load(const char* filename, uint8_t* destination, uint32_t size, uint32_t offset)
+uint32_t PlatformPSP::load(const char* filename, uint8_t* destination, uint32_t size)
 {
     for (int i = 0; i < FILENAME_MAPPINGS; i++) {
         if (strcmp(filename, filenameMappings[i].filename) == 0) {
-            uint32_t availableSize = MIN(size, filenameMappings[i].size - offset);
-            memcpy(destination, filenameMappings[i].data + offset, availableSize);
+            uint32_t availableSize = MIN(size, filenameMappings[i].size);
+            memcpy(destination, filenameMappings[i].data, availableSize);
             return availableSize;
         }
     }
@@ -741,7 +741,12 @@ uint32_t PlatformPSP::load(const char* filename, uint8_t* destination, uint32_t 
     return 0;
 }
 
-uint8_t* PlatformPSP::loadTileset(const char* filename)
+void PlatformPSP::loadMap(Map map, uint8_t* destination)
+{
+    memcpy(destination, filenameMappings[i].data, 8960);
+}
+
+uint8_t* PlatformPSP::loadTileset()
 {
     return tileset;
 }
@@ -1119,7 +1124,7 @@ void PlatformPSP::writeToScreenMemory(address_t address, uint8_t value, uint8_t 
 void PlatformPSP::loadModule(Module module)
 {
     if (loadedModule != module) {
-        uint32_t moduleSize = load(moduleFilenames[module], moduleData, LARGEST_MODULE_SIZE, 0);
+        uint32_t moduleSize = load(moduleFilenames[module], moduleData, LARGEST_MODULE_SIZE);
         undeltaSamples(moduleData, moduleSize);
         setSampleData(moduleData);
         loadedModule = module;
