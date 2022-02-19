@@ -15,6 +15,10 @@
 #endif
 #include "petrobots.h"
 
+// MAP FILES CONSIST OF EVERYTHING FROM THIS POINT ON
+uint8_t MAP_DATA[8960];
+// END OF MAP FILE
+
 uint8_t* DESTRUCT_PATH; // Destruct path array (256 bytes)
 uint8_t* TILE_ATTRIB;   // Tile attrib array (256 bytes)
 #ifndef PLATFORM_SPRITE_SUPPORT
@@ -77,10 +81,6 @@ enum KEYS {
     KEY_YES,
     KEY_NO
 };
-
-// MAP FILES CONSIST OF EVERYTHING FROM THIS POINT ON
-uint8_t MAP_DATA[8960];
-// END OF MAP FILE
 
 uint8_t TILE;           // The tile number to be plotted
 uint8_t DIRECTION;      // The direction of the tile to be plotted

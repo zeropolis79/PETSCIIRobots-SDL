@@ -7,6 +7,19 @@
 #define MAP_WINDOW_WIDTH (PLATFORM_MAP_WINDOW_TILES_WIDTH * 24)
 #define MAP_WINDOW_HEIGHT (PLATFORM_MAP_WINDOW_TILES_HEIGHT * 24)
 
+// MAP FILES CONSIST OF EVERYTHING FROM THIS POINT ON
+extern uint8_t MAP_DATA[8960];
+#define UNIT_TYPE MAP_DATA  // Unit type 0=none (64 bytes)
+#define UNIT_LOC_X (MAP_DATA + 1 * 64) // Unit X location (64 bytes)
+#define UNIT_LOC_Y (MAP_DATA + 2 * 64) // Unit X location (64 bytes)
+#define UNIT_A (MAP_DATA + 3 * 64)
+#define UNIT_B (MAP_DATA + 4 * 64)
+#define UNIT_C (MAP_DATA + 5 * 64)
+#define UNIT_D (MAP_DATA + 6 * 64)
+#define UNIT_HEALTH ((int8_t*)(MAP_DATA + 7 * 64)) // Unit health (0 to 11) (64 bytes)
+#define MAP (MAP_DATA + 8 * 64 + 256)        // Location of MAP (8K)
+// END OF MAP FILE
+
 extern uint8_t* DESTRUCT_PATH; // Destruct path array (256 bytes)
 extern uint8_t* TILE_ATTRIB;   // Tile attrib array (256 bytes)
 #ifndef PLATFORM_SPRITE_SUPPORT
@@ -39,19 +52,6 @@ extern uint8_t PREVIOUS_MAP_FOREGROUND_VARIANT[MAP_WINDOW_SIZE];
 // key controls are stored.  These must be set before
 // the game can start.
 extern uint8_t KEY_CONFIG[26];
-
-// MAP FILES CONSIST OF EVERYTHING FROM THIS POINT ON
-extern uint8_t MAP_DATA[8960];
-#define UNIT_TYPE MAP_DATA  // Unit type 0=none (64 bytes)
-#define UNIT_LOC_X (MAP_DATA + 1 * 64) // Unit X location (64 bytes)
-#define UNIT_LOC_Y (MAP_DATA + 2 * 64) // Unit X location (64 bytes)
-#define UNIT_A (MAP_DATA + 3 * 64)
-#define UNIT_B (MAP_DATA + 4 * 64)
-#define UNIT_C (MAP_DATA + 5 * 64)
-#define UNIT_D (MAP_DATA + 6 * 64)
-#define UNIT_HEALTH ((int8_t*)(MAP_DATA + 7 * 64)) // Unit health (0 to 11) (64 bytes)
-#define MAP (MAP_DATA + 8 * 64 + 256)        // Location of MAP (8K)
-// END OF MAP FILE
 
 extern uint8_t TILE;           // The tile number to be plotted
 extern uint8_t DIRECTION;      // The direction of the tile to be plotted
