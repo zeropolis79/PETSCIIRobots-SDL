@@ -219,19 +219,12 @@ uint8_t BORDER = 0; // Used for border flash timing
 uint8_t SCREEN_SHAKE = 0; // 1=shake 0=no shake
 uint8_t CONTROL = PLATFORM_DEFAULT_CONTROL; // 0=keyboard 1=custom keys 2=snes
 uint16_t BORDER_COLOR = 0xf00; // Used for border flash coloring
-#if defined(_AMIGA)
-char INTRO_MESSAGE[] = "welcome to amiga-robots!\xff"
+char INTRO_MESSAGE[] = "welcome to "
+                       PLATFORM_NAME
+                       "-robots!\xff"
                        "by david murray 2021\xff"
-                       "amiga port by vesa halttunen";
-#elif defined(_PSP)
-char INTRO_MESSAGE[] = "welcome to psp-robots!\xff"
-                       "by david murray 2021\xff"
-                       "psp port by vesa halttunen";
-#else
-char INTRO_MESSAGE[] = "welcome to sdl-robots!\xff"
-                       "by david murray 2021\xff"
-                       "sdl port by vesa halttunen";
-#endif
+                       PLATFORM_NAME
+                       " port by vesa halttunen";
 char MSG_CANTMOVE[] = "can't move that!";
 char MSG_BLOCKED[] = "blocked!";
 char MSG_SEARCHING[] = "searching";
