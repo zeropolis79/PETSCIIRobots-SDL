@@ -6,6 +6,7 @@
 .qmake.stash
 AmigaRobots
 PETRobots
+ArcadeRobots
 DecompressData
 PETSCIIRobots.slave
 *.lha
