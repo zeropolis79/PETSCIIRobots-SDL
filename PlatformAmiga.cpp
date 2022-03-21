@@ -746,6 +746,7 @@ PlatformAmiga::PlatformAmiga() :
     }
 
     ScreenToFront(screen);
+    ActivateWindow(window);
 
     uint32_t windowSignal = 1L << window->UserPort->mp_SigBit;
     for (bool done = false; !done;) {
