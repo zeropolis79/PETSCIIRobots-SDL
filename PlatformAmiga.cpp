@@ -734,18 +734,10 @@ PlatformAmiga::PlatformAmiga() :
     }
 
     for (i = 0; i < 1000; i++) {
-        uint8_t value = (uint8_t)demoText[i];
-        bool reverse = value > 127;
-        uint8_t* source = fontPlanes + ((value & 127) << 3);
+        uint8_t* source = fontPlanes + (demoText[i] << 3);
         uint8_t* destination = screenPlanes + addressMap[i];
-        if (reverse) {
-            for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
-                *destination = ~*source++;
-            }
-        } else {
-            for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
-                *destination = *source++;
-            }
+        for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
+            *destination = *source++;
         }
     }
 
