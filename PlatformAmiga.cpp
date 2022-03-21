@@ -16,7 +16,9 @@
 #include <hardware/cia.h>
 #include <devices/audio.h>
 #include "PT2.3F_replay_cia.h"
+#ifdef PLATFORM_GZIP_SUPPORT
 #include "ungzip.h"
+#endif
 #include "Palette.h"
 #include "PlatformAmiga.h"
 #include <stdio.h>
