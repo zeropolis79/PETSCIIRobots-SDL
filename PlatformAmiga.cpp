@@ -478,7 +478,7 @@ static char demoText[] =
     " user's manual or buy the full version  "
     "         at www.the8bitguy.com          "
     "                                        "
-    "         full version includes          "
+    "     *** full version includes ***      "
     "                                        "
     "       - all 14 levels                  "
     "                                        "
@@ -729,6 +729,9 @@ PlatformAmiga::PlatformAmiga() :
     SetAPen(&screen->RastPort, 1);
 
     convertToPETSCII(demoText);
+    for (i = 0; i < 21; i++) {
+        demoText[489 + i] = 0x63;
+    }
 
     for (i = 0; i < 1000; i++) {
         uint8_t value = (uint8_t)demoText[i];
@@ -768,6 +771,8 @@ PlatformAmiga::PlatformAmiga() :
 
     SetRGB4(&screen->ViewPort, 1, 0, 0, 0);
     SetAPen(&screen->RastPort, 0);
+
+    WaitTOF();
 #endif
 
 #ifdef PLATFORM_CURSOR_SUPPORT
