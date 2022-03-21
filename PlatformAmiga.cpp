@@ -465,6 +465,36 @@ uint8_t liveMapToPlane1[1];
 uint8_t liveMapToPlane3[1];
 #endif
 
+#if PLATFORM_MAP_COUNT == 2
+static char demoText[] =
+    "                                        "
+    "                                        "
+    "                                        "
+    "                                        "
+    "  attack of the petscii robots amiga    "
+    "shareware version is free to distribute "
+    "                                        "
+    "  you can download a free copy of the   "
+    " user's manual or buy the full version  "
+    "         at www.the8bitguy.com          "
+    "                                        "
+    "         full version includes          "
+    "                                        "
+    "       - all 14 levels                  "
+    "                                        "
+    "       - cd32 controller support        "
+    "                                        "
+    "       - hotkey for robot locations     "
+    "                                        "
+    "       - get rid of this nagging screen "
+    "                                        "
+    "                                        "
+    "       press any key to continue        "
+    "                                        "
+    "                                        ";
+extern void convertToPETSCII(char* string);
+#endif
+
 PlatformAmiga::PlatformAmiga() :
     framesPerSecond_((GfxBase->DisplayFlags & PAL) ? 50 : 60),
     clock((GfxBase->DisplayFlags & PAL) ? 3546895 : 3579545),
@@ -693,6 +723,53 @@ PlatformAmiga::PlatformAmiga() :
     }
 
     SetPointer(window, pointer, 0, 0, 0, 0);
+
+#if PLATFORM_MAP_COUNT == 2
+    SetRGB4(&screen->ViewPort, 1, 0, 15, 0);
+    SetAPen(&screen->RastPort, 1);
+
+    convertToPETSCII(demoText);
+
+    for (i = 0; i < 1000; i++) {
+        uint8_t value = (uint8_t)demoText[i];
+        bool reverse = value > 127;
+        uint8_t* source = fontPlanes + ((value & 127) << 3);
+        uint8_t* destination = screenPlanes + addressMap[i];
+        if (reverse) {
+            for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
+                *destination = ~*source++;
+            }
+        } else {
+            for (int y = 0; y < 8; y++, destination += PLANES * SCREEN_WIDTH_IN_BYTES) {
+                *destination = *source++;
+            }
+        }
+    }
+
+    ScreenToFront(screen);
+
+    uint32_t windowSignal = 1L << window->UserPort->mp_SigBit;
+    for (bool done = false; !done;) {
+        uint32_t signals = Wait(windowSignal);
+        if (signals & windowSignal) {
+            IntuiMessage* message;
+            while ((message = (IntuiMessage*)GetMsg(window->UserPort))) {
+                uint32_t messageClass = message->Class;
+                uint16_t messageCode = message->Code;
+
+                ReplyMsg((Message*)message);
+
+                if (messageClass == IDCMP_RAWKEY && messageCode < 0x80) {
+                    done = true;
+                }
+            }
+        }
+    }
+
+    SetRGB4(&screen->ViewPort, 1, 0, 0, 0);
+    SetAPen(&screen->RastPort, 0);
+#endif
+
 #ifdef PLATFORM_CURSOR_SUPPORT
     GetSprite(cursorSprite1, 2);
     GetSprite(cursorSprite2, 3);
@@ -915,6 +992,7 @@ void PlatformAmiga::preloadAssets()
                 preloadedAssetLengths[asset] = load(moduleFilenames[3], preloadedAssets[asset], 71432);
                 offset += preloadedAssetLengths[asset++];
 
+#if PLATFORM_MAP_COUNT > 2
                 preloadedAssets[asset] = preloadedAssetBuffer + offset;
                 preloadedAssetLengths[asset] = load(moduleFilenames[4], preloadedAssets[asset], 103754);
                 offset += preloadedAssetLengths[asset++];
@@ -922,16 +1000,25 @@ void PlatformAmiga::preloadAssets()
                 preloadedAssets[asset] = preloadedAssetBuffer + offset;
                 preloadedAssetLengths[asset] = load(moduleFilenames[5], preloadedAssets[asset], 105654);
                 offset += preloadedAssetLengths[asset++];
+#else
+                asset += 2;
+#endif
 
                 preloadedAssets[asset] = preloadedAssetBuffer + offset;
                 preloadedAssetLengths[asset] = load(moduleFilenames[6], preloadedAssets[asset], 86504);
                 offset += preloadedAssetLengths[asset++];
 
-                for (i = 0; i < 14; i++) {
-                    MAPNAME[6] = 'a' + i;
-                    preloadedAssets[asset] = preloadedAssetBuffer + offset;
-                    preloadedAssetLengths[asset] = load(MAPNAME, preloadedAssets[asset], 8960);
-                    offset += preloadedAssetLengths[asset++];
+                for (i = 0; i < 14; i++, asset++) {
+#if PLATFORM_MAP_COUNT == 2
+                    if (i == 0 || i == 3) {
+#endif
+                        MAPNAME[6] = 'a' + i;
+                        preloadedAssets[asset] = preloadedAssetBuffer + offset;
+                        preloadedAssetLengths[asset] = load(MAPNAME, preloadedAssets[asset], 8960);
+                        offset += preloadedAssetLengths[asset];
+#if PLATFORM_MAP_COUNT == 2
+                    }
+#endif
                 }
             }
         }

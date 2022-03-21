@@ -2765,7 +2765,11 @@ uint8_t CONTROLSTART[] = { 0, 10, 20 };
 
 void CYCLE_MAP()
 {
+#if PLATFORM_MAP_COUNT > 2
     SELECTED_MAP++;
+#else
+    SELECTED_MAP ^= 3;
+#endif
     if (SELECTED_MAP == PLATFORM_MAP_COUNT) { // Maximum number of maps
         SELECTED_MAP = 0;
     }
