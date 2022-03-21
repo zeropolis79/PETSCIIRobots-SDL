@@ -471,10 +471,6 @@ uint8_t liveMapToPlane3[1];
 
 #if PLATFORM_MAP_COUNT == 2
 static char demoText[] =
-    "                                        "
-    "                                        "
-    "                                        "
-    "                                        "
     "  attack of the petscii robots amiga    "
     "shareware version is free to distribute "
     "                                        "
@@ -486,16 +482,20 @@ static char demoText[] =
     "                                        "
     "       - all 14 levels                  "
     "                                        "
+    "       - 4 different in-game tunes      "
+    "                                        "
     "       - cd32 controller support        "
     "                                        "
     "       - hotkey for robot locations     "
     "                                        "
+    "       - customizable keyboard controls "
+    "                                        "
+    "       - hard disk installer            "
+    "                                        "
     "       - get rid of this nagging screen "
     "                                        "
     "                                        "
-    "       press any key to continue        "
-    "                                        "
-    "                                        ";
+    "       press any key to continue        ";
 extern void convertToPETSCII(char* string);
 #endif
 
@@ -734,7 +734,7 @@ PlatformAmiga::PlatformAmiga() :
 
     convertToPETSCII(demoText);
     for (i = 0; i < 21; i++) {
-        demoText[489 + i] = 0x63;
+        demoText[8 * 40 + 9 + i] = 0x63;
     }
 
     for (i = 0; i < 1000; i++) {
