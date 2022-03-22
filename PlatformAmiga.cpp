@@ -420,7 +420,11 @@ static uint8_t standardControls[] = {
     0x31, // SEARCH OBEJCT
     0x37, // MOVE OBJECT
     0x42, // LIVE MAP
+#if PLATFORM_MAP_COUNT > 2
     0xc2, // LIVE MAP ROBOTS
+#else
+    0x7f,
+#endif
     0x45, // PAUSE
     0x55, // MUSIC
     0xb3, // CHEAT (TODO make this 5f)
