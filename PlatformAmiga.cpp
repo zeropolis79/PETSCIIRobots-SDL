@@ -498,7 +498,7 @@ static char demoText[] =
     "                                        "
     "       - customizable keyboard controls "
     "                                        "
-    "       - hard disk installer            "
+    "       - pet graphics and sound version "
     "                                        "
     "       - get rid of this nagging screen "
     "                                        "
