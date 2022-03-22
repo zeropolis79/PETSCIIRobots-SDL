@@ -427,7 +427,11 @@ static uint8_t standardControls[] = {
 #endif
     0x45, // PAUSE
     0x55, // MUSIC
-    0xb3, // CHEAT (TODO make this 5f)
+#if PLATFORM_MAP_COUNT > 2
+    0xb3, // CHEAT
+#else
+    0x7f,
+#endif
     0x4c, // CURSOR UP
     0x4d, // CURSOR DOWN
     0x4f, // CURSOR LEFT
