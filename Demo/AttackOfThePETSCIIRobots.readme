@@ -1,0 +1,44 @@
+Short:        Attack of the PETSCII Robots (Shareware)
+Author:       dfwgreencars@gmail.com (David Murray)
+Uploader:     vesuri@jormas.com (Vesa Halttunen)
+Type:         game/demo
+Architecture: m68k-amigaos
+Version:      Shareware
+
+Explore the vast worlds, both indoors and outdoors. Along the way you will find
+guns, bombs, magnets, EMP devices, and health kits, which will help you defeat
+the robots. You'll need to solve puzzles, sometimes using wits, other times
+using skill to stay alive and make it to the transporter pad. You'll get to
+play the 10 original maps (*), along with several bonus maps for the Amiga
+version.
+
+This version was designed from the ground up for the Commodore Amiga. It makes
+proper use of the enhanced graphics and sound capabilities of the Amiga in
+order to provide a better graphical experience than the preceding 8-bit
+versions. It also features an instant on-screen map, 16-color graphics, a
+4-channel "Mod Tracker" style musical score, and even a PETSCII-only
+version (*) to pay homage to the original PET version.
+
+Petscii Robots will work on any Amiga with at least 512K, but does support
+additional RAM to provide in-game music and hard disk installation for faster
+loading of maps. You can play with the keyboard, joystick, or a
+CD32 gamepad (*).
+
+David Murray               Original Game Design, assembly coding.
+Vesa Halttunen             Amiga development
+Piotr Radecki              Pixel art for tiles
+Noelle Aman                MOD-Music
+Anders Enger Jensen        Box and Manual design
+Brendan Carmody            Original Box Art
+
+Attack of the PETSCII Robots Amiga shareware version is free to distribute.
+You can buy the full version at www.the8bitguy.com.
+Features marked with an asterisk (*) are only available in the full version.
+
+Full version includes:
+- all 14 levels
+- 4 different in-game tunes
+- CD32 controller support
+- hotkey for robot locations
+- customizable keyboard controls
+- PET graphics and sound version
