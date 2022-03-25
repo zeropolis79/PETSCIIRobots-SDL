@@ -93,6 +93,8 @@ _bootdos:
 	beq	.checkJSR
 	cmp.w	#$ce1b,d0			; version 1.1
 	beq	.start
+	cmp.w	#$e283,d0			; version 1.2
+	beq	.start
 
 .wrongVersion:
 	pea	TDREASON_WRONGVER
