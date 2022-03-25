@@ -3282,7 +3282,7 @@ void DEMATERIALIZE()
 #ifdef PLATFORM_SPRITE_SUPPORT
     UNIT_TILE[0] = 243; // dematerialize tile
 #else
-    UNIT_TILE[0] = (UNIT_TIMER_B[UNIT] & 0x01) + 160; // dematerialize tile
+    UNIT_TILE[0] = (UNIT_TIMER_B[UNIT] & 0x01) + 252; // dematerialize tile
     UNIT_TILE[0] += (UNIT_TIMER_B[UNIT] & 0x08) >> 3;
 #endif
     UNIT_TIMER_B[UNIT]++;
@@ -3316,10 +3316,10 @@ void ANIMATE_PLAYER()
     WALK_FRAME++;
     WALK_FRAME &= 3;
 #else
-    if (UNIT_TILE[0] == 97) {
-        UNIT_TILE[0] = 96;
+    if (UNIT_TILE[0] == 247) {
+        UNIT_TILE[0] = 243;
     } else {
-        UNIT_TILE[0] = 97;
+        UNIT_TILE[0] = 247;
     }
 #endif
 }

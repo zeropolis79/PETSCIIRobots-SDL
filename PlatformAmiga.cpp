@@ -38,9 +38,9 @@
 #else
 #define PLANES 1
 #ifdef PLATFORM_GZIP_SUPPORT
-#define LONGEST_FILENAME 14 // pet-level-a.gz
+#define LONGEST_FILENAME 10 // level-a.gz
 #else
-#define LONGEST_FILENAME 11 // pet-level-a
+#define LONGEST_FILENAME 7 // level-a
 #endif
 #endif
 #define SCREEN_PLANES_SIZE (SCREEN_SIZE * PLANES + 16 * 2)
@@ -1310,12 +1310,6 @@ uint32_t PlatformAmiga::load(const char* name, uint8_t* destination, uint32_t si
 {
     char filename[LONGEST_FILENAME + 1];
     char* c = filename;
-#ifndef PLATFORM_COLOR_SUPPORT
-    *c++ = 'p';
-    *c++ = 'e';
-    *c++ = 't';
-    *c++ = '-';
-#endif
     while (*name) {
         *c++ = *name++;
     }
@@ -1465,13 +1459,14 @@ void PlatformAmiga::generateTiles(uint8_t* tileData, uint8_t* tileAttributes)
             { bottomLeft[tile], bottomMiddle[tile], bottomRight[tile] }
         };
 
-        if ((tile >= 96 && tile <= 103) ||  // PLAYER, HOVERBOT, EVILBOT
+        if ((tile == 243 || tile == 247) || // PLAYER
+            (tile >= 98 && tile <= 103) ||  // HOVERBOT, EVILBOT
             tile == 111 ||                  // DEAD PLAYER
             tile == 115 ||                  // DEAD ROBOT
             tile == 130 ||                  // BOMB
             tile == 134 ||                  // MAGNET
             (tile >= 140 && tile <= 142) || // WATER DROID
-            (tile == 160 && tile <= 162) || // DEMATERIALIZE
+            (tile == 252 && tile <= 254) || // DEMATERIALIZE
             (tile >= 164 && tile <= 165) || // ROLLERBOT
             (tile >= 240 && tile <= 241) || // VERT/HORIZ PLASMA
             (tile >= 244 && tile <= 246) || // VERT/HORIZ PISTOL, BIG EXPLOSION
