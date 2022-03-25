@@ -31,13 +31,13 @@ slv_keyexit	= $59	; F10
 
 	INCLUDE	"kick13.s"
 
-	dc.b	"$VER: PETSCIIRobots.slave 1.1 (09.02.2022)",0
+	dc.b	"$VER: PETSCIIRobots.slave 1.2 (25.03.2022)",0
 
 slv_CurrentDir:	dc.b	"Data",0
 slv_name:		dc.b	"Attack of the PETSCII Robots",0
 slv_copy:		dc.b	"2021 8-Bit Productions, LLC.",0
 slv_info:		dc.b	"Adapted by Vesa Halttunen",10
-				dc.b	"Version 1.1 (09.02.2022)",0
+				dc.b	"Version 1.2 (25.03.2022)",0
 programName:	dc.b	"AmigaRobots",0
 args:			dc.b	10
 argsEnd:		dc.b	0
