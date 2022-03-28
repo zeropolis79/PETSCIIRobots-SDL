@@ -3300,7 +3300,11 @@ void DEMATERIALIZE()
             UNIT_TYPE[0] = 2; // this mean game over condition, player type
             UNIT_TYPE[UNIT] = 7; // Normal transporter pad
         } else {
+#ifdef PLATFORM_SPRITE_SUPPORT
             UNIT_TILE[0] = 97;
+#else
+            UNIT_TILE[0] = 247;
+#endif
             UNIT_LOC_X[0] = UNIT_C[UNIT]; // target X coordinates
             UNIT_LOC_Y[0] = UNIT_D[UNIT]; // target Y coordinates
             UNIT_TYPE[UNIT] = 7; // Normal transporter pad
