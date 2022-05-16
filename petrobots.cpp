@@ -2691,6 +2691,13 @@ void INTRO_SCREEN()
                 START_INTRO_MUSIC();
             }
 #endif
+            else {
+                REVERSE_MENU_OPTION(false);
+                REVERSE_MENU_OPTION(true);
+                CHANGE_DIFFICULTY_LEVEL();
+                DISPLAY_MAP_NAME();
+                platform->fadeScreen(15, false);
+            }
         }
         platform->renderFrame(true);
     }

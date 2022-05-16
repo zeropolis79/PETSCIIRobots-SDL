@@ -507,6 +507,24 @@ static char demoText[] =
 extern void convertToPETSCII(char* string);
 #endif
 
+#ifdef INACTIVITY_TIMEOUT
+static char scrollText[] =
+    "      attack of the petscii robots      "
+    "                                        "
+    "         a game by david murray         "
+    "                                        "
+    "                                        "
+    "                                        "
+    "         arcade version credits         "
+    "                                        "
+    "     programming by vesa halttunen      "
+    "                                        "
+    "        graphics by piotr radecki       "
+    "                                        "
+    "           music by noelle aman         ";
+extern void convertToPETSCII(char* string);
+#endif
+
 PlatformAmiga::PlatformAmiga() :
     framesPerSecond_((GfxBase->DisplayFlags & PAL) ? 50 : 60),
     clock((GfxBase->DisplayFlags & PAL) ? 3546895 : 3579545),
@@ -527,6 +545,9 @@ PlatformAmiga::PlatformAmiga() :
     moduleData(0),
     loadedModule(ModuleSoundFX),
 #endif
+#ifdef PLATFORM_IMAGE_SUPPORT
+    loadedImage(ImageIntro),
+#endif
     ioAudio(0),
     messagePort(0),
     tilesBitMap(new BitMap),
@@ -543,6 +564,9 @@ PlatformAmiga::PlatformAmiga() :
     loadBuffer(0),
 #ifdef PLATFORM_PRELOAD_SUPPORT
     preloadedAssetBuffer(0),
+#endif
+#ifdef INACTIVITY_TIMEOUT
+    framesIdle(0),
 #endif
     bplcon1DefaultValue(0),
     shakeStep(0),
@@ -735,6 +759,10 @@ PlatformAmiga::PlatformAmiga() :
     }
 
     SetPointer(window, pointer, 0, 0, 0, 0);
+
+#ifdef INACTIVITY_TIMEOUT
+    convertToPETSCII(scrollText);
+#endif
 
 #if PLATFORM_MAP_COUNT == 2
     SetRGB4(&screen->ViewPort, 1, 0, 15, 0);
@@ -1177,12 +1205,28 @@ uint8_t PlatformAmiga::readKeyboard()
             } else if (downKey == keyCodeWithShift) {
                 downKey = 0xff;
             }
+
+#ifdef INACTIVITY_TIMEOUT
+            framesIdle = 0;
+#endif
             break;
         }
         default:
             break;
         }
     }
+
+#if defined(PLATFORM_IMAGE_SUPPORT) && defined(INACTIVITY_TIMEOUT)
+    if (loadedImage == ImageIntro && downKey == 0xff) {
+        framesIdle++;
+
+        if (framesIdle / framesPerSecond_ >= INACTIVITY_TIMEOUT) {
+            screenSaver();
+
+            return 0x7f;
+        }
+    }
+#endif
 
     uint8_t result = keyToReturn;
     keyToReturn = 0xff;
@@ -1409,6 +1453,10 @@ void PlatformAmiga::displayImage(Image image)
         load(imageFilenames[image], screenPlanes, SCREEN_SIZE * PLANES + (2 << PLANES));
 
     palette->setPalette((uint16_t*)(screenPlanes + SCREEN_SIZE * PLANES), (1 << PLANES));
+
+#ifdef INACTIVITY_TIMEOUT
+    framesIdle = 0;
+#endif
 }
 #endif
 
@@ -2379,3 +2427,44 @@ void PlatformAmiga::waitForScreenMemoryAccess()
 {
     WaitBlit();
 }
+
+#ifdef INACTIVITY_TIMEOUT
+void PlatformAmiga::screenSaver()
+{
+    fadeScreen(0, false);
+    clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+    waitForScreenMemoryAccess();
+    fadeScreen(15, false);
+
+    for (int scrollOffset = 0; scrollOffset < (13 + 25) * 8; scrollOffset++) {
+        copyRect(0, 1, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 1);
+        waitForScreenMemoryAccess();
+
+        if (scrollOffset < 13 * 8) {
+            uint8_t* destination = screenPlanes + (SCREEN_HEIGHT - 1) * PLANES * SCREEN_WIDTH_IN_BYTES;
+            int row = (scrollOffset >> 3) * SCREEN_WIDTH_IN_BYTES;
+            for (int column = 0; column < SCREEN_WIDTH_IN_BYTES; column++, destination++) {
+                uint8_t* source = fontPlanes + ((scrollText[row + column] & 127) << 3) + (scrollOffset & 7);
+                *destination = *source;
+                destination[1 * SCREEN_WIDTH_IN_BYTES] = *source;
+                destination[2 * SCREEN_WIDTH_IN_BYTES] = *source;
+                destination[3 * SCREEN_WIDTH_IN_BYTES] = *source;
+            }
+        }
+
+        WaitTOF();
+
+        IntuiMessage* message;
+        while ((message = (IntuiMessage*)GetMsg(window->UserPort))) {
+            if (message->Class == IDCMP_RAWKEY) {
+                scrollOffset = (13 + 25) * 8;
+            }
+
+            ReplyMsg((Message*)message);
+        }
+    }
+
+    fadeScreen(0, false);
+    displayImage(ImageIntro);
+}
+#endif

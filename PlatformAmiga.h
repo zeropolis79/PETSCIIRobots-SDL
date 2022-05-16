@@ -111,6 +111,9 @@ private:
     __asm static uint16_t readCD32Pad();
     __asm static void enableLowpassFilter();
     __asm static void disableLowpassFilter();
+#ifdef INACTIVITY_TIMEOUT
+    void screenSaver();
+#endif
     int framesPerSecond_;
     uint32_t clock;
     uint32_t originalDirectoryLock;
@@ -128,6 +131,9 @@ private:
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     uint8_t* moduleData;
     Module loadedModule;
+#endif
+#ifdef PLATFORM_IMAGE_SUPPORT
+    Image loadedImage;
 #endif
     IOAudio* ioAudio;
     MsgPort* messagePort;
@@ -147,6 +153,10 @@ private:
     uint8_t* preloadedAssetBuffer;
     uint8_t* preloadedAssets[24];
     uint32_t preloadedAssetLengths[24];
+#endif
+#ifdef INACTIVITY_TIMEOUT
+    uint16_t framesIdle;
+    uint16_t scrollOffset;
 #endif
     uint16_t bplcon1DefaultValue;
     uint8_t shakeStep;
