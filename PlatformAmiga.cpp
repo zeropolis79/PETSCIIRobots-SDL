@@ -2437,7 +2437,7 @@ void PlatformAmiga::screenSaver()
     fadeScreen(15, false);
 
     for (int scrollOffset = 0; scrollOffset < (13 + 25) * 8; scrollOffset++) {
-        copyRect(0, 1, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 1);
+        BltBitMap(screenBitmap, 0, 1, screenBitmap, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 1, 0xc0, 0x01, 0);
         waitForScreenMemoryAccess();
 
         if (scrollOffset < 13 * 8) {
@@ -2446,9 +2446,6 @@ void PlatformAmiga::screenSaver()
             for (int column = 0; column < SCREEN_WIDTH_IN_BYTES; column++, destination++) {
                 uint8_t* source = fontPlanes + ((scrollText[row + column] & 127) << 3) + (scrollOffset & 7);
                 *destination = *source;
-                destination[1 * SCREEN_WIDTH_IN_BYTES] = *source;
-                destination[2 * SCREEN_WIDTH_IN_BYTES] = *source;
-                destination[3 * SCREEN_WIDTH_IN_BYTES] = *source;
             }
         }
 
