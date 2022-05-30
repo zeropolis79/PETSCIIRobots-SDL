@@ -1,5 +1,5 @@
 CFLAGS=WITH SCoptions.arcade
-OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o ungzip.o Palette.o PT2.3F_replay_cia.o Tileset.o C64Font.o Faces.o Tiles.o AnimTiles.o Sprites.o SpritesMask.o Items.o Keys.o Health.o SoundFXModule.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o SquareWave.o
+OBJECTS=petrobots.o Platform.o PlatformAmiga.o PlatformAmigaAssembler.o ungzip.o Palette.o PT2.3F_replay_cia.o Tileset.o C64Font.o Faces.o Tiles.o AnimTiles.o Sprites.o SpritesMask.o Items.o Keys.o Health.o Attract1.o Attract2.o Attract3.o SoundFXModule.o SoundExplosion.o SoundMedkit.o SoundEMP.o SoundMagnet.o SoundShock.o SoundMove.o SoundPlasma.o SoundPistol.o SoundItemFound.o SoundError.o SoundCycleWeapon.o SoundCycleItem.o SoundDoor.o SoundMenuBeep.o SoundShortBeep.o SquareWave.o
 
 all: ArcadeRobots
 
@@ -35,6 +35,12 @@ Keys.o: Amiga/Keys.raw
     Bin2Hunk Amiga/Keys.raw Keys.o NAME _keysPlanes HUNK data
 Health.o: Amiga/Health.raw
     Bin2Hunk Amiga/Health.raw Health.o NAME _healthPlanes CHIP
+Attract1.o: Arcade/Attract1.raw
+    Bin2Hunk Arcade/Attract1.raw Attract1.o NAME _attract1Planes HUNK data
+Attract2.o: Arcade/Attract2.raw
+    Bin2Hunk Arcade/Attract2.raw Attract2.o NAME _attract2Planes HUNK data
+Attract3.o: Arcade/Attract3.raw
+    Bin2Hunk Arcade/Attract3.raw Attract3.o NAME _attract3Planes HUNK data
 SoundFXModule.o: Music/mod.soundfx
     Bin2Hunk Music/mod.soundfx SoundFXModule.o NAME _soundFXModule CHIP
 SoundExplosion.o: Sounds/sounds_dsbarexp.raw

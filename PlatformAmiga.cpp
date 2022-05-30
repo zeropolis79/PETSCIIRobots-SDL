@@ -85,6 +85,11 @@ __chip extern uint8_t spritesMask[];
 __chip extern uint8_t itemsPlanes[];
 __far extern uint8_t keysPlanes[];
 __chip extern uint8_t healthPlanes[];
+#ifdef INACTIVITY_TIMEOUT
+__far extern uint8_t attract1Planes[];
+__far extern uint8_t attract2Planes[];
+__far extern uint8_t attract3Planes[];
+#endif
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 __chip extern uint8_t soundFXModule[];
 __chip extern int8_t soundExplosion[];
@@ -507,24 +512,6 @@ static char demoText[] =
 extern void convertToPETSCII(char* string);
 #endif
 
-#ifdef INACTIVITY_TIMEOUT
-static char scrollText[] =
-    "      attack of the petscii robots      "
-    "                                        "
-    "         a game by david murray         "
-    "                                        "
-    "                                        "
-    "                                        "
-    "         arcade version credits         "
-    "                                        "
-    "     programming by vesa halttunen      "
-    "                                        "
-    "        graphics by piotr radecki       "
-    "                                        "
-    "           music by noelle aman         ";
-extern void convertToPETSCII(char* string);
-#endif
-
 PlatformAmiga::PlatformAmiga() :
     framesPerSecond_((GfxBase->DisplayFlags & PAL) ? 50 : 60),
     clock((GfxBase->DisplayFlags & PAL) ? 3546895 : 3579545),
@@ -567,6 +554,9 @@ PlatformAmiga::PlatformAmiga() :
 #endif
 #ifdef INACTIVITY_TIMEOUT
     framesIdle(0),
+    attractImage(0),
+    attractImageX(0),
+    attractImageY(0),
 #endif
     bplcon1DefaultValue(0),
     shakeStep(0),
@@ -759,10 +749,6 @@ PlatformAmiga::PlatformAmiga() :
     }
 
     SetPointer(window, pointer, 0, 0, 0, 0);
-
-#ifdef INACTIVITY_TIMEOUT
-    convertToPETSCII(scrollText);
-#endif
 
 #if PLATFORM_MAP_COUNT == 2
     SetRGB4(&screen->ViewPort, 1, 0, 15, 0);
@@ -2432,33 +2418,49 @@ void PlatformAmiga::waitForScreenMemoryAccess()
 void PlatformAmiga::screenSaver()
 {
     fadeScreen(0, false);
+
     clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
     waitForScreenMemoryAccess();
+
+    uint8_t* attractImages[] = { attract1Planes, attract2Planes, attract3Planes };
+    uint8_t* attractPlanes = attractImages[attractImage];
+    uint8_t* destination = screenPlanes + attractImageY * PLANES * SCREEN_WIDTH_IN_BYTES + attractImageX;
+    for (int y = 0; y < 160 * PLANES; y++) {
+        for (int x = 0; x < 30; x++) {
+            *destination++ = *attractPlanes++;
+        }
+        destination += SCREEN_WIDTH_IN_BYTES - 30;
+    }
+
+    palette->setPalette((uint16_t*)(attract1Planes + 30 * 160 * PLANES), (1 << PLANES));
     fadeScreen(15, false);
 
-    for (int scrollOffset = 0; scrollOffset < (13 + 25) * 8; scrollOffset++) {
-        BltBitMap(screenBitmap, 0, 1, screenBitmap, 0, 0, SCREEN_WIDTH, SCREEN_HEIGHT - 1, 0xc0, 0x01, 0);
-        waitForScreenMemoryAccess();
-
-        if (scrollOffset < 13 * 8) {
-            uint8_t* destination = screenPlanes + (SCREEN_HEIGHT - 1) * PLANES * SCREEN_WIDTH_IN_BYTES;
-            int row = (scrollOffset >> 3) * SCREEN_WIDTH_IN_BYTES;
-            for (int column = 0; column < SCREEN_WIDTH_IN_BYTES; column++, destination++) {
-                uint8_t* source = fontPlanes + ((scrollText[row + column] & 127) << 3) + (scrollOffset & 7);
-                *destination = *source;
-            }
-        }
-
+    for (framesIdle = 0; framesIdle / framesPerSecond_ < INACTIVITY_TIMEOUT; framesIdle++) {
         WaitTOF();
 
         IntuiMessage* message;
         while ((message = (IntuiMessage*)GetMsg(window->UserPort))) {
             if (message->Class == IDCMP_RAWKEY) {
-                scrollOffset = (13 + 25) * 8;
+                framesIdle = INACTIVITY_TIMEOUT * framesPerSecond_;
             }
 
             ReplyMsg((Message*)message);
         }
+    }
+
+    attractImage++;
+    if (attractImage > 2) {
+        attractImage = 0;
+    }
+
+    attractImageX += 7;
+    if (attractImageX >= 10) {
+        attractImageX -= 10;
+    }
+
+    attractImageY += 25;
+    if (attractImageY >= (SCREEN_HEIGHT - 160)) {
+        attractImageY -= (SCREEN_HEIGHT - 160);
     }
 
     fadeScreen(0, false);

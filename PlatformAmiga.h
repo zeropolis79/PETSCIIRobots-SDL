@@ -156,7 +156,9 @@ private:
 #endif
 #ifdef INACTIVITY_TIMEOUT
     uint16_t framesIdle;
-    uint16_t scrollOffset;
+    uint16_t attractImage;
+    uint8_t attractImageX;
+    uint8_t attractImageY;
 #endif
     uint16_t bplcon1DefaultValue;
     uint8_t shakeStep;
