@@ -2648,6 +2648,9 @@ void RESET_KEYS_AMMO()
 
 void INTRO_SCREEN()
 {
+#ifdef INACTIVITY_TIMEOUT
+    DIFF_LEVEL = 0;
+#endif
     platform->fadeScreen(0, false);
     DISPLAY_INTRO_SCREEN();
     DISPLAY_MAP_NAME();
