@@ -85,7 +85,7 @@ __chip extern uint8_t spritesMask[];
 __chip extern uint8_t itemsPlanes[];
 __far extern uint8_t keysPlanes[];
 __chip extern uint8_t healthPlanes[];
-#ifdef INACTIVITY_TIMEOUT
+#ifdef INACTIVITY_TIMEOUT_INTRO
 __far extern uint8_t attract1Planes[];
 __far extern uint8_t attract2Planes[];
 __far extern uint8_t attract3Planes[];
@@ -552,9 +552,10 @@ PlatformAmiga::PlatformAmiga() :
 #ifdef PLATFORM_PRELOAD_SUPPORT
     preloadedAssetBuffer(0),
 #endif
-#ifdef INACTIVITY_TIMEOUT
+#if defined(INACTIVITY_TIMEOUT_INTRO) || defined(INACTIVITY_TIMEOUT_GAME)
     framesIdle(0),
-    attractImage(0),
+#endif
+#ifdef INACTIVITY_TIMEOUT_INTRO
     attractImageX(0),
     attractImageY(0),
 #endif
@@ -1192,7 +1193,7 @@ uint8_t PlatformAmiga::readKeyboard()
                 downKey = 0xff;
             }
 
-#ifdef INACTIVITY_TIMEOUT
+#if defined(INACTIVITY_TIMEOUT_INTRO) || defined(INACTIVITY_TIMEOUT_GAME)
             framesIdle = 0;
 #endif
             break;
@@ -1202,12 +1203,12 @@ uint8_t PlatformAmiga::readKeyboard()
         }
     }
 
-#if defined(PLATFORM_IMAGE_SUPPORT) && defined(INACTIVITY_TIMEOUT)
+#if defined(PLATFORM_IMAGE_SUPPORT) && defined(INACTIVITY_TIMEOUT_INTRO)
     if (loadedImage == ImageIntro && downKey == 0xff) {
         framesIdle++;
 
-        if (framesIdle / framesPerSecond_ >= INACTIVITY_TIMEOUT) {
-            screenSaver();
+        if (framesIdle / framesPerSecond_ >= INACTIVITY_TIMEOUT_INTRO) {
+            attract();
 
             return 0x7f;
         }
@@ -1440,9 +1441,10 @@ void PlatformAmiga::displayImage(Image image)
 
     palette->setPalette((uint16_t*)(screenPlanes + SCREEN_SIZE * PLANES), (1 << PLANES));
 
-#ifdef INACTIVITY_TIMEOUT
+#if defined(INACTIVITY_TIMEOUT_INTRO) || defined(INACTIVITY_TIMEOUT_GAME)
     framesIdle = 0;
 #endif
+    loadedImage = image;
 }
 #endif
 
@@ -2414,53 +2416,51 @@ void PlatformAmiga::waitForScreenMemoryAccess()
     WaitBlit();
 }
 
-#ifdef INACTIVITY_TIMEOUT
-void PlatformAmiga::screenSaver()
+#ifdef INACTIVITY_TIMEOUT_INTRO
+void PlatformAmiga::attract()
 {
-    fadeScreen(0, false);
+    uint8_t* attractImages[] = { attract1Planes, attract2Planes, attract3Planes, attract1Planes, attract2Planes, attract3Planes };
+    for (int attractImage = 0; attractImage < 6; attractImage++) {
+        fadeScreen(0, false);
 
-    clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
-    waitForScreenMemoryAccess();
+        clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
+        waitForScreenMemoryAccess();
 
-    uint8_t* attractImages[] = { attract1Planes, attract2Planes, attract3Planes };
-    uint8_t* attractPlanes = attractImages[attractImage];
-    uint8_t* destination = screenPlanes + attractImageY * PLANES * SCREEN_WIDTH_IN_BYTES + attractImageX;
-    for (int y = 0; y < 160 * PLANES; y++) {
-        for (int x = 0; x < 30; x++) {
-            *destination++ = *attractPlanes++;
-        }
-        destination += SCREEN_WIDTH_IN_BYTES - 30;
-    }
-
-    palette->setPalette((uint16_t*)(attract1Planes + 30 * 160 * PLANES), (1 << PLANES));
-    fadeScreen(15, false);
-
-    for (framesIdle = 0; framesIdle / framesPerSecond_ < INACTIVITY_TIMEOUT; framesIdle++) {
-        WaitTOF();
-
-        IntuiMessage* message;
-        while ((message = (IntuiMessage*)GetMsg(window->UserPort))) {
-            if (message->Class == IDCMP_RAWKEY) {
-                framesIdle = INACTIVITY_TIMEOUT * framesPerSecond_;
+        uint8_t* attractPlanes = attractImages[attractImage];
+        uint8_t* destination = screenPlanes + attractImageY * PLANES * SCREEN_WIDTH_IN_BYTES + attractImageX;
+        for (int y = 0; y < 160 * PLANES; y++) {
+            for (int x = 0; x < 30; x++) {
+                *destination++ = *attractPlanes++;
             }
-
-            ReplyMsg((Message*)message);
+            destination += SCREEN_WIDTH_IN_BYTES - 30;
         }
-    }
 
-    attractImage++;
-    if (attractImage > 2) {
-        attractImage = 0;
-    }
+        palette->setPalette((uint16_t*)(attract1Planes + 30 * 160 * PLANES), (1 << PLANES));
+        fadeScreen(15, false);
 
-    attractImageX += 7;
-    if (attractImageX >= 10) {
-        attractImageX -= 10;
-    }
+        for (framesIdle = 0; framesIdle / framesPerSecond_ < 5; framesIdle++) {
+            WaitTOF();
 
-    attractImageY += 25;
-    if (attractImageY >= (SCREEN_HEIGHT - 160)) {
-        attractImageY -= (SCREEN_HEIGHT - 160);
+            IntuiMessage* message;
+            while ((message = (IntuiMessage*)GetMsg(window->UserPort))) {
+                if (message->Class == IDCMP_RAWKEY) {
+                    framesIdle = 5 * framesPerSecond_;
+                    attractImage = 6;
+                }
+
+                ReplyMsg((Message*)message);
+            }
+        }
+
+        attractImageX += 7;
+        if (attractImageX >= 10) {
+            attractImageX -= 10;
+        }
+
+        attractImageY += 25;
+        if (attractImageY >= (SCREEN_HEIGHT - 160)) {
+            attractImageY -= (SCREEN_HEIGHT - 160);
+        }
     }
 
     fadeScreen(0, false);

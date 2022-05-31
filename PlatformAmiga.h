@@ -111,8 +111,8 @@ private:
     __asm static uint16_t readCD32Pad();
     __asm static void enableLowpassFilter();
     __asm static void disableLowpassFilter();
-#ifdef INACTIVITY_TIMEOUT
-    void screenSaver();
+#ifdef INACTIVITY_TIMEOUT_INTRO
+    void attract();
 #endif
     int framesPerSecond_;
     uint32_t clock;
@@ -154,9 +154,10 @@ private:
     uint8_t* preloadedAssets[24];
     uint32_t preloadedAssetLengths[24];
 #endif
-#ifdef INACTIVITY_TIMEOUT
+#if defined(INACTIVITY_TIMEOUT_INTRO) || defined(INACTIVITY_TIMEOUT_GAME)
     uint16_t framesIdle;
-    uint16_t attractImage;
+#endif
+#ifdef INACTIVITY_TIMEOUT_INTRO
     uint8_t attractImageX;
     uint8_t attractImageY;
 #endif

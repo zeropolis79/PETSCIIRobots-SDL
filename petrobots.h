@@ -159,7 +159,7 @@ extern uint8_t MINUTES;
 extern uint8_t SECONDS;
 extern uint8_t CYCLES;
 extern uint8_t CLOCK_ACTIVE;
-#ifdef INACTIVITY_TIMEOUT
+#ifdef INACTIVITY_TIMEOUT_GAME
 extern uint8_t INACTIVE_SECONDS;
 #endif
 

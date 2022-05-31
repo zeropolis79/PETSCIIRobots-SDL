@@ -354,7 +354,7 @@ void UPDATE_GAME_CLOCK()
     }
     CYCLES = 0;
     SECONDS++;
-#ifdef INACTIVITY_TIMEOUT
+#ifdef INACTIVITY_TIMEOUT_GAME
     INACTIVE_SECONDS++;
 #endif
     if (SECONDS != 60) {
@@ -375,7 +375,7 @@ uint8_t MINUTES = 0;
 uint8_t SECONDS = 0;
 uint8_t CYCLES = 0;
 uint8_t CLOCK_ACTIVE = 0;
-#ifdef INACTIVITY_TIMEOUT
+#ifdef INACTIVITY_TIMEOUT_GAME
 uint8_t INACTIVE_SECONDS = 0;
 #endif
 
@@ -395,8 +395,8 @@ void MAIN_GAME_LOOP()
     platform->renderFrame();
     bool done = false;
     while (!done && !platform->quit) {
-#ifdef INACTIVITY_TIMEOUT
-        if (INACTIVE_SECONDS >= INACTIVITY_TIMEOUT) {
+#ifdef INACTIVITY_TIMEOUT_GAME
+        if (INACTIVE_SECONDS >= INACTIVITY_TIMEOUT_GAME) {
             return;
         }
 #endif
@@ -414,7 +414,7 @@ void MAIN_GAME_LOOP()
         uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
         // Keyboard controls here.
         if (A != 0xff) {
-#ifdef INACTIVITY_TIMEOUT
+#ifdef INACTIVITY_TIMEOUT_GAME
             INACTIVE_SECONDS = 0;
 #endif
             KEYTIMER = 5;
@@ -486,7 +486,7 @@ void MAIN_GAME_LOOP()
         }
         // SNES CONTROLLER starts here
         if (B != 0) {
-#ifdef INACTIVITY_TIMEOUT
+#ifdef INACTIVITY_TIMEOUT_GAME
             INACTIVE_SECONDS = 0;
 #endif
             // first we start with the 4 directional buttons.
@@ -2641,14 +2641,14 @@ void RESET_KEYS_AMMO()
     SECONDS = 0;
     MINUTES = 0;
     HOURS = 0;
-#ifdef INACTIVITY_TIMEOUT
+#ifdef INACTIVITY_TIMEOUT_GAME
     INACTIVE_SECONDS = 0;
 #endif
 }
 
 void INTRO_SCREEN()
 {
-#ifdef INACTIVITY_TIMEOUT
+#ifdef INACTIVITY_TIMEOUT_INTRO
     DIFF_LEVEL = 0;
 #endif
     platform->fadeScreen(0, false);
