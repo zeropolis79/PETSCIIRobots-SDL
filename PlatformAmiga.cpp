@@ -448,8 +448,8 @@ static uint8_t standardControls[] = {
     0x40, // SPACE
     0x44, // RETURN
 #ifdef INACTIVITY_TIMEOUT_GAME
-    0x26, // YES
-    0x28 // NO
+    0x4f, // YES
+    0x4e // NO
 #else
     0x15, // YES
     0x36 // NO
