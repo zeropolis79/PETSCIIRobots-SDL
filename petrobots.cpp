@@ -173,7 +173,9 @@ void INIT_GAME()
     RESET_KEYS_AMMO();
     platform->fadeScreen(0, false);
     DISPLAY_GAME_SCREEN();
+#ifndef INACTIVITY_TIMEOUT_GAME
     DISPLAY_LOAD_MESSAGE2();
+#endif
     platform->fadeScreen(15, false);
     MAP_LOAD_ROUTINE();
 #ifdef PLATFORM_MODULE_BASED_AUDIO
