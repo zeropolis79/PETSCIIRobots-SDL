@@ -62,9 +62,13 @@
 #define PRELOADED_ASSETS_BUFFER_SIZE_ALL (PRELOADED_ASSETS_BUFFER_SIZE_MINIMUM + 71432 + 103754 + 105654 + 86504 + 14 * 8960)
 #endif
 #if PLATFORM_MAP_COUNT > 2
-static const char version[] = "$VER: Attack of the PETSCII Robots 1.2 (2022-05-31)";
+#ifdef INACTIVITY_TIMEOUT_GAME
+static const char version[] = "$VER: Attack of the PETSCII Robots Arcade (2022-06-01)";
 #else
-static const char version[] = "$VER: Attack of the PETSCII Robots Shareware (2022-05-31)";
+static const char version[] = "$VER: Attack of the PETSCII Robots 1.3 (2022-06-01)";
+#endif
+#else
+static const char version[] = "$VER: Attack of the PETSCII Robots Shareware (2022-06-01)";
 #endif
 
 struct SpriteData {
