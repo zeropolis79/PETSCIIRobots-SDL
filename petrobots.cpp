@@ -2650,9 +2650,6 @@ void RESET_KEYS_AMMO()
 
 void INTRO_SCREEN()
 {
-#ifdef INACTIVITY_TIMEOUT_INTRO
-    DIFF_LEVEL = 0;
-#endif
     platform->fadeScreen(0, false);
     DISPLAY_INTRO_SCREEN();
     DISPLAY_MAP_NAME();
@@ -2696,13 +2693,17 @@ void INTRO_SCREEN()
                 START_INTRO_MUSIC();
             }
 #endif
-            else {
+#ifdef INACTIVITY_TIMEOUT_INTRO
+            else if (A == 0x7f) {
                 REVERSE_MENU_OPTION(false);
                 REVERSE_MENU_OPTION(true);
+                DIFF_LEVEL = 0;
+                SELECTED_MAP = 0;
                 CHANGE_DIFFICULTY_LEVEL();
                 DISPLAY_MAP_NAME();
                 platform->fadeScreen(15, false);
             }
+#endif
         }
         platform->renderFrame(true);
     }
