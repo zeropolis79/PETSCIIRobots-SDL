@@ -247,8 +247,13 @@ char MSG_TRANS1[] = "transporter will not activate\xff"
 char MSG_ELEVATOR[] = "[ elevator panel ]  down\xff"
                       "[  select level  ]  opens";
 char MSG_LEVELS[] = "[                ]  door";
+#ifdef INACTIVITY_TIMEOUT_GAME
+char MSG_PAUSED[] = "exit game?\xff"
+                    "left=yes right=no";
+#else
 char MSG_PAUSED[] = "game paused.\xff"
                     "exit game (y/n)";
+#endif
 char MSG_MUSICON[] = "music on.";
 char MSG_MUSICOFF[] = "music off.";
 uint8_t SELECTED_MAP = 0;

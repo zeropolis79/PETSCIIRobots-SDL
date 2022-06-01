@@ -443,8 +443,13 @@ static uint8_t standardControls[] = {
     0x4e, // CURSOR RIGHT
     0x40, // SPACE
     0x44, // RETURN
+#ifdef INACTIVITY_TIMEOUT_GAME
+    0x26, // YES
+    0x28 // NO
+#else
     0x15, // YES
     0x36 // NO
+#endif
 };
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
 #define LIVE_MAP_ORIGIN_X 0
