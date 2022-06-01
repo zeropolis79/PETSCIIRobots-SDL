@@ -2512,7 +2512,11 @@ void GAME_OVER()
         platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
     }
 #endif
+#ifdef INACTIVITY_TIMEOUT_GAME
+    for (int frames = 0; platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit && frames < 5 * platform->framesPerSecond(); frames++) {
+#else
     while (platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit) {
+#endif
         platform->renderFrame(true);
     }
     GOM4();
@@ -2532,7 +2536,11 @@ void GOM4()
     DISPLAY_WIN_LOSE();
     platform->renderFrame();
     platform->fadeScreen(15, false);
+#ifdef INACTIVITY_TIMEOUT_GAME
+    for (int frames = 0; platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit && frames < 15 * platform->framesPerSecond(); frames++) {
+#else
     while (platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit) {
+#endif
         platform->renderFrame(true);
     }
     platform->clearKeyBuffer(); // CLEAR KEYBOARD BUFFER
