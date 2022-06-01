@@ -2859,7 +2859,11 @@ void CHANGE_DIFFICULTY_LEVEL()
 #endif
 }
 
+#ifdef INACTIVITY_TIMEOUT_GAME
+uint8_t DIFF_LEVEL = 0; // default easy
+#else
 uint8_t DIFF_LEVEL = 1; // default medium
+#endif
 uint8_t ROBOT_FACE[] = {
     0x3A, 0x43, 0x49, 0x55, 0x43, 0x3A, 0x49, 0x55, // EASY LEVEL
     0x40, 0x40, 0x6E, 0x70, 0x40, 0x40, 0x49, 0x55, // MEDIUM LEVEL
