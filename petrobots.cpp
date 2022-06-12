@@ -2715,6 +2715,8 @@ void INTRO_SCREEN()
                 CHANGE_DIFFICULTY_LEVEL();
                 DISPLAY_MAP_NAME();
                 platform->fadeScreen(15, false);
+            } else if (A &= 0x7f) {
+                done = EXEC_COMMAND();
             }
 #endif
         }
