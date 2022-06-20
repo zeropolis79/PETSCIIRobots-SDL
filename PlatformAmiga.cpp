@@ -886,6 +886,8 @@ PlatformAmiga::PlatformAmiga() :
     enableLowpassFilter();
 #endif
 
+    custom.potgo = ((custom.potinp & 0x3fff) | 0xc000);
+
     platform = this;
 }
 
