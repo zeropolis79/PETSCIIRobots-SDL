@@ -63,12 +63,12 @@
 #endif
 #if PLATFORM_MAP_COUNT > 2
 #ifdef INACTIVITY_TIMEOUT_GAME
-static const char version[] = "$VER: Attack of the PETSCII Robots Arcade (2022-06-12)";
+static const char version[] = "$VER: Attack of the PETSCII Robots Arcade (2022-06-20)";
 #else
-static const char version[] = "$VER: Attack of the PETSCII Robots 1.3 (2022-06-12)";
+static const char version[] = "$VER: Attack of the PETSCII Robots 1.3 (2022-06-20)";
 #endif
 #else
-static const char version[] = "$VER: Attack of the PETSCII Robots Shareware (2022-06-12)";
+static const char version[] = "$VER: Attack of the PETSCII Robots Shareware (2022-06-20)";
 #endif
 
 struct SpriteData {
