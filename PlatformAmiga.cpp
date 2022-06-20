@@ -1078,7 +1078,11 @@ void PlatformAmiga::undeltaSamples(uint8_t* module, uint32_t moduleSize)
     for (int8_t* sampleData = samplesStart; sampleData < samplesEnd; sampleData++) {
         int8_t delta = *sampleData;
         sample += delta;
+#ifdef INACTIVITY_TIMEOUT_INTRO
+        *sampleData = sample >> 1;
+#else
         *sampleData = sample;
+#endif
     }
 }
 
