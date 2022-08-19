@@ -1763,11 +1763,17 @@ void TOGGLE_LIVE_MAP()
 
         platform->renderLiveMap(MAP);
     } else {
-        LIVE_MAP_ON = 0;
+#ifdef PLATFORM_LIVE_MAP_SINGLE_KEY
+        TOGGLE_LIVE_MAP_ROBOTS();
+        if (LIVE_MAP_ROBOTS_ON == 0)
+#endif
+        {
+            LIVE_MAP_ON = 0;
 
 #ifdef OPTIMIZED_MAP_RENDERING
-        INVALIDATE_PREVIOUS_MAP();
+            INVALIDATE_PREVIOUS_MAP();
 #endif
+        }
     }
     REDRAW_WINDOW = 1;
 }
