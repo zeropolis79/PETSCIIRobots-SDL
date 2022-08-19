@@ -169,6 +169,9 @@ void INIT_GAME()
     SCREEN_SHAKE = 0;
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
     LIVE_MAP_ON = 0;
+#ifdef PLATFORM_LIVE_MAP_SINGLE_KEY
+    LIVE_MAP_ROBOTS_ON = 0;
+#endif
 #endif
     RESET_KEYS_AMMO();
     platform->fadeScreen(0, false);
