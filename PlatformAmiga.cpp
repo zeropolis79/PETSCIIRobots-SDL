@@ -1260,15 +1260,17 @@ uint8_t PlatformAmiga::readKeyboard()
     }
 
 #if defined(PLATFORM_IMAGE_SUPPORT) && defined(INACTIVITY_TIMEOUT_INTRO)
-    animate();
+    if (loadedImage == ImageIntro) {
+        animate();
 
-    if (loadedImage == ImageIntro && downKey == 0xff) {
-        framesIdle++;
+        if (downKey == 0xff) {
+            framesIdle++;
 
-        if (framesIdle / framesPerSecond_ >= INACTIVITY_TIMEOUT_INTRO) {
-            attract();
+            if (framesIdle / framesPerSecond_ >= INACTIVITY_TIMEOUT_INTRO) {
+                attract();
 
-            return 0x7f;
+                return 0x7f;
+            }
         }
     }
 #endif
