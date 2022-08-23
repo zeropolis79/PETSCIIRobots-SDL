@@ -947,8 +947,13 @@ PlatformAmiga::~PlatformAmiga()
 
 #ifdef INACTIVITY_TIMEOUT_INTRO
     if (screen && screen->ViewPort.UCopIns) {
-        FreeVPortCopLists(&screen->ViewPort);
-        RemakeDisplay();
+        screen->ViewPort.UCopIns = 0;
+        RethinkDisplay();
+    }
+
+    if (userCopperList) {
+        FreeCopList(userCopperList->FirstCopList);
+        FreeMem(userCopperList, sizeof(UCopList));
     }
 #endif
 
