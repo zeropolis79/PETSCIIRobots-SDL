@@ -2489,8 +2489,9 @@ void PlatformAmiga::waitForScreenMemoryAccess()
 uint16_t* PlatformAmiga::getUserCopperlist()
 {
     uint16_t* userCopperList = GfxBase->ActiView->LOFCprList->start;
-    while (*userCopperList++ != 0xfffe);
-    while (*userCopperList++ != 0xfffe);
+    while (*userCopperList != 0x019e) userCopperList += 2;
+    userCopperList += 2;
+    while (*userCopperList != 0x019e) userCopperList += 2;
     return userCopperList - 2;
 }
 
