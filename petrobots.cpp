@@ -2835,6 +2835,11 @@ char* CALC_MAP_NAME()
 
 void REVERSE_MENU_OPTION(bool reverse)
 {
+#ifdef INACTIVITY_TIMEOUT_INTRO
+    if (reverse) {
+        platform->setHighlightedMenuRow(MENUY);
+    }
+#else
 #ifdef PLATFORM_COLOR_SUPPORT
     for (int Y = 0; Y != 10; Y++) {
         writeToScreenMemory(MENU_CHART[MENUY] + Y, SCREEN_MEMORY[MENU_CHART[MENUY] + Y], reverse ? 14 : 15, 5);
@@ -2843,6 +2848,7 @@ void REVERSE_MENU_OPTION(bool reverse)
     for (int Y = 0; Y != 10; Y++) {
         writeToScreenMemory(MENU_CHART[MENUY] + Y, SCREEN_MEMORY[MENU_CHART[MENUY] + Y] ^ 0x80);
     }
+#endif
 #endif
 }
 

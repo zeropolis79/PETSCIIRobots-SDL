@@ -167,6 +167,7 @@ public:
     virtual void stopSample();
     virtual void renderFrame(bool waitForNextFrame = false);
     virtual void waitForScreenMemoryAccess();
+    virtual void setHighlightedMenuRow(uint16_t row);
     bool quit;
 };
 

@@ -10,6 +10,8 @@
 #include <graphics/gfxbase.h>
 #include <graphics/view.h>
 #include <graphics/sprite.h>
+#include <graphics/copper.h>
+#include <graphics/gfxmacros.h>
 #include <intuition/intuition.h>
 #include <hardware/intbits.h>
 #include <hardware/custom.h>
@@ -565,6 +567,7 @@ PlatformAmiga::PlatformAmiga() :
     framesIdle(0),
 #endif
 #ifdef INACTIVITY_TIMEOUT_INTRO
+    userCopperList(0),
     attractImageX(0),
     attractImageY(0),
 #endif
@@ -809,6 +812,16 @@ PlatformAmiga::PlatformAmiga() :
     GetSprite(cursorSprite2, 3);
 #endif
 
+#ifdef INACTIVITY_TIMEOUT_INTRO
+    userCopperList = (UCopList *)AllocMem(sizeof(UCopList), MEMF_PUBLIC | MEMF_CLEAR);
+    CINIT(userCopperList, 4);
+    CWAIT(userCopperList, 20, 0);
+    CMOVE(userCopperList, custom.color[15], 0);
+    CWAIT(userCopperList, 28, 0);
+    CMOVE(userCopperList, custom.color[15], 0);
+    CEND(userCopperList);
+#endif
+
     verticalBlankInterrupt->is_Node.ln_Type = NT_INTERRUPT;
     verticalBlankInterrupt->is_Node.ln_Pri = 127;
     verticalBlankInterrupt->is_Node.ln_Name = "Attack of the PETSCII Robots VBI";
@@ -919,6 +932,13 @@ PlatformAmiga::~PlatformAmiga()
     if (verticalBlankInterrupt->is_Data == this) {
         RemIntServer(INTB_VERTB, verticalBlankInterrupt);
     }
+
+#ifdef INACTIVITY_TIMEOUT_INTRO
+    if (screen && screen->ViewPort.UCopIns) {
+        FreeVPortCopLists(&screen->ViewPort);
+        RemakeDisplay();
+    }
+#endif
 
 #ifdef PLATFORM_CURSOR_SUPPORT
     if (cursorSprite2->num != -1) {
@@ -1455,6 +1475,11 @@ void PlatformAmiga::displayImage(Image image)
         load(imageFilenames[image], screenPlanes, SCREEN_SIZE * PLANES + (2 << PLANES));
 
     palette->setPalette((uint16_t*)(screenPlanes + SCREEN_SIZE * PLANES), (1 << PLANES));
+
+#ifdef INACTIVITY_TIMEOUT_INTRO
+    screen->ViewPort.UCopIns = image == ImageIntro ? userCopperList : 0;
+    RethinkDisplay();
+#endif
 
 #if defined(INACTIVITY_TIMEOUT_INTRO) || defined(INACTIVITY_TIMEOUT_GAME)
     framesIdle = 0;
@@ -2173,6 +2198,14 @@ void PlatformAmiga::fadeScreen(uint16_t intensity, bool immediate)
                 fade += fadeDelta;
                 palette->setFade(fade);
                 LoadRGB4(&screen->ViewPort, palette->palette(), (1 << PLANES));
+
+#ifdef INACTIVITY_TIMEOUT_INTRO
+                if (screen->ViewPort.UCopIns) {
+                    screen->ViewPort.UCopIns->FirstCopList->CopIns[1].DESTDATA = palette->palette()[14];
+                    screen->ViewPort.UCopIns->FirstCopList->Next->CopIns[0].DESTDATA = palette->palette()[15];
+                    RethinkDisplay();
+                } else
+#endif
                 WaitTOF();
             } while (fade != intensity);
         }
@@ -2432,11 +2465,21 @@ void PlatformAmiga::waitForScreenMemoryAccess()
 }
 
 #ifdef INACTIVITY_TIMEOUT_INTRO
+void PlatformAmiga::setHighlightedMenuRow(uint16_t row)
+{
+    screen->ViewPort.UCopIns->FirstCopList->CopIns[0].VWAITPOS = 20 + 8 * row;
+    screen->ViewPort.UCopIns->FirstCopList->CopIns[2].VWAITPOS = 28 + 8 * row;
+    RethinkDisplay();
+}
+
 void PlatformAmiga::attract()
 {
     uint8_t* attractImages[] = { attract1Planes, attract2Planes, attract3Planes, attract1Planes, attract2Planes, attract3Planes };
     for (int attractImage = 0; attractImage < 6; attractImage++) {
         fadeScreen(0, false);
+
+        screen->ViewPort.UCopIns = 0;
+        RethinkDisplay();
 
         clearRect(0, 0, SCREEN_WIDTH, SCREEN_HEIGHT);
         waitForScreenMemoryAccess();

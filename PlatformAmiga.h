@@ -13,6 +13,7 @@ struct IOAudio;
 struct MsgPort;
 struct BitMap;
 struct SimpleSprite;
+struct UCopList;
 class Palette;
 
 class PlatformAmiga : public Platform {
@@ -85,6 +86,9 @@ public:
 #endif
     virtual void renderFrame(bool waitForNextFrame);
     virtual void waitForScreenMemoryAccess();
+#ifdef INACTIVITY_TIMEOUT_INTRO
+    virtual void setHighlightedMenuRow(uint16_t row);
+#endif
 
 private:
     __saveds void runVerticalBlankInterrupt();
@@ -158,6 +162,7 @@ private:
     uint16_t framesIdle;
 #endif
 #ifdef INACTIVITY_TIMEOUT_INTRO
+    UCopList* userCopperList;
     uint8_t attractImageX;
     uint8_t attractImageY;
 #endif

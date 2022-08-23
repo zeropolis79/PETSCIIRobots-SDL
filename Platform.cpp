@@ -151,4 +151,8 @@ void Platform::waitForScreenMemoryAccess()
 {
 }
 
+void Platform::setHighlightedMenuRow(uint16_t)
+{
+}
+
 Platform* platform = 0;
