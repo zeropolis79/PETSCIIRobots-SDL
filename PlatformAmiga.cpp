@@ -569,7 +569,10 @@ PlatformAmiga::PlatformAmiga() :
 #ifdef INACTIVITY_TIMEOUT_INTRO
     userCopperList(0),
     highlightedMenuRowPalette(new Palette(palette->palette() + 14, 1, 15)),
-    highlightedMenuRowDelta(-1),
+    explosionPalette(new Palette(palette->palette() + 9, 6, 15)),
+    highlightedMenuRowFadeDelta(-1),
+    explosionFadeDelta(-1),
+    explosionFadeWait(0),
     attractImageX(0),
     attractImageY(0),
 #endif
@@ -816,11 +819,18 @@ PlatformAmiga::PlatformAmiga() :
 
 #ifdef INACTIVITY_TIMEOUT_INTRO
     userCopperList = (UCopList *)AllocMem(sizeof(UCopList), MEMF_PUBLIC | MEMF_CLEAR);
-    CINIT(userCopperList, 4);
+    CINIT(userCopperList, 11);
     CWAIT(userCopperList, 20, 0);
     CMOVE(userCopperList, custom.color[15], 0);
     CWAIT(userCopperList, 28, 0);
     CMOVE(userCopperList, custom.color[15], 0);
+    CWAIT(userCopperList, 143, 0);
+    CMOVE(userCopperList, custom.color[9], 0);
+    CMOVE(userCopperList, custom.color[10], 0);
+    CMOVE(userCopperList, custom.color[11], 0);
+    CMOVE(userCopperList, custom.color[12], 0);
+    CMOVE(userCopperList, custom.color[13], 0);
+    CMOVE(userCopperList, custom.color[14], 0);
     CEND(userCopperList);
 #endif
 
@@ -975,6 +985,7 @@ PlatformAmiga::~PlatformAmiga()
     }
 
 #ifdef INACTIVITY_TIMEOUT_INTRO
+    delete explosionPalette;
     delete highlightedMenuRowPalette;
 #endif
     delete[] loadBuffer;
@@ -1244,6 +1255,8 @@ uint8_t PlatformAmiga::readKeyboard()
     }
 
 #if defined(PLATFORM_IMAGE_SUPPORT) && defined(INACTIVITY_TIMEOUT_INTRO)
+    animate();
+
     if (loadedImage == ImageIntro && downKey == 0xff) {
         framesIdle++;
 
@@ -1251,8 +1264,6 @@ uint8_t PlatformAmiga::readKeyboard()
             attract();
 
             return 0x7f;
-        } else {
-            animate();
         }
     }
 #endif
@@ -2209,7 +2220,7 @@ void PlatformAmiga::fadeScreen(uint16_t intensity, bool immediate)
 #ifdef INACTIVITY_TIMEOUT_INTRO
                 if (screen->ViewPort.UCopIns) {
                     animate();
-                } else
+                }
 #endif
                 WaitTOF();
             } while (fade != intensity);
@@ -2470,27 +2481,56 @@ void PlatformAmiga::waitForScreenMemoryAccess()
 }
 
 #ifdef INACTIVITY_TIMEOUT_INTRO
+uint16_t* PlatformAmiga::getUserCopperlist()
+{
+    uint16_t* userCopperList = GfxBase->ActiView->LOFCprList->start;
+    while (*userCopperList++ != 0xfffe);
+    while (*userCopperList++ != 0xfffe);
+    return userCopperList - 2;
+}
+
 void PlatformAmiga::setHighlightedMenuRow(uint16_t row)
 {
-    screen->ViewPort.UCopIns->FirstCopList->CopIns[0].VWAITPOS = 20 + 8 * row;
-    screen->ViewPort.UCopIns->FirstCopList->CopIns[2].VWAITPOS = 28 + 8 * row;
-    RethinkDisplay();
+    uint16_t* userCopperList = getUserCopperlist();
+    userCopperList[0] = *GfxBase->ActiView->LOFCprList->start + ((2 + 20 + 8 * row) << 8);
+    userCopperList[4] = *GfxBase->ActiView->LOFCprList->start + ((2 + 28 + 8 * row) << 8);
 }
 
 void PlatformAmiga::animate()
 {
     uint16_t fade = highlightedMenuRowPalette->fade();
-    fade += highlightedMenuRowDelta;
+    fade += highlightedMenuRowFadeDelta;
     if (fade == 8) {
-        highlightedMenuRowDelta = 1;
+        highlightedMenuRowFadeDelta = 1;
     } else if (fade == 15) {
-        highlightedMenuRowDelta = -1;
+        highlightedMenuRowFadeDelta = -1;
     }
     highlightedMenuRowPalette->setPalette(palette->palette() + 14, 1);
     highlightedMenuRowPalette->setFade(fade);
-    screen->ViewPort.UCopIns->FirstCopList->CopIns[1].DESTDATA = highlightedMenuRowPalette->palette()[0];
-    screen->ViewPort.UCopIns->FirstCopList->Next->CopIns[0].DESTDATA = palette->palette()[15];
-    RethinkDisplay();
+
+    fade = explosionPalette->fade();
+    explosionFadeWait++;
+    explosionFadeWait &= 3;
+    if (explosionFadeWait == 0) {
+        fade += explosionFadeDelta;
+        if (fade == 8) {
+            explosionFadeDelta = 1;
+        } else if (fade == 15) {
+            explosionFadeDelta = -1;
+        }
+    }
+    explosionPalette->setPalette(palette->palette() + 9, 6);
+    explosionPalette->setFade(fade);
+
+    uint16_t* userCopperList = getUserCopperlist();
+    userCopperList[3] = highlightedMenuRowPalette->palette()[0];
+    userCopperList[7] = palette->palette()[15];
+    userCopperList[11] = explosionPalette->palette()[0];
+    userCopperList[13] = explosionPalette->palette()[1];
+    userCopperList[15] = explosionPalette->palette()[2];
+    userCopperList[17] = explosionPalette->palette()[3];
+    userCopperList[19] = explosionPalette->palette()[4];
+    userCopperList[21] = explosionPalette->palette()[5];
 }
 
 void PlatformAmiga::attract()

@@ -116,6 +116,7 @@ private:
     __asm static void enableLowpassFilter();
     __asm static void disableLowpassFilter();
 #ifdef INACTIVITY_TIMEOUT_INTRO
+    uint16_t* getUserCopperlist();
     void animate();
     void attract();
 #endif
@@ -165,7 +166,10 @@ private:
 #ifdef INACTIVITY_TIMEOUT_INTRO
     UCopList* userCopperList;
     Palette* highlightedMenuRowPalette;
-    int8_t highlightedMenuRowDelta;
+    Palette* explosionPalette;
+    int8_t highlightedMenuRowFadeDelta;
+    int8_t explosionFadeDelta;
+    uint8_t explosionFadeWait;
     uint8_t attractImageX;
     uint8_t attractImageY;
 #endif
