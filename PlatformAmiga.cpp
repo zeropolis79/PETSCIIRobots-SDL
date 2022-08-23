@@ -568,6 +568,8 @@ PlatformAmiga::PlatformAmiga() :
 #endif
 #ifdef INACTIVITY_TIMEOUT_INTRO
     userCopperList(0),
+    highlightedMenuRowPalette(new Palette(palette->palette() + 14, 1, 15)),
+    highlightedMenuRowDelta(-1),
     attractImageX(0),
     attractImageY(0),
 #endif
@@ -972,6 +974,9 @@ PlatformAmiga::~PlatformAmiga()
         UnLock(CurrentDir(originalDirectoryLock));
     }
 
+#ifdef INACTIVITY_TIMEOUT_INTRO
+    delete highlightedMenuRowPalette;
+#endif
     delete[] loadBuffer;
     delete palette;
 #ifdef PLATFORM_CURSOR_SUPPORT
@@ -1246,6 +1251,8 @@ uint8_t PlatformAmiga::readKeyboard()
             attract();
 
             return 0x7f;
+        } else {
+            animate();
         }
     }
 #endif
@@ -2201,9 +2208,7 @@ void PlatformAmiga::fadeScreen(uint16_t intensity, bool immediate)
 
 #ifdef INACTIVITY_TIMEOUT_INTRO
                 if (screen->ViewPort.UCopIns) {
-                    screen->ViewPort.UCopIns->FirstCopList->CopIns[1].DESTDATA = palette->palette()[14];
-                    screen->ViewPort.UCopIns->FirstCopList->Next->CopIns[0].DESTDATA = palette->palette()[15];
-                    RethinkDisplay();
+                    animate();
                 } else
 #endif
                 WaitTOF();
@@ -2469,6 +2474,22 @@ void PlatformAmiga::setHighlightedMenuRow(uint16_t row)
 {
     screen->ViewPort.UCopIns->FirstCopList->CopIns[0].VWAITPOS = 20 + 8 * row;
     screen->ViewPort.UCopIns->FirstCopList->CopIns[2].VWAITPOS = 28 + 8 * row;
+    RethinkDisplay();
+}
+
+void PlatformAmiga::animate()
+{
+    uint16_t fade = highlightedMenuRowPalette->fade();
+    fade += highlightedMenuRowDelta;
+    if (fade == 8) {
+        highlightedMenuRowDelta = 1;
+    } else if (fade == 15) {
+        highlightedMenuRowDelta = -1;
+    }
+    highlightedMenuRowPalette->setPalette(palette->palette() + 14, 1);
+    highlightedMenuRowPalette->setFade(fade);
+    screen->ViewPort.UCopIns->FirstCopList->CopIns[1].DESTDATA = highlightedMenuRowPalette->palette()[0];
+    screen->ViewPort.UCopIns->FirstCopList->Next->CopIns[0].DESTDATA = palette->palette()[15];
     RethinkDisplay();
 }
 
