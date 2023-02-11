@@ -540,10 +540,6 @@ void PlatformSDL::displayImage(Image image)
         SDL_Rect sourceRect = { 0, 0, 320, 200 };
         SDL_Rect destinationRect = { 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT };
         SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
-
-        if (image == ImageIntro) {
-            this->clearRect(32, 36, 80, 8);
-        }
     }
 
     palette = imageSurfaces[image]->format->palette;

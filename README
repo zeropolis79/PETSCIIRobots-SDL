@@ -1,7 +1,7 @@
 Attack of the PETSCII Robots C++
 ================================
 Ported by Vesa Halttunen <vesuri@jormas.com>
-This source code may be used as basis for ports to different platforms as long as Vesa Halttunen gets co-credited.
+This work is licensed under the Creative Commons Attribution 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
 
 About
 -----
@@ -10,74 +10,13 @@ About
 - Various #defines starting with PLATFORM_ can be used to build a variant with different features using the same platform implementation
 - To port to a new platform, create a new PlatformXYZ.cpp/h implementation based on the existing ones and instantiate it in main() (petrobots.cpp)
 
-SDL version
------------
+Building
+--------
 brew install sdl2 sdl2_image
 make setup
 make
 cd SDL
 ../petrobots
-
-Amiga version
--------------
-smake
-cd Amiga
-/amigarobots
-
-smake -f smakefile.pet
-cd Amiga
-/petrobots
-
-Amiga requirements
-------------------
-- Any classic Motorola 680x0 based Amiga with at least 512 kB of chip memory
-
-Amiga keyboard controls
------------------------
-IJKL move
-ASDF fire
-Z search
-M move
-SPACE use item
-F1 cycle weapon
-F2 cycle item
-F6 toggle music
-RAMIGA+Q quit
-ESC pause
-TAB live map
-SHIFT+TAB live map robots
-
-Amiga joystick controls
------------------------
-UP/DOWN/LEFT/RIGHT move
-BUTTON1+UP/DOWN/LEFT/RIGHT fire
-BUTTON2 use item
-BUTTON2+LEFT cycle item
-BUTTON2+RIGHT cycle weapon
-BUTTON2+UP move
-BUTTON2+DOWN search
-
-Amiga CD32 controls
--------------------
-UP/DOWN/LEFT/RIGHT move
-YELLOW/RED/GREEN/BLUE fire
-REVERSE search
-FORWARD move
-PLAY use item
-PLAY+REVERSE cycle item
-PLAY+FORWARD cycle weapon
-PLAY+LEFT live map
-PLAY+DOWN live map robots
-PLAY+BLUE pause
-PLAY+RED toggle music
-
-Troubleshooting
----------------
-The hard disk installation script "Install" requires the AmigaOS tool "Installer" to be in path. It is included with AmigaOS 2.1 and above but can also be installed from Aminet (https://aminet.net/package/util/misc/Installer-43_3). The game can also be installed by manually copying the contents of the disk to the desired location, making sure to copy the Data directory as well.
-
-On systems with only 512 kilobytes of memory the game disk uses the tool "Add44k" to increase the amount of available memory. This tool is not compatible with Kickstart 3.0 and causes display corruption while the game is loading. The solution is to use a different Kickstart version, add more memory to the system or find an alternative for Add44k to be placed in s/startup-sequence.
-
-If the cursor is not (fully) visible during searching or moving objects, the game's screen is positioned too far to the left of the display. This is usually caused by the system's overscan settings. The solution is to drag the game screen to the right or to adjust the system's overscan settings so that the screen is positioned more to the right.
 
 Making of
 ---------
@@ -99,36 +38,6 @@ When the game was mostly complete otherwise, it was time to implement the live m
 
 Last but not least joystick support was implemented. Most Amiga games only support a single button Atari style joystick. However, there are Amiga games that do support the 7 button Amiga CD32 gamepad either natively or via patches, so it made sense to add support for such a pad as well. In this mode all the game commands are available through the gamepad. Getting this code right required digging up some obscure information from forum discussions and such. Atari style joysticks can also have two buttons, so support for the second button was added to the joystick mode. This way most of the game commands are available using such a joystick as well. While not optimal, at least the game is now fully playable using a traditional joystick.
 
-PSP version
------------
-make -f Makefile.PSP
-mksfo petrobots param.sfo
-psp-prx-strip -v "petrobots.prx"
-psp_boot_packager c param.sfo "petrobots.prx" eboot.pbp
-
-PSP requirements
-----------------
-PSP system software 6.35
-
-PSP controls
-------------
-UP/DOWN/LEFT/RIGHT move
-TRIANGLE/CROSS/SQUARE/CIRCLE fire
-L search
-R move
-START use item
-SELECT+L cycle item
-SELECT+R cycle weapon
-SELECT+LEFT live map
-SELECT+DOWN live map robots
-SELECT+CIRCLE pause
-SELECT+CROSS toggle music
-
 TODO
 ----
 - Add screen and map size getters in Program to allow actual screen size to be determined on startup
-- Amiga PAL screen size support
-- Amiga monitor support
-- Amiga command line argument / tooltype support
-- Render live map to a separate Amiga screen
-- PSP native resolution intro screen and game over screen

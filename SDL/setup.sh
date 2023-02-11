@@ -7,7 +7,7 @@ fi
 
 if [ ! -f tileset.amiga ]
 then
-  for file in ../tileset.amiga ../PSP/level-* ../Amiga/*.png ../Music/mod.* ../Sounds/*.raw
+  for file in ../tileset.amiga ../Music/mod.* ../Sounds/*.raw
   do
     ln -s "$file"
   done

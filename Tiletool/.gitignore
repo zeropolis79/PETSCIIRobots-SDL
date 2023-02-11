@@ -1,2 +1,4 @@
+*.pro.user
+.qmake.stash
 Makefile
 Tiletool
