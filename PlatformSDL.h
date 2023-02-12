@@ -37,6 +37,11 @@ public:
     virtual void renderHealth(uint8_t health, uint16_t x, uint16_t y);
     virtual void renderFace(uint8_t face, uint16_t x, uint16_t y);
 #endif
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+    virtual void renderLiveMap(uint8_t* map);
+    virtual void renderLiveMapTile(uint8_t* map, uint8_t x, uint8_t y);
+    virtual void renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots);
+#endif
 #ifdef PLATFORM_CURSOR_SUPPORT
     virtual void showCursor(uint16_t x, uint16_t y);
     virtual void hideCursor();

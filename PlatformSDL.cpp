@@ -112,6 +112,13 @@ static uint8_t standardControls[] = {
     SDL_SCANCODE_N // NO
 };
 
+#define LIVE_MAP_ORIGIN_X ((PLATFORM_SCREEN_WIDTH - 56 - 128 * 3) / 2)
+#define LIVE_MAP_ORIGIN_Y ((PLATFORM_SCREEN_HEIGHT - 32 - 64 * 3) / 2)
+
+uint8_t unitTypes[48];
+uint8_t unitX[48];
+uint8_t unitY[48];
+
 PlatformSDL::PlatformSDL() :
     interrupt(0),
     audioSpec({0}),
@@ -805,6 +812,122 @@ void PlatformSDL::renderFace(uint8_t face, uint16_t x, uint16_t y)
     destinationRect.w = 16;
     destinationRect.h = 24;
     SDL_BlitSurface(facesSurface, &sourceRect, windowSurface, &destinationRect);
+}
+#endif
+
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+void PlatformSDL::renderLiveMap(uint8_t* map)
+{
+    clearRect(0, 0, PLATFORM_SCREEN_WIDTH - 56, LIVE_MAP_ORIGIN_Y);
+    clearRect(0, LIVE_MAP_ORIGIN_Y, LIVE_MAP_ORIGIN_X, PLATFORM_SCREEN_HEIGHT - 32 - 2 * LIVE_MAP_ORIGIN_Y);
+    clearRect(PLATFORM_SCREEN_WIDTH - 56 - LIVE_MAP_ORIGIN_X, LIVE_MAP_ORIGIN_Y, LIVE_MAP_ORIGIN_X, PLATFORM_SCREEN_HEIGHT - 32 - 2 * LIVE_MAP_ORIGIN_Y);
+    clearRect(0, PLATFORM_SCREEN_HEIGHT - 32 - LIVE_MAP_ORIGIN_Y, PLATFORM_SCREEN_WIDTH - 56, LIVE_MAP_ORIGIN_Y);
+
+    SDL_Rect sourceRect, destinationRect;
+    /*
+    sourceRect.w = 24;
+    sourceRect.h = 24;
+    destinationRect.w = 3;
+    destinationRect.h = 3;
+
+    for (int mapY = 0; mapY < 64; mapY++) {
+        for (int mapX = 0; mapX < 128; mapX++) {
+            sourceRect.x = 0;
+            sourceRect.y = *map++ * 24;
+            destinationRect.x = LIVE_MAP_ORIGIN_X + mapX * 3;
+            destinationRect.y = LIVE_MAP_ORIGIN_Y + mapY * 3;
+            SDL_BlitScaled(tileSurface, &sourceRect, windowSurface, &destinationRect);
+        }
+    }
+    */
+    sourceRect.w = 1;
+    sourceRect.h = 1;
+    destinationRect.w = 1;
+    destinationRect.h = 1;
+
+    for (int mapY = 0; mapY < 64; mapY++) {
+        for (int mapX = 0; mapX < 128; mapX++) {
+            int tile = *map++;
+            for (int y = 0; y < 3; y++) {
+                for (int x = 0; x < 3; x++) {
+                    sourceRect.x = x * 8;
+                    sourceRect.y = tile * 24 + y * 8;
+                    destinationRect.x = LIVE_MAP_ORIGIN_X + mapX * 3 + x;
+                    destinationRect.y = LIVE_MAP_ORIGIN_Y + mapY * 3 + y;
+                    SDL_BlitSurface(tileSurface, &sourceRect, windowSurface, &destinationRect);
+                }
+            }
+        }
+    }
+
+    for (int i = 0; i < 48; i++) {
+        unitTypes[i] = 255;
+    }
+}
+
+void PlatformSDL::renderLiveMapTile(uint8_t* map, uint8_t mapX, uint8_t mapY)
+{
+    SDL_Rect sourceRect, destinationRect;
+    /*
+    sourceRect.x = 0;
+    sourceRect.y = map[(mapY << 7) + mapX] * 24;
+    sourceRect.w = 24;
+    sourceRect.h = 24;
+    destinationRect.x = LIVE_MAP_ORIGIN_X + mapX * 3;
+    destinationRect.y = LIVE_MAP_ORIGIN_Y + mapY * 3;
+    destinationRect.w = 3;
+    destinationRect.h = 3;
+    SDL_BlitScaled(tileSurface, &sourceRect, windowSurface, &destinationRect);
+    */
+    sourceRect.w = 1;
+    sourceRect.h = 1;
+    destinationRect.w = 1;
+    destinationRect.h = 1;
+    int tile = map[(mapY << 7) + mapX];
+    for (int y = 0; y < 3; y++) {
+        for (int x = 0; x < 3; x++) {
+            sourceRect.x = x * 8;
+            sourceRect.y = tile * 24 + y * 8;
+            destinationRect.x = LIVE_MAP_ORIGIN_X + mapX * 3 + x;
+            destinationRect.y = LIVE_MAP_ORIGIN_Y + mapY * 3 + y;
+            SDL_BlitSurface(tileSurface, &sourceRect, windowSurface, &destinationRect);
+        }
+    }
+}
+
+void PlatformSDL::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots)
+{
+    for (int i = 0; i < 48; i++) {
+        if ((i < 28 || unitTypes[i] == 22) && (unitX[i] != ::unitX[i] || unitY[i] != ::unitY[i] || (i > 0 && (!showRobots || unitTypes[i] == 22 || unitTypes[i] != ::unitTypes[i])) || (i == 0 && playerColor != ::unitTypes[i]))) {
+            // Remove old dot if any
+            if (::unitTypes[i] != 255) {
+                renderLiveMapTile(map, ::unitX[i], ::unitY[i]);
+
+                if (i > 0 && !showRobots) {
+                    ::unitTypes[i] = 255;
+                }
+            }
+
+            if (i == 0 ||
+                (unitTypes[i] == 22 && (unitX[i] != unitX[0] || unitY[i] != unitY[0])) ||
+                (showRobots &&
+                 (unitTypes[i] == 1 ||
+                 (unitTypes[i] >= 2 && unitTypes[i] <= 5) ||
+                 (unitTypes[i] >= 17 && unitTypes[i] <= 18) ||
+                 unitTypes[i] == 9))) {
+                // Render new dot
+                int x = unitX[i];
+                int y = unitY[i];
+                SDL_Rect clearRect = { LIVE_MAP_ORIGIN_X + x * 3, LIVE_MAP_ORIGIN_Y + y * 3, 3, 3 };
+                SDL_Color* color = &palette->colors[(i > 0 || playerColor == 1) ? 1 : 0];
+                SDL_FillRect(windowSurface, &clearRect, SDL_MapRGB(windowSurface->format, color->r, color->g, color->b));
+
+                ::unitTypes[i] = i == 0 ? playerColor : unitTypes[i];
+                ::unitX[i] = unitX[i];
+                ::unitY[i] = unitY[i];
+            }
+        }
+    }
 }
 #endif
 
