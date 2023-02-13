@@ -53,6 +53,11 @@ public:
     virtual void copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinationX, uint16_t destinationY, uint16_t width, uint16_t height);
     virtual void clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height);
     virtual void shakeScreen();
+#ifdef PLATFORM_FADE_SUPPORT
+    virtual void startFadeScreen(uint16_t color, uint16_t intensity);
+    virtual void fadeScreen(uint16_t intensity, bool immediate);
+    virtual void stopFadeScreen();
+#endif
     virtual void writeToScreenMemory(address_t address, uint8_t value);
     virtual void writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset);
 #ifdef PLATFORM_MODULE_BASED_AUDIO
@@ -87,6 +92,8 @@ private:
     SDL_Joystick *joystick;
     SDL_Window* window;
     SDL_Surface* windowSurface;
+    SDL_Surface* bufferSurface;
+    SDL_Surface* fadeSurface;
     SDL_Surface* fontSurface;
 #ifdef PLATFORM_IMAGE_BASED_TILES
     SDL_Surface* tileSurface;
@@ -141,6 +148,8 @@ private:
 #endif
     uint16_t interruptIntervalInSamples;
     uint16_t samplesSinceInterrupt;
+    uint32_t fadeBaseColor;
+    uint16_t fadeIntensity;
     uint16_t joystickStateToReturn;
     uint16_t joystickState;
     uint16_t pendingState;

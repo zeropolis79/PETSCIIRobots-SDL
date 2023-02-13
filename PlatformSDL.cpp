@@ -146,6 +146,8 @@ PlatformSDL::PlatformSDL() :
     joystick(0),
     window(0),
     windowSurface(0),
+    bufferSurface(0),
+    fadeSurface(0),
     fontSurface(0),
 #ifdef PLATFORM_IMAGE_BASED_TILES
     tileSurface(0),
@@ -182,6 +184,8 @@ PlatformSDL::PlatformSDL() :
 #endif
     interruptIntervalInSamples(0),
     samplesSinceInterrupt(0),
+    fadeBaseColor(0),
+    fadeIntensity(0),
     joystickStateToReturn(0),
     joystickState(0),
     pendingState(0),
@@ -195,6 +199,8 @@ PlatformSDL::PlatformSDL() :
     if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) == 0) {
         fprintf(stderr, "Error initializing SDL_image: %s\n", IMG_GetError());
     }
+
+    SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
 
     SDL_AudioSpec requestedAudioSpec;
     SDL_zero(requestedAudioSpec);
@@ -217,6 +223,8 @@ PlatformSDL::PlatformSDL() :
 
     window = SDL_CreateWindow("Attack of the PETSCII Robots", 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT, 0);
     windowSurface = SDL_GetWindowSurface(window);
+    bufferSurface = SDL_CreateRGBSurface(0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
+    fadeSurface = SDL_CreateRGBSurface(0, 1, 1, 32, 0x000000ff, 0x0000ff00, 0x00ff0000, 0xff000000);
 #ifdef PLATFORM_COLOR_SUPPORT
     fontSurface = IMG_Load("c64font.png");
 #else
@@ -326,15 +334,17 @@ PlatformSDL::~PlatformSDL()
         SDL_FreeSurface(tileSurfaces[i]);
     }
 #endif
+    SDL_FreeSurface(fadeSurface);
+    SDL_FreeSurface(bufferSurface);
     SDL_FreeSurface(fontSurface);
+    SDL_DestroyWindow(window);
+    SDL_JoystickClose(joystick);
+    SDL_CloseAudioDevice(audioDeviceID);
+    SDL_Quit();
 #ifdef PLATFORM_MODULE_BASED_AUDIO
     delete[] sampleData;
     delete[] moduleData;
 #endif
-    SDL_DestroyWindow(window);     
-    SDL_JoystickClose(joystick);
-    SDL_CloseAudioDevice(audioDeviceID);
-    SDL_Quit();
 }
 
 void PlatformSDL::audioCallback(void* data, uint8_t* stream, int bytes) {
@@ -561,25 +571,25 @@ uint8_t* PlatformSDL::loadTileset()
 void PlatformSDL::displayImage(Image image)
 {
     SDL_Rect clearRect = { 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT };
-    SDL_FillRect(windowSurface, &clearRect, 0xff000000);
+    SDL_FillRect(bufferSurface, &clearRect, 0xff000000);
 
     if (image == ImageGame) {
         SDL_Rect sourceRect = { 320 - 56, 0, 56, 128 };
         SDL_Rect destinationRect = { PLATFORM_SCREEN_WIDTH - 56, 0, 56, 128 };
-        SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+        SDL_BlitSurface(imageSurfaces[image], &sourceRect, bufferSurface, &destinationRect);
 
         sourceRect.y = 128;
         for (destinationRect.y = 128; destinationRect.y < (PLATFORM_SCREEN_HEIGHT - 32); destinationRect.y += 40) {
             sourceRect.h = MIN(40, PLATFORM_SCREEN_HEIGHT - 32 - destinationRect.y);
             destinationRect.h = sourceRect.h;
-            SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+            SDL_BlitSurface(imageSurfaces[image], &sourceRect, bufferSurface, &destinationRect);
         }
 
         sourceRect.y = 168;
         sourceRect.h = 32;
         destinationRect.y = PLATFORM_SCREEN_HEIGHT - 32;
         destinationRect.h = 32;
-        SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+        SDL_BlitSurface(imageSurfaces[image], &sourceRect, bufferSurface, &destinationRect);
 
         sourceRect.x = 0;
         sourceRect.y = 168;
@@ -589,18 +599,18 @@ void PlatformSDL::displayImage(Image image)
         destinationRect.y = PLATFORM_SCREEN_HEIGHT - 32;
         destinationRect.w = sourceRect.w;
         destinationRect.h = sourceRect.h;
-        SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+        SDL_BlitSurface(imageSurfaces[image], &sourceRect, bufferSurface, &destinationRect);
 
         sourceRect.x = 104;
         for (destinationRect.x = 104; destinationRect.x < (PLATFORM_SCREEN_WIDTH - 56); destinationRect.x += 160) {
             sourceRect.w = MIN(160, PLATFORM_SCREEN_WIDTH - 56 - destinationRect.x);
             destinationRect.w = sourceRect.w;
-            SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+            SDL_BlitSurface(imageSurfaces[image], &sourceRect, bufferSurface, &destinationRect);
         }
     } else {
         SDL_Rect sourceRect = { 0, 0, 320, 200 };
         SDL_Rect destinationRect = { 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT };
-        SDL_BlitSurface(imageSurfaces[image], &sourceRect, windowSurface, &destinationRect);
+        SDL_BlitSurface(imageSurfaces[image], &sourceRect, bufferSurface, &destinationRect);
     }
 
     palette = imageSurfaces[image]->format->palette;
@@ -690,7 +700,7 @@ SDL_Rect clipRect = { 0, 0, PLATFORM_SCREEN_WIDTH - 56, PLATFORM_SCREEN_HEIGHT -
 
 void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t variant, bool transparent)
 {
-    SDL_SetClipRect(windowSurface, &clipRect);
+    SDL_SetClipRect(bufferSurface, &clipRect);
     if (transparent) {
 #ifdef PLATFORM_SPRITE_SUPPORT
         if (tileSpriteMap[tile] >= 0) {
@@ -717,7 +727,7 @@ void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t varia
     destinationRect.y = y;
     destinationRect.w = 24;
     destinationRect.h = 24;
-    SDL_BlitSurface(tileSurface, &sourceRect, windowSurface, &destinationRect);
+    SDL_BlitSurface(tileSurface, &sourceRect, bufferSurface, &destinationRect);
 #else
     SDL_Rect sourceRect, destinationRect;
     sourceRect.x = 0;
@@ -729,14 +739,14 @@ void PlatformSDL::renderTile(uint8_t tile, uint16_t x, uint16_t y, uint8_t varia
     destinationRect.w = 24;
     destinationRect.h = 24;
     SDL_SetSurfaceBlendMode(tileSurfaces[tile], transparent ? SDL_BLENDMODE_BLEND : SDL_BLENDMODE_NONE);
-    SDL_BlitSurface(tileSurfaces[tile], &sourceRect, windowSurface, &destinationRect);
+    SDL_BlitSurface(tileSurfaces[tile], &sourceRect, bufferSurface, &destinationRect);
 #endif
-    SDL_SetClipRect(windowSurface, 0);
+    SDL_SetClipRect(bufferSurface, 0);
 }
 
 void PlatformSDL::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, uint16_t x, uint16_t y, uint8_t backgroundVariant, uint8_t foregroundVariant)
 {
-    SDL_SetClipRect(windowSurface, &clipRect);
+    SDL_SetClipRect(bufferSurface, &clipRect);
     SDL_Surface* backgroundSurface = tileSurface;
 #ifdef PLATFORM_IMAGE_BASED_TILES
     if (animTileMap[backgroundTile] >= 0) {
@@ -756,29 +766,29 @@ void PlatformSDL::renderTiles(uint8_t backgroundTile, uint8_t foregroundTile, ui
         sourceRect.y = backgroundTile * 24;
         destinationRect.x = x;
         destinationRect.y = y;
-        SDL_BlitSurface(backgroundSurface, &sourceRect, windowSurface, &destinationRect);
+        SDL_BlitSurface(backgroundSurface, &sourceRect, bufferSurface, &destinationRect);
 
         sourceRect.y = sprite * 24;
-        SDL_BlitSurface(spritesSurface, &sourceRect, windowSurface, &destinationRect);
+        SDL_BlitSurface(spritesSurface, &sourceRect, bufferSurface, &destinationRect);
     } else {
 #endif
         sourceRect.y = backgroundTile * 24;
         destinationRect.x = x;
         destinationRect.y = y;
-        SDL_BlitSurface(backgroundSurface, &sourceRect, windowSurface, &destinationRect);
+        SDL_BlitSurface(backgroundSurface, &sourceRect, bufferSurface, &destinationRect);
 
         sourceRect.y = foregroundTile * 24;
-        SDL_BlitSurface(tileSurface, &sourceRect, windowSurface, &destinationRect);
+        SDL_BlitSurface(tileSurface, &sourceRect, bufferSurface, &destinationRect);
 #ifdef PLATFORM_IMAGE_BASED_TILES
     }
 #endif
-    SDL_SetClipRect(windowSurface, 0);
+    SDL_SetClipRect(bufferSurface, 0);
 }
 
 #ifdef PLATFORM_SPRITE_SUPPORT
 void PlatformSDL::renderSprite(uint8_t sprite, uint16_t x, uint16_t y)
 {
-    SDL_SetClipRect(windowSurface, &clipRect);
+    SDL_SetClipRect(bufferSurface, &clipRect);
     SDL_Rect sourceRect, destinationRect;
     sourceRect.x = 0;
     sourceRect.y = sprite * 24;
@@ -788,15 +798,15 @@ void PlatformSDL::renderSprite(uint8_t sprite, uint16_t x, uint16_t y)
     destinationRect.y = y;
     destinationRect.w = 24;
     destinationRect.h = 24;
-    SDL_BlitSurface(spritesSurface, &sourceRect, windowSurface, &destinationRect);
-    SDL_SetClipRect(windowSurface, 0);
+    SDL_BlitSurface(spritesSurface, &sourceRect, bufferSurface, &destinationRect);
+    SDL_SetClipRect(bufferSurface, 0);
 }
 #endif
 
 #ifdef PLATFORM_IMAGE_BASED_TILES
 void PlatformSDL::renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y)
 {
-    SDL_SetClipRect(windowSurface, &clipRect);
+    SDL_SetClipRect(bufferSurface, &clipRect);
     SDL_Rect sourceRect, destinationRect;
     sourceRect.x = 0;
     sourceRect.y = animTile * 24;
@@ -806,8 +816,8 @@ void PlatformSDL::renderAnimTile(uint8_t animTile, uint16_t x, uint16_t y)
     destinationRect.y = y;
     destinationRect.w = 24;
     destinationRect.h = 24;
-    SDL_BlitSurface(animTilesSurface, &sourceRect, windowSurface, &destinationRect);
-    SDL_SetClipRect(windowSurface, 0);
+    SDL_BlitSurface(animTilesSurface, &sourceRect, bufferSurface, &destinationRect);
+    SDL_SetClipRect(bufferSurface, 0);
 }
 #endif
 
@@ -823,7 +833,7 @@ void PlatformSDL::renderItem(uint8_t item, uint16_t x, uint16_t y)
     destinationRect.y = y;
     destinationRect.w = 48;
     destinationRect.h = 21;
-    SDL_BlitSurface(itemsSurface, &sourceRect, windowSurface, &destinationRect);
+    SDL_BlitSurface(itemsSurface, &sourceRect, bufferSurface, &destinationRect);
 }
 
 void PlatformSDL::renderKey(uint8_t key, uint16_t x, uint16_t y)
@@ -837,7 +847,7 @@ void PlatformSDL::renderKey(uint8_t key, uint16_t x, uint16_t y)
     destinationRect.y = y;
     destinationRect.w = 16;
     destinationRect.h = 14;
-    SDL_BlitSurface(keysSurface, &sourceRect, windowSurface, &destinationRect);
+    SDL_BlitSurface(keysSurface, &sourceRect, bufferSurface, &destinationRect);
 }
 
 void PlatformSDL::renderHealth(uint8_t health, uint16_t x, uint16_t y)
@@ -851,7 +861,7 @@ void PlatformSDL::renderHealth(uint8_t health, uint16_t x, uint16_t y)
     destinationRect.y = y;
     destinationRect.w = 48;
     destinationRect.h = 51;
-    SDL_BlitSurface(healthSurface, &sourceRect, windowSurface, &destinationRect);
+    SDL_BlitSurface(healthSurface, &sourceRect, bufferSurface, &destinationRect);
 }
 
 void PlatformSDL::renderFace(uint8_t face, uint16_t x, uint16_t y)
@@ -865,7 +875,7 @@ void PlatformSDL::renderFace(uint8_t face, uint16_t x, uint16_t y)
     destinationRect.y = y;
     destinationRect.w = 16;
     destinationRect.h = 24;
-    SDL_BlitSurface(facesSurface, &sourceRect, windowSurface, &destinationRect);
+    SDL_BlitSurface(facesSurface, &sourceRect, bufferSurface, &destinationRect);
 }
 #endif
 
@@ -890,7 +900,7 @@ void PlatformSDL::renderLiveMap(uint8_t* map)
             sourceRect.y = *map++ * 24;
             destinationRect.x = LIVE_MAP_ORIGIN_X + mapX * 3;
             destinationRect.y = LIVE_MAP_ORIGIN_Y + mapY * 3;
-            SDL_BlitScaled(tileSurface, &sourceRect, windowSurface, &destinationRect);
+            SDL_BlitScaled(tileSurface, &sourceRect, bufferSurface, &destinationRect);
         }
     }
     */
@@ -908,7 +918,7 @@ void PlatformSDL::renderLiveMap(uint8_t* map)
                     sourceRect.y = tile * 24 + y * 8;
                     destinationRect.x = LIVE_MAP_ORIGIN_X + mapX * 3 + x;
                     destinationRect.y = LIVE_MAP_ORIGIN_Y + mapY * 3 + y;
-                    SDL_BlitSurface(tileSurface, &sourceRect, windowSurface, &destinationRect);
+                    SDL_BlitSurface(tileSurface, &sourceRect, bufferSurface, &destinationRect);
                 }
             }
         }
@@ -931,7 +941,7 @@ void PlatformSDL::renderLiveMapTile(uint8_t* map, uint8_t mapX, uint8_t mapY)
     destinationRect.y = LIVE_MAP_ORIGIN_Y + mapY * 3;
     destinationRect.w = 3;
     destinationRect.h = 3;
-    SDL_BlitScaled(tileSurface, &sourceRect, windowSurface, &destinationRect);
+    SDL_BlitScaled(tileSurface, &sourceRect, bufferSurface, &destinationRect);
     */
     sourceRect.w = 1;
     sourceRect.h = 1;
@@ -944,7 +954,7 @@ void PlatformSDL::renderLiveMapTile(uint8_t* map, uint8_t mapX, uint8_t mapY)
             sourceRect.y = tile * 24 + y * 8;
             destinationRect.x = LIVE_MAP_ORIGIN_X + mapX * 3 + x;
             destinationRect.y = LIVE_MAP_ORIGIN_Y + mapY * 3 + y;
-            SDL_BlitSurface(tileSurface, &sourceRect, windowSurface, &destinationRect);
+            SDL_BlitSurface(tileSurface, &sourceRect, bufferSurface, &destinationRect);
         }
     }
 }
@@ -974,7 +984,7 @@ void PlatformSDL::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* 
                 int y = unitY[i];
                 SDL_Rect clearRect = { LIVE_MAP_ORIGIN_X + x * 3, LIVE_MAP_ORIGIN_Y + y * 3, 3, 3 };
                 SDL_Color* color = &palette->colors[(i > 0 || playerColor == 1) ? 1 : 0];
-                SDL_FillRect(windowSurface, &clearRect, SDL_MapRGB(windowSurface->format, color->r, color->g, color->b));
+                SDL_FillRect(bufferSurface, &clearRect, SDL_MapRGB(bufferSurface->format, color->r, color->g, color->b));
 
                 ::unitTypes[i] = i == 0 ? playerColor : unitTypes[i];
                 ::unitX[i] = unitX[i];
@@ -992,19 +1002,19 @@ static SDL_Rect cursorSurfaceRect = {
 void PlatformSDL::showCursor(uint16_t x, uint16_t y)
 {
     if (cursorRect.h > 0) {
-        SDL_BlitSurface(cursorSurface, &cursorSurfaceRect, windowSurface, &cursorRect);
+        SDL_BlitSurface(cursorSurface, &cursorSurfaceRect, bufferSurface, &cursorRect);
     }
     cursorRect.x = x * 24 - 2;
     cursorRect.y = y * 24 - 2;
     cursorRect.w = 28;
     cursorRect.h = 28;
-    SDL_BlitSurface(windowSurface, &cursorRect, cursorSurface, &cursorSurfaceRect);
+    SDL_BlitSurface(bufferSurface, &cursorRect, cursorSurface, &cursorSurfaceRect);
 }
 
 void PlatformSDL::hideCursor()
 {
     if (cursorRect.h > 0) {
-        SDL_BlitSurface(cursorSurface, &cursorSurfaceRect, windowSurface, &cursorRect);
+        SDL_BlitSurface(cursorSurface, &cursorSurfaceRect, bufferSurface, &cursorRect);
         cursorRect.h = 0;
     }
 }
@@ -1028,7 +1038,7 @@ void PlatformSDL::copyRect(uint16_t sourceX, uint16_t sourceY, uint16_t destinat
     destinationRect.y = destinationY;
     destinationRect.w = width;
     destinationRect.h = height;
-    SDL_BlitSurface(windowSurface, &sourceRect, windowSurface, &destinationRect);
+    SDL_BlitSurface(bufferSurface, &sourceRect, bufferSurface, &destinationRect);
 }
 
 void PlatformSDL::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t height)
@@ -1038,13 +1048,49 @@ void PlatformSDL::clearRect(uint16_t x, uint16_t y, uint16_t width, uint16_t hei
     rect.y = y;
     rect.w = width;
     rect.h = height;
-    SDL_FillRect(windowSurface, &rect, 0xff000000);
+    SDL_FillRect(bufferSurface, &rect, 0xff000000);
 }
 
 void PlatformSDL::shakeScreen()
 {
     copyRect(8, 0, 0, 0, 256, 168);
 }
+
+#ifdef PLATFORM_FADE_SUPPORT
+void PlatformSDL::startFadeScreen(uint16_t color, uint16_t intensity)
+{
+    uint32_t r = (color & 0xf00) >> 8;
+    uint32_t g = (color & 0x0f0) << 4;
+    uint32_t b = (color & 0x00f) << 16;
+    uint32_t bgr = r |  g | b;
+    fadeBaseColor = bgr | (bgr << 4);
+    fadeIntensity = intensity;
+}
+
+void PlatformSDL::fadeScreen(uint16_t intensity, bool immediate)
+{
+    if (fadeIntensity != intensity) {
+        if (immediate) {
+            fadeIntensity = intensity;
+         } else {
+            int16_t fadeDelta = intensity > fadeIntensity ? 1 : -1;
+            do {
+                fadeIntensity += fadeDelta;
+
+                SDL_Event event;
+                while (SDL_PollEvent(&event));
+
+                this->renderFrame(true);
+            } while (fadeIntensity != intensity);
+        }
+    }
+}
+
+void PlatformSDL::stopFadeScreen()
+{
+    fadeIntensity = 15;
+}
+#endif
 
 void PlatformSDL::writeToScreenMemory(address_t address, uint8_t value)
 {
@@ -1058,7 +1104,7 @@ void PlatformSDL::writeToScreenMemory(address_t address, uint8_t value)
     destinationRect.w = 8;
     destinationRect.h = 8;
     SDL_SetSurfaceColorMod(fontSurface, 0x77, 0xbb, 0x55);
-    SDL_BlitSurface(fontSurface, &sourceRect, windowSurface, &destinationRect);
+    SDL_BlitSurface(fontSurface, &sourceRect, bufferSurface, &destinationRect);
 }
 
 void PlatformSDL::writeToScreenMemory(address_t address, uint8_t value, uint8_t color, uint8_t yOffset)
@@ -1073,7 +1119,7 @@ void PlatformSDL::writeToScreenMemory(address_t address, uint8_t value, uint8_t 
     destinationRect.w = 8;
     destinationRect.h = 8;
     SDL_SetSurfaceColorMod(fontSurface, palette->colors[color].r, palette->colors[color].g, palette->colors[color].b);
-    SDL_BlitSurface(fontSurface, &sourceRect, windowSurface, &destinationRect);
+    SDL_BlitSurface(fontSurface, &sourceRect, bufferSurface, &destinationRect);
 }
 
 #ifdef PLATFORM_MODULE_BASED_AUDIO
@@ -1203,12 +1249,22 @@ void PlatformSDL::renderFrame(bool)
             { cursorRect.x + cursorRect.w - 2, cursorRect.y + 2, 2, cursorRect.h - 4 },
             { cursorRect.x, cursorRect.y + cursorRect.h - 2, cursorRect.w, 2 }
         };
-        SDL_FillRects(windowSurface, rects, 4, 0xffffffff);
+        SDL_FillRects(bufferSurface, rects, 4, 0xffffffff);
 #ifdef PLATFORM_CURSOR_SHAPE_SUPPORT
         if (cursorShape != ShapeUse) {
             renderSprite(cursorShape == ShapeSearch ? 83 : 84, cursorRect.x + 2, cursorRect.y + 2);
         }
 #endif
+    }
+
+    SDL_Rect bufferRect = { 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT };
+    SDL_BlitSurface(bufferSurface, &bufferRect, windowSurface, &bufferRect);
+    if (fadeIntensity != 15) {
+        uint32_t intensity = (15 - fadeIntensity) << 24;
+        uint32_t abgr = intensity | (intensity << 4) | fadeBaseColor;
+        SDL_Rect fadeRect = { 0, 0, 1, 1 };
+        SDL_FillRect(fadeSurface, &fadeRect, abgr);
+        SDL_BlitScaled(fadeSurface, &fadeRect, windowSurface, &bufferRect);
     }
     SDL_UpdateWindowSurface(window);
 }

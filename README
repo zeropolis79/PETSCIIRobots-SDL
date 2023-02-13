@@ -43,4 +43,3 @@ Last but not least joystick support was implemented. Most Amiga games only suppo
 TODO
 ----
 - Add screen and map size getters in Program to allow actual screen size to be determined on startup
-- PLATFORM_FADE_SUPPORT
