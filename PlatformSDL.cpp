@@ -182,6 +182,9 @@ PlatformSDL::PlatformSDL() :
     audioFrequency(440),
     audioVolume(INT16_MAX >> 4),
 #endif
+#ifdef PLATFORM_IMAGE_SUPPORT
+    loadedImage(ImageIntro),
+#endif
     interruptIntervalInSamples(0),
     samplesSinceInterrupt(0),
     fadeBaseColor(0),
@@ -608,12 +611,12 @@ void PlatformSDL::displayImage(Image image)
             SDL_BlitSurface(imageSurfaces[image], &sourceRect, bufferSurface, &destinationRect);
         }
     } else {
-        SDL_Rect sourceRect = { 0, 0, 320, 200 };
-        SDL_Rect destinationRect = { 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT };
-        SDL_BlitSurface(imageSurfaces[image], &sourceRect, bufferSurface, &destinationRect);
+        SDL_Rect rect = { 0, 0, 320, 200 };
+        SDL_BlitSurface(imageSurfaces[image], &rect, bufferSurface, &rect);
     }
 
     palette = imageSurfaces[image]->format->palette;
+    loadedImage = image;
 }
 #endif
 
@@ -1257,14 +1260,15 @@ void PlatformSDL::renderFrame(bool)
 #endif
     }
 
-    SDL_Rect bufferRect = { 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT };
-    SDL_BlitSurface(bufferSurface, &bufferRect, windowSurface, &bufferRect);
+    SDL_Rect bufferRect = { 0, 0, loadedImage == ImageGame ? PLATFORM_SCREEN_WIDTH : 320, loadedImage == ImageGame ? PLATFORM_SCREEN_HEIGHT : 200 };
+    SDL_Rect windowRect = { 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT };
+    SDL_BlitScaled(bufferSurface, &bufferRect, windowSurface, &windowRect);
     if (fadeIntensity != 15) {
         uint32_t intensity = (15 - fadeIntensity) << 24;
         uint32_t abgr = intensity | (intensity << 4) | fadeBaseColor;
         SDL_Rect fadeRect = { 0, 0, 1, 1 };
         SDL_FillRect(fadeSurface, &fadeRect, abgr);
-        SDL_BlitScaled(fadeSurface, &fadeRect, windowSurface, &bufferRect);
+        SDL_BlitScaled(fadeSurface, &fadeRect, windowSurface, &windowRect);
     }
     SDL_UpdateWindowSurface(window);
 }

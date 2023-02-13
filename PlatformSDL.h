@@ -146,6 +146,9 @@ private:
     float audioFrequency;
     int16_t audioVolume;
 #endif
+#ifdef PLATFORM_IMAGE_SUPPORT
+    Image loadedImage;
+#endif
     uint16_t interruptIntervalInSamples;
     uint16_t samplesSinceInterrupt;
     uint32_t fadeBaseColor;
