@@ -20,6 +20,7 @@ public:
     virtual void keyRepeat();
     virtual void clearKeyBuffer();
     virtual bool isKeyOrJoystickPressed(bool gamepad);
+    virtual uint16_t readJoystick(bool gamepad);
     virtual void loadMap(Map map, uint8_t* destination);
     virtual uint8_t* loadTileset();
 #ifdef PLATFORM_IMAGE_SUPPORT
@@ -83,6 +84,7 @@ private:
     void (*interrupt)(void);
     SDL_AudioSpec audioSpec;
     SDL_AudioDeviceID audioDeviceID;
+    SDL_Joystick *joystick;
     SDL_Window* window;
     SDL_Surface* windowSurface;
     SDL_Surface* fontSurface;
@@ -139,6 +141,9 @@ private:
 #endif
     uint16_t interruptIntervalInSamples;
     uint16_t samplesSinceInterrupt;
+    uint16_t joystickStateToReturn;
+    uint16_t joystickState;
+    uint16_t pendingState;
     uint8_t keyToReturn;
     uint8_t downKey;
     uint8_t shift;

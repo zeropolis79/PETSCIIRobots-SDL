@@ -119,10 +119,31 @@ uint8_t unitTypes[48];
 uint8_t unitX[48];
 uint8_t unitY[48];
 
+static uint16_t joystickButtons[] = {
+    Platform::JoystickRed, // 0
+    Platform::JoystickBlue, // 1
+    Platform::JoystickGreen, // 2
+    Platform::JoystickYellow, // 3
+    Platform::JoystickPlay, // 4
+    0, // 5
+    Platform::JoystickExtra, // 6
+    0, // 7
+    0, // 8
+    Platform::JoystickReverse, // 9
+    Platform::JoystickForward, // 10
+    Platform::JoystickUp, // 11
+    Platform::JoystickDown, // 12
+    Platform::JoystickLeft, // 13
+    Platform::JoystickRight, // 14
+    0, // 15
+    0 // 16
+};
+
 PlatformSDL::PlatformSDL() :
     interrupt(0),
     audioSpec({0}),
     audioDeviceID(0),
+    joystick(0),
     window(0),
     windowSurface(0),
     fontSurface(0),
@@ -161,6 +182,9 @@ PlatformSDL::PlatformSDL() :
 #endif
     interruptIntervalInSamples(0),
     samplesSinceInterrupt(0),
+    joystickStateToReturn(0),
+    joystickState(0),
+    pendingState(0),
     keyToReturn(0xff),
     downKey(0xff),
     shift(0)
@@ -188,6 +212,8 @@ PlatformSDL::PlatformSDL() :
     interruptIntervalInSamples = audioSpec.freq / framesPerSecond_;
     samplesSinceInterrupt = interruptIntervalInSamples;
     SDL_PauseAudioDevice(audioDeviceID, 0);
+
+    joystick = SDL_JoystickOpen(0);
 
     window = SDL_CreateWindow("Attack of the PETSCII Robots", 0, 0, PLATFORM_SCREEN_WIDTH, PLATFORM_SCREEN_HEIGHT, 0);
     windowSurface = SDL_GetWindowSurface(window);
@@ -306,6 +332,7 @@ PlatformSDL::~PlatformSDL()
     delete[] moduleData;
 #endif
     SDL_DestroyWindow(window);     
+    SDL_JoystickClose(joystick);
     SDL_CloseAudioDevice(audioDeviceID);
     SDL_Quit();
 }
@@ -447,6 +474,17 @@ uint8_t PlatformSDL::readKeyboard()
                 downKey = 0xff;
             }
         }
+        break;
+        case SDL_JOYBUTTONDOWN:
+            if (event.jbutton.button < sizeof(joystickButtons) / sizeof(uint16_t)) {
+                pendingState |= joystickButtons[event.jbutton.button];
+            }
+            break;
+        case SDL_JOYBUTTONUP:
+            if (event.jbutton.button < sizeof(joystickButtons) / sizeof(uint16_t)) {
+                pendingState &= ~joystickButtons[event.jbutton.button];
+            }
+            break;
         default:
             break;
         }
@@ -460,6 +498,7 @@ uint8_t PlatformSDL::readKeyboard()
 void PlatformSDL::keyRepeat()
 {
     keyToReturn = downKey;
+    joystickStateToReturn = joystickState;
 }
 
 void PlatformSDL::clearKeyBuffer()
@@ -468,11 +507,26 @@ void PlatformSDL::clearKeyBuffer()
     while (SDL_PollEvent(&event));
     keyToReturn = 0xff;
     downKey = 0xff;
+    pendingState = 0;
+    joystickStateToReturn = 0;
 }
 
 bool PlatformSDL::isKeyOrJoystickPressed(bool gamepad)
 {
-    return downKey != 0xff;
+    return downKey != 0xff || (joystickState != 0 && joystickState != JoystickPlay);
+}
+
+uint16_t PlatformSDL::readJoystick(bool gamepad)
+{
+    if (joystickState != pendingState) {
+        // Don't return Play button press
+        joystickStateToReturn = pendingState != JoystickPlay ? pendingState : 0;
+        joystickState = pendingState;
+    }
+
+    uint16_t result = joystickStateToReturn;
+    joystickStateToReturn = 0;
+    return result;
 }
 
 uint32_t PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t size)
