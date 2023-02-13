@@ -1,4 +1,4 @@
-Attack of the PETSCII Robots C++
+Attack of the PETSCII Robots SDL
 ================================
 Ported by Vesa Halttunen <vesuri@jormas.com>
 This work is licensed under the Creative Commons Attribution 4.0 International License. To view a copy of this license, visit http://creativecommons.org/licenses/by/4.0/ or send a letter to Creative Commons, PO Box 1866, Mountain View, CA 94042, USA.
@@ -9,6 +9,8 @@ About
 - Platform.h is essentially an interface with platform specific implementation classes
 - Various #defines starting with PLATFORM_ can be used to build a variant with different features using the same platform implementation
 - To port to a new platform, create a new PlatformXYZ.cpp/h implementation based on the existing ones and instantiate it in main() (petrobots.cpp)
+- If the target platform version will only support a certain feature set, feel free to get rid of the unnecessary PLATFORM_ #ifdefs manually or using a preprocessor
+- The SDL version is a generic baseline implementation that should be customized for each actual target platform
 
 Building
 --------
@@ -41,3 +43,4 @@ Last but not least joystick support was implemented. Most Amiga games only suppo
 TODO
 ----
 - Add screen and map size getters in Program to allow actual screen size to be determined on startup
+- PLATFORM_FADE_SUPPORT
