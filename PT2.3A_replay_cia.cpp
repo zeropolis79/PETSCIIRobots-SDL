@@ -140,7 +140,7 @@ void processAudio(int16_t* outputBuffer, uint32_t outputLength, uint32_t sampleR
         channel7.process(bufferPosition, samplesToProcess, sampleRate, true);
         bufferPosition += samplesToProcess;
 
-        // Run the vertical blank interupt if required
+        // Run the vertical blank interrupt if required
         ciatar -= samplesToProcess * timerAdvancePerSample;
         if (ciatar < 0) {
             ciatar += ciataw;
