@@ -891,7 +891,6 @@ void PlatformSDL::renderLiveMap(uint8_t* map)
     clearRect(0, PLATFORM_SCREEN_HEIGHT - 32 - LIVE_MAP_ORIGIN_Y, PLATFORM_SCREEN_WIDTH - 56, LIVE_MAP_ORIGIN_Y);
 
     SDL_Rect sourceRect, destinationRect;
-    /*
     sourceRect.w = 24;
     sourceRect.h = 24;
     destinationRect.w = 3;
@@ -906,26 +905,6 @@ void PlatformSDL::renderLiveMap(uint8_t* map)
             SDL_BlitScaled(tileSurface, &sourceRect, bufferSurface, &destinationRect);
         }
     }
-    */
-    sourceRect.w = 1;
-    sourceRect.h = 1;
-    destinationRect.w = 1;
-    destinationRect.h = 1;
-
-    for (int mapY = 0; mapY < 64; mapY++) {
-        for (int mapX = 0; mapX < 128; mapX++) {
-            int tile = *map++;
-            for (int y = 0; y < 3; y++) {
-                for (int x = 0; x < 3; x++) {
-                    sourceRect.x = x * 8;
-                    sourceRect.y = tile * 24 + y * 8;
-                    destinationRect.x = LIVE_MAP_ORIGIN_X + mapX * 3 + x;
-                    destinationRect.y = LIVE_MAP_ORIGIN_Y + mapY * 3 + y;
-                    SDL_BlitSurface(tileSurface, &sourceRect, bufferSurface, &destinationRect);
-                }
-            }
-        }
-    }
 
     for (int i = 0; i < 48; i++) {
         unitTypes[i] = 255;
@@ -935,7 +914,6 @@ void PlatformSDL::renderLiveMap(uint8_t* map)
 void PlatformSDL::renderLiveMapTile(uint8_t* map, uint8_t mapX, uint8_t mapY)
 {
     SDL_Rect sourceRect, destinationRect;
-    /*
     sourceRect.x = 0;
     sourceRect.y = map[(mapY << 7) + mapX] * 24;
     sourceRect.w = 24;
@@ -945,21 +923,6 @@ void PlatformSDL::renderLiveMapTile(uint8_t* map, uint8_t mapX, uint8_t mapY)
     destinationRect.w = 3;
     destinationRect.h = 3;
     SDL_BlitScaled(tileSurface, &sourceRect, bufferSurface, &destinationRect);
-    */
-    sourceRect.w = 1;
-    sourceRect.h = 1;
-    destinationRect.w = 1;
-    destinationRect.h = 1;
-    int tile = map[(mapY << 7) + mapX];
-    for (int y = 0; y < 3; y++) {
-        for (int x = 0; x < 3; x++) {
-            sourceRect.x = x * 8;
-            sourceRect.y = tile * 24 + y * 8;
-            destinationRect.x = LIVE_MAP_ORIGIN_X + mapX * 3 + x;
-            destinationRect.y = LIVE_MAP_ORIGIN_Y + mapY * 3 + y;
-            SDL_BlitSurface(tileSurface, &sourceRect, bufferSurface, &destinationRect);
-        }
-    }
 }
 
 void PlatformSDL::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots)
