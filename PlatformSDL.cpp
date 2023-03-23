@@ -1,6 +1,8 @@
 #include "PT2.3A_replay_cia.h"
 #include "PlatformSDL.h"
 
+#define JOYSTICK_AXIS_THRESHOLD 30000
+
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 #define LARGEST_MODULE_SIZE 105654
 #define TOTAL_SAMPLE_SIZE 75755
@@ -531,10 +533,37 @@ bool PlatformSDL::isKeyOrJoystickPressed(bool gamepad)
 
 uint16_t PlatformSDL::readJoystick(bool gamepad)
 {
-    if (joystickState != pendingState) {
+    uint16_t state = 0;
+    int16_t leftStickX = SDL_JoystickGetAxis(joystick, 0);
+    int16_t leftStickY = SDL_JoystickGetAxis(joystick, 1);
+    int16_t rightStickX = SDL_JoystickGetAxis(joystick, 2);
+    int16_t rightStickY = SDL_JoystickGetAxis(joystick, 3);
+    if (leftStickX < -JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickLeft;
+    } else if (leftStickX > JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickRight;
+    }
+    if (leftStickY < -JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickUp;
+    } else if (leftStickY > JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickDown;
+    }
+    if (rightStickX < -JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickGreen;
+    } else if (rightStickX > JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickBlue;
+    }
+    if (rightStickY < -JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickYellow;
+    } else if (rightStickY > JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickRed;
+    }
+    state |= pendingState;
+
+    if (joystickState != state) {
         // Don't return Play button press
-        joystickStateToReturn = pendingState != JoystickPlay ? pendingState : 0;
-        joystickState = pendingState;
+        joystickStateToReturn = state != JoystickPlay ? state : 0;
+        joystickState = state;
     }
 
     uint16_t result = joystickStateToReturn;
