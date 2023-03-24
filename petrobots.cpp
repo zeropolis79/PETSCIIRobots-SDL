@@ -561,7 +561,7 @@ void MAIN_GAME_LOOP()
                         KEYTIMER = 20;
                     }
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
-                    if (B & Platform::JoystickYellow) {
+                    if (B == Platform::JoystickPlay) {
                         TOGGLE_LIVE_MAP_ROBOTS();
                         CLEAR_KEY_BUFFER();
                     }
@@ -3178,13 +3178,13 @@ void ELEVATOR_SELECT()
         uint16_t B = platform->readJoystick(CONTROL >= 2 ? true : false);
         if (A != 0xff || B != 0) {
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
-            if (A == KEY_CONFIG[KEY_LIVE_MAP] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickLeft)) || (CONTROL == 3 && (B & Platform::JoystickPlay) == 0 && (B & Platform::JoystickYellow))) {
+            if (A == KEY_CONFIG[KEY_LIVE_MAP] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickLeft)) || (CONTROL == 3 && (B & Platform::JoystickYellow))) {
                 TOGGLE_LIVE_MAP();
                 if (LIVE_MAP_ON == 0) {
                     DRAW_MAP_WINDOW();
                 }
                 CLEAR_KEY_BUFFER();
-            } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickDown)) || (CONTROL == 3 && (B & Platform::JoystickPlay) && (B & Platform::JoystickYellow))) {
+            } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickDown)) || (CONTROL == 3 && B == Platform::JoystickPlay)) {
                 TOGGLE_LIVE_MAP_ROBOTS();
                 CLEAR_KEY_BUFFER();
             } else

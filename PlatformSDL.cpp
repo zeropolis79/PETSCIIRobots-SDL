@@ -1,7 +1,7 @@
 #include "PT2.3A_replay_cia.h"
 #include "PlatformSDL.h"
 
-#define JOYSTICK_AXIS_THRESHOLD 30000
+#define JOYSTICK_AXIS_THRESHOLD 25000
 
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 #define LARGEST_MODULE_SIZE 105654
@@ -561,8 +561,7 @@ uint16_t PlatformSDL::readJoystick(bool gamepad)
     state |= pendingState;
 
     if (joystickState != state) {
-        // Don't return Play button press
-        joystickStateToReturn = state != JoystickPlay ? state : 0;
+        joystickStateToReturn = state;
         joystickState = state;
     }
 
