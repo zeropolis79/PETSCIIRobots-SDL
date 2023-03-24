@@ -549,14 +549,14 @@ uint16_t PlatformSDL::readJoystick(bool gamepad)
         state |= JoystickDown;
     }
     if (rightStickX < -JOYSTICK_AXIS_THRESHOLD) {
-        state |= JoystickGreen;
+        state |= JoystickLeft | JoystickPlay;
     } else if (rightStickX > JOYSTICK_AXIS_THRESHOLD) {
-        state |= JoystickBlue;
+        state |= JoystickRight | JoystickPlay;
     }
     if (rightStickY < -JOYSTICK_AXIS_THRESHOLD) {
-        state |= JoystickYellow;
+        state |= JoystickUp | JoystickPlay;
     } else if (rightStickY > JOYSTICK_AXIS_THRESHOLD) {
-        state |= JoystickRed;
+        state |= JoystickDown | JoystickPlay;
     }
     state |= pendingState;
 

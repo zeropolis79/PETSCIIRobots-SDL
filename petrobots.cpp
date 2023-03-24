@@ -222,7 +222,7 @@ uint8_t PLASMA_ACT = 0; // 0=No plasma fire active 1=plasma fire active
 uint8_t RANDOM = 0; // used for random number generation
 uint8_t BORDER = 0; // Used for border flash timing
 uint8_t SCREEN_SHAKE = 0; // 1=shake 0=no shake
-uint8_t CONTROL = PLATFORM_DEFAULT_CONTROL; // 0=keyboard 1=custom keys 2=snes
+uint8_t CONTROL = PLATFORM_DEFAULT_CONTROL; // 0=keyboard 1=custom keys 2=snes 3=analog
 uint16_t BORDER_COLOR = 0xf00; // Used for border flash coloring
 char INTRO_MESSAGE[] = "welcome to "
                        PLATFORM_NAME
@@ -419,9 +419,9 @@ void MAIN_GAME_LOOP()
             GAME_OVER();
             return;
         }
-        KEY_REPEAT(platform->isKeyOrJoystickPressed(CONTROL == 2 ? true : false));
+        KEY_REPEAT(platform->isKeyOrJoystickPressed(CONTROL >= 2 ? true : false));
         uint8_t A = platform->readKeyboard();
-        uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
+        uint16_t B = platform->readJoystick(CONTROL >= 2 ? true : false);
         // Keyboard controls here.
         if (A != 0xff) {
 #ifdef INACTIVITY_TIMEOUT_GAME
@@ -500,9 +500,9 @@ void MAIN_GAME_LOOP()
             INACTIVE_SECONDS = 0;
 #endif
             // first we start with the 4 directional buttons.
-            if ((CONTROL == 2 && (B & Platform::JoystickPlay) == 0) ||
-                (CONTROL != 2 && (B & Platform::JoystickBlue) == 0)) {
-                if (CONTROL != 2 && B & Platform::JoystickRed) {
+            if ((CONTROL >= 2 && (B & Platform::JoystickPlay) == 0) ||
+                (CONTROL < 2 && (B & Platform::JoystickBlue) == 0)) {
+                if (CONTROL < 2 && B & Platform::JoystickRed) {
                     if (B & Platform::JoystickLeft) {
                         FIRE_LEFT();
                         KEYTIMER = 20;
@@ -541,7 +541,68 @@ void MAIN_GAME_LOOP()
                 }
             }
             // Now check for non-repeating buttons
-            if (CONTROL == 2) {
+            switch (CONTROL) {
+            case 3:
+                if (B & Platform::JoystickPlay) {
+                    if (B & Platform::JoystickLeft) {
+                        FIRE_LEFT();
+                        KEYTIMER = 20;
+                    }
+                    if (B & Platform::JoystickRight) {
+                        FIRE_RIGHT();
+                        KEYTIMER = 20;
+                    }
+                    if (B & Platform::JoystickUp) {
+                        FIRE_UP();
+                        KEYTIMER = 20;
+                    }
+                    if (B & Platform::JoystickDown) {
+                        FIRE_DOWN();
+                        KEYTIMER = 20;
+                    }
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+                    if (B & Platform::JoystickYellow) {
+                        TOGGLE_LIVE_MAP_ROBOTS();
+                        CLEAR_KEY_BUFFER();
+                    }
+#endif
+                } else {
+                    if (B & Platform::JoystickGreen) {
+                        CYCLE_ITEM();
+                        KEYTIMER = 15;
+                    }
+                    if (B & Platform::JoystickBlue) {
+                        CYCLE_WEAPON();
+                        KEYTIMER = 15;
+                    }
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+                    if (B & Platform::JoystickYellow) {
+                        TOGGLE_LIVE_MAP();
+                        CLEAR_KEY_BUFFER();
+                    }
+#endif
+                    if (B == Platform::JoystickExtra) {
+                        done = PAUSE_GAME();
+                    }
+                    if (B & Platform::JoystickPlay) {
+                        TOGGLE_MUSIC();
+                        CLEAR_KEY_BUFFER();
+                    }
+                    if (B == Platform::JoystickRed) {
+                        USE_ITEM();
+                        KEYTIMER = 15;
+                    }
+                    if (B & Platform::JoystickReverse) {
+                        SEARCH_OBJECT();
+                        KEYTIMER = 15;
+                    }
+                    if (B & Platform::JoystickForward) {
+                        MOVE_OBJECT();
+                        KEYTIMER = 15;
+                    }
+                }
+                break;
+            case 2:
                 if (B & Platform::JoystickPlay) {
                     if (B & Platform::JoystickReverse) {
                         CYCLE_ITEM();
@@ -606,7 +667,8 @@ void MAIN_GAME_LOOP()
                     }
 #endif
                 }
-            } else {
+                break;
+            default:
                 if (B & Platform::JoystickBlue) {
                     if (B & Platform::JoystickLeft) {
                         CYCLE_ITEM();
@@ -629,6 +691,7 @@ void MAIN_GAME_LOOP()
                         KEYTIMER = 15;
                     }
                 }
+                break;
             }
         }
     }
@@ -739,7 +802,7 @@ bool PAUSE_GAME()
     platform->renderFrame();
     while (!platform->quit) {
         uint8_t A = platform->readKeyboard();
-        uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
+        uint16_t B = platform->readJoystick(CONTROL >= 2 ? true : false);
         if (A == KEY_CONFIG[KEY_PAUSE] || // RUN/STOP
             A == KEY_CONFIG[KEY_NO] ||
             (B & Platform::JoystickBlue)) { // N-KEY
@@ -1345,7 +1408,7 @@ void USER_SELECT_OBJECT()
         }
         uint8_t A = platform->readKeyboard();
         // SNES controls for this routine
-        uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
+        uint16_t B = platform->readJoystick(CONTROL >= 2 ? true : false);
         if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
             UNIT_DIRECTION[0] = 3;
             CURSOR_X++;
@@ -1458,7 +1521,7 @@ void MOVE_OBJECT()
         // keyboard control
         uint8_t A = platform->readKeyboard();
         // SNES controls
-        uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
+        uint16_t B = platform->readJoystick(CONTROL >= 2 ? true : false);
         if (A != 0xff || B != 0) {
             if (A == KEY_CONFIG[KEY_CURSOR_RIGHT] || A == KEY_CONFIG[KEY_MOVE_RIGHT] || (B & Platform::JoystickRight)) { // CURSOR RIGHT
                 CURSOR_X++;
@@ -2527,9 +2590,9 @@ void GAME_OVER()
     }
 #endif
 #ifdef INACTIVITY_TIMEOUT_GAME
-    for (int frames = 0; platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit && frames < 5 * platform->framesPerSecond(); frames++) {
+    for (int frames = 0; platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL >= 2 ? true : false) == 0 && !platform->quit && frames < 5 * platform->framesPerSecond(); frames++) {
 #else
-    while (platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit) {
+    while (platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL >= 2 ? true : false) == 0 && !platform->quit) {
 #endif
         platform->renderFrame(true);
     }
@@ -2551,9 +2614,9 @@ void GOM4()
     platform->renderFrame();
     platform->fadeScreen(15, false);
 #ifdef INACTIVITY_TIMEOUT_GAME
-    for (int frames = 0; platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit && frames < 15 * platform->framesPerSecond(); frames++) {
+    for (int frames = 0; platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL >= 2 ? true : false) == 0 && !platform->quit && frames < 15 * platform->framesPerSecond(); frames++) {
 #else
-    while (platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL == 2 ? true : false) == 0 && !platform->quit) {
+    while (platform->readKeyboard() == 0xff && platform->readJoystick(CONTROL >= 2 ? true : false) == 0 && !platform->quit) {
 #endif
         platform->renderFrame(true);
     }
@@ -2794,11 +2857,12 @@ void CYCLE_CONTROLS()
 char CONTROLTEXT[] = "standard  "
                      "custom    "
 #ifdef GAMEPAD_CD32
-                     "cd32 pad  ";
+                     "cd32 pad  "
 #else
-                     "snes pad  ";
+                     "snes pad  "
 #endif
-uint8_t CONTROLSTART[] = { 0, 10, 20 };
+                     "analog pad";
+uint8_t CONTROLSTART[] = { 0, 10, 20, 30 };
 
 void CYCLE_MAP()
 {
@@ -3111,16 +3175,16 @@ void ELEVATOR_SELECT()
         // KEYBOARD INPUT
         uint8_t A = platform->readKeyboard();
         // SNES INPUT
-        uint16_t B = platform->readJoystick(CONTROL == 2 ? true : false);
+        uint16_t B = platform->readJoystick(CONTROL >= 2 ? true : false);
         if (A != 0xff || B != 0) {
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
-            if (A == KEY_CONFIG[KEY_LIVE_MAP] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickLeft))) {
+            if (A == KEY_CONFIG[KEY_LIVE_MAP] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickLeft)) || (CONTROL == 3 && (B & Platform::JoystickPlay) == 0 && (B & Platform::JoystickYellow))) {
                 TOGGLE_LIVE_MAP();
                 if (LIVE_MAP_ON == 0) {
                     DRAW_MAP_WINDOW();
                 }
                 CLEAR_KEY_BUFFER();
-            } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickDown))) {
+            } else if (A == KEY_CONFIG[KEY_LIVE_MAP_ROBOTS] || (CONTROL == 2 && (B & Platform::JoystickPlay) && (B & Platform::JoystickDown)) || (CONTROL == 3 && (B & Platform::JoystickPlay) && (B & Platform::JoystickYellow))) {
                 TOGGLE_LIVE_MAP_ROBOTS();
                 CLEAR_KEY_BUFFER();
             } else
