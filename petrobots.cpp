@@ -560,6 +560,10 @@ void MAIN_GAME_LOOP()
                         FIRE_DOWN();
                         KEYTIMER = 20;
                     }
+                    if (B & Platform::JoystickExtra) {
+                        TOGGLE_MUSIC();
+                        CLEAR_KEY_BUFFER();
+                    }
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
                     if (B == Platform::JoystickPlay) {
                         TOGGLE_LIVE_MAP_ROBOTS();
@@ -567,6 +571,12 @@ void MAIN_GAME_LOOP()
                     }
 #endif
                 } else {
+#ifdef PLATFORM_LIVE_MAP_SUPPORT
+                    if (B & Platform::JoystickYellow) {
+                        TOGGLE_LIVE_MAP();
+                        CLEAR_KEY_BUFFER();
+                    }
+#endif
                     if (B & Platform::JoystickGreen) {
                         CYCLE_ITEM();
                         KEYTIMER = 15;
@@ -575,20 +585,7 @@ void MAIN_GAME_LOOP()
                         CYCLE_WEAPON();
                         KEYTIMER = 15;
                     }
-#ifdef PLATFORM_LIVE_MAP_SUPPORT
-                    if (B & Platform::JoystickYellow) {
-                        TOGGLE_LIVE_MAP();
-                        CLEAR_KEY_BUFFER();
-                    }
-#endif
-                    if (B == Platform::JoystickExtra) {
-                        done = PAUSE_GAME();
-                    }
-                    if (B & Platform::JoystickPlay) {
-                        TOGGLE_MUSIC();
-                        CLEAR_KEY_BUFFER();
-                    }
-                    if (B == Platform::JoystickRed) {
+                    if (B & Platform::JoystickRed) {
                         USE_ITEM();
                         KEYTIMER = 15;
                     }
@@ -599,6 +596,9 @@ void MAIN_GAME_LOOP()
                     if (B & Platform::JoystickForward) {
                         MOVE_OBJECT();
                         KEYTIMER = 15;
+                    }
+                    if (B & Platform::JoystickExtra) {
+                        done = PAUSE_GAME();
                     }
                 }
                 break;
