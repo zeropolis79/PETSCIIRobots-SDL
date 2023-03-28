@@ -550,13 +550,21 @@ uint16_t PlatformSDL::readJoystick(bool gamepad)
     }
     if (rightStickX < -JOYSTICK_AXIS_THRESHOLD) {
         state |= JoystickLeft | JoystickPlay;
+        state &= ~(JoystickRight | JoystickUp | JoystickDown);
+        pendingState &= ~(JoystickRight | JoystickUp | JoystickDown);
     } else if (rightStickX > JOYSTICK_AXIS_THRESHOLD) {
         state |= JoystickRight | JoystickPlay;
+        state &= ~(JoystickLeft | JoystickUp | JoystickDown);
+        pendingState &= ~(JoystickLeft | JoystickUp | JoystickDown);
     }
     if (rightStickY < -JOYSTICK_AXIS_THRESHOLD) {
         state |= JoystickUp | JoystickPlay;
+        state &= ~(JoystickDown | JoystickLeft | JoystickRight);
+        pendingState &= ~(JoystickDown | JoystickLeft | JoystickRight);
     } else if (rightStickY > JOYSTICK_AXIS_THRESHOLD) {
         state |= JoystickDown | JoystickPlay;
+        state &= ~(JoystickUp | JoystickLeft | JoystickRight);
+        pendingState &= ~(JoystickUp | JoystickLeft | JoystickRight);
     }
     state |= pendingState;
 
