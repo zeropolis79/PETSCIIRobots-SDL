@@ -565,7 +565,7 @@ void MAIN_GAME_LOOP()
                         CLEAR_KEY_BUFFER();
                     }
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
-                    if (B == Platform::JoystickPlay) {
+                    if (B & Platform::JoystickYellow) {
                         TOGGLE_LIVE_MAP_ROBOTS();
                         CLEAR_KEY_BUFFER();
                     }

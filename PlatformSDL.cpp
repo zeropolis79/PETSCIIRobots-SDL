@@ -561,7 +561,8 @@ uint16_t PlatformSDL::readJoystick(bool gamepad)
     state |= pendingState;
 
     if (joystickState != state) {
-        joystickStateToReturn = state;
+        // Don't return Play button press
+        joystickStateToReturn = state != JoystickPlay ? state : 0;
         joystickState = state;
     }
 
