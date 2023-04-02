@@ -89,7 +89,7 @@ private:
     void (*interrupt)(void);
     SDL_AudioSpec audioSpec;
     SDL_AudioDeviceID audioDeviceID;
-    SDL_Joystick *joystick;
+    SDL_Joystick* joystick;
     SDL_Window* window;
     SDL_Surface* windowSurface;
     SDL_Surface* bufferSurface;

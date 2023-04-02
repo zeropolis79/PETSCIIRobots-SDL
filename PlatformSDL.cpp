@@ -1,6 +1,8 @@
 #include "PT2.3A_replay_cia.h"
 #include "PlatformSDL.h"
 
+#define JOYSTICK_AXIS_THRESHOLD 25000
+
 #ifdef PLATFORM_MODULE_BASED_AUDIO
 #define LARGEST_MODULE_SIZE 105654
 #define TOTAL_SAMPLE_SIZE 75755
@@ -531,10 +533,45 @@ bool PlatformSDL::isKeyOrJoystickPressed(bool gamepad)
 
 uint16_t PlatformSDL::readJoystick(bool gamepad)
 {
-    if (joystickState != pendingState) {
+    uint16_t state = 0;
+    int16_t leftStickX = SDL_JoystickGetAxis(joystick, 0);
+    int16_t leftStickY = SDL_JoystickGetAxis(joystick, 1);
+    int16_t rightStickX = SDL_JoystickGetAxis(joystick, 2);
+    int16_t rightStickY = SDL_JoystickGetAxis(joystick, 3);
+    if (leftStickX < -JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickLeft;
+    } else if (leftStickX > JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickRight;
+    }
+    if (leftStickY < -JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickUp;
+    } else if (leftStickY > JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickDown;
+    }
+    if (rightStickX < -JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickLeft | JoystickPlay;
+        state &= ~(JoystickRight | JoystickUp | JoystickDown);
+        pendingState &= ~(JoystickRight | JoystickUp | JoystickDown);
+    } else if (rightStickX > JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickRight | JoystickPlay;
+        state &= ~(JoystickLeft | JoystickUp | JoystickDown);
+        pendingState &= ~(JoystickLeft | JoystickUp | JoystickDown);
+    }
+    if (rightStickY < -JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickUp | JoystickPlay;
+        state &= ~(JoystickDown | JoystickLeft | JoystickRight);
+        pendingState &= ~(JoystickDown | JoystickLeft | JoystickRight);
+    } else if (rightStickY > JOYSTICK_AXIS_THRESHOLD) {
+        state |= JoystickDown | JoystickPlay;
+        state &= ~(JoystickUp | JoystickLeft | JoystickRight);
+        pendingState &= ~(JoystickUp | JoystickLeft | JoystickRight);
+    }
+    state |= pendingState;
+
+    if (joystickState != state) {
         // Don't return Play button press
-        joystickStateToReturn = pendingState != JoystickPlay ? pendingState : 0;
-        joystickState = pendingState;
+        joystickStateToReturn = state != JoystickPlay ? state : 0;
+        joystickState = state;
     }
 
     uint16_t result = joystickStateToReturn;
@@ -891,7 +928,6 @@ void PlatformSDL::renderLiveMap(uint8_t* map)
     clearRect(0, PLATFORM_SCREEN_HEIGHT - 32 - LIVE_MAP_ORIGIN_Y, PLATFORM_SCREEN_WIDTH - 56, LIVE_MAP_ORIGIN_Y);
 
     SDL_Rect sourceRect, destinationRect;
-    /*
     sourceRect.w = 24;
     sourceRect.h = 24;
     destinationRect.w = 3;
@@ -906,26 +942,6 @@ void PlatformSDL::renderLiveMap(uint8_t* map)
             SDL_BlitScaled(tileSurface, &sourceRect, bufferSurface, &destinationRect);
         }
     }
-    */
-    sourceRect.w = 1;
-    sourceRect.h = 1;
-    destinationRect.w = 1;
-    destinationRect.h = 1;
-
-    for (int mapY = 0; mapY < 64; mapY++) {
-        for (int mapX = 0; mapX < 128; mapX++) {
-            int tile = *map++;
-            for (int y = 0; y < 3; y++) {
-                for (int x = 0; x < 3; x++) {
-                    sourceRect.x = x * 8;
-                    sourceRect.y = tile * 24 + y * 8;
-                    destinationRect.x = LIVE_MAP_ORIGIN_X + mapX * 3 + x;
-                    destinationRect.y = LIVE_MAP_ORIGIN_Y + mapY * 3 + y;
-                    SDL_BlitSurface(tileSurface, &sourceRect, bufferSurface, &destinationRect);
-                }
-            }
-        }
-    }
 
     for (int i = 0; i < 48; i++) {
         unitTypes[i] = 255;
@@ -935,7 +951,6 @@ void PlatformSDL::renderLiveMap(uint8_t* map)
 void PlatformSDL::renderLiveMapTile(uint8_t* map, uint8_t mapX, uint8_t mapY)
 {
     SDL_Rect sourceRect, destinationRect;
-    /*
     sourceRect.x = 0;
     sourceRect.y = map[(mapY << 7) + mapX] * 24;
     sourceRect.w = 24;
@@ -945,21 +960,6 @@ void PlatformSDL::renderLiveMapTile(uint8_t* map, uint8_t mapX, uint8_t mapY)
     destinationRect.w = 3;
     destinationRect.h = 3;
     SDL_BlitScaled(tileSurface, &sourceRect, bufferSurface, &destinationRect);
-    */
-    sourceRect.w = 1;
-    sourceRect.h = 1;
-    destinationRect.w = 1;
-    destinationRect.h = 1;
-    int tile = map[(mapY << 7) + mapX];
-    for (int y = 0; y < 3; y++) {
-        for (int x = 0; x < 3; x++) {
-            sourceRect.x = x * 8;
-            sourceRect.y = tile * 24 + y * 8;
-            destinationRect.x = LIVE_MAP_ORIGIN_X + mapX * 3 + x;
-            destinationRect.y = LIVE_MAP_ORIGIN_Y + mapY * 3 + y;
-            SDL_BlitSurface(tileSurface, &sourceRect, bufferSurface, &destinationRect);
-        }
-    }
 }
 
 void PlatformSDL::renderLiveMapUnits(uint8_t* map, uint8_t* unitTypes, uint8_t* unitX, uint8_t* unitY, uint8_t playerColor, bool showRobots)
@@ -1080,8 +1080,7 @@ void PlatformSDL::fadeScreen(uint16_t intensity, bool immediate)
             do {
                 fadeIntensity += fadeDelta;
 
-                SDL_Event event;
-                while (SDL_PollEvent(&event));
+                clearKeyBuffer();
 
                 this->renderFrame(true);
             } while (fadeIntensity != intensity);
