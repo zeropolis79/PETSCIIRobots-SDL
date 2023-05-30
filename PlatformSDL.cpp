@@ -200,9 +200,11 @@ PlatformSDL::PlatformSDL() :
 {
     if (SDL_Init(SDL_INIT_EVERYTHING) != 0) {
         fprintf(stderr, "Error initializing SDL: %s\n", SDL_GetError());
+        exit(1);
     }
     if ((IMG_Init(IMG_INIT_PNG) & IMG_INIT_PNG) == 0) {
         fprintf(stderr, "Error initializing SDL_image: %s\n", IMG_GetError());
+        exit(1);
     }
 
     SDL_SetHint(SDL_HINT_RENDER_VSYNC, "1");
@@ -218,6 +220,7 @@ PlatformSDL::PlatformSDL() :
     audioDeviceID = SDL_OpenAudioDevice(NULL, 0, &requestedAudioSpec, &audioSpec, SDL_AUDIO_ALLOW_ANY_CHANGE);
     if (!audioDeviceID) {
         fprintf(stderr, "Failed to open audio device: %s\n", SDL_GetError());
+        exit(1);
     }
 
     interruptIntervalInSamples = audioSpec.freq / framesPerSecond_;
@@ -651,9 +654,14 @@ void PlatformSDL::displayImage(Image image)
         SDL_Rect rect = { 0, 0, 320, 200 };
         SDL_BlitSurface(imageSurfaces[image], &rect, bufferSurface, &rect);
     }
-
-    palette = imageSurfaces[image]->format->palette;
-    loadedImage = image;
+    
+    if (imageSurfaces[image]) {
+        palette = imageSurfaces[image]->format->palette;
+        loadedImage = image;
+    } else {
+        fprintf(stderr, "Error loading image assets\n");
+        exit(1);
+    }
 }
 #endif
 
