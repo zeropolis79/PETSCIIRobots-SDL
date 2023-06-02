@@ -71,7 +71,7 @@ void AudioChannel::process(int16_t* buffer, uint32_t samples, uint32_t sampleRat
         return;
     }
 
-    float dmaPerSample = 7093789.2 / period / sampleRate / 2;
+    float dmaPerSample = (float)7093789.2 / period / sampleRate / 2;
 
     if (add) {
         for (uint32_t i = 0; i < samples; i++) {
@@ -80,7 +80,7 @@ void AudioChannel::process(int16_t* buffer, uint32_t samples, uint32_t sampleRat
             if (dmaCurrent >= dmaEnd) {
                 dmaStart = data;
                 dmaCurrent -= dmaEnd;
-                dmaEnd = length * 2;
+                dmaEnd = float(length * 2);
             }
         }
     } else {
@@ -90,7 +90,7 @@ void AudioChannel::process(int16_t* buffer, uint32_t samples, uint32_t sampleRat
             if (dmaCurrent >= dmaEnd) {
                 dmaStart = data;
                 dmaCurrent -= dmaEnd;
-                dmaEnd = length * 2;
+                dmaEnd = (float)(length * 2);
             }
         }
     }
@@ -99,7 +99,7 @@ void AudioChannel::process(int16_t* buffer, uint32_t samples, uint32_t sampleRat
 void AudioChannel::start() {
     dmaStart = data;
     dmaCurrent = 0;
-    dmaEnd = length * 2;
+    dmaEnd = (float)(length * 2);
     dmacon = true;
 }
 
@@ -122,7 +122,7 @@ AudioChannel channel6(6);
 AudioChannel channel7(7);
 void processAudio(int16_t* outputBuffer, uint32_t outputLength, uint32_t sampleRate)
 {
-    float timerAdvancePerSample = 709378.92 / (float)sampleRate;
+    float timerAdvancePerSample = (float)709378.92 / (float)sampleRate;
 
     int16_t *bufferPosition = outputBuffer;
     for (uint32_t samplesLeft = outputLength; samplesLeft > 0;) {
@@ -191,7 +191,7 @@ void mt_init(uint8_t* songData)
     mt_SongPos = 0;
     mt_PatternPos = 0;
 
-    ciataw = std::floor(TimerValue / RealTempo);
+    ciataw = (float)std::floor(TimerValue / RealTempo);
     ciatar = ciataw;
 }
 
@@ -747,7 +747,7 @@ void mt_SetSpeed(AudioChannel& channel, ChanTemp& mt_chantemp)
         mt_end();
     } else if (mt_chantemp.n_cmd.byte[0] >= 32) {
         RealTempo = mt_chantemp.n_cmd.byte[0];
-        ciataw = std::floor(TimerValue / RealTempo);
+        ciataw = (float)std::floor(TimerValue / RealTempo);
     } else {
         mt_counter = 0;
         mt_speed = mt_chantemp.n_cmd.byte[0];

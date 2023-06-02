@@ -12,13 +12,18 @@ About
 - If the target platform version will only support a certain feature set, feel free to get rid of the unnecessary PLATFORM_ #ifdefs manually or using a preprocessor
 - The SDL version is a generic baseline implementation that should be customized for each actual target platform
 
-Building
+MacOS Building
 --------
 brew install sdl2 sdl2_image
 make setup
 make
 cd SDL
 ../petrobots
+
+Windows Building
+--------
+download SDL2 VC dev zip's, unzip contents to `SDL_src/VC` directories (SDL2_image and SDL2)
+open `WindowsProject.sln` with Visual Studio 2022+, press Build > Build solution.
 
 Making of
 ---------

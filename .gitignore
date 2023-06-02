@@ -1,3 +1,9 @@
 *.o
 .DS_Store
 petrobots
+
+SDL_src/VC/SDL2/*
+SDL_src/VC/SDL2_image/*
+!.placeholder
+x64
+.vs
