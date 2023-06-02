@@ -1,0 +1,175 @@
+<?xml version="1.0" encoding="utf-8"?>
+<Project DefaultTargets="Build" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup Label="ProjectConfigurations">
+    <ProjectConfiguration Include="Debug|Win32">
+      <Configuration>Debug</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|Win32">
+      <Configuration>Release</Configuration>
+      <Platform>Win32</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Debug|x64">
+      <Configuration>Debug</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+    <ProjectConfiguration Include="Release|x64">
+      <Configuration>Release</Configuration>
+      <Platform>x64</Platform>
+    </ProjectConfiguration>
+  </ItemGroup>
+  <PropertyGroup Label="Globals">
+    <VCProjectVersion>16.0</VCProjectVersion>
+    <Keyword>Win32Proj</Keyword>
+    <ProjectGuid>{d75a8e04-4a30-42d4-8671-9c2ea7a12b61}</ProjectGuid>
+    <RootNamespace>WindowsProject1</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
+    <ProjectName>PETSCIIRobots</ProjectName>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>true</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
+    <ConfigurationType>Application</ConfigurationType>
+    <UseDebugLibraries>false</UseDebugLibraries>
+    <PlatformToolset>v143</PlatformToolset>
+    <WholeProgramOptimization>true</WholeProgramOptimization>
+    <CharacterSet>Unicode</CharacterSet>
+  </PropertyGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
+  <ImportGroup Label="ExtensionSettings">
+  </ImportGroup>
+  <ImportGroup Label="Shared">
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <ImportGroup Label="PropertySheets" Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
+  </ImportGroup>
+  <PropertyGroup Label="UserMacros" />
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>PLATFORM_NAME="sdl";PLATFORM_SCREEN_WIDTH=440;PLATFORM_SCREEN_HEIGHT=224;PLATFORM_MAP_WINDOW_TILES_WIDTH=16;PLATFORM_MAP_WINDOW_TILES_HEIGHT=8;PLATFORM_INTRO_OPTIONS=3;PLATFORM_DEFAULT_CONTROL=3;PLATFORM_MODULE_BASED_AUDIO;PLATFORM_TILE_BASED_RENDERING;PLATFORM_IMAGE_BASED_TILES;PLATFORM_IMAGE_SUPPORT;PLATFORM_SPRITE_SUPPORT;PLATFORM_COLOR_SUPPORT;PLATFORM_CURSOR_SUPPORT;PLATFORM_CURSOR_SHAPE_SUPPORT;PLATFORM_FADE_SUPPORT;PLATFORM_LIVE_MAP_SUPPORT;OPTIMIZED_MAP_RENDERING;_CRT_SECURE_NO_WARNINGS;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\SDL_src\VC\SDL2_image\include;..\SDL_src\VC\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\SDL_src\VC\SDL2\lib\x64;..\SDL_src\VC\SDL2_image\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>CP ../SDL_src/VC/SDL2/lib/x64/SDL2.dll ../x64/Debug/
+CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>PLATFORM_NAME="sdl";PLATFORM_SCREEN_WIDTH=440;PLATFORM_SCREEN_HEIGHT=224;PLATFORM_MAP_WINDOW_TILES_WIDTH=16;PLATFORM_MAP_WINDOW_TILES_HEIGHT=8;PLATFORM_INTRO_OPTIONS=3;PLATFORM_DEFAULT_CONTROL=3;PLATFORM_MODULE_BASED_AUDIO;PLATFORM_TILE_BASED_RENDERING;PLATFORM_IMAGE_BASED_TILES;PLATFORM_IMAGE_SUPPORT;PLATFORM_SPRITE_SUPPORT;PLATFORM_COLOR_SUPPORT;PLATFORM_CURSOR_SUPPORT;PLATFORM_CURSOR_SHAPE_SUPPORT;PLATFORM_FADE_SUPPORT;PLATFORM_LIVE_MAP_SUPPORT;OPTIMIZED_MAP_RENDERING;_CRT_SECURE_NO_WARNINGS;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\SDL_src\VC\SDL2_image\include;..\SDL_src\VC\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\SDL_src\VC\SDL2\lib\x64;..\SDL_src\VC\SDL2_image\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>CP ../SDL_src/VC/SDL2/lib/x64/SDL2.dll ../x64/Debug/
+CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>PLATFORM_NAME="sdl";PLATFORM_SCREEN_WIDTH=440;PLATFORM_SCREEN_HEIGHT=224;PLATFORM_MAP_WINDOW_TILES_WIDTH=16;PLATFORM_MAP_WINDOW_TILES_HEIGHT=8;PLATFORM_INTRO_OPTIONS=3;PLATFORM_DEFAULT_CONTROL=3;PLATFORM_MODULE_BASED_AUDIO;PLATFORM_TILE_BASED_RENDERING;PLATFORM_IMAGE_BASED_TILES;PLATFORM_IMAGE_SUPPORT;PLATFORM_SPRITE_SUPPORT;PLATFORM_COLOR_SUPPORT;PLATFORM_CURSOR_SUPPORT;PLATFORM_CURSOR_SHAPE_SUPPORT;PLATFORM_FADE_SUPPORT;PLATFORM_LIVE_MAP_SUPPORT;OPTIMIZED_MAP_RENDERING;_CRT_SECURE_NO_WARNINGS;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\SDL_src\VC\SDL2_image\include;..\SDL_src\VC\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\SDL_src\VC\SDL2\lib\x64;..\SDL_src\VC\SDL2_image\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>CP ../SDL_src/VC/SDL2/lib/x64/SDL2.dll ../x64/Debug/
+CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+    <ClCompile>
+      <WarningLevel>Level3</WarningLevel>
+      <FunctionLevelLinking>true</FunctionLevelLinking>
+      <IntrinsicFunctions>true</IntrinsicFunctions>
+      <SDLCheck>true</SDLCheck>
+      <PreprocessorDefinitions>PLATFORM_NAME="sdl";PLATFORM_SCREEN_WIDTH=440;PLATFORM_SCREEN_HEIGHT=224;PLATFORM_MAP_WINDOW_TILES_WIDTH=16;PLATFORM_MAP_WINDOW_TILES_HEIGHT=8;PLATFORM_INTRO_OPTIONS=3;PLATFORM_DEFAULT_CONTROL=3;PLATFORM_MODULE_BASED_AUDIO;PLATFORM_TILE_BASED_RENDERING;PLATFORM_IMAGE_BASED_TILES;PLATFORM_IMAGE_SUPPORT;PLATFORM_SPRITE_SUPPORT;PLATFORM_COLOR_SUPPORT;PLATFORM_CURSOR_SUPPORT;PLATFORM_CURSOR_SHAPE_SUPPORT;PLATFORM_FADE_SUPPORT;PLATFORM_LIVE_MAP_SUPPORT;OPTIMIZED_MAP_RENDERING;_CRT_SECURE_NO_WARNINGS;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <ConformanceMode>true</ConformanceMode>
+      <AdditionalIncludeDirectories>..\SDL_src\VC\SDL2_image\include;..\SDL_src\VC\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+    </ClCompile>
+    <Link>
+      <SubSystem>Console</SubSystem>
+      <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <OptimizeReferences>true</OptimizeReferences>
+      <GenerateDebugInformation>true</GenerateDebugInformation>
+      <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalLibraryDirectories>..\SDL_src\VC\SDL2\lib\x64;..\SDL_src\VC\SDL2_image\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
+    </Link>
+    <PostBuildEvent>
+      <Command>CP ../SDL_src/VC/SDL2/lib/x64/SDL2.dll ../x64/Debug/
+CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
+    </PostBuildEvent>
+  </ItemDefinitionGroup>
+  <ItemGroup>
+    <ClInclude Include="..\petrobots.h" />
+    <ClInclude Include="..\Platform.h" />
+    <ClInclude Include="..\PlatformSDL.h" />
+    <ClInclude Include="..\PT2.3A_replay_cia.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="targetver.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClCompile Include="..\petrobots.cpp" />
+    <ClCompile Include="..\Platform.cpp" />
+    <ClCompile Include="..\PlatformSDL.cpp" />
+    <ClCompile Include="..\PT2.3A_replay_cia.cpp" />
+  </ItemGroup>
+  <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
+  <ImportGroup Label="ExtensionTargets">
+  </ImportGroup>
+</Project>

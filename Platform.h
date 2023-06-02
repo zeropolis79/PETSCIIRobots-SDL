@@ -16,7 +16,7 @@
 #define PLATFORM_DEFAULT_CONTROL 0
 #endif
 
-#if __cplusplus < 201103L
+#if __cplusplus < 201103L && !defined(_WIN32)
 typedef char int8_t;
 typedef short int16_t;
 typedef long int32_t;

@@ -1,5 +1,6 @@
 #include "PT2.3A_replay_cia.h"
 #include "PlatformSDL.h"
+#include <stdio.h>
 
 #define JOYSTICK_AXIS_THRESHOLD 25000
 
@@ -585,7 +586,7 @@ uint32_t PlatformSDL::load(const char* filename, uint8_t* destination, uint32_t 
 
     FILE* file = fopen(filename, "r");
     if (file) {
-        bytesRead = fread(destination, 1, size, file);
+        bytesRead = (uint32_t)fread(destination, 1, size, file);
 
         fclose(file);
     }
@@ -650,6 +651,14 @@ void PlatformSDL::displayImage(Image image)
     } else {
         SDL_Rect rect = { 0, 0, 320, 200 };
         SDL_BlitSurface(imageSurfaces[image], &rect, bufferSurface, &rect);
+    }
+
+    if (imageSurfaces[image]->format->palette == NULL) {
+        SDL_Color colors[256];
+        for (int i = 0; i < 256; i++)
+            colors[i].r = colors[i].g = colors[i].b = (Uint8)i;
+
+        imageSurfaces[image]->format->palette = new SDL_Palette{ 256, colors };
     }
 
     palette = imageSurfaces[image]->format->palette;
