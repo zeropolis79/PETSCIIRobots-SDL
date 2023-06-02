@@ -1398,7 +1398,7 @@ void USER_SELECT_OBJECT()
         }
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
-        if (UNIT_TYPE[0] == 0) { // Did player die wile moving something?
+        if (UNIT_TYPE[0] == 0) { // Did player die while moving something?
 #ifdef PLATFORM_CURSOR_SUPPORT
             platform->hideCursor();
 #else
@@ -1510,7 +1510,7 @@ void MOVE_OBJECT()
         }
         PET_SCREEN_SHAKE();
         BACKGROUND_TASKS();
-        if (UNIT_TYPE[0] == 0) { // Did player die wile moving something?
+        if (UNIT_TYPE[0] == 0) { // Did player die while moving something?
 #ifdef PLATFORM_CURSOR_SUPPORT
             platform->hideCursor();
 #else
@@ -1556,7 +1556,7 @@ void MOVE_OBJECT()
         if (UNIT_FIND == 255) { // 255 means no unit found.
             PLAY_SOUND(6); // move sound, SOUND PLAY
             MOVTEMP_D = MAP_SOURCE[0]; // Grab current object
-            MAP_SOURCE[0] = MOVTEMP_O; // replace with obect we are moving
+            MAP_SOURCE[0] = MOVTEMP_O; // replace with object we are moving
             MAP_X = MOVTEMP_X; // RETRIEVE original location of object
             MAP_Y = MOVTEMP_Y;
             GET_TILE_FROM_MAP();
@@ -1599,7 +1599,7 @@ void CACULATE_AND_REDRAW()
     REDRAW_WINDOW = 1;
 }
 
-// This routine checks all units from 0 to 31 and figures out if it should be dislpayed
+// This routine checks all units from 0 to 31 and figures out if it should be displayed
 // on screen, and then grabs that unit's tile and stores it in the MAP_PRECALC array
 // so that when the window is drawn, it does not have to search for units during the
 // draw, speeding up the display routine.
@@ -4334,7 +4334,7 @@ void RESTORE_TILE()
     if (TILE != 246) {
         return;
     }
-    if (TEMP_A != 131) { // Cannister tile
+    if (TEMP_A != 131) { // Canister tile
         if ((TILE_ATTRIB[TEMP_A] & 0x08) == 0x08) { // %00001000 can it be destroyed?
             MAP_SOURCE[0] = DESTRUCT_PATH[TEMP_A];
         } else {
@@ -4346,8 +4346,8 @@ void RESTORE_TILE()
         }
 #endif
     } else {
-        // What to do if we encounter an explosive cannister
-        MAP_SOURCE[0] = 135; // Blown cannister
+        // What to do if we encounter an explosive canister
+        MAP_SOURCE[0] = 135; // Blown canister
 #ifdef PLATFORM_LIVE_MAP_SUPPORT
         if (LIVE_MAP_ON == 1) {
             platform->renderLiveMapTile(MAP, MAP_X, MAP_Y);
@@ -4356,7 +4356,7 @@ void RESTORE_TILE()
         for (int X = 28; X != 32; X++) { // Start of weapons units
             if (UNIT_TYPE[X] == 0) {
                 UNIT_TYPE[X] = 6; // bomb AI
-                UNIT_TILE[X] = 131; // Cannister tile
+                UNIT_TILE[X] = 131; // Canister tile
                 UNIT_LOC_X[X] = MAP_X;
                 UNIT_LOC_Y[X] = MAP_Y;
                 UNIT_TIMER_A[X] = 10; // How long until exposion?
@@ -4569,11 +4569,11 @@ void PISTOL_AI_COMMON()
         MAP_X = UNIT_LOC_X[UNIT];
         MAP_Y = UNIT_LOC_Y[UNIT];
         GET_TILE_FROM_MAP();
-        if (TILE == 131) { // explosive cannister
-            // hit an explosive cannister
-            MAP_SOURCE[0] = 135; // Blown cannister
+        if (TILE == 131) { // explosive canister
+            // hit an explosive canister
+            MAP_SOURCE[0] = 135; // Blown canister
             UNIT_TYPE[UNIT] = 6; // bomb AI
-            UNIT_TILE[UNIT] = 131; // Cannister tile
+            UNIT_TILE[UNIT] = 131; // Canister tile
             UNIT_LOC_X[UNIT] = MAP_X;
             UNIT_LOC_Y[UNIT] = MAP_Y;
             UNIT_TIMER_A[UNIT] = 5; // How long until exposion?
@@ -4604,7 +4604,7 @@ void PISTOL_AI_COMMON()
         MAP_X = UNIT_LOC_X[UNIT];
         MAP_Y = UNIT_LOC_Y[UNIT];
         GET_TILE_FROM_MAP();
-        if (TILE != 131) { // cannister tile
+        if (TILE != 131) { // canister tile
             if ((TILE_ATTRIB[TILE] & 0x10) == 0x10) {
                 // check if it encountered a human/robot
                 CHECK_FOR_UNIT();
@@ -4689,7 +4689,7 @@ void HOVER_ATTACK()
     } else if (UNIT_LOC_X[UNIT] < UNIT_LOC_X[0]) {
         REQUEST_WALK_RIGHT();
     }
-    // NOW CHECK FOR VERITCAL MOVEMENT
+    // NOW CHECK FOR VERTICAL MOVEMENT
     if (UNIT_LOC_Y[UNIT] > UNIT_LOC_Y[0]) {
         REQUEST_WALK_UP();
     } else if (UNIT_LOC_Y[UNIT] < UNIT_LOC_Y[0]) {
@@ -4749,7 +4749,7 @@ void EVILBOT()
         } else if (UNIT_LOC_X[UNIT] < UNIT_LOC_X[0]) {
             REQUEST_WALK_RIGHT();
         }
-        // NOW CHECK FOR VERITCAL MOVEMENT
+        // NOW CHECK FOR VERTICAL MOVEMENT
         if (UNIT_LOC_Y[UNIT] > UNIT_LOC_Y[0]) {
             REQUEST_WALK_UP();
         } else if (UNIT_LOC_Y[UNIT] < UNIT_LOC_Y[0]) {
