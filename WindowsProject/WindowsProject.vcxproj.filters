@@ -1,0 +1,25 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Project ToolsVersion="4.0" xmlns="http://schemas.microsoft.com/developer/msbuild/2003">
+  <ItemGroup>
+    <ClCompile Include="..\petrobots.cpp" />
+    <ClCompile Include="..\Platform.cpp" />
+    <ClCompile Include="..\PlatformSDL.cpp" />
+    <ClCompile Include="..\PT2.3A_replay_cia.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ClInclude Include="..\petrobots.h" />
+    <ClInclude Include="..\Platform.h" />
+    <ClInclude Include="..\PlatformSDL.h" />
+    <ClInclude Include="..\PT2.3A_replay_cia.h" />
+    <ClInclude Include="framework.h" />
+    <ClInclude Include="targetver.h" />
+    <ClInclude Include="resource.h" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\icon.png" />
+    <Image Include="..\icon.ico" />
+  </ItemGroup>
+</Project>

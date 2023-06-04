@@ -389,6 +389,18 @@ uint8_t CLOCK_ACTIVE = 0;
 uint8_t INACTIVE_SECONDS = 0;
 #endif
 
+Uint32 next_time;
+Uint32 time_left(void)
+{
+    Uint32 now;
+
+    now = SDL_GetTicks();
+    if (next_time <= now)
+        return 0;
+    else
+        return next_time - now;
+}
+
 // This routine spaces out the timers so that not everything
 // is running out once. It also starts the game_clock.
 void SET_INITIAL_TIMERS()
@@ -694,6 +706,8 @@ void MAIN_GAME_LOOP()
                 break;
             }
         }
+        SDL_Delay(time_left()); // limit FPS on computers and mobile devices. Causes issues on game consoles and web.
+        next_time += TICK_INTERVAL;
     }
 }
 
