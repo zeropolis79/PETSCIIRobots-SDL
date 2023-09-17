@@ -1,0 +1,8 @@
+The source-code is being provided as is. You can study it and modify it but you can't distribute any direct modifications without permission from David Murray. If you think a modification is good, you can contact us 
+and it MIGHT be able to form part of official builds.
+Commerical exploitation is not permitted, again without permission from David Murray.
+The source-code CAN be used to adapt the game to run on other systems but any new ports must NOT be distributed without David's permission and it would be appreciated that any new ports would have their source-code be
+made avaliable for Github.
+Enhanced versions which run on a particular set of source code (like gZDoom) can be freely distributed but the end user must provide the source files from a legally purchased copy of the game themselves - no source files
+are to be distributed. Myself and David Murray will not provide any technical support for enhanced versions.
+I myself am not responsible for technical issues, especially when it comes to compiling source code as I have no knowledge of it but I can be approached when it comes to testing. 
