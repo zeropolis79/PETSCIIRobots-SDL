@@ -254,7 +254,7 @@ PlatformSDL::PlatformSDL() :
     animTilesSurface = IMG_Load("animtiles.png");
 #ifdef PLATFORM_SPRITE_SUPPORT
     spritesSurface = IMG_Load("spritesalpha.png");
-    SDL_SetColorKey(spritesSurface, SDL_TRUE, 16);
+    SDL_SetColorKey(spritesSurface, SDL_TRUE, SDL_MapRGB(spritesSurface->format, 255, 0, 255));
 #endif
 #endif
 #ifdef PLATFORM_CURSOR_SUPPORT

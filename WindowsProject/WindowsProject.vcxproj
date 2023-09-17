@@ -122,7 +122,7 @@ CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
       <AdditionalIncludeDirectories>..\SDL_src\VC\SDL2_image\include;..\SDL_src\VC\SDL2\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
-      <SubSystem>Console</SubSystem>
+      <SubSystem>Windows</SubSystem>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <AdditionalDependencies>SDL2.lib;SDL2main.lib;SDL2_image.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <AdditionalLibraryDirectories>..\SDL_src\VC\SDL2\lib\x64;..\SDL_src\VC\SDL2_image\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
@@ -161,6 +161,7 @@ CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
     <ClInclude Include="..\PlatformSDL.h" />
     <ClInclude Include="..\PT2.3A_replay_cia.h" />
     <ClInclude Include="framework.h" />
+    <ClInclude Include="resource.h" />
     <ClInclude Include="targetver.h" />
   </ItemGroup>
   <ItemGroup>
@@ -168,6 +169,13 @@ CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
     <ClCompile Include="..\Platform.cpp" />
     <ClCompile Include="..\PlatformSDL.cpp" />
     <ClCompile Include="..\PT2.3A_replay_cia.cpp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ResourceCompile Include="Resource.rc" />
+  </ItemGroup>
+  <ItemGroup>
+    <Image Include="..\icon.ico" />
+    <Image Include="..\icon.png" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
