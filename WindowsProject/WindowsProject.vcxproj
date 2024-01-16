@@ -86,8 +86,8 @@
       <AdditionalLibraryDirectories>..\SDL_src\VC\SDL2\lib\x64;..\SDL_src\VC\SDL2_image\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>CP ../SDL_src/VC/SDL2/lib/x64/SDL2.dll ../x64/Debug/
-CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
+      <Command>COPY ..\SDL_src\VC\SDL2\lib\x64\SDL2.dll ..\x64\Debug\
+COPY ..\SDL_src\VC\SDL2_image\lib\x64\SDL2_image.dll ..\x64/Debug\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -109,8 +109,8 @@ CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
       <AdditionalLibraryDirectories>..\SDL_src\VC\SDL2\lib\x64;..\SDL_src\VC\SDL2_image\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>CP ../SDL_src/VC/SDL2/lib/x64/SDL2.dll ../x64/Debug/
-CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
+      <Command>COPY ..\SDL_src\VC\SDL2\lib\x64\SDL2.dll ..\x64\Debug\
+COPY ..\SDL_src\VC\SDL2_image\lib\x64\SDL2_image.dll ..\x64\Debug\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -128,8 +128,8 @@ CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
       <AdditionalLibraryDirectories>..\SDL_src\VC\SDL2\lib\x64;..\SDL_src\VC\SDL2_image\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>CP ../SDL_src/VC/SDL2/lib/x64/SDL2.dll ../x64/Debug/
-CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
+      <Command>COPY ..\SDL_src\VC\SDL2\lib\x64\SDL2.dll ..\x64\Debug\
+COPY ..\SDL_src\VC\SDL2_image\lib\x64\SDL2_image.dll ..\x64\Debug\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -151,8 +151,8 @@ CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
       <AdditionalLibraryDirectories>..\SDL_src\VC\SDL2\lib\x64;..\SDL_src\VC\SDL2_image\lib\x64;%(AdditionalLibraryDirectories)</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
-      <Command>CP ../SDL_src/VC/SDL2/lib/x64/SDL2.dll ../x64/Debug/
-CP ../SDL_src/VC/SDL2_image/lib/x64/SDL2_image.dll ../x64/Debug/</Command>
+      <Command>COPY ..\SDL_src\VC\SDL2\lib\x64\SDL2.dll ..\x64\Debug\
+COPY ..\SDL_src\VC\SDL2_image\lib\x64\SDL2_image.dll ..\x64\Debug\</Command>
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
